@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.3"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.wst.common.project.facet.core.facets">
+      <project-facet
+            id="com.vaadin.integration.eclipse.core">
+         <label>
+            Vaadin Eclipse Integration
+         </label>
+      </project-facet>
+      <project-facet-version
+            facet="com.vaadin.integration.eclipse.core"
+            version="0.1">
+         <constraint>
+         <and>
+            <requires
+                  facet="jst.java"
+                  version="[5.0">
+         </requires>
+         <requires
+                  facet="jst.web"
+                  version="[2.3">
+         </requires>
+         </and>
+         </constraint>
+      </project-facet-version>
+      <action
+            facet="com.vaadin.integration.eclipse.core"
+            id="com.vaadin.integration.eclipse.core-install"
+            type="install">
+         <delegate
+               class="com.vaadin.integration.eclipse.CoreFacetInstallDelegate">
+         </delegate>
+         <config-factory
+               class="com.vaadin.integration.eclipse.configuration.VaadinFacetInstallDataModelProvider">
+         </config-factory>
+      </action>
+      <action
+            facet="com.vaadin.integration.eclipse.core"
+            id="com.vaadin.integration.eclipse.core-uninstall"
+            type="uninstall">
+         <delegate
+               class="com.vaadin.integration.eclipse.CoreFacetUninstallDelegate">
+         </delegate>
+      </action>
+      <template id="template.vaadin">
+         <label>Vaadin Project</label>
+         <fixed facet="jst.java"/>
+         <fixed facet="jst.web"/>
+         <fixed facet="com.vaadin.integration.eclipse.core"/>
+      </template>
+      
+   </extension>
+   <extension
+         point="org.eclipse.wst.common.project.facet.core.presets">
+      <static-preset
+            id="com.vaadin.integration.eclipse.preset">
+         <label>
+            Vaadin Project
+         </label>
+         <description>
+            Creates a web project which uses Vaadin
+         </description>
+         <facet
+               id="jst.java"
+               version="5.0">
+         </facet>
+         <facet
+               id="jst.web"
+               version="2.3">
+         </facet>
+         <facet
+               id="jst.web"
+               version="2.4">
+         </facet>
+         <facet
+               id="jst.web"
+               version="2.5">
+         </facet>
+         <facet
+               id="com.vaadin.integration.eclipse.core"
+               version="0.1">
+         </facet>
+      </static-preset>
+   </extension>
+   <extension
+         point="org.eclipse.wst.common.project.facet.core.runtimes">
+      <supported>
+         <facet
+               id="com.vaadin.integration.eclipse.core">
+         </facet>
+         <runtime-component
+               any="true">
+         </runtime-component>
+      </supported>
+   </extension>
+   <extension
+         point="org.eclipse.wst.common.project.facet.ui.images">
+      <image
+            facet="com.vaadin.integration.eclipse.core"
+            path="icons/vaadin-icon-16.png">
+      </image>
+   </extension>
+
+    <extension
+         id="VaadinUIProjectWizards"
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="Vaadin"
+            id="com.vaadin">
+      </category>
+      <wizard
+            name="Vaadin Project"
+            icon="icons/vaadin-icon-16.png"
+            category="com.vaadin"
+            project="true"
+            finalPerspective="org.eclipse.jst.j2ee.J2EEPerspective"
+            id="com.vaadin.integration.eclipse.wizards.VaadinProjectWizard">
+         <class class="com.vaadin.integration.eclipse.wizards.VaadinProjectWizard">
+            <parameter name="javaeeproject" value="true"/>
+            <parameter name="menuIndex" value="25" />
+         </class>
+         <description>
+            Create a Vaadin project.
+         </description>
+         <selection
+               class="org.eclipse.core.resources.IResource" />
+      </wizard>
+	</extension>
+	<!-- This affects the navigator view and the file menu but not the Project Explorer -->
+    <extension
+       point="org.eclipse.ui.perspectiveExtensions">
+       <perspectiveExtension targetID="org.eclipse.jst.j2ee.J2EEPerspective">
+          <newWizardShortcut id="com.vaadin.integration.eclipse.wizards.VaadinProjectWizard"/>
+       </perspectiveExtension>
+    </extension>
+	<!-- This is required to have the New Vaadin Project in the project explorer top-level menu -->
+    <extension point="org.eclipse.ui.navigator.navigatorContent">
+       <commonWizard type="new" wizardId="com.vaadin.integration.eclipse.wizards.VaadinProjectWizard" menuGroupId="org.eclipse.jst.j2ee.ui.newProjects">
+          <enablement></enablement>
+       </commonWizard>
+    </extension>
+	
+   <extension
+         point="org.eclipse.wst.common.project.facet.ui.wizardPages">
+      <wizard-pages
+            action="com.vaadin.integration.eclipse.core-install">
+         <page
+               class="com.vaadin.integration.eclipse.VaadinCoreFacetInstallPage">
+         </page>
+      </wizard-pages>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="com.vaadin"
+            name="Vaadin">
+      </category>
+      <wizard
+            category="com.vaadin"
+            class="com.vaadin.integration.eclipse.wizards.NewThemeWizard"
+            icon="icons/vaadin-icon-16.png"
+            id="com.vaadin.integration.eclipse.wizards.NewThemeWizard"
+            name="Vaadin Theme">
+      </wizard>
+      <wizard
+            category="com.vaadin"
+            class="com.vaadin.integration.eclipse.wizards.NewWidgetsetWizard"
+            icon="icons/vaadin-icon-16.png"
+            id="com.vaadin.integration.eclipse.wizards.NewWidgetsetWizard"
+            name="Vaadin Widgetset">
+      </wizard>
+      <wizard
+            category="com.vaadin"
+            class="com.vaadin.integration.eclipse.wizards.NewComponentWizard"
+            icon="icons/vaadin-icon-16.png"
+            id="com.vaadin.integration.eclipse.wizards.NewComponentWizard"
+            name="Vaadin Widget">
+      </wizard>
+   </extension>
+   <extension point="org.eclipse.ltk.core.refactoring.renameParticipants">
+	<renameParticipant
+		id="com.vaadin.integration.eclipse.WebContextRenameParticipant" 
+		name="Vaadin rename participant"
+		class="com.vaadin.integration.eclipse.WebContextRenameParticipant">
+		<enablement>
+			<with variable="affectedNatures">
+				<iterate operator="or">
+					<equals value="org.eclipse.jdt.core.javanature" />
+				</iterate>
+			</with>
+		</enablement>
+	</renameParticipant>
+</extension>
+   <extension point="org.eclipse.ltk.core.refactoring.moveParticipants">
+	<moveParticipant
+		id="com.vaadin.integration.eclipse.MoveParticipant" 
+		name="Vaadin move participant"
+		class="com.vaadin.integration.eclipse.WebContextMoveParticipant">
+		<enablement>
+			<with variable="affectedNatures">
+				<iterate operator="or">
+					<equals value="org.eclipse.jdt.core.javanature" />
+				</iterate>
+			</with>
+		</enablement>
+	</moveParticipant>
+</extension>
+   <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            adaptable="true"
+            class="com.vaadin.integration.eclipse.decorators.ApplicationDecorator"
+            id="com.vaadin.integration.eclipse.decorators.application"
+            label="Vaadin Application Decorator"
+            lightweight="true"
+            state="true">
+      </decorator>
+   </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            class="com.vaadin.integration.eclipse.properties.VaadinProjectPropertyPage"
+            id="com.vaadin.integration.eclipse.properties.VaadinProjectPropertyPage"
+            name="Vaadin">
+            <filter
+                name="nature"
+                value="org.eclipse.wst.common.project.facet.core.nature">
+            </filter>
+            <enabledWhen>
+               <adapt type="org.eclipse.core.resources.IProject"/> 
+            </enabledWhen>
+      </page>
+      <page
+            category="com.vaadin.integration.eclipse.properties.VaadinProjectPropertyPage"
+            class="com.vaadin.integration.eclipse.properties.VaadinVersionPropertyPage"
+            id="com.vaadin.integration.eclipse.properties.VaadinVersionPropertyPage"
+            name="Vaadin Version">
+            <filter
+                name="nature"
+                value="org.eclipse.wst.common.project.facet.core.nature">
+            </filter>
+            <enabledWhen>
+               <adapt type="org.eclipse.core.resources.IProject"/> 
+            </enabledWhen>
+      </page>
+   </extension>
+   
+</plugin>

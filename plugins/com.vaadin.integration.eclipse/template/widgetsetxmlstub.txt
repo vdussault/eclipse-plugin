@@ -1,0 +1,8 @@
+<module>
+	<!-- Inherit super widgetset -->
+	<inherits name="SUPER_WS" /> 
+	
+	<!-- Entry point -->
+	<entry-point class="WS_NAME"/>
+	
+</module>

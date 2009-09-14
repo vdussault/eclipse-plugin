@@ -1,0 +1,7 @@
+    <portlet>
+        <!-- Matches definition in portlet.xml. -->
+        <!-- Note: Must not be the same as servlet name. -->
+        <portlet-name>STUB_PORTLETNAME</portlet-name>
+        <instanceable>true</instanceable>
+        <ajaxable>false</ajaxable>
+    </portlet>
