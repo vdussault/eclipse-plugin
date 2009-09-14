@@ -33,7 +33,7 @@
 		</exec>
 
 		<!--  Check out feature(s) -->
-		<delete dir="${buildDirectory}/plugins" />
+		<delete dir="${buildDirectory}/features" />
 		<exec executable="svn">
 			<arg value="checkout" />
 			<arg value="http://dev.vaadin.com/svn/integration/eclipse/features" />
