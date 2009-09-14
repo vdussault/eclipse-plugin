@@ -1,0 +1,78 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>6.9.&nbsp;Accordion</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="layout.html" title="Chapter&nbsp;6.&nbsp;Managing Layout"><link rel="prev" href="layout.components.tabsheet.html" title="6.8.&nbsp;TabSheet"><link rel="next" href="layout.settings.html" title="6.10.&nbsp;Layout Formatting"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>6.9.&nbsp;Accordion</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">6.9.&nbsp;<code class="classname">Accordion</code></th></tr><tr><td align="left" width="20%"><a accesskey="p" href="layout.components.tabsheet.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;6.&nbsp;Managing Layout</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="layout.settings.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="layout.components.accordion"></a>6.9.&nbsp;<code class="classname">Accordion</code></h2></div></div></div>
+        
+
+        <p>
+            <code class="classname">Accordion</code> is a multicomponent container similar to
+            <code class="classname">TabSheet</code>, except that the "tabs" are arranged
+            vertically. Clicking on a tab opens its contained component in the space
+            between the tab and the next one. You can use an
+            <code class="classname">Accordion</code> identically to a
+            <code class="classname">TabSheet</code>, which it actually inherits. See <a href="layout.components.tabsheet.html" title="6.8.&nbsp;TabSheet">Section&nbsp;6.8, &ldquo;<code class="classname">TabSheet</code>&rdquo;</a> for more information.
+        </p>
+        
+        <p>
+            The following example shows how you can create a simple accordion. As the
+            <code class="classname">Accordion</code> is rather naked alone, we put it inside a
+            Panel that acts as its caption and provides it a border.
+        </p>
+
+        <pre class="programlisting">// Create the Accordion.
+Accordion accordion = new Accordion();
+
+// Have it take all space available in the layout.
+accordion.setSizeFull();
+
+// Some components to put in the Accordion.
+Label l1 = new Label("There are no previously saved actions.");
+Label l2 = new Label("There are no saved notes.");
+Label l3 = new Label("There are currently no issues.");
+
+// Add the components as tabs in the Accordion.
+accordion.addTab(l1, "Saved actions", null);
+accordion.addTab(l2, "Notes", null);
+accordion.addTab(l3, "Issues", null);
+
+// A container for the Accordion.
+Panel panel = new Panel("Tasks");
+panel.setWidth("300px");
+panel.setHeight("300px");
+panel.addComponent(accordion);
+
+// Trim its layout to allow the Accordion take all space.
+panel.getLayout().setSizeFull();
+panel.getLayout().setMargin(false);</pre>
+
+        <p>
+            <a href="layout.components.accordion.html#figure.accordion.example1" title="Figure&nbsp;6.11.&nbsp;An Accordion">Figure&nbsp;6.11, &ldquo;An Accordion&rdquo;</a> shows what the example would look
+            like with the default theme.
+        </p>
+
+        <div class="figure"><a name="figure.accordion.example1"></a><p class="title"><b>Figure&nbsp;6.11.&nbsp;An Accordion</b></p><div class="figure-contents">
+            
+            <div class="mediaobject" align="center"><img src="img/layout/accordion-example1.png" align="middle" alt="An Accordion"></div>
+        </div></div><br class="figure-break">
+
+		<div class="simplesect" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N22B28"></a>CSS Style Rules</h3></div></div></div>
+			
+
+			<pre class="programlisting">.v-accordion {}
+.v-accordion-item {}
+.v-accordion-item-open {}
+.v-accordion-item-first {}
+.v-accordion-item-caption {}
+.v-accordion-item-caption .v-caption {}
+.v-accordion-item-content {}</pre>
+
+            <p>
+                The top-level element of <code class="classname">Accordion</code> has the
+                <code class="literal">v-accordion</code> style. An <code class="classname">Accordion</code>
+                consists of a sequence of item elements, each of which has a caption
+                element (the tab) and a content area element.
+            </p>
+            
+            <p>
+                The selected item (tab) has also the <code class="literal">v-accordion-open</code>
+                style. The content area is not shown for the closed items.
+            </p>
+		</div>
+    </div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="layout.components.tabsheet.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="layout.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="layout.settings.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">6.8.&nbsp;<code class="classname">TabSheet</code>&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;6.10.&nbsp;Layout Formatting</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

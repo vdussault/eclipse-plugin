@@ -1,0 +1,115 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>3.2.&nbsp;Technological Background</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="architecture.html" title="Chapter&nbsp;3.&nbsp;Architecture"><link rel="prev" href="architecture.html" title="Chapter&nbsp;3.&nbsp;Architecture"><link rel="next" href="architecture.server-side.html" title="3.3.&nbsp;Applications as Java Servlet Sessions"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>3.2.&nbsp;Technological Background</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">3.2.&nbsp;Technological Background</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="architecture.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;3.&nbsp;Architecture</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="architecture.server-side.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="architecture.technology"></a>3.2.&nbsp;Technological Background</h2></div></div></div>
+		
+
+		<p>
+			This section provides an introduction to the various technologies and designs
+			on which Vaadin is based: AJAX-based web applications in general,
+			Google Web Toolkit, and JSON data interchange format. This knowledge is not
+			necessary for using Vaadin, but provides some background if you need
+			to make low-level extensions to Vaadin.
+		</p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="architecture.technology.ajax"></a>3.2.1.&nbsp;AJAX</h3></div></div></div>
+			
+			<p>
+				AJAX (Asynchronous JavaScript and XML) is a technique for developing web
+				applications with responsive user interaction, similar to traditional
+				desktop applications. While conventional JavaScript-enabled HTML pages can
+				receive new content only with page updates, AJAX-enabled pages send user
+				interaction to the server using an asynchronous request and receive
+				updated content in the response. This way, only small parts of the page
+				data can be loaded. This goal is archieved by the use of a certain set of
+				technologies: XHTML, CSS, DOM, JavaScript, XMLHttpRequest, and XML.
+			</p>
+
+			<p>
+				AJAX, with all the fuss and pomp it receives, is essentially made possible
+				by a simple API, namely the <code class="methodname">XMLHttpRequest</code> class
+				in JavaScript. The API is available in all major browsers and, as of 2006,
+				the API is under way to become a W3C standard.
+			</p>
+
+			<p>
+				Communications between the browser and the server usually require some
+				sort of <span class="emphasis"><em>serialization</em></span> (or
+				<span class="emphasis"><em>marshalling</em></span>) of data objects. AJAX suggests the use
+				of XML for data representation in communications between the browser and
+				the server. While Vaadin Release 4 used XML for data interchange,
+				Release 5 uses the more efficient JSON. For more information about JSON
+				and its use in Vaadin, see <a href="architecture.technology.html#architecture.technology.json" title="3.2.3.&nbsp;JSON">Section&nbsp;3.2.3, &ldquo;JSON&rdquo;</a>.
+			</p>
+
+			<p>
+				If you're a newcomer to Ajax, <a href="advanced.html#advanced.application.pages" title="10.1.&nbsp;Special Characteristics of AJAX Applications">Section&nbsp;10.1, &ldquo;Special Characteristics of AJAX Applications&rdquo;</a>
+				discusses the history and motivations for AJAX-based web applications, as
+				well as some special characteristics that differ from both traditional web
+				applications and desktop applications.
+			</p>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="architecture.technology.gwt"></a>3.2.2.&nbsp;Google Web Toolkit</h3></div></div></div>
+			
+
+			<p>
+				Google Web Toolkit is a software development kit for developing
+				client-side web applications easily, without having to use JavaScript or
+				other browser technologies directly. Applications using GWT are developed
+				with Java and compiled into JavaScript with the GWT Compiler.
+			</p>
+
+			<p>
+				GWT is essentially a client-side technology, normally used to develop user
+				interface logic in the web browser. GWT applications still need to
+				communicate with a server using RPC calls and by serializing any
+				data. Vaadin effectively hides all client-server communications, allows
+				handling user interaction logic in a server application, and allows
+				software development in a single server-side application. This makes the
+				architecture of an AJAX-based web application much simpler.
+			</p>
+
+			<p>
+				Vaadin uses GWT to render user interfaces in the web browser and
+				handle the low-level tasks of user interaction in the browser. Use of GWT is
+				largely invisible in Vaadin for applications that do not need any
+				custom GWT components.
+			</p>
+
+			<p>
+				See <a href="architecture.client-side.html" title="3.4.&nbsp;Client-Side Engine">Section&nbsp;3.4, &ldquo;Client-Side Engine&rdquo;</a> for a description of
+				how GWT is used in the Client-Side Engine of Vaadin. <a href="gwt.html" title="Chapter&nbsp;9.&nbsp;Developing Custom Components">Chapter&nbsp;9, <i xmlns:xlink="http://www.w3.org/1999/xlink">Developing Custom Components</i></a> provides information about the integration of
+				GWT-based user interface components with Vaadin.
+			</p>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="architecture.technology.json"></a>3.2.3.&nbsp;JSON</h3></div></div></div>
+			
+
+			<p>
+				JSON is a lightweight data-interchange format that is easy and fast to
+				generate and parse. JSON messages are said to be possibly a hundred times
+				faster to parse than XML with current browser technology. The format is a
+				subset of the JavaScript language, which makes it possible to evaluate
+				JSON messages directly as JavaScript expressions. This makes JSON very
+				easy to use in JavaScript applications and therefore also for AJAX
+				applications.
+			</p>
+
+			<p>
+				The Client-Side Engine of Vaadin uses JSON through Google Web
+				Toolkit, which supports JSON communications in the
+				<code class="classname">com.google.gwt.json.client</code> package.  Together with
+				advanced update optimization and caching, Vaadin is able to
+				update changes in the user interface to the browser in an extremely
+				efficient way.
+			</p>
+
+			<p>
+				The use of JSON is completely invisible to a developer using
+				Vaadin. Implementation of client-server serialization in custom widgets
+				uses abstract interfaces that may be implemented as any low-level
+				interchange format, such as XML or JSON. Details on JSON communications
+				are given in <a href="uidl.json.html" title="A.2.&nbsp;JSON Rendering">Section&nbsp;A.2, &ldquo;JSON Rendering&rdquo;</a>.
+			</p>
+		</div>
+
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="architecture.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="architecture.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="architecture.server-side.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Chapter&nbsp;3.&nbsp;Architecture&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;3.3.&nbsp;Applications as Java Servlet Sessions</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

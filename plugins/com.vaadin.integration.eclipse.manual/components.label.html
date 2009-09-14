@@ -1,0 +1,199 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>5.3.&nbsp;Label</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="components.html" title="Chapter&nbsp;5.&nbsp;User Interface Components"><link rel="prev" href="components.features.html" title="5.2.&nbsp;Common Component Features"><link rel="next" href="components.link.html" title="5.4.&nbsp;Link"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>5.3.&nbsp;Label</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">5.3.&nbsp;<code class="classname">Label</code></th></tr><tr><td align="left" width="20%"><a accesskey="p" href="components.features.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;5.&nbsp;User Interface Components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="components.link.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="components.label"></a>5.3.&nbsp;<code class="classname">Label</code></h2></div></div></div>
+		
+
+		<p>
+			<code class="classname">Label</code> is a text component that you can use to
+			display non-editable text. The text will wrap
+			around if the width of the containing component limits the length of the
+			lines (except for preformatted text).
+		</p>
+		
+		<pre class="programlisting">// A container for the Label.
+Panel panel = new Panel("Panel Containing a Label");
+panel.setWidth("200px"); // Defined width.
+main.addComponent(panel);
+
+panel.addComponent(
+    new Label("This is a Label inside a Panel. There is enough " +
+              "text in the label to make the text wrap if it " +
+              "exceeds the width of the panel."));</pre>
+
+        <p>
+            As the size of the <code class="classname">Panel</code> in the above example is fixed,
+            the text in the <code class="classname">Label</code> will wrap to fit the panel, as
+            shown in <a href="components.label.html#figure.components.label" title="Figure&nbsp;5.2.&nbsp;The Label Component">Figure&nbsp;5.2, &ldquo;The Label Component&rdquo;</a>.
+        </p>
+
+		<div class="figure"><a name="figure.components.label"></a><p class="title"><b>Figure&nbsp;5.2.&nbsp;The Label Component</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/components/label-example1.png" align="middle" alt="The Label Component"></div>
+		</div></div><br class="figure-break">
+
+		<p>
+			The contents of a label are formatted depending on the content mode. By
+			default, the text is assumed to be plain text and any contained XML-specific
+			characters will be quoted appropriately to allow rendering the contents of a
+			label in XHTML in a web browser. The content mode can be set in the constructor
+			or with <code class="methodname">setContentMode()</code>, and can have the following
+			values:
+		</p>
+
+		<div class="variablelist"><dl><dt><span class="term"><code class="constant">CONTENT_DEFAULT</code></span></dt><dd>
+					<p>
+                        The default content mode is <code class="varname">CONTENT_TEXT</code> (see
+                        below).
+                    </p>
+                </dd><dt><span class="term"><code class="constant">CONTENT_PREFORMATTED</code></span></dt><dd>
+					<p>
+                        Content mode, where the label contains preformatted text. It will
+                        be, by default, rendered with a fixed-width typewriter
+                        font. Preformatted text can contain line breaks, written in Java
+                        with the <code class="literal">\n</code> escape sequence for a newline
+                        character (ASCII 0x0a), or tabulator characters written with
+                        <code class="literal">\t</code> (ASCII 0x08).
+                    </p>
+                </dd><dt><span class="term"><code class="constant">CONTENT_RAW</code></span></dt><dd>
+					<p>
+                        Content mode, where the label contains raw text. Output is not
+                        required to be valid XML. It can be, for example, HTML, which can
+                        be unbalanced or otherwise invalid XML. The example below uses the
+                        &lt;br&gt; tag in HTML. While XHTML should be preferred in most
+                        cases, this can be useful for some specific purposes where you may
+                        need to display loosely formatted HTML content. The raw mode also
+                        preserves character entities, some of which might otherwise be
+                        interpreted incorrectly.
+                    </p>
+                </dd><dt><span class="term"><code class="constant">CONTENT_TEXT</code></span></dt><dd>
+					<p>
+                        Content mode, where the label contains only plain text. All
+                        characters are allowed, including the special
+                        <code class="literal">&lt;</code>, <code class="literal">&gt;</code>, and
+                        <code class="literal">&amp;</code> characters in XML or HTML, which are
+                        quoted properly in XHTML while rendering the component. This is
+                        the default mode.
+                    </p>
+                </dd><dt><span class="term"><code class="constant">CONTENT_XHTML</code></span></dt><dd>
+					<p>
+                        Content mode, where the label contains XHTML. The content will be
+                        enclosed in a DIV element having the namespace
+                        "<code class="uri">http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd</code>".
+                    </p>
+                </dd><dt><span class="term"><code class="constant">CONTENT_XML</code></span></dt><dd>
+					<p>
+                        Content mode, where the label contains well-formed and
+                        well-balanced XML. Each of the root elements must have their
+                        default namespace specified.
+                    </p>
+                </dd><dt><span class="term"><code class="constant">CONTENT_UIDL</code></span></dt><dd>
+					<p>
+                        Formatted content mode, where the contents are XML that is
+                        restricted to UIDL 1.0, the internal language of Vaadin for AJAX
+                        communications between the server and the browser. Obsolete since
+                        IT Mill Toolkit 5.0.
+                    </p>
+                </dd></dl></div>
+
+		<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3>
+			<p>
+				Notice that the validity of XML or XHTML in a <code class="classname">Label</code>
+				is not checked in the server when rendering the component and any errors
+				can result in an error in the browser! You should validate the content
+				before displaying it in the component, especially if it comes from an
+				uncertain source.
+			</p>
+		</div>
+
+		<p>
+			The following example demonstrates the use of
+			<code class="classname">Label</code> in different modes.
+		</p>
+
+			<pre class="programlisting">GridLayout labelgrid = new GridLayout (2,1);
+
+labelgrid.addComponent (new Label ("CONTENT_DEFAULT"));
+labelgrid.addComponent (
+    new Label ("This is a label in default mode: &lt;plain text&gt;",
+               Label.CONTENT_DEFAULT));
+
+labelgrid.addComponent (new Label ("CONTENT_PREFORMATTED"));
+labelgrid.addComponent (
+    new Label ("This is a preformatted label.\n"+
+               "The newline character \\n breaks the line.",
+               Label.CONTENT_PREFORMATTED));
+
+labelgrid.addComponent (new Label ("CONTENT_RAW"));
+labelgrid.addComponent (
+    new Label ("This is a label in raw mode.&lt;br&gt;It can contain, "+
+               "for example, unbalanced markup.",
+               Label.CONTENT_RAW));
+
+labelgrid.addComponent (new Label ("CONTENT_TEXT"));
+labelgrid.addComponent (
+    new Label ("This is a label in (plain) text mode",
+               Label.CONTENT_TEXT));
+
+labelgrid.addComponent (new Label ("CONTENT_XHTML"));
+labelgrid.addComponent (
+    new Label ("&lt;i&gt;This&lt;/i&gt; is an &lt;b&gt;XHTML&lt;/b&gt; formatted label",
+               Label.CONTENT_XHTML));
+
+labelgrid.addComponent (new Label ("CONTENT_XML"));
+labelgrid.addComponent (
+    new Label ("This is an &lt;myelement&gt;XML&lt;/myelement&gt; "+
+               "formatted label",
+               Label.CONTENT_XML));
+
+main.addComponent(labelgrid);</pre>
+
+		<p>
+			The rendering will look as follows:
+		</p>
+
+		<div class="figure"><a name="N21732"></a><p class="title"><b>Figure&nbsp;5.3.&nbsp;Label Modes Rendered on Screen</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/components/label-modes.png" align="middle" alt="Label Modes Rendered on Screen"></div>
+		</div></div><br class="figure-break">
+
+		<p>
+			Using the XHTML, XML, or raw modes allow inclusion of, for example,
+			images within the text flow, which is not possible with any regular
+			layout components.  The following example includes an image within
+			the text flow, with the image coming from a class loader resource.
+		</p>
+
+        <pre class="programlisting">ClassResource labelimage = new ClassResource ("labelimage.jpg",
+                                              this);
+main.addComponent(new Label("Here we have an image &lt;img src=\"" +
+                            this.getRelativeLocation(labelimage) +
+                            "\"/&gt; within text.",
+                            Label.CONTENT_XHTML));</pre>
+
+		<p>
+			When you use a class loader resource, the image has to be included in
+			the JAR of the web application. In this case, the
+			<code class="filename">labelimage.jpg</code> needs to be in the default
+			package. When rendered in a web browser, the output will look as
+			follows:
+		</p>
+
+		<div class="figure"><a name="N2175A"></a><p class="title"><b>Figure&nbsp;5.4.&nbsp;Referencing An Image Resource in Label</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/components/label-withimage.png" align="middle" alt="Referencing An Image Resource in Label"></div>
+		</div></div><br class="figure-break">
+
+		<p>
+			Another solution would be to use the
+			<code class="classname">CustomLayout</code> component, where you can write
+			the component content as an XHTML fragment in a theme, but such a
+			solution may be too heavy for most cases, and not flexible enough if
+			the content needs to be dynamically generated.
+		</p>
+
+		<p>
+			Notice that the rendering of XHTML depends on the assumption that the
+			client software and the terminal adapter are XHTML based. It is
+			possible to write a terminal adapter for a custom thin client
+			application, which may not be able to render XHTML at all. There are
+			also differences between web browsers in their support of XHTML.
+		</p>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="components.features.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="components.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="components.link.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">5.2.&nbsp;Common Component Features&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;5.4.&nbsp;<code class="classname">Link</code></td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

@@ -1,0 +1,206 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>10.6.&nbsp;Shortcut Keys</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="advanced.html" title="Chapter&nbsp;10.&nbsp;Advanced Web Application Topics"><link rel="prev" href="advanced.resources.html" title="10.5.&nbsp;Resources"><link rel="next" href="advanced.printing.html" title="10.7.&nbsp;Printing"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>10.6.&nbsp;Shortcut Keys</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">10.6.&nbsp;Shortcut Keys</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="advanced.resources.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;10.&nbsp;Advanced Web Application Topics</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="advanced.printing.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="advanced.shortcuts"></a>10.6.&nbsp;Shortcut Keys</h2></div></div></div>
+		
+
+		
+
+		<p>
+			Shortcut keys can be defined as <span class="emphasis"><em>actions</em></span> using the
+			<code class="classname">ShortcutAction</code> class. ShortcutAction extends generic 
+			<code class="classname">Action</code> class that is used for example in 
+			<code class="classname">Tree</code> and <code class="classname">Table</code> for context menus.
+			Currently the only classes that accept <code class="classname">ShortcutActions</code> 
+			are <code class="classname">Window</code> and <code class="classname">Panel</code>.
+			This may change in the future. <code class="classname">Table</code> is a good
+			candidate to support ShortcutActions. 
+		</p>
+		
+		<p>		
+			To handle key presses, you need	to define an action handler by implementing 
+			the <code class="classname">Handler</code> interface. The interface has two methods 
+			that you need to implement: <code class="methodname">getActions()</code> and
+			<code class="methodname">handleAction()</code>.
+		</p>
+
+		<p>
+			The <code class="methodname">getActions()</code> interface method must return an
+			array of <code class="classname">Action</code> objects for the component specified
+			with the second parameter for the method, the <em class="parameter"><code>sender</code></em> of
+			an action. For a keyboard shortcut, you use a
+			<code class="classname">ShortcutAction</code>. The implementation of the method could
+			be following:
+		</p>
+
+        <pre class="programlisting">// Have the unmodified Enter key cause an event
+Action action_ok = new ShortcutAction("Default key",
+        ShortcutAction.KeyCode.ENTER, null);
+
+// Have the C key modified with Alt cause an event
+Action action_cancel = new ShortcutAction("Alt+C",
+        ShortcutAction.KeyCode.C,
+        new int[] { ShortcutAction.ModifierKey.ALT });
+
+Action[] actions = new Action[] {action_cancel, action_ok};
+
+public Action[] getActions(Object target, Object sender) {
+    if(sender == myPanel)
+        return actions;
+
+    return null;
+}</pre>
+
+		<p>
+			The returned Action array may be static or created dynamically for different
+			senders according to your needs. 
+		</p>
+
+		<p>
+			The constructor method of <code class="classname">ShortcutAction</code> takes a 
+			symbolic caption for the action; this is largely irrelevant
+			for shortcut actions in their current implementation, but might be used 
+			later if implementors use them in both menus and as shortcut actions.
+			The second parameter is the keycode, as defined in 
+			<code class="classname">ShortcutAction.KeyCode</code> interface. Currently, the 
+			following keycodes are allowed:
+		</p>
+
+		<div class="variablelist"><dl><dt><span class="term">Keys <em class="parameter"><code>A</code></em> to <em class="parameter"><code>Z</code></em></span></dt><dd>Normal letter keys</dd><dt><span class="term"><em class="parameter"><code>F1</code></em> to <em class="parameter"><code>F12</code></em></span></dt><dd>
+					<p>Function keys</p>
+				</dd><dt><span class="term"><em class="parameter"><code>BACKSPACE</code></em>, <em class="parameter"><code>DELETE</code></em>, <em class="parameter"><code>ENTER</code></em>, <em class="parameter"><code>ESCAPE</code></em>, <em class="parameter"><code>INSERT</code></em>, <em class="parameter"><code>TAB</code></em></span></dt><dd>
+					<p>Control keys</p>
+				</dd><dt><span class="term"><em class="parameter"><code>NUM0</code></em> to <em class="parameter"><code>NUM9</code></em></span></dt><dd>
+					<p>Number pad keys</p>
+				</dd><dt><span class="term"><em class="parameter"><code>ARROW_DOWN</code></em>, <em class="parameter"><code>ARROW_UP</code></em>, <em class="parameter"><code>ARROW_LEFT</code></em>, <em class="parameter"><code>ARROW_RIGHT</code></em></span></dt><dd>
+					<p>Arrow keys</p>
+				</dd><dt><span class="term"><em class="parameter"><code>HOME</code></em>, <em class="parameter"><code>END</code></em>, <em class="parameter"><code>PAGE_UP</code></em>, <em class="parameter"><code>PAGE_DOWN</code></em></span></dt><dd>
+					<p>Other movement keys</p>
+				</dd></dl></div>
+
+		<p>
+			The third parameter is an array of modifier keys, as defined in the
+			<code class="classname">ShortcutAction.ModifierKey</code> interface. The
+			following modifier keys are allowed: <em class="parameter"><code>ALT</code></em>,
+			<em class="parameter"><code>CTRL</code></em>, and <em class="parameter"><code>SHIFT</code></em>. The modifier
+			keys can be combined; for example, the following defines shortcut key
+			combination
+			<span><strong class="keycap">Ctrl</strong></span>-<span><strong class="keycap">Shift</strong></span>-<span><strong class="keycap">S</strong></span>:
+
+
+		<pre class="programlisting">ShortcutAction("Ctrl+Shift+S",
+               ShortcutAction.KeyCode.S, new int[] {
+                      ShortcutAction.ModifierKey.CTRL,
+                      ShortcutAction.ModifierKey.SHIFT});</pre>
+
+		</p>
+
+		<p>
+			The following example demonstrates the definition of a default button for a
+			user interface, as well as a normal shortcut key,
+			<span><strong class="keycap">Alt</strong></span>-<span><strong class="keycap">C</strong></span> for clicking the
+			<span class="guibutton">Cancel</span> button.
+		</p>
+
+		<pre class="programlisting">import com.vaadin.event.Action;
+import com.vaadin.event.ShortcutAction;
+import com.vaadin.event.Action.Handler;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
+import com.vaadin.ui.TextField;
+
+public class DefaultButtonExample extends CustomComponent
+                                  implements Handler {
+    // Define and create user interface components
+    Panel panel = new Panel("Login");
+    FormLayout formlayout = new FormLayout();
+    TextField username = new TextField("Username");
+    TextField password = new TextField("Password");
+    HorizontalLayout buttons = new HorizontalLayout();
+
+    // Create buttons and define their listener methods.
+    Button ok = new Button("OK", this, "okHandler");
+    Button cancel = new Button("Cancel", this, "cancelHandler");
+
+    // Have the unmodified Enter key cause an event
+    Action action_ok = new ShortcutAction("Default key",
+            ShortcutAction.KeyCode.ENTER, null);
+
+    // Have the C key modified with Alt cause an event
+    Action action_cancel = new ShortcutAction("Alt+C",
+            ShortcutAction.KeyCode.C,
+            new int[] { ShortcutAction.ModifierKey.ALT });
+
+    public DefaultButtonExample() {
+        // Set up the user interface
+        setCompositionRoot(panel);
+        panel.addComponent(formlayout);
+        formlayout.addComponent(username);
+        formlayout.addComponent(password);
+        formlayout.addComponent(buttons);
+        buttons.addComponent(ok);
+        buttons.addComponent(cancel);
+
+        // Set focus to username
+        username.focus();
+
+        // Set this object as the action handler
+        System.out.println("adding ah");
+        panel.addActionHandler(this);
+
+        System.out.println("start done.");
+    }
+
+    /**
+     * Retrieve actions for a specific component. This method
+     * will be called for each object that has a handler; in
+     * this example just for login panel. The returned action
+     * list might as well be static list.
+     */
+    public Action[] getActions(Object target, Object sender) {
+        System.out.println("getActions()");
+        return new Action[] { action_ok, action_cancel };
+    }
+
+    /**
+     * Handle actions received from keyboard. This simply directs
+     * the actions to the same listener methods that are called
+     * with ButtonClick events.
+     */
+    public void handleAction(Action action, Object sender,
+                             Object target) {
+        if (action == action_ok) {
+            okHandler();
+        }
+        if (action == action_cancel) {
+            cancelHandler();
+        }
+    }
+
+    public void okHandler() {
+        // Do something: report the click
+        formlayout.addComponent(new Label("OK clicked. "
+                + "User=" + username.getValue() + ", password="
+                + password.getValue()));
+        //  
+    }
+
+    public void cancelHandler() {
+        // Do something: report the click
+        formlayout.addComponent(new Label("Cancel clicked. User="
+                + username.getValue() + ", password="
+                + password.getValue()));
+    }
+}</pre>
+
+		<p>
+			Notice that the keyboard actions can currently be attached only to 
+			<code class="classname">Panel</code>s and <code class="classname">Window</code>s. This can
+			cause problems if you have components that require a certain key. For example,
+			multi-line <code class="classname">TextField</code> requires the
+			<span><strong class="keycap">Enter</strong></span> key. There is currently no way to filter the shortcut
+			actions out while the focus is inside some specific component, so you need to
+			avoid such conflicts.
+		</p>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="advanced.resources.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="advanced.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="advanced.printing.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">10.5.&nbsp;Resources&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;10.7.&nbsp;Printing</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

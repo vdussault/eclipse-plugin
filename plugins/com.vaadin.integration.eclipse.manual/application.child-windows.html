@@ -1,0 +1,241 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>4.3.&nbsp;Child Windows</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="application.html" title="Chapter&nbsp;4.&nbsp;Writing a Web Application"><link rel="prev" href="application.main-window.html" title="4.2.&nbsp;Managing the Main Window"><link rel="next" href="application.events.html" title="4.4.&nbsp;Handling Events with Listeners"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>4.3.&nbsp;Child Windows</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">4.3.&nbsp;Child Windows</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="application.main-window.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;4.&nbsp;Writing a Web Application</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="application.events.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="application.child-windows"></a>4.3.&nbsp;Child Windows</h2></div></div></div>
+		
+		
+		<p>
+			An application-level window can have a number of floating child windows. They
+			are managed by the client-side JavaScript runtime of Vaadin using HTML
+			features. Vaadin allows opening and closing child windows, refreshing one
+			window from another, resizing windows, and scrolling the window content. Child
+			windows are typically used for <em class="firstterm">Dialog Windows</em> and
+			<em class="firstterm">Multiple Document Interface</em> applications. Child windows
+			are by default not modal; you can set them modal as described in <a href="application.child-windows.html#application.child-windows.modal" title="4.3.3.&nbsp;Modal Windows">Section&nbsp;4.3.3, &ldquo;Modal Windows&rdquo;</a>.
+		</p>
+
+		<p>
+			As with all user interface components, the appearance of a window and its
+			contents is defined with themes.
+		</p>
+
+		<p>
+			User control of a child window is limited to moving, resizing, and closing
+			the window. Maximizing or minimizing are not yet supported.
+		</p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="application.child-window.openclose"></a>4.3.1.&nbsp;Opening and Closing a Child Window</h3></div></div></div>
+			
+			
+			<p>
+				You can open a new window by creating a new
+				<code class="classname">Window</code> object and adding it to the
+				main window with <code class="methodname">addWindow()</code> method of
+				the <code class="classname">Application</code> class.
+			</p>
+
+			<pre class="programlisting">mywindow = new Window("My Window");
+mainwindow.addWindow(mywindow);</pre>
+
+			<p>
+				You close the window in a similar fashion, by calling the
+				<code class="methodname">removeWindow()</code> of the
+				<code class="classname">Application</code> class:
+			</p>
+
+			<pre class="programlisting">myapplication.removeWindow (mywindow);</pre>
+
+			<p>
+				The user can, by default, close a child window by clicking the close
+				button in the upper-right corner of the window. You can disable the button
+				by setting the window as <span class="emphasis"><em>read-only</em></span> with
+				<code class="methodname">setReadOnly(true)</code>. Notice that you could disable
+				the button also by making it invisible in CSS with a "<em class="parameter"><code>display:
+				none</code></em>" formatting. The problem with such a cosmetic disabling
+				is that a malicious user might re-enable the button and close the window,
+				which might cause problems and possibly be a security hole. Setting
+				the window as read-only not only disables the close button on the client
+				side, but also prevents processing the close event on the server side.
+			</p>
+	
+			<p>
+				The following example demonstrates the use of a child window in an
+				application. The example manages the window using a custom component that
+				contains a button for opening and closing the window.
+			</p>
+
+			<pre class="programlisting">/** Component contains a button that allows opening a window. */
+public class WindowOpener extends CustomComponent
+                          implements Window.CloseListener {
+    Window mainwindow;  // Reference to main window
+    Window mywindow;    // The window to be opened
+    Button openbutton;  // Button for opening the window
+    Button closebutton; // A button in the window
+    Label  explanation; // A descriptive text
+
+    public WindowOpener(String label, Window main) {
+        mainwindow = main;
+
+        // The component contains a button that opens the window.
+        final VerticalLayout layout = new VerticalLayout();
+        
+        openbutton = new Button("Open Window", this,
+                                "openButtonClick");
+        explanation = new Label("Explanation");
+        layout.addComponent(openbutton);
+        layout.addComponent(explanation);
+        
+        setCompositionRoot(layout);
+    }
+
+    /** Handle the clicks for the two buttons. */
+    public void openButtonClick(Button.ClickEvent event) {
+        /* Create a new window. */
+        mywindow = new Window("My Dialog");
+        mywindow.setPositionX(200);
+        mywindow.setPositionY(100);
+
+        /* Add the window inside the main window. */
+        mainwindow.addWindow(mywindow);
+
+        /* Listen for close events for the window. */
+        mywindow.addListener(this);
+
+        /* Add components in the window. */
+        mywindow.addComponent(
+                new Label("A text label in the window."));
+        closebutton = new Button("Close", this, "closeButtonClick");
+        mywindow.addComponent(closebutton);
+
+        /* Allow opening only one window at a time. */
+        openbutton.setEnabled(false);
+
+        explanation.setValue("Window opened");
+    }
+
+    /** Handle Close button click and close the window. */
+    public void closeButtonClick(Button.ClickEvent event) {
+        /* Windows are managed by the application object. */
+        mainwindow.removeWindow(mywindow);
+
+        /* Return to initial state. */
+        openbutton.setEnabled(true);
+
+        explanation.setValue("Closed with button");
+    }
+
+    /** In case the window is closed otherwise. */
+    public void windowClose(CloseEvent e) {
+        /* Return to initial state. */
+        openbutton.setEnabled(true);
+
+        explanation.setValue("Closed with window controls");
+    }
+}</pre>
+
+			<p>
+				The example implements a custom component that inherits the
+				<code class="classname">CustomComponent</code> class. It consists of a
+				<code class="classname">Button</code> that it uses to open a window and a
+				<code class="classname">Label</code> to describe the state of the window. When the
+				window is open, the button is disabled. When the window is closed, the
+				button is enabled again. 
+			</p>
+
+			<p>
+				You can use the above custom component in the application class with:
+			</p>
+
+			<pre class="programlisting"> public void init() { 
+    Window main = new Window("The Main Window"); 
+    setMainWindow(main);
+
+    addComponent(new WindowOpener("Window Opener", main));
+}</pre>
+
+			<p>
+				When added to an application, the screen will look as illustrated
+				in the following screenshot:
+			</p>
+
+			<div class="figure"><a name="figure.window.open.example"></a><p class="title"><b>Figure&nbsp;4.2.&nbsp;Opening a Child Window</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/layout/window_openexample.png" align="middle" alt="Opening a Child Window"></div>
+			</div></div><br class="figure-break">
+
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="application.child-window.position"></a>4.3.2.&nbsp;Window Positioning</h3></div></div></div>
+			
+
+			<p>
+				When created, a window will have a default size and
+				position. You can specify the size of a window with
+				<code class="methodname">setHeight()</code> and
+				<code class="methodname">setWidth()</code> methods. You can set the
+				position of the window with <code class="methodname">setPositionX()</code>
+				and <code class="methodname">setPositionY()</code> methods.
+			</p>
+
+			<pre class="programlisting">/* Create a new window. */
+mywindow = new Window("My Dialog");
+
+/* Set window size. */
+mywindow.setHeight("200px");
+mywindow.setWidth("400px");
+
+/* Set window position. */
+mywindow.setPositionX(200);
+mywindow.setPositionY(50);</pre>
+
+			<p>
+				Notice that the size of the main window is unknown and the
+				<code class="methodname">getHeight</code> and
+				<code class="methodname">getWidth</code> methods will return
+				<span class="returnvalue">-1</span>.
+			</p>
+
+		</div>
+
+		
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="application.child-windows.modal"></a>4.3.3.&nbsp;Modal Windows</h3></div></div></div>
+			
+
+			<p>
+				A modal window is a child window that has to be closed by the
+				user before the use of the parent window can continue. Dialog windows
+				are typically modal. The advantage of modal windows is the
+				simplification of user interaction, which may contribute to the
+				clarity of the user interface. Modal windows are also easy to use
+				from a development perspective, because as user interaction is
+				isolated to them, changes in application state are more limited
+				while the modal window is open. The disadvantage of modal windows
+				is that they can restrict workflow too much.
+			</p>
+
+			<div class="figure"><a name="figure.window.modal"></a><p class="title"><b>Figure&nbsp;4.3.&nbsp;Screenshot of the Modal Window Demo Application</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/layout/window_modal.png" align="middle" alt="Screenshot of the Modal Window Demo Application"></div>
+			</div></div><br class="figure-break">
+			
+			<p>
+				Depending on theme settings, the parent window may be grayed
+				while the modal window is open.
+			</p>
+
+			<p>
+				The demo application of Vaadin includes an example of
+				using modal windows. <a href="application.child-windows.html#figure.window.modal" title="Figure&nbsp;4.3.&nbsp;Screenshot of the Modal Window Demo Application">Figure&nbsp;4.3, &ldquo;Screenshot of the Modal Window Demo Application&rdquo;</a> above
+				is from the demo application. The example includes the source
+				code.
+			</p>
+
+			<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Security Warning</h3>
+				
+				<p>
+					Modality of child windows is purely a client-side feature and can be
+					circumvented with client-side attack code. You should not trust in the
+					modality of child windows in security-critical situations such as
+					login windows.
+				</p>
+			</div>
+		</div>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="application.main-window.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="application.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="application.events.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">4.2.&nbsp;Managing the Main Window&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;4.4.&nbsp;Handling Events with Listeners</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

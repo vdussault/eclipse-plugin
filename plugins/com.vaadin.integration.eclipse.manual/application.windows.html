@@ -1,0 +1,470 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>10.2.&nbsp;Application-Level Windows</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="advanced.html" title="Chapter&nbsp;10.&nbsp;Advanced Web Application Topics"><link rel="prev" href="advanced.html" title="Chapter&nbsp;10.&nbsp;Advanced Web Application Topics"><link rel="next" href="application.embedding.html" title="10.3.&nbsp;Embedding Applications in Web Pages"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>10.2.&nbsp;Application-Level Windows</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">10.2.&nbsp;Application-Level Windows</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="advanced.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;10.&nbsp;Advanced Web Application Topics</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="application.embedding.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="application.windows"></a>10.2.&nbsp;Application-Level Windows</h2></div></div></div>
+		
+
+		<p>
+			Vaadin Release 5 introduces support for multiple application-level
+			windows that can be used just like the main window. All such windows use the
+			same application session. Each window is identified with a URL that is used to
+			access it. This makes it possible to bookmark application-level windows. Such
+			windows can even be created dynamically based on URLs.
+		</p>
+
+		<p>
+			Application-level windows allow several uses important for the usability of
+			browser-based applications.
+		</p>
+
+		<div class="itemizedlist"><ul type="disc"><li>
+				<span class="emphasis"><em>Native child windows</em></span>. An application can open child
+				windows that are not floating windows inside a parent window.
+			</li><li>
+				<span class="emphasis"><em>Page-based browsing</em></span>. The application can allow the
+				user to open certain content to different windows. For example, in a
+				messaging application, it can be useful to open different messages to
+				different windows so that the user can browse through them while writing a
+				new message.
+			</li><li>
+				<span class="emphasis"><em>Bookmarking</em></span>. Bookmarks in the web browser can provide an
+				entry-point to some content provided by an application.
+			</li><li>
+				<span class="emphasis"><em>Embedding windows</em></span>. Windows can be embedded in web
+				pages, thus making it possible to provide different views to an
+				application from different pages or even from the same page, while keeping
+				the same session. See <a href="application.embedding.html" title="10.3.&nbsp;Embedding Applications in Web Pages">Section&nbsp;10.3, &ldquo;Embedding Applications in Web Pages&rdquo;</a>.
+			</li></ul></div>
+
+		<p>
+			Because of the special nature of AJAX applications, these uses require some
+			caveats. We will go through them later in <a href="application.windows.html#application.windows.caveats" title="10.2.4.&nbsp;Caveats in Using Multiple Windows">Section&nbsp;10.2.4, &ldquo;Caveats in Using Multiple Windows&rdquo;</a>.
+		</p>
+		
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N23F99"></a>10.2.1.&nbsp;Creating New Application-Level Windows</h3></div></div></div>
+			
+
+			<p>
+				Creating a new application-level window is much like creating a child
+				window (see <a href="application.child-windows.html" title="4.3.&nbsp;Child Windows">Section&nbsp;4.3, &ldquo;Child Windows&rdquo;</a>), except that the
+				window is added with <code class="methodname">addWindow()</code> to the application
+				object instead of the main window.
+			</p>
+
+			<pre class="programlisting">public class WindowTestApplication extends Application {
+    public void init() {
+        // First create the main window.
+        final Window main = new Window ("My Test Application");
+        setMainWindow(main);
+         
+        // Create another application-level window.
+        final Window mywindow = new Window("Second Window");
+        
+        // Manually set the name of the window.
+        mywindow.setName("mywindow");
+        
+        // Add some content to the window.
+        mywindow.addComponent(new Label("Has content."));
+
+        // Add the window to the application.
+        addWindow(mywindow);
+    }
+}</pre>
+
+			<p>
+				This creates the window object that a user can view by opening a URL in
+				a browser. Creating an application-level window object does not open a new
+				browser window automatically to view the object, but if you wish to open
+				one, you have to do it explicitly as shown below. An application-level
+				window has a unique URL, which is based on the application URL and the
+				name of the window given with the <code class="methodname">setName()</code>
+				method. For example, if the application URL is
+				<code class="uri">http://localhost:8080/myapp/</code> and the window name is
+				<code class="literal">mywindow</code>, the URL for the window will be
+				<code class="uri">http://localhost:8080/myapp/mywindow/</code>. If the name of a window
+				is not explicitly set with <code class="methodname">setName()</code>, an
+				automatically generated name will be used. The name can be retrieved with
+				the <code class="methodname">getName()</code> method and the entire URL with
+				<code class="methodname">getURL()</code>.
+			</p>
+
+			<p>
+				There are three typical ways to open a new window: using the
+				<code class="methodname">open()</code> method of <code class="classname">Window</code>
+				class, a <code class="classname">Link</code>, or referencing it from HTML or
+				JavaScript code written inside a <code class="classname">Label</code> component.
+			</p>
+
+			<p>
+				The <code class="classname">Window</code> <code class="methodname">open()</code> method
+				takes as parameters a resource to open and the target name. You can use
+				<code class="classname">ExternalResource</code> to open a specific URL, which you
+				get from the window to be opened with the
+				<code class="methodname">getURL()</code> method.
+			</p>
+
+			<pre class="programlisting">/* Create a button to open a new window. */
+main.addComponent(new Button("Click to open new window",
+                  new Button.ClickListener() { 
+    public void buttonClick(ClickEvent event) {
+        // Open the window.
+        main.open(new ExternalResource(mywindow.getURL()),
+                  "_new");
+    }      
+}));</pre>
+
+			<p>
+				The target name is one of the default HTML target names (<em class="parameter"><code>_new</code></em>, <em class="parameter"><code>_blank</code></em>, <em class="parameter"><code>_top</code></em>, etc.) or a custom target name.  How the window is
+				exactly opened depends on the browser. Browsers that support tabbed
+				browsing can open the window in another tab, depending on the browser
+				settings.
+			</p>
+
+			<p>
+				Another typical way to open windows is to use a <code class="classname">Link</code>
+				component with the window URL as an
+				<code class="classname">ExternalResource</code>.
+			</p>
+
+			<pre class="programlisting">/* Add a link to the second window. */
+Link link = new Link("Click to open second window",
+                     new ExternalResource(mywindow.getURL()));
+link.setTargetName("second");
+link.setTargetHeight(300);
+link.setTargetWidth(300);
+link.setTargetBorder(Link.TARGET_BORDER_DEFAULT);
+main.addComponent(link);</pre>
+
+			<p>
+				Using a <code class="classname">Link</code> allows you to specify parameters for
+				the window that opens by clicking on the link. Above, we set the
+				dimensions of the window and specify what window controls the window
+				should contain. The <em class="parameter"><code>Link.TARGET_BORDER_DEFAULT</code></em>
+				specifies to use the default, which includes most of the usual window
+				controls, such as the menu, the toolbar, and the status bar.
+			</p>
+
+			<p>
+				Another way to allow the user to open a window is to insert the URL in
+				HTML code inside a <code class="classname">Label</code>. This allows even more
+				flexibility in specifying how the window should be opened.
+			</p>
+
+			<pre class="programlisting">// Add the link manually inside a Label.
+main.addComponent(
+    new Label("Second window: &lt;a href='" + mywindow.getURL()
+              + "' target='second'&gt;click to open&lt;/a&gt;",
+              Label.CONTENT_XHTML));
+main.addComponent(
+    new Label("The second window can be accessed through URL: "
+              + mywindow.getURL()));</pre>
+
+			<p>
+				When an application-level window is closed in the browser the
+				<code class="methodname">close()</code> method is normally called just like
+				for a child window and the <code class="classname">Window</code> object is
+				purged from the application. However, there are situations where
+				<code class="methodname">close()</code> might not be called. See
+				<a href="application.windows.html#application.windows.closing" title="10.2.3.&nbsp;Closing Windows">Section&nbsp;10.2.3, &ldquo;Closing Windows&rdquo;</a> for more information. 
+			</p>
+
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="application.windows.dynamic"></a>10.2.2.&nbsp;Creating Windows Dynamically</h3></div></div></div>
+			
+			
+			<p>
+				You can create a window object dynamically by its URL path by overriding
+				the <code class="methodname">getWindow()</code> method of the
+				<code class="classname">Application</code> class. The method gets a window name as
+				its parameter and must return the corresponding
+				<code class="classname">Window</code> object. The window name is determined from
+				the first URL path element after the application URL (window name may not
+				contain slashes). See the notes below for setting the actual name of the
+				dynamically created windows below.
+			</p>
+
+			<p>
+				The following example allows opening windows with a window name that
+				begins with "<code class="literal">planet-</code>" prefix. Since the method is
+				called for <span class="emphasis"><em>every</em></span> browser request for the application,
+				we filter only the requests where a window with the given name does not
+				yet exist.
+			</p>
+
+			<pre class="programlisting">public class WindowTestApplication extends Application {
+    ...
+
+    @Override
+    public Window getWindow(String name) {
+        // If a dynamically created window is requested, but
+        // it does not exist yet, create it.
+        if (name.startsWith("planet-") &amp;&amp;
+              super.getWindow(name) == null) {
+            String planetName =
+                    name.substring("planet-".length());
+
+            // Create the window object.
+            Window newWindow =
+                    new Window("Window about " + planetName);
+            
+            // DANGEROUS: Set the name explicitly. Otherwise,
+            // an automatically generated name is used, which
+            // is usually safer.
+            newWindow.setName(name);
+
+            // Put some content in it.
+            newWindow.addComponent(
+                new Label("This window contains details about " +
+                          planetName + "."));
+            
+            // Add it to the application as a regular
+            // application-level window.
+            addWindow(newWindow);
+            
+            return newWindow;
+        }
+
+        // Otherwise the Application object manages existing
+        // windows by their name.
+        return super.getWindow(name);
+    }</pre>
+
+			<p>
+				The window name is and must be a unique indentifier for each
+				<code class="classname">Window</code> object instance. If you use
+				<code class="methodname">setName()</code> to set the window name explicitly, as
+				we did above, any browser window that has the same URL (within the same
+				browser) would open the <span class="emphasis"><em>same</em></span> window object. This is
+				dangerous and <span class="emphasis"><em>generally not recommended</em></span>, because the
+				browser windows would share the same window object. Opening two windows
+				with the same static name would immediately lead to a synchronization
+				error, as is shown in <a href="application.windows.html#figure.application.window.dynamic.error" title="Figure&nbsp;10.1.&nbsp;Synchronization Error Between Windows with the Same Name">Figure&nbsp;10.1, &ldquo;Synchronization Error Between Windows with the Same Name&rdquo;</a> below. (While also the
+				window captions are same, they are irrelevant for this problem.)
+			</p>
+
+			<div class="figure"><a name="figure.application.window.dynamic.error"></a><p class="title"><b>Figure&nbsp;10.1.&nbsp;Synchronization Error Between Windows with the Same Name</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/application/window-application-dynamic-3.png" align="middle" alt="Synchronization Error Between Windows with the Same Name"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				There are some cases where setting the name explicitly is useful. The
+				launch application below is one example, as it always opens the other
+				windows in a window target that is specific to the window name, thereby
+				never creating two windows with the same URL. Similarly, if you had
+				embedded the application in a browser frame and the link would open the
+				window in a frame, you would not have problems. Having a single window
+				instance for a URL is also useful if the browser crashes and the user
+				opens the window again, as it will have kept its previous (server-side)
+				state.
+			</p>
+
+			<p>
+				Leaving the window name to be automatically generated allows opening
+				multiple windows with the same URL, while each of the windows will have a
+				separate state. The URL in the location bar stays unchanged and the
+				generated window name is used only for the Ajax communications to identify
+				the window object. A generated name is a string representation of a unique
+				random number, such as "<code class="literal">1928676448</code>". You should be
+				aware of the generated window names when overriding the
+				<code class="methodname">getWindow()</code> method (and not unintentionally
+				create a new window instance dynamically for each such request). The
+				condition in the above example would also filter out the requests for an
+				already existing window with a generated name.
+			</p>
+
+			<p>
+				<a href="application.windows.html#figure.application.window.dynamic.new" title="Figure&nbsp;10.2.&nbsp;A Dynamically Created Window">Figure&nbsp;10.2, &ldquo;A Dynamically Created Window&rdquo;</a> shows a
+				dynamically created application-level window with the URL shown in the
+				address bar. The URL for the application is here
+				<code class="uri">http://localhost:8080/tk5/windowexample/</code>, including the
+				application context, and the dynamically created window's name is
+				<code class="uri">planet-mars</code>.
+			</p>
+
+			<div class="figure"><a name="figure.application.window.dynamic.new"></a><p class="title"><b>Figure&nbsp;10.2.&nbsp;A Dynamically Created Window</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/application/window-application-dynamic-1.png" align="middle" alt="A Dynamically Created Window"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				The application knows the windows it already has and can return them after
+				the creation. The application also handles closing and destruction of
+				application-level window objects, as discussed in <a href="application.windows.html#application.windows.closing" title="10.2.3.&nbsp;Closing Windows">Section&nbsp;10.2.3, &ldquo;Closing Windows&rdquo;</a>.
+			</p>
+
+			<p>
+				Such dynamic windows could be opened as in the following example:
+			</p>
+			
+			<pre class="programlisting">public void init() {
+    final Window main = new Window("Window Test");
+    setMainWindow(main);
+
+    // Have some IDs for the dynamically creatable windows.
+    final String[] items = new String[] { "mercury", "venus",
+            "earth", "mars", "jupiter", "saturn", "uranus",
+            "neptune" };
+    
+    // Create a list of links to each of the available window.
+    for (int i = 0; i &lt; items.length; i++) {
+        // Create a URL for the window.
+        String windowUrl = getURL() + "planet-" + items[i];
+        
+        // Create a link to the window URL. Using the 
+        // item ID for the target also opens it in a new
+        // browser window (or tab) unique to the window name.
+        main.addComponent(
+            new Link("Open window about " + items[i],
+                     new ExternalResource(windowUrl),
+                     items[i], -1, -1, Window.BORDER_DEFAULT));
+    }
+}</pre>
+        			
+			<div class="figure"><a name="figure.application.window.dynamic.main"></a><p class="title"><b>Figure&nbsp;10.3.&nbsp;Opening Windows</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/application/window-application-dynamic-2.png" align="middle" alt="Opening Windows"></div>
+			</div></div><br class="figure-break">
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="application.windows.closing"></a>10.2.3.&nbsp;Closing Windows</h3></div></div></div>
+			
+
+			<p>
+				When the user closes an application-level window, the Client-Side Engine
+				running in the browser will report the event to the server before the page
+				is actually removed. You can catch the event with a
+				<code class="classname">Window.CloseListener</code>, as is done in the example
+				below.
+			</p>
+
+			<pre class="programlisting">newWindow.addListener(new Window.CloseListener() {
+    @Override
+    public void windowClose(CloseEvent e) {
+        // Do something.
+        System.out.println(e.getWindow().getName() +
+                           " was closed");
+
+        // Add a text to the main window about closing.
+        // (This does not update the main window.)
+        getMainWindow().addComponent(
+            new Label("Window '" + e.getWindow().getName() +
+                      "' was closed."));
+    }
+});</pre>
+
+			<p>
+				Notice that the change to the server-side state of the main window (or
+				another application-level window) does not refresh the window in the
+				browser, so the change will be unseen until user interaction or polling
+				refreshes the window. This problem and its dangers are discussed in <a href="application.windows.html#application.windows.caveats" title="10.2.4.&nbsp;Caveats in Using Multiple Windows">Section&nbsp;10.2.4, &ldquo;Caveats in Using Multiple Windows&rdquo;</a> below.
+			</p>
+
+			<p>
+				The close event does not occur if the browser crashes or the connection
+				is otherwise severed violently. In such a situation, the window object will
+				be left hanging, which could become a resource problem if you allow the
+				users to open many such application-level windows. The positive side is
+				that the user can reconnect to the window using the window URL.
+			</p>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="application.windows.caveats"></a>10.2.4.&nbsp;Caveats in Using Multiple Windows</h3></div></div></div>
+			
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N240EC"></a>Communication Between Windows</h4></div></div></div>
+				
+				
+				<p>
+					For cases where you need communication between windows, we recommend
+					using floating child windows. In Vaadin Release 5, an
+					application window can not update the data in other windows. The
+					contents of a window can only be updated when the particular window makes
+					a request to the server. The request can be caused by user input or
+					through polling.
+				</p>
+
+				<p>
+					Changing the server-side state of a window while processing a user event
+					from another window can potentially cause serious problems. Changing
+					the client-side state of a window does not always immediately
+					communicate the changes to the server. The server-side state can therefore
+					be out of sync with the client-side state.
+				</p>
+
+				<div class="figure"><a name="figure.window.polling"></a><p class="title"><b>Figure&nbsp;10.4.&nbsp;Communication Between Two Application-Level Windows</b></p><div class="figure-contents">
+					
+					<div class="mediaobject" align="center"><img src="img/application/window-polling-example1.png" align="middle" alt="Communication Between Two Application-Level Windows"></div>
+				</div></div><br class="figure-break">
+
+				<p>
+					The following example creates a second window that changes the
+					contents of the main window, as illustrated in the figure above. In
+					this simple case, changing the main window contents is safe.
+				</p>
+
+				<pre class="programlisting">// Create a table in the main window to hold items added
+// in the second window
+final Table table = new Table();
+table.setPageLength(5);
+table.getSize().setWidth(100, Size.UNITS_PERCENTAGE);
+table.addContainerProperty("Name", String.class, "");
+main.addComponent(table);
+
+// Create the second window
+final Window adderWindow = new Window("Add Items");
+adderWindow.setName("win-adder");
+main.getApplication().addWindow(adderWindow);
+
+// Create selection component to add items to the table
+final NativeSelect select = new NativeSelect("Select item to add");
+select.setImmediate(true);
+adderWindow.addComponent(select);
+
+// Add some items to the selection
+String items[] = new String[]{"-- Select --", "Mercury", "Venus", 
+        "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"};
+for (int i=0; i&lt;items.length; i++)
+    select.addItem(items[i]);
+select.setNullSelectionItemId(items[0]);
+
+// When an item is selected in the second window, add
+// table in the main window
+select.addListener(new ValueChangeListener() {
+    public void valueChange(ValueChangeEvent event) {
+        // If the selected value is something else
+        // but a null selection item.
+        if (select.getValue() != null) {
+            // Add the selected item to the table
+            // in the main window
+            table.addItem(new Object[]{select.getValue()},
+                          new Integer(table.size()));
+        }
+    }
+});
+
+// Link to open the selection window
+Link link = new Link("Click to open second window",
+                     new ExternalResource(adderWindow.getURL()),
+                     "_new", 50, 200,
+                     Link.TARGET_BORDER_DEFAULT);
+main.addComponent(link);
+
+// Enable polling to update the main window
+ProgressIndicator poller = new ProgressIndicator();
+poller.addStyleName("invisible");
+main.addComponent(poller);</pre>
+
+				<p>
+					The example uses an invisible <code class="classname">ProgressIndicator</code>
+					to implement polling. This is sort of a trick and a more proper API
+					for polling is under design. Making the progress indicator invisible
+					requires the following CSS style definition:
+				</p>
+
+				<pre class="programlisting">.v-progressindicator-invisible {
+    display: none;
+}</pre>
+
+
+			</div>
+		</div>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="advanced.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="advanced.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="application.embedding.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Chapter&nbsp;10.&nbsp;Advanced Web Application Topics&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;10.3.&nbsp;Embedding Applications in Web Pages</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

@@ -1,0 +1,382 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>7.2.&nbsp;Introduction to Cascading Style Sheets</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="themes.html" title="Chapter&nbsp;7.&nbsp;Themes"><link rel="prev" href="themes.html" title="Chapter&nbsp;7.&nbsp;Themes"><link rel="next" href="themes.creating.html" title="7.3.&nbsp;Creating and Using Themes"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>7.2.&nbsp;Introduction to Cascading Style Sheets</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">7.2.&nbsp;Introduction to Cascading Style Sheets</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="themes.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;7.&nbsp;Themes</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="themes.creating.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="themes.css"></a>7.2.&nbsp;Introduction to Cascading Style Sheets</h2></div></div></div>
+		
+		
+		<p>
+			Cascading Style Sheets or CSS is a technique to separate the appearance of a
+			web page from the content represented in HTML or XHTML. Let us give a short
+			introduction to Cascading Style Sheets and look how they are relevant to
+			software development with Vaadin.
+		</p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N22F49"></a>7.2.1.&nbsp;Basic CSS Rules</h3></div></div></div>
+			
+
+			<p>
+				A style sheet is a file that contains a set of
+				<span class="emphasis"><em>rules</em></span>. Each rule consists of one or more
+				<span class="emphasis"><em>selectors</em></span>, separated with commas, and a
+				<span class="emphasis"><em>declaration block</em></span> enclosed in curly braces. A
+				declaration block contains a list of <span class="emphasis"><em>property</em></span>
+				statements. Each property has a label and a value, separated with a
+				colon. A property statement ends with a semicolon.
+			</p>
+
+			<p>
+				Let us look at an example:
+			</p>
+
+			<pre class="programlisting">p, td { 
+  color: blue;
+}
+
+td { 
+  background: yellow;
+  font-weight: bold;
+}</pre>
+
+			<p>
+				In the example above, <code class="literal">p</code> and <code class="literal">td</code> are
+				element type selectors that match with <code class="literal">&lt;p&gt;</code> and
+				<code class="literal">&lt;td&gt;</code> elements in HTML, respectively. The first
+				rule matches with both elements, while the second matches only with
+				<code class="literal">&lt;td&gt;</code> elements. Let us assume that you have saved
+				the above style sheet with the name <code class="filename">mystylesheet.css</code> and
+				consider the following HTML file located in the same folder.
+			</p>
+
+			<pre class="programlisting">&lt;html&gt;
+    &lt;head&gt;
+        &lt;link rel="stylesheet" type="text/css"
+              href="mystylesheet.css"/&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        <span class="strong"><strong>&lt;p&gt;</strong></span>This is a paragraph<span class="strong"><strong>&lt;/p&gt;</strong></span>
+        <span class="strong"><strong>&lt;p&gt;</strong></span>This is another paragraph<span class="strong"><strong>&lt;/p&gt;</strong></span>
+        &lt;table&gt;
+            &lt;tr&gt;
+                <span class="strong"><strong>&lt;td&gt;</strong></span>This is a table cell<span class="strong"><strong>&lt;/td&gt;</strong></span>
+                <span class="strong"><strong>&lt;td&gt;</strong></span>This is another table cell<span class="strong"><strong>&lt;/td&gt;</strong></span>
+            &lt;/tr&gt;
+        &lt;/table&gt;
+    &lt;/body&gt;
+&lt;/html&gt;</pre>
+
+			<p>
+				The <code class="literal">&lt;link&gt;</code> element defines the style sheet to
+				use. The HTML elements that match the above rules are emphasized. When the
+				page is displayed in the browser, it will look as shown in the figure
+				below.
+			</p>
+
+			<div class="figure"><a name="figure.themes.basic.1"></a><p class="title"><b>Figure&nbsp;7.2.&nbsp;Simple Styling by Element Type</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/themes/themes-css-match-1.png" align="middle" alt="Simple Styling by Element Type"></div>
+			</div></div><br class="figure-break">
+				
+			<p>
+				CSS has an <span class="emphasis"><em>inheritance</em></span> mechanism where contained
+				elements inherit the properties of their parent elements. For example, let
+				us change the above example and define it instead as follows:
+			</p>
+
+			<pre class="programlisting">table {
+    color: blue;
+    background: yellow;
+}</pre>
+
+			<p>
+				All elements contained in the <code class="literal">&lt;table&gt;</code> element
+				would have the same properties. For example, the text in the contained
+				<code class="literal">&lt;td&gt;</code> elements would be in blue color.
+			</p>
+
+			<p>
+				Each HTML element type accepts a certain set of properties. The
+				<code class="literal">&lt;div&gt;</code> elements are generic elements that can be
+				used to create almost any layout and formatting that can be created with a
+				specific HTML element type. Vaadin uses
+				<code class="literal">&lt;div&gt;</code> elements extensively, especially for
+				layouts.
+			</p>
+
+			<p>
+				Matching elements by their type is, however, rarely if ever used in style
+				sheets for Vaadin components or Google Web Toolkit widgets.
+			</p>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N22FD2"></a>7.2.2.&nbsp;Matching by Element Class</h3></div></div></div>
+			
+
+			<p>
+				Matching HTML elements by the <span class="emphasis"><em>class</em></span> attribute of the
+				elements is the most relevant form of matching with Vaadin. It is
+				also possible to match with the <span class="emphasis"><em>identifier</em></span> of a HTML
+				element.
+			</p>
+
+			<p>
+				The class of an HTML element is defined with the
+				<em class="parameter"><code>class</code></em> attribute as follows:
+			</p>
+
+<pre class="programlisting">&lt;html&gt;
+  &lt;body&gt;
+    <span class="strong"><strong>&lt;p class="normal"&gt;</strong></span>This is the first paragraph<span class="strong"><strong>&lt;/p&gt;</strong></span>
+
+    <span class="strong"><strong>&lt;p class="another"&gt;</strong></span>This is the second paragraph<span class="strong"><strong>&lt;/p&gt;</strong></span>
+
+    &lt;table&gt;
+      &lt;tr&gt;
+        <span class="strong"><strong>&lt;td class="normal"&gt;</strong></span>This is a table cell<span class="strong"><strong>&lt;/td&gt;</strong></span>
+        <span class="strong"><strong>&lt;td class="another"&gt;</strong></span>This is another table cell<span class="strong"><strong>&lt;/td&gt;</strong></span>
+      &lt;/tr&gt;
+    &lt;/table&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</pre>
+
+			<p>
+				The class attributes of HTML elements can be matched in CSS rules with a
+				selector notation where the class name is written after a period following
+				the element name. This gives us full control of matching elements by their
+				type and class.
+			</p>
+
+			<pre class="programlisting">p.normal   {color: red;}
+p.another  {color: blue;}
+td.normal  {background: pink;}
+td.another {background: yellow;}</pre>
+
+			<p>
+				The page would look as shown below:
+			</p>
+
+			<div class="figure"><a name="N23013"></a><p class="title"><b>Figure&nbsp;7.3.&nbsp;Matching HTML Element Type and Class</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/themes/themes-css-match-class-2.png" align="middle" alt="Matching HTML Element Type and Class"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				We can also match solely by the class by using the universal selector
+				<code class="literal">*</code> for the element name, for example
+				<code class="literal">*.normal</code>. The universal selector can also be left out
+				altogether so that we use just the class name following the period, for
+				example <code class="literal">.normal</code>.
+			</p>
+
+			<pre class="programlisting">.normal {
+    color: red;
+}
+
+.another {
+    blackground: yellow;
+}</pre>
+
+			<p>
+				In this case, the rule will match with all elements of the same class
+				regardless of the element type. The result is shown in <a href="themes.css.html#figure.themes.match.class" title="Figure&nbsp;7.4.&nbsp;Matching Only HTML Element Class">Figure&nbsp;7.4, &ldquo;Matching Only HTML Element Class&rdquo;</a>.  This example illustrates a
+				technique to make style sheets compatible regardless of the exact HTML
+				element used in drawing a component.
+			</p>
+
+			<div class="figure"><a name="figure.themes.match.class"></a><p class="title"><b>Figure&nbsp;7.4.&nbsp;Matching Only HTML Element Class</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/themes/themes-css-match-class-3.png" align="middle" alt="Matching Only HTML Element Class"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				To assure compatibility, we recommend that you use only matching based on
+				the element classes and <span class="emphasis"><em>do not</em></span> match for specific
+				HTML element types in CSS rules, because either Vaadin or GWT
+				may use different HTML elements to render some components in the
+				future. For example, IT Mill Toolkit Release 4 used
+				<code class="literal">&lt;div&gt;</code> elements extensively for layout
+				components. However, IT Mill Toolkit Release 5 and Vaadin use GWT to render the components, and GWT
+				uses the <code class="literal">&lt;table&gt;</code> element to implement most
+				layouts. Similarly, IT Mill Toolkit Release 4 used <code class="literal">&lt;div&gt;</code> element
+				also for buttons, but in Release 5, GWT uses the
+				<code class="literal">&lt;button&gt;</code> element. Vaadin has little control over
+				how GWT renders its components, so we can not guarantee compatibility in
+				different versions of GWT. However, both <code class="literal">&lt;div&gt;</code>
+				and <code class="literal">&lt;table&gt;</code> as well as
+				<code class="literal">&lt;tr&gt;</code> and <code class="literal">&lt;td&gt;</code> elements
+				accept most of the same properties, so matching only the class hierarchy
+				of the elements should be compatible in most cases.
+			</p>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N2307E"></a>7.2.3.&nbsp;Matching by Descendant Relationship</h3></div></div></div>
+			
+
+			<p>
+				CSS allows matching HTML by their containment relationship. For example,
+				consider the following HTML fragment:
+			</p>
+
+			<pre class="programlisting">&lt;body&gt;
+  &lt;p class="mytext"&gt;Here is some text inside a
+                    paragraph element&lt;/p&gt;
+  &lt;table class="<span class="strong"><strong>mytable</strong></span>"&gt;
+    &lt;tr&gt;
+      &lt;td class="<span class="strong"><strong>mytext</strong></span>"&gt;Here is text inside
+                      a table and inside a td element.&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/table&gt;
+&lt;/body&gt;</pre>
+
+			<p>
+				Matching by the class name <code class="literal">.mytext</code> alone would match
+				both the <code class="literal">&lt;p&gt;</code> and <code class="literal">&lt;td&gt;</code>
+				elements. If we want to match only the table cell, we could use the following selector:
+			</p>
+
+			<pre class="programlisting">.mytable .mytext {color: blue;}</pre>
+
+			<p>
+				To match, a class listed in a rule does not have to be an immediate
+				descendant of the previous class, but just a descendant. For example, the
+				selector "<code class="literal">.v-panel .v-button</code>" would match all elements
+				with class <code class="literal">.v-button</code> somewhere inside an element with
+				class <code class="literal">.v-panel</code>.
+			</p>
+
+			<p>
+				Let us give an example with a real case. Consider the following Vaadin
+				component.
+			</p>
+
+			<pre class="programlisting">public class LoginBox extends CustomComponent {
+    Panel         panel  = new Panel("Log In");
+
+    public LoginBox () {
+        setCompositionRoot(panel);
+        
+        panel.addComponent(new TextField("Username:"));
+        panel.addComponent(new TextField("Password:"));
+        panel.addComponent(new Button("Login"));
+    }
+}</pre>
+			
+			<p>
+				The component will look by default as shown in the following figure.
+			</p>
+
+			<div class="figure"><a name="figure.themes.example.login.1"></a><p class="title"><b>Figure&nbsp;7.5.&nbsp;Themeing Login Box Example with 'runo' theme.</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/themes/example-login-default.png" align="middle" alt="Themeing Login Box Example with 'runo' theme."></div>
+			</div></div><br class="figure-break">
+
+			<p>
+					Now, let us look at the HTML structure of the component. The following
+					listing assumes that the application contains only the above component
+					in the main window of the application.
+				</p>
+
+			<pre class="programlisting">&lt;body&gt;
+   &lt;div id="itmtk-ajax-window"&gt;
+    &lt;div&gt;
+       &lt;div class="<span class="strong"><strong>v-orderedlayout</strong></span>"&gt;
+        &lt;div&gt;
+           &lt;div class="<span class="strong"><strong>v-panel</strong></span>"&gt;
+            &lt;div class="<span class="strong"><strong>v-panel-caption</strong></span>"&gt;<span class="emphasis"><em>Log In</em></span>&lt;/div&gt;
+            &lt;div class="<span class="strong"><strong>v-panel-content</strong></span>"&gt;
+               &lt;div class="<span class="strong"><strong>v-orderedlayout</strong></span>"&gt;
+                &lt;div&gt;
+                   &lt;div&gt;
+                    &lt;div class="<span class="strong"><strong>v-caption</strong></span>"&gt;
+                      &lt;span&gt;<span class="emphasis"><em>Username:</em></span>&lt;/span&gt;
+                    &lt;/div&gt;
+                   &lt;/div&gt;
+                   &lt;input type="text" <span class="strong"><strong>class="v-textfield</strong></span>"/&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                   &lt;div&gt;
+                    &lt;div class="<span class="strong"><strong>v-caption</strong></span>"&gt;
+                      &lt;span&gt;<span class="emphasis"><em>Password:</em></span>&lt;/span&gt;
+                    &lt;/div&gt;
+                   &lt;/div&gt;
+                   &lt;input type="password"
+                          class="v-textfield"/&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                  &lt;button type="button"
+                          class="<span class="strong"><strong>v-button</strong></span>"&gt;<span class="emphasis"><em>Login</em></span>&lt;/button&gt;
+                  &lt;/div&gt;
+               &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class="<span class="strong"><strong>v-panel-deco</strong></span>"/&gt;
+            &lt;/div&gt;
+           &lt;/div&gt;
+        &lt;/div&gt;
+       &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/body&gt;</pre>
+
+				<p>
+					Now, consider the following theme where we set the backgrounds of
+					various elements.
+				</p>
+
+		<pre class="programlisting">.v-panel .v-panel-caption {
+	background: #80ff80; /* pale green */
+}
+
+.v-panel .v-panel-content {
+	background: yellow;
+}
+
+.v-panel .v-textfield {
+	background: #e0e0ff; /* pale blue */
+}
+
+.v-panel .v-button {
+	background: pink;
+}</pre>
+
+			<p>
+				The coloring has changed as shown in the following figure.
+			</p>
+			
+			<div class="figure"><a name="figure.themes.example.mytheme.1"></a><p class="title"><b>Figure&nbsp;7.6.&nbsp;Themeing Login Box Example with Custom Theme</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/themes/example-login-mytheme.png" align="middle" alt="Themeing Login Box Example with Custom Theme"></div>
+			</div></div><br class="figure-break">
+			
+			<p>
+				An element can have multiple classes separated with a space. With multiple
+				classes, a CSS rule matches an element if any of the classes match. This
+				feature is used in many Vaadin components to allow matching based
+				on the state of the component. For example, when the mouse is over a
+				<code class="classname">Link</code> component, <code class="literal">over</code> class is
+				added to the component. Most of such styling is a feature of Google Web
+				Toolkit.
+				</p>
+		</div>
+			
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N23129"></a>7.2.4.&nbsp;Notes on Compatibility</h3></div></div></div>
+			
+
+			<p>
+				CSS was first proposed in 1994. The specification of CSS is maintained by
+				the CSS Working Group of World Wide Web Consortium (W3C). Its versions are
+				specified as <span class="emphasis"><em>levels</em></span> that build upon the earlier
+				version. CSS Level 1 was published in 1996, Level 2 in 1998. Development
+				of CSS Level 3 was started in 1998 and is still under way.
+			</p>
+
+			<p>
+				While the support for CSS has been universal in all graphical web browsers
+				since at least 1995, the support has been very incomplete at times and
+				there still exists an unfortunate number of incompatibilities between
+				browsers. While we have tried to take these incompatibilities into account
+				in the built-in themes in Vaadin, you need to consider them while
+				developing custom themes.
+			</p>
+
+			<p>
+				Compatibility issues are detailed in various CSS handbooks.
+			</p>
+		</div>
+		
+		<pre class="programlisting"></pre>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="themes.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="themes.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="themes.creating.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Chapter&nbsp;7.&nbsp;Themes&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;7.3.&nbsp;Creating and Using Themes</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

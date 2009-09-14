@@ -1,0 +1,92 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>3.5.&nbsp;Events and Listeners</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="architecture.html" title="Chapter&nbsp;3.&nbsp;Architecture"><link rel="prev" href="architecture.client-side.html" title="3.4.&nbsp;Client-Side Engine"><link rel="next" href="application.html" title="Chapter&nbsp;4.&nbsp;Writing a Web Application"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>3.5.&nbsp;Events and Listeners</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">3.5.&nbsp;Events and Listeners</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="architecture.client-side.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;3.&nbsp;Architecture</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="application.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="architecture.events"></a>3.5.&nbsp;Events and Listeners</h2></div></div></div>
+		
+
+		<p>
+			When a user does something, such as clicks a button or selects an item, the
+			application needs to know about it. Many Java-based user interface frameworks
+			follow the <span class="emphasis"><em>Observer</em></span> design pattern to communicate user
+			input to the application logic. So does Vaadin. The design pattern involves
+			two kinds of elements: an object and a number of observers that listen for
+			events regarding the object. When an event related to the object occurs, the
+			observers receive a notification regarding the event. In most cases there is
+			only one observer, defined in the application logic, but the pattern allows
+			for multiple observers. As in the event-listener framework of Java SE, we call
+			the observing objects <span class="emphasis"><em>listeners</em></span>.
+		</p>
+
+		<p>
+			In the ancient times of C programming, <span class="emphasis"><em>callback functions</em></span>
+			filled largely the same need as listeners do now. In object-oriented
+			languages, we have only classes and methods, not functions, so the application
+			has to give a class interface instead of a callback function pointer to the
+			framework. However, Vaadin supports defining a method as a listener
+			as well.
+		</p>
+
+		<p>
+			Events can serve many kinds of purposes. In Vaadin, the
+			usual purpose of events is handling user interaction in a user interface. Session
+			management can require special events, such as time-out, in which
+			case the event is actually the lack of user interaction. Time-out is a special
+			case of timed or scheduled events, where an event occurs at a
+			specific date and time or when a set time has passed. Database and
+			other asynchronous communications can cause events too.
+		</p>
+
+		<p>
+			To receive events of a particular type, an application must include a
+			class that implements the corresponding listener interface. In small
+			applications, the application class itself could implement the needed
+			listener interfaces. Listeners are managed by the
+			<code class="classname">AbstractComponent</code> class, the base class of all
+			user interface components. This means that events regarding any
+			component can listened to. The listeners are registered in the
+			components with <code class="methodname">addListener()</code> method.
+		</p>
+
+		<p>
+			Most components that have related events define their own
+			event class and corresponding listener classes. For example, the
+			<code class="classname">Button</code> has
+			<code class="classname">Button.ClickEvent</code> events, which can be
+			listened to through the <code class="classname">Button.ClickListener</code>
+			interface. This allows an application to listen to many different
+			kinds of events and to distinguish between them at class level. This
+			is usually not enough, as applications usually have many components
+			of the same class and need to distinguish between the particular
+			components. We will look into that more closely later. The
+			purpose of this sort of class level separation is to avoid having to
+			make type conversions in the handlers.
+		</p>
+
+		<p>
+			Notice that many listener interfaces inherit the
+			<code class="classname">java.util.EventListener</code> superinterface, but it
+			is not generally necessary to inherit it.
+		</p>
+
+
+        
+		<div class="figure"><a name="figure.eventlistenerdiagram"></a><p class="title"><b>Figure&nbsp;3.3.&nbsp;Class Diagram of a Button Click Listener</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/arch/events-classdiagram.png" align="middle" alt="Class Diagram of a Button Click Listener"></div>
+		</div></div><br class="figure-break">
+
+		<p>
+			<a href="architecture.events.html#figure.eventlistenerdiagram" title="Figure&nbsp;3.3.&nbsp;Class Diagram of a Button Click Listener">Figure&nbsp;3.3, &ldquo;Class Diagram of a Button Click Listener&rdquo;</a> illustrates an example
+			where an application-specific class inherits the
+			<code class="classname">Button.ClickListener</code> interface to be able to
+			listen for button click events. The application must instantiate the
+			listener class and register it with
+			<code class="methodname">addListener()</code>. When an event occurs, an
+			event object is instantiated, in this case a
+			<code class="classname">ClickEvent</code>. The event object knows the related
+			UI component, in this case the <code class="classname">Button</code>.
+		</p>
+
+        <p>
+            <a href="application.events.html" title="4.4.&nbsp;Handling Events with Listeners">Section&nbsp;4.4, &ldquo;Handling Events with Listeners&rdquo;</a> goes into details of handling events in
+            practice.
+        </p>
+
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="architecture.client-side.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="architecture.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="application.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">3.4.&nbsp;Client-Side Engine&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Chapter&nbsp;4.&nbsp;Writing a Web Application</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

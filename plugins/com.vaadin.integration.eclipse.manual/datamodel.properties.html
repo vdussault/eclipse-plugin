@@ -1,0 +1,67 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>8.2.&nbsp;Properties</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="datamodel.html" title="Chapter&nbsp;8.&nbsp;Binding Components to Data"><link rel="prev" href="datamodel.html" title="Chapter&nbsp;8.&nbsp;Binding Components to Data"><link rel="next" href="datamodel.items.html" title="8.3.&nbsp;Holding properties in Items"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>8.2.&nbsp;Properties</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">8.2.&nbsp;Properties</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="datamodel.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;8.&nbsp;Binding Components to Data</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="datamodel.items.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="datamodel.properties"></a>8.2.&nbsp;Properties</h2></div></div></div>
+		
+
+		<p>
+			Vaadin data model is one of the core concepts in the library and the
+			<code class="classname">Property</code>-interface is the base of that model. Property
+			provides a standardized API for a single data object that can be read (get) and
+			written (set). A property is always typed, but can optionally support data type
+			conversions. The type of a property can be any Java class. Optionally,
+			properties can provide value change events for following their changes.
+		</p>
+
+		
+		<p>
+			Properties are in themselves unnamed objects.  Properties are
+			collected in an <span class="emphasis"><em>item</em></span>, which associates the properties with
+			names, the <span class="emphasis"><em>Property Identifiers</em></span> or <span class="emphasis"><em>PID</em></span>s.
+			Items can be contained in containers and are identified with <span class="emphasis"><em>Item
+			Identifiers</em></span> or <span class="emphasis"><em>IID</em></span>s. In the spreadsheet analogy,
+			<span class="emphasis"><em>Property Identifiers</em></span> would correspond to column names and
+			<span class="emphasis"><em>Item Identifiers</em></span> to row names. The identifiers can be arbitrary
+			objects, but should implement the <code class="methodname">equals(Object)</code> and
+			<code class="methodname">hashCode()</code> methods so that they can be used in any
+			standard Java <code class="classname">Collection</code>.
+		</p>
+
+		<p>
+			The most important function of the Property as well as other data models is to
+			connect classes implementing the interface directly to editor and viewer
+			classes. Typically this is used to connect different data sources to UI components
+			for editing and viewing their contents.
+		</p>
+
+		<p>
+			Properties can be utilized either by implementing the interface or by using some of
+			the existing property implementations. Vaadin includes
+			<code class="classname">Property</code> interface implementations for arbitrary function
+			pairs or Bean-properties as well as simple object properties.
+		</p>
+
+		<p>
+			Many of the UI components also implement Property interface and allow setting of
+			other components as their data-source. Simple UI-components that control a single
+			property (their displayed value or state) include various
+			<code class="classname">Field</code> implementations such as
+			<code class="classname">TextField</code>, <code class="classname">DateField</code> and
+			<code class="classname">Button</code> as well as the <code class="classname">Label</code>. You
+			can access this property through the <code class="classname">Property</code> interface
+			inherited by the components.
+		</p>
+
+		<p>
+			In addition to the simple components, a variety of selectable components such as
+			Select, Table and Tree have a property that contains their current selection
+			(the identifier of the selected item or a set of item identifiers).
+		</p>
+		
+		<p>
+			Components manage their <span class="emphasis"><em>property</em></span> by default using an internal
+			data source object, in which case the property is contained within the component,
+			but you can bind the the components to external data sources with the
+			<code class="methodname">setPropertyDataSource()</code> method of the
+			<code class="classname">com.vaadin.ui.AbstractField</code> class inherited by such
+			components.
+		</p>
+
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="datamodel.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="datamodel.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="datamodel.items.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Chapter&nbsp;8.&nbsp;Binding Components to Data&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;8.3.&nbsp;Holding properties in Items</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

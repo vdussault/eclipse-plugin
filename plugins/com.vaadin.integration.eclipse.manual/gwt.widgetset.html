@@ -1,0 +1,107 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>9.4.&nbsp;Defining a Widget Set</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="gwt.html" title="Chapter&nbsp;9.&nbsp;Developing Custom Components"><link rel="prev" href="gwt.integration.html" title="9.3.&nbsp;Integrating a GWT Widget"><link rel="next" href="gwt.server-side.html" title="9.5.&nbsp;Server-Side Components"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>9.4.&nbsp;Defining a Widget Set</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">9.4.&nbsp;Defining a Widget Set</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="gwt.integration.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;9.&nbsp;Developing Custom Components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="gwt.server-side.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="gwt.widgetset"></a>9.4.&nbsp;Defining a Widget Set</h2></div></div></div>
+		
+		
+		<p>
+			The client-side components, or in GWT terminology, widgets, must be made
+			usable in the client-side GWT application by defining a widget set factory
+			that can create the widgets by their UIDL tag name. (Actually, such a widget
+			set factory <span class="emphasis"><em>is</em></span> the client-side application.)
+		</p>
+
+		<p>
+			A widget set factory needs to inherit the default factory
+			<code class="classname">DefaultWidgetSet</code> and implement the
+			<code class="methodname">createWidget()</code> and
+			<code class="methodname">resolveWidgetType()</code> methods. The methods must call
+			their default implementation to allow creation of the standard widgets.
+		</p>
+
+		<p>
+			The following example shows how to define a widget set factory class for the
+			Color Picker example. The tag name of the widget was defined in the
+			server-side implementation of the widget (see <a href="gwt.integration.html#gwt.integration.example.colorpicker" title="9.3.3.&nbsp;Example: Integrating the Color Picker Widget">Section&nbsp;9.3.3, &ldquo;Example: Integrating the Color Picker Widget&rdquo;</a>) as
+			<code class="literal">colorpicker</code>. The
+			<code class="methodname">resolveWidgetType()</code> must resolve this name to the
+			class object of the <code class="classname">VColorPicker</code> integration class,
+			which is later passed to the <code class="methodname">createWidget()</code> method for
+			creating an instance of the <code class="classname">VColorPicker</code> class.
+		</p>
+
+		<pre class="programlisting">import com.vaadin.demo.colorpicker.gwt.client.ui.VColorPicker;
+import com.vaadin.terminal.gwt.client.DefaultWidgetSet;
+import com.vaadin.terminal.gwt.client.Paintable;
+import com.vaadin.terminal.gwt.client.UIDL;
+
+public class ColorPickerWidgetSet extends DefaultWidgetSet {
+    /** Resolves UIDL tag name to widget class. */
+    protected Class resolveWidgetType(UIDL uidl) {
+        final String tag = uidl.getTag();
+        if ("colorpicker".equals(tag))
+            return VColorPicker.class;
+
+        // Let the DefaultWidgetSet handle resolution of
+        // default widgets
+        return super.resolveWidgetType(uidl);
+    }
+
+    /** Creates a widget instance by its class object. */
+    public Paintable createWidget(UIDL uidl) {
+        final Class type = resolveWidgetType(uidl);
+        if (VColorPicker.class == type)
+            return new VColorPicker();
+
+        // Let the DefaultWidgetSet handle creation of
+        // default widgets
+        return super.createWidget(uidl);
+    }
+}</pre>
+
+		<p>
+			The default widgets in Vaadin actually use more than just the tag
+			name to resolve the actual widget class. For example, the
+			<code class="classname">Button</code> server-side component, which has tag name
+			<code class="literal">button</code>, can be resolved to either an
+			<code class="classname">VButton</code> or <code class="classname">VCheckBox</code> widget,
+			depending on the <em class="parameter"><code>switch</code></em>
+			(<em class="parameter"><code>switchMode</code></em>) attribute. Vaadin Client-Side
+			Engine can actually replace the client-side object of the parameters change.
+		</p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gwt.widgetset.moduledescriptor"></a>9.4.1.&nbsp;GWT Module Descriptor</h3></div></div></div>
+			
+
+			<p>
+				A widget set is actually a GWT application and needs to be defined in the
+				GWT module descriptor as the entry point of the application. A GWT module
+				descriptor is an XML file with extension <code class="filename">.gwt.xml</code>.
+			</p>
+
+			<p>
+				The following example shows the GWT module descriptor of the Color Picker
+				application. The client-side entry point will be the
+				<code class="classname">WidgetSet</code> class. We also define the default
+				stylesheet for the color picker widget, as described above in <a href="gwt.widgets.html#gwt.widgets.styling" title="9.2.3.&nbsp;Styling GWT Widgets">Section&nbsp;9.2.3, &ldquo;Styling GWT Widgets&rdquo;</a>.
+			</p>
+
+			<pre class="programlisting">&lt;module&gt;
+  &lt;!-- Inherit NoEntry version to avoid multiple entrypoints --&gt;
+  &lt;inherits
+      name="com.vaadin.terminal.gwt.DefaultWidgetSetNoEntry" /&gt; 
+    
+  &lt;!-- WidgetSet default theme --&gt;    
+  &lt;stylesheet src="colorpicker/styles.css"/&gt;
+
+  &lt;!-- Entry point --&gt;
+  &lt;entry-point
+      class="com.vaadin.demo.colorpicker.gwt.client.WidgetSet"/&gt;
+  
+&lt;/module&gt;</pre>
+
+			<p>
+				For more information about the GWT Module XML Format, please see Google
+				Web Toolkit Developer Guide.
+			</p>
+		</div>
+
+		<pre class="programlisting"></pre>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="gwt.integration.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="gwt.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="gwt.server-side.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">9.3.&nbsp;Integrating a GWT Widget&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;9.5.&nbsp;Server-Side Components</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

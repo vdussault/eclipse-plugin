@@ -1,0 +1,201 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>7.3.&nbsp;Creating and Using Themes</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="themes.html" title="Chapter&nbsp;7.&nbsp;Themes"><link rel="prev" href="themes.css.html" title="7.2.&nbsp;Introduction to Cascading Style Sheets"><link rel="next" href="datamodel.html" title="Chapter&nbsp;8.&nbsp;Binding Components to Data"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>7.3.&nbsp;Creating and Using Themes</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">7.3.&nbsp;Creating and Using Themes</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="themes.css.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;7.&nbsp;Themes</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="datamodel.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="themes.creating"></a>7.3.&nbsp;Creating and Using Themes</h2></div></div></div>
+		
+
+		<p>
+			Custom themes are placed in <code class="filename">VAADIN/themes</code> folder of the
+			web application (in the <code class="filename">WebContent</code> directory) as
+			illustrated in <a href="themes.html#figure.themes.theme-contents" title="Figure&nbsp;7.1.&nbsp;Theme Contents">Figure&nbsp;7.1, &ldquo;Theme Contents&rdquo;</a>. This location
+			is fixed. You need to have a theme folder for each theme you use in your
+			application, although applications rarely need more than a single theme. For
+			example, if you want to define a theme with the name <code class="varname">mytheme</code>,
+			you will place it in folder <code class="filename">VAADIN/themes/mytheme</code>.
+		</p>
+
+		<p>
+			A custom theme must also inherit a built-in theme, as shown in the example
+			below:
+		</p>
+
+		<pre class="programlisting">@import "../reindeer/styles.css";
+
+body {
+    background: yellow;
+}</pre>
+
+        <p>
+            Vaadin 6.0 includes two built-in themes: <code class="literal">reindeer</code> and
+            <code class="literal">runo</code>. The latter is a compatibility theme for IT Mill
+            Toolkit 5; there is no longer a "default" theme. See <a href="themes.creating.html#section.themes.default" title="Built-in Themes">the section called &ldquo;Built-in Themes&rdquo;</a> and <a href="themes.creating.html#themes.creating.inheritance" title="7.3.3.&nbsp;Theme Inheritance">Section&nbsp;7.3.3, &ldquo;Theme Inheritance&rdquo;</a> below for details on inheriting
+            themes.
+		</p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N2316B"></a>7.3.1.&nbsp;Styling Standard Components</h3></div></div></div>
+			
+
+			<p>
+				Each user interface component in Vaadin has a set of style
+				classes that you can use to control the appearance of the component. Some
+				components have additional elements that also allow styling.
+			</p>
+
+			<p>
+				The following table lists the style classes of all client-side components
+				of Vaadin. Notice that a single server-side component can have
+				multiple client-side implementations. For example, a
+				<code class="classname">Button</code> can be rendered on the client side either as
+				a regular button or a check box, depending on the
+				<em class="parameter"><code>switchMode</code></em> attribute of the button. For details
+				regarding the mapping to client-side components, see <a href="gwt.widgetset.html" title="9.4.&nbsp;Defining a Widget Set">Section&nbsp;9.4, &ldquo;Defining a Widget Set&rdquo;</a>. Each client-side component type has its own style class
+				and a number of additional classes that depend on the client-side state of
+				the component. For example, a text field will have
+				<code class="literal">v-textfield-focus</code> class when mouse pointer hovers over
+				the component. This state is purely on the client-side and is not passed
+				to the server.
+			</p>
+
+			<p>
+				Some client-side components can be shared by different server-side
+				components. There is also the
+				<code class="classname">VUnknownComponent</code>, which is a component that
+				indicates an internal error in a situation where the server asked to
+				render a component which is not available on the client-side.
+			</p>
+
+				<div class="table"><a name="N23188"></a><p class="title"><b>Table&nbsp;7.1.&nbsp;Default CSS Style Names of Vaadin Components</b></p><div class="table-contents">
+					
+					<table summary="Default CSS Style Names of Vaadin Components" border="1"><colgroup><col><col><col></colgroup><thead><tr valign="top"><th align="left" valign="top">Server-Side Component</th><th align="left" valign="top">Client-Side Widget</th><th align="left" valign="top">CSS Class Name</th></tr></thead><tbody><tr valign="top"><td rowspan="2" align="left" valign="top">Button</td><td align="left" valign="top">VButton</td><td align="left" valign="top">v-button</td></tr><tr valign="top"><td align="left" valign="top">VCheckBox</td><td align="left" valign="top">&nbsp;</td></tr><tr valign="top"><td align="left" valign="top">CustomComponent</td><td align="left" valign="top">VCustomComponent</td><td align="left" valign="top">v-customcomponent</td></tr><tr valign="top"><td align="left" valign="top">CustomLayout</td><td align="left" valign="top">VCustomLayout</td><td align="left" valign="top">&nbsp;</td></tr><tr valign="top"><td rowspan="5" align="left" valign="top">DateField</td><td align="left" valign="top">VDateField</td><td align="left" valign="top">v-datefield</td></tr><tr valign="top"><td align="left" valign="top">VCalendar</td><td align="left" valign="top">v-datefield-entrycalendar</td></tr><tr valign="top"><td align="left" valign="top">VDateFieldCalendar</td><td align="left" valign="top">v-datefield-calendar</td></tr><tr valign="top"><td align="left" valign="top">VPopupCalendar</td><td align="left" valign="top">v-datefield-calendar</td></tr><tr valign="top"><td align="left" valign="top">VTextualDate</td><td align="left" valign="top">&nbsp;</td></tr><tr valign="top"><td align="left" valign="top">Embedded</td><td align="left" valign="top">VEmbedded</td><td align="left" valign="top">-</td></tr><tr valign="top"><td align="left" valign="top">Form</td><td align="left" valign="top">VForm</td><td align="left" valign="top">v-form</td></tr><tr valign="top"><td align="left" valign="top">FormLayout</td><td align="left" valign="top">VFormLayout</td><td align="left" valign="top">-</td></tr><tr valign="top"><td align="left" valign="top">GridLayout</td><td align="left" valign="top">VGridLayout</td><td align="left" valign="top">-</td></tr><tr valign="top"><td align="left" valign="top">Label</td><td align="left" valign="top">VLabel</td><td align="left" valign="top">v-label</td></tr><tr valign="top"><td align="left" valign="top">Link</td><td align="left" valign="top">VLink</td><td align="left" valign="top">v-link</td></tr><tr valign="top"><td align="left" valign="top">OptionGroup</td><td align="left" valign="top">VOptionGroup</td><td align="left" valign="top">v-select-optiongroup</td></tr><tr valign="top"><td align="left" valign="top">HorizontalLayout</td><td align="left" valign="top">VHorizontalLayout</td><td align="left" valign="top">v-horizontallayout</td></tr><tr valign="top"><td align="left" valign="top">VerticalLayout</td><td align="left" valign="top">VVerticalLayout</td><td align="left" valign="top">v-verticallayout</td></tr><tr valign="top"><td align="left" valign="top">Panel</td><td align="left" valign="top">VPanel</td><td align="left" valign="top">v-panel (v-panel-caption, v-panel-content, v-panel-deco)</td></tr><tr valign="top"><td rowspan="3" align="left" valign="top">Select</td><td align="left" valign="top">&nbsp;</td><td align="left" valign="top">&nbsp;</td></tr><tr valign="top"><td align="left" valign="top">VListSelect</td><td align="left" valign="top">v-listselect</td></tr><tr valign="top"><td align="left" valign="top">VFilterSelect</td><td align="left" valign="top">v-filterselect</td></tr><tr valign="top"><td align="left" valign="top">Slider</td><td align="left" valign="top">VSlider</td><td align="left" valign="top">v-slider</td></tr><tr valign="top"><td rowspan="3" align="left" valign="top">SplitPanel</td><td align="left" valign="top">VSplitPanel</td><td align="left" valign="top">-</td></tr><tr valign="top"><td align="left" valign="top">VSplitPanelHorizontal</td><td align="left" valign="top">-</td></tr><tr valign="top"><td align="left" valign="top">VSplitPanelVertical</td><td align="left" valign="top">-</td></tr><tr valign="top"><td rowspan="2" align="left" valign="top">Table</td><td align="left" valign="top">VScrollTable</td><td align="left" valign="top">v-table</td></tr><tr valign="top"><td align="left" valign="top">VTablePaging</td><td align="left" valign="top">v-table (v-table-tbody)</td></tr><tr valign="top"><td align="left" valign="top">TabSheet</td><td align="left" valign="top">VTabSheet</td><td align="left" valign="top">v-tabsheet (v-tabsheet-content, v-tablsheet-tabs)</td></tr><tr valign="top"><td rowspan="3" align="left" valign="top">TextField</td><td align="left" valign="top">VTextField</td><td align="left" valign="top">v-textfield</td></tr><tr valign="top"><td align="left" valign="top">VTextArea</td><td align="left" valign="top">&nbsp;</td></tr><tr valign="top"><td align="left" valign="top">VPasswordField</td><td align="left" valign="top">&nbsp;</td></tr><tr valign="top"><td align="left" valign="top">Tree</td><td align="left" valign="top">VTree</td><td align="left" valign="top">v-tree (v-tree-node-selected)</td></tr><tr valign="top"><td align="left" valign="top">TwinColSelect</td><td align="left" valign="top">VTwinColSelect</td><td align="left" valign="top">v-select-twincol (v-select-twincol-selections, v-select-twincol-buttons, v-select-twincol-deco)</td></tr><tr valign="top"><td align="left" valign="top">Upload</td><td align="left" valign="top">VUpload</td><td align="left" valign="top">-</td></tr><tr valign="top"><td align="left" valign="top">Window</td><td align="left" valign="top">VWindow</td><td align="left" valign="top">v-window</td></tr><tr valign="top"><td align="left" valign="top">-</td><td align="left" valign="top">CalendarEntry</td><td align="left" valign="top">-</td></tr><tr valign="top"><td align="left" valign="top">-</td><td align="left" valign="top">CalendarPanel</td><td align="left" valign="top">v-datefield-calendarpanel</td></tr><tr valign="top"><td align="left" valign="top">-</td><td align="left" valign="top">ContextMenu</td><td align="left" valign="top">v-contextmenu</td></tr><tr valign="top"><td align="left" valign="top">-</td><td align="left" valign="top">VUnknownComponent</td><td align="left" valign="top">itmtk-unknown (itmtk-unknown-caption)</td></tr><tr valign="top"><td align="left" valign="top">-</td><td align="left" valign="top">VView</td><td align="left" valign="top">-</td></tr><tr valign="top"><td align="left" valign="top">-</td><td align="left" valign="top">Menubar</td><td align="left" valign="top">gwt-MenuBar</td></tr><tr valign="top"><td align="left" valign="top">-</td><td align="left" valign="top">MenuItem</td><td align="left" valign="top">gwt-MenuItem</td></tr><tr valign="top"><td align="left" valign="top">-</td><td align="left" valign="top">Time</td><td align="left" valign="top">v-datefield-time (v-select)</td></tr></tbody></table>
+			</div></div><br class="table-break">
+			
+			<p>
+				Style names of sub-components are shown in parentheses.
+			</p>
+
+			<div class="section" lang="en"><div class="titlepage"></div>
+				<div class="section" lang="en"><div class="titlepage"><div><div><h5 class="title"><a name="section.themes.default"></a>Built-in Themes</h5></div></div></div>
+					
+
+                    <p>
+                        Vaadin currently includes two built-in themes:
+                        <code class="literal">reindeer</code> and <code class="literal">runo</code>. The
+                        latter is the default theme for IT Mill Toolkit 5 (where its name is "default");
+                        the default theme in Vaadin 6.0 is <code class="literal">reindeer</code>. 
+                    </p>
+					
+					<p>
+						The built-in themes are provided in the respective
+						<code class="filename">VAADIN/themes/reindeer/styles.css</code> and
+						<code class="filename">VAADIN/themes/runo/styles.css</code> stylesheets
+						in the Vaadin library JAR. These stylesheets are compilations of
+						the separate stylesheets for each component in the corresponding
+						subdirectory. The stylesheets are compiled to a single file for
+						efficiency: the browser needs to load just a single file.
+					</p>
+					
+                    <div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Serving Built-In Themes Statically</h3>
+                        
+
+                        <p>
+                            The built-in themes included in the Vaadin library JAR are
+                            served dynamically from the JAR by the servlet. Serving a
+                            theme statically by the web server is much more efficient. You
+                            only need to extract the <code class="filename">VAADIN/</code>
+                            directory from the JAR under your
+                            <code class="filename">WebContent</code> directory. Just make sure to
+                            update it if you upgrade to a newer version of Vaadin.
+                        </p>
+                    </div>
+
+					<p>
+						Creation of a default theme for custom GWT widgets is described in
+						<a href="gwt.widgets.html#gwt.widgets.styling" title="9.2.3.&nbsp;Styling GWT Widgets">Section&nbsp;9.2.3, &ldquo;Styling GWT Widgets&rdquo;</a>.
+					</p>
+
+				</div>
+			</div>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="themes.creating.using"></a>7.3.2.&nbsp;Using Themes</h3></div></div></div>
+			
+
+			<p>
+				Using a theme is simple, you only need to set the theme with
+				<code class="methodname">setTheme()</code>.
+			</p>
+
+			<p>
+				Defining the appearance of a user interface component is fairly
+				simple. First, you create a component and add a custom style name for it
+				with <code class="methodname">addStyleName()</code>. Then you write the CSS
+				element that defines the formatting for the component.
+			</p>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="themes.creating.inheritance"></a>7.3.3.&nbsp;Theme Inheritance</h3></div></div></div>
+			
+
+			<p>
+				When you define your own theme, you will need to inherit a built-in theme
+				(unless you just copy the built-in theme).
+			</p>
+
+			<p>
+				Inheritance in CSS is done with the <code class="literal">@import</code>
+				statement. In the typical case, when you define your own theme, you
+				inherit a built-in theme as follows:
+			</p>
+
+			<pre class="programlisting">@import "../reindeer/styles.css";
+
+body {
+    background: yellow;
+}</pre>
+
+			<p>
+				You can even create a deep hierarchy of themes by inheritance. Such a
+				solution is often useful if you have some overall theme for your
+				application and a slightly modified theme for different user classes. You
+				can even make it possible for each user to have his or her own theme.
+			</p>
+
+			<p>
+				For example, let us assume that we have the base theme of an application
+				with the name <code class="classname">myapp</code> and a specific
+				<code class="classname">myapp-student</code> theme for users with the student
+				role. The stylesheet of the base theme would be located in
+				<code class="filename">themes/myapp/styles.css</code>. We can then "inherit" it in
+				<code class="filename">themes/myapp-student/styles.css</code> with a simple
+				<code class="literal">@import</code> statement:
+			</p>
+
+			<pre class="programlisting">@import "../myapp/styles.css";
+
+body {
+    background: green;
+}</pre>
+
+			<p>
+				This would make the page look just as with the base theme, except for the
+				green background. You could use the theme inheritance as follows:
+			</p>
+
+		<pre class="programlisting">public class MyApplication extends com.vaadin.Application {
+    
+    public void init() {
+        setTheme("myapp");
+        ...
+    }
+
+    public void login(User user) {
+        if (user.role == User.ROLE_STUDENT)
+            setTheme("myapp-student");
+        ...
+    }
+
+    public void logout() {
+        setTheme("myapp");
+        ...
+    }
+}</pre>
+
+		</div>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="themes.css.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="themes.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="datamodel.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">7.2.&nbsp;Introduction to Cascading Style Sheets&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Chapter&nbsp;8.&nbsp;Binding Components to Data</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

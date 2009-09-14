@@ -1,0 +1,22 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>3.3.&nbsp;Applications as Java Servlet Sessions</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="architecture.html" title="Chapter&nbsp;3.&nbsp;Architecture"><link rel="prev" href="architecture.technology.html" title="3.2.&nbsp;Technological Background"><link rel="next" href="architecture.client-side.html" title="3.4.&nbsp;Client-Side Engine"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>3.3.&nbsp;Applications as Java Servlet Sessions</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">3.3.&nbsp;Applications as Java Servlet Sessions</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="architecture.technology.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;3.&nbsp;Architecture</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="architecture.client-side.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="architecture.server-side"></a>3.3.&nbsp;Applications as Java Servlet Sessions</h2></div></div></div>
+		
+
+		<p>
+			Vaadin framework does basically everything it does on top of the Java
+			Servlet API, which lies hidden deep under the hood, with the terminal adapter
+			being the lowest level layer for handling requests from the web
+			container.
+        </p>
+
+        <p>
+            When the web container gets the first request for a URL registered for an
+            application, it creates an instance of the
+            <code class="classname">ApplicationServlet</code> class in Vaadin framework
+            that inherits the <code class="classname">HttpApplet</code> class defined in Java
+            Servlet API. It follows sessions by using <code class="classname">HttpSession</code>
+            interface and associates an <code class="classname">Application</code> instance with
+            each session. During the lifetime of a session, the framework relays user
+            actions to the proper application instance, and further to a user interface
+            component.
+		</p>
+    </div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="architecture.technology.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="architecture.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="architecture.client-side.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">3.2.&nbsp;Technological Background&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;3.4.&nbsp;Client-Side Engine</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

@@ -1,0 +1,97 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>6.5.&nbsp;FormLayout</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="layout.html" title="Chapter&nbsp;6.&nbsp;Managing Layout"><link rel="prev" href="layout.components.gridlayout.html" title="6.4.&nbsp;GridLayout"><link rel="next" href="layout.components.panel.html" title="6.6.&nbsp;Panel"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>6.5.&nbsp;FormLayout</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">6.5.&nbsp;<code class="classname">FormLayout</code></th></tr><tr><td align="left" width="20%"><a accesskey="p" href="layout.components.gridlayout.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;6.&nbsp;Managing Layout</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="layout.components.panel.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="layout.components.formlayout"></a>6.5.&nbsp;<code class="classname">FormLayout</code></h2></div></div></div>
+        
+        
+        <p>
+            <code class="classname">FormLayout</code> is the default layout of a
+            <code class="classname">Form</code> component. It lays the form fields and their
+            captions out in two columns, with optional indicators for required fields and
+            errors that can be shown for each field.
+        </p>
+
+        <p>
+            A <code class="classname">Form</code> handles additional layout elements
+            itself, including a caption, a form description, a form error indicator,
+            a footer that is often used for buttons and a border. For more
+            information on these, see <a href="components.form.html" title="5.16.&nbsp;Form">Section&nbsp;5.16, &ldquo;<code class="classname">Form</code>&rdquo;</a>.
+        </p>
+
+        <p>
+            The field captions can have an icon in addition to the text.
+        </p>
+
+        <pre class="programlisting">// A FormLayout used outside the context of a Form
+FormLayout fl = new FormLayout();
+
+// Make the FormLayout shrink to its contents 
+fl.setSizeUndefined();
+
+TextField tf = new TextField("A Field");
+fl.addComponent(tf);
+
+// Mark the first field as required
+tf.setRequired(true);
+tf.setRequiredError("The Field may not be empty.");
+
+TextField tf2 = new TextField("Another Field");
+fl.addComponent(tf2);
+
+// Set the second field straing to error state with a message.
+tf2.setComponentError(
+    new UserError("This is the error indicator of a Field."));</pre>
+
+        <p>
+            The resulting layout will look as follows. The error message shows in a
+            tooptip when you hover the mouse pointer over the error indicator.
+        </p>
+        
+        <div class="figure"><a name="figure.layout.formlayout"></a><p class="title"><b>Figure&nbsp;6.5.&nbsp;A <code class="classname">FormLayout</code> Layout for Forms</b></p><div class="figure-contents">
+            
+            <div class="mediaobject" align="center"><img src="img/layout/formlayout-example1.png" align="middle" alt="A FormLayout Layout for Forms"></div>
+        </div></div><br class="figure-break">	
+
+        <div class="simplesect" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N2290E"></a>CSS Style Rules</h3></div></div></div>
+            
+
+                        
+            <pre class="programlisting">.v-formlayout {}
+.v-formlayout .v-caption {}
+
+/* Columns in a field row. */
+.v-formlayout-contentcell {} /* Field content. */
+.v-formlayout-captioncell {} /* Field caption. */
+.v-formlayout-errorcell {}   /* Field error indicator. */
+
+/* Overall style of field rows. */
+.v-formlayout-row {}
+.v-formlayout-firstrow {}
+.v-formlayout-lastrow {}
+
+/* Required field indicator. */
+.v-formlayout .v-required-field-indicator {}
+.v-formlayout-captioncell .v-caption
+        .v-required-field-indicator {}
+
+/* Error indicator. */
+.v-formlayout-cell .v-errorindicator {}
+.v-formlayout-error-indicator .v-errorindicator {}</pre>
+
+            
+
+            <p>
+                The top-level element of <code class="classname">FormLayout</code> has the
+                <code class="literal">v-formlayout</code> style. The layout is tabular with three
+                columns: the caption column, the error indicator column, and the field
+                column. These can be styled with
+                <code class="literal">v-formlayout-captioncell</code>,
+                <code class="literal">v-formlayout-errorcell</code>, and
+                <code class="literal">v-formlayout-contentcell</code>, respectively. While the
+                error indicator is shown as a dedicated column, the indicator for required
+                fields is currently shown as a part of the caption column.
+            </p>
+
+            <p>
+                For information on setting margins and spacing, see also <a href="layout.settings.html#layout.settings.spacing" title="6.10.3.&nbsp;Layout Cell Spacing">Section&nbsp;6.10.3, &ldquo;Layout Cell Spacing&rdquo;</a> and <a href="layout.settings.html#layout.settings.margins" title="6.10.4.&nbsp;Layout Margins">Section&nbsp;6.10.4, &ldquo;Layout Margins&rdquo;</a>.
+            </p>
+            
+        </div>
+    </div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="layout.components.gridlayout.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="layout.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="layout.components.panel.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">6.4.&nbsp;<code class="classname">GridLayout</code>&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;6.6.&nbsp;<code class="classname">Panel</code></td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

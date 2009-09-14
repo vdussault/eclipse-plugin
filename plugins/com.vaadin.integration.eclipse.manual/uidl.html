@@ -1,0 +1,192 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Appendix&nbsp;A.&nbsp;User Interface Definition Language (UIDL)</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="index.html" title="Book of Vaadin"><link rel="prev" href="advanced.printing.html" title="10.7.&nbsp;Printing"><link rel="next" href="uidl.json.html" title="A.2.&nbsp;JSON Rendering"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>Appendix&nbsp;A.&nbsp;User Interface Definition Language (UIDL)</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Appendix&nbsp;A.&nbsp;User Interface Definition Language (UIDL)</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="advanced.printing.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="uidl.json.html">Next</a></td></tr></table><hr></div><div class="appendix" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="uidl"></a>Appendix&nbsp;A.&nbsp;User Interface Definition Language (UIDL)</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="uidl.html#uidl.painting">A.1. API for Painting Components</a></span></dt><dt><span class="section"><a href="uidl.json.html">A.2. JSON Rendering</a></span></dt></dl></div>
+	
+	
+	<p>
+		User Interface Definition Language (UIDL) is a language for serializing user
+		interface contents and changes in responses from web server to a browser. The idea
+		is that the server-side components "paint" themselves to the screen (a web page)
+		with the language. The UIDL messages are parsed in the browser and translated to
+		GWT widgets.
+	</p>
+
+	<p>
+		The UIDL is used through both server-side and client-side APIs. The server-side
+		API consists of the <code class="classname">PaintTarget</code> interface, described
+		in <a href="uidl.html#uidl.painting" title="A.1.&nbsp;API for Painting Components">Section&nbsp;A.1, &ldquo;API for Painting Components&rdquo;</a>. The client-side interface depends on
+		the implementation of the client-side engine. In Vaadin Release 5, the
+		client-side engine uses the Google Web Toolkit framework. Painting the user
+		interface with a GWT widget is described in <a href="gwt.widgets.html" title="9.2.&nbsp;Google Web Toolkit Widgets">Section&nbsp;9.2, &ldquo;Google Web Toolkit Widgets&rdquo;</a>.
+	</p>
+
+	<p>
+		UIDL supports painting either the entire user interface or just fragments of
+		it. When the application is started by opening the page in a web browser, the
+		entire user interface is painted. If a user interface component changes, only the
+		changes are painted.
+	</p>
+
+	<p>
+		Since Vaadin Release 5, the UIDL communications are currently done using JSON
+		(JavaScript Object Notation), which is a lightweight data interchange format that
+		is especially efficient for interfacing with JavaScript-based AJAX code in the
+		browser. The use of JSON as the interchange format is largely transparent; IT Mill
+		Toolkit version 4 (predecessor of Vaadin released in 2006) the older versions used
+		an XML-based UIDL representation with the same API. Nevertheless, the UIDL API
+		uses XML concepts such as attributes and elements. Below, we show examples of a
+		<code class="classname">Button</code> component in both XML and JSON notation.
+	</p>
+
+	<p>
+		With XML notation:
+	</p>
+
+	<pre class="programlisting">&lt;button id="PID2" immediate="true"
+        caption="My Button" focusid="1"&gt;
+    &lt;boolean id="v1" name="state"
+             value="false"&gt;&lt;/boolean&gt;
+&lt;/button&gt;</pre>
+
+	<p>
+		With JSON notation:
+	</p>
+
+	<pre class="programlisting">["button",
+ {"id": "PID2",
+  "immediate":true,
+  "caption": "My Button",
+  "focusid":1,
+  "v":{"state":false}
+ }
+]</pre>
+
+	<p>
+		Components are identified with a <span class="emphasis"><em>PID</em></span> or
+		<span class="emphasis"><em>paintable identifier</em></span> in the <code class="literal">id</code>
+		attribute. Each component instance has its individual PID, which is usually an
+		automatically generated string, but can be set manually with
+		<code class="methodname">setDebugId()</code> method.
+	</p>
+			
+	<p>
+		<a href="uidl.json.html" title="A.2.&nbsp;JSON Rendering">Section&nbsp;A.2, &ldquo;JSON Rendering&rdquo;</a> gives further details on JSON. For more
+		information about handling UIDL messages in the client-side components, see <a href="gwt.html" title="Chapter&nbsp;9.&nbsp;Developing Custom Components">Chapter&nbsp;9, <i xmlns:xlink="http://www.w3.org/1999/xlink">Developing Custom Components</i></a>.
+	</p>
+
+	<p>
+		You can track and debug UIDL communications easily with the Firebug extension for
+		Mozilla Firefox, as illustrated in <a href="uidl.json.html" title="A.2.&nbsp;JSON Rendering">Section&nbsp;A.2, &ldquo;JSON Rendering&rdquo;</a> below. 
+	</p>
+
+	<div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="uidl.painting"></a>A.1.&nbsp;API for Painting Components</h2></div></div></div>
+		
+		
+		<p>
+			Serialization or "painting" of user interface components from server to the
+			client-side engine running in the browser is done through the
+			<code class="classname">PaintTarget</code> interface. In Vaadin Release 5,
+			the only implementation of the interface is the
+			<code class="classname">JsonPaintTarget</code>, detailed in <a href="uidl.json.html" title="A.2.&nbsp;JSON Rendering">Section&nbsp;A.2, &ldquo;JSON Rendering&rdquo;</a> below.
+		</p>
+
+		<p>
+			The abstract <code class="classname">AbstractComponent</code> class allows easy
+			painting of user interface components by managing many basic tasks, such as
+			attributes common for all components. Components that inherit the class need
+			to implement the abstract <code class="methodname">getTag()</code> method that
+			returns the UIDL tag of the component. For example, the implementation for the
+			<code class="classname">Button</code> component is as follows:
+		</p>
+
+		<pre class="programlisting">public String getTag() {
+    return "button";
+}</pre>
+
+		<p>
+			<code class="classname">AbstractComponent</code> implements the
+			<code class="methodname">paint()</code> method of the
+			<code class="classname">Paintable</code> interface to handle basic tasks in painting,
+			and provides <code class="methodname">paintContent()</code> method for components to
+			paint their special contents. The method gets the
+			<code class="classname">PaintTarget</code> interface as its parameter. The method
+			should call the default implementation to paint any common attributes.
+		</p>
+
+		<pre class="programlisting">/* Paint (serialize) the component for the client. */
+public void paintContent(PaintTarget target)
+                throws PaintException {
+    // Superclass writes any common attributes in
+    // the paint target.
+    super.paintContent(target);
+    
+    // Set any values as variables of the paint target.
+    target.addVariable(this, "colorname", getColor());
+}</pre>
+
+		<p>
+			Serialized data can be attributes or variables, serialized with the
+			<code class="methodname">addAttribute()</code> and
+			<code class="methodname">addVariable()</code> methods, respectively. You must always
+			serialize the attributes first and the variables only after that.
+		</p>
+
+		<p>
+			The API provides a number of variations of the methods for serializing
+			different basic data types. The methods support the native Java data types and
+			strings of the <code class="classname">String</code>
+			class. <code class="methodname">addVariable()</code> also supports vectors of
+			strings.
+		</p>
+
+		<p>
+			Contained components are serialized by calling the
+			<code class="methodname">paint()</code> method of a sub-component, which will call
+			the <code class="methodname">paintContent()</code> for the sub-component, allowing
+			the serialization of user interfaces recursively. The
+			<code class="methodname">paint()</code> method is declared in the server-side
+			<code class="classname">Paintable</code> interface and implemented in the abstract
+			base classes, <code class="classname">AbstractComponent</code> and
+			<code class="classname">AbstractComponentContainer</code> (for layouts).
+		</p>
+
+		<p>
+			Layout components have to serialize the essential attributes and variables
+			they need, but not the contained components. The
+			<code class="classname">AbstractComponentContainer</code> and
+			<code class="classname">AbstractLayout</code> baseclasses manage the recursive
+			painting of all the contained components in layouts.
+		</p>
+
+		<p>
+			The <code class="classname">AbstractField</code> provides an even higher-level base
+			class for user interface components. The field components hold a value or a
+			<span class="emphasis"><em>property</em></span>, and implement the
+			<code class="classname">Property</code> interface to access this property. For example
+			the property of a <code class="classname">Button</code> is a
+			<code class="classname">Boolean</code> value.
+		</p>
+
+		<pre class="programlisting">public void paintContent(PaintTarget target)
+                 throws PaintException {
+    super.paintContent(target);
+
+    // Serialize the switchMode as an attribute
+    if (isSwitchMode())
+        target.addAttribute("type", "switch");
+
+    // Get the state of the Button safely
+    boolean state;
+    try {
+        state = ((Boolean) getValue()).booleanValue();
+    } catch (NullPointerException e) {
+        state = false;
+    }
+    target.addVariable(this, "state", state);
+
+}</pre>
+
+	</div>
+
+	
+
+    
+</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="advanced.printing.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;<a accesskey="n" href="uidl.json.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">10.7.&nbsp;Printing&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;A.2.&nbsp;JSON Rendering</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

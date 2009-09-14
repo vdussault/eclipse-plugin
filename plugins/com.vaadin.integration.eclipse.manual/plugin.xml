@@ -1,0 +1,1 @@
+<plugin provider-name="IT Mill" version="6.0.0.v200905291138" id="com.vaadin.manual" name="Book of Vaadin"><extension point="org.eclipse.help.toc"><toc primary="true" file="toc.xml"></toc></extension></plugin>

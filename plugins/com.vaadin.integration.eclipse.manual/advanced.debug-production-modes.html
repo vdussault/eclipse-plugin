@@ -1,0 +1,166 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>10.4.&nbsp;Debug and Production Mode</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="advanced.html" title="Chapter&nbsp;10.&nbsp;Advanced Web Application Topics"><link rel="prev" href="application.embedding.html" title="10.3.&nbsp;Embedding Applications in Web Pages"><link rel="next" href="advanced.resources.html" title="10.5.&nbsp;Resources"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>10.4.&nbsp;Debug and Production Mode</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">10.4.&nbsp;Debug and Production Mode</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="application.embedding.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;10.&nbsp;Advanced Web Application Topics</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="advanced.resources.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="advanced.debug-production-modes"></a>10.4.&nbsp;Debug and Production Mode</h2></div></div></div>
+		
+
+		<p>
+			Vaadin applications can be run in two modes: <span class="emphasis"><em>debug
+			mode</em></span> and <span class="emphasis"><em>production mode</em></span>. The debug mode,
+			which is on by default, enables a number of built-in debug features for the
+			developers. The features include:
+		</p>
+
+		<div class="itemizedlist"><ul type="disc"><li>Debug Window for accessing debug functionalities</li><li>Display debug information in the Debug Window and server console.</li><li><span class="guibutton">Analyze layouting</span> button that analyzes the layout for possible problems.</li></ul></div>
+
+		<p>
+			All applications are run in the debug mode by default (since IT Mill Toolkit
+			version 5.3.0). The production mode can be enabled, and debug mode thereby
+			disabled, by adding a <em class="parameter"><code>productionMode=true</code></em> parameter to
+			the servlet context in the <code class="filename">web.xml</code> deployment descriptor:
+		</p>
+
+		<pre class="programlisting">&lt;context-param&gt;
+  &lt;param-name&gt;productionMode&lt;/param-name&gt;
+  &lt;param-value&gt;true&lt;/param-value&gt;
+  &lt;description&gt;Vaadin production mode&lt;/description&gt;
+&lt;/context-param&gt;</pre>
+		
+		<p>
+			Enabling the production mode disables the debug features, thereby preventing
+			users from easily inspecting the inner workings of the application from the
+			browser.
+		</p>
+		
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="advanced.debug-production-modes.debug.mode"></a>10.4.1.&nbsp;Debug Mode</h3></div></div></div>
+			
+			
+			<p>
+				Running an application in the debug mode enables the client-side Debug
+				Window in the browser. You can open the Debug Window by adding
+				"<code class="uri">?debug</code>" to the application URL, e.g.,
+				<code class="uri">http://localhost:8080/myapp/?debug</code>. The Debug Window, shown in
+				<a href="advanced.debug-production-modes.html#figure.debug.window" title="Figure&nbsp;10.7.&nbsp;Debug Window">Figure&nbsp;10.7, &ldquo;Debug Window&rdquo;</a>, consists of buttons controlling the
+				debugging features and a scrollable log of debug messages.
+			</p>
+
+			<div class="figure"><a name="figure.debug.window"></a><p class="title"><b>Figure&nbsp;10.7.&nbsp;Debug Window</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/debug/debug-window.png" align="middle" alt="Debug Window"></div>
+			</div></div><br class="figure-break">
+
+			<div class="variablelist"><dl><dt><span class="term"><span class="guibutton">Clear console</span></span></dt><dd>
+						Clears the log in the Debug Window.
+					</dd><dt><span class="term"><span class="guibutton">Restart app</span></span></dt><dd>
+						Restarts the application.
+					</dd><dt><span class="term"><span class="guibutton">Force layout</span></span></dt><dd>
+						Causes all currently visible layouts to recalculate their
+						appearance. Layout components calculate the space required by all
+						child components, so the layout appearance must be recalculated
+						whenever the size of a child component is changed. In normal
+						applications, this is done automatically, but when you do themeing
+						or alter the CSS with Firebug, you may need to force all layouts
+						to recalculate themselves, taking into account the recently made
+						changes.
+					</dd><dt><span class="term"><span class="guibutton">Analyze layouts</span></span></dt><dd>
+						This is described in the following section.
+					</dd></dl></div>
+
+			<p>
+				If you use the Firebug plugin in Mozilla Firefox, the log messages will
+				also be printed to the Firebug console. In such a case, you may want to
+				enable client-side debugging without showing the Debug Window with
+				"<code class="uri">?debug=quiet</code>" in the URL. In the quiet debug mode, log
+				messages will only be printed to the Firebug console.
+			</p>
+		</div>
+
+ 		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N2435C"></a>10.4.2.&nbsp;Analyzing Layouts</h3></div></div></div>
+			
+			<p>
+				The <span class="guilabel">Analyze layouts</span> button analyzes the currently
+				visible layouts and makes a report of possible layout related
+				problems. All detected layout problems are displayed in the log and also
+				printed to the console.
+			</p>
+
+			<p>
+				The most common layout problem is caused by placing a component that has a
+				relative size inside a container (layout) that has undefined size, e.g.,
+				adding a 100% wide <code class="classname">Panel</code> inside a
+				<code class="classname">HorizontalLayout</code> with no width specification. In
+				such a case, the error will look as shown below:
+			</p>
+
+			<pre class="programlisting">Vaadin DEBUG
+- Window/1a8bd74 "My window" (width: MAIN WINDOW)
+  - HorizontalLayout/1cf243b (width: UNDEFINED)
+    - Panel/12e43f1 "My panel" (width: RELATIVE, 100.0 %)
+Layout problem detected: Component with relative width inside a HorizontalLayout with no width defined
+Relative sizes were replaced by undefined sizes, components may not render as expected.
+			</pre>
+			
+			<p>
+				This particular error tells that the <code class="classname">Panel</code> "My
+				panel" is 100% wide while the width of the containing
+				<code class="classname">HorizontalLayout</code> is undefined. The components will
+				be rendered as if the the width of the contained
+				<code class="classname">Panel</code> was undefined, which might not be what the
+				developer wanted. There are two possible fixes for this case: if the
+				<code class="classname">Panel</code> should fill the main window horizontally, set
+				a width for the <code class="classname">HorizontalLayout</code> (e.g. 100% wide),
+				or set the width of the <code class="classname">Panel</code> to "undefined" to
+				render the it as it is currently rendered but avoiding the warning
+				message.
+			</p>
+
+			<p>
+				The same error is shown in the Debug Window in a slightly different form
+				and with an additional feature (see <a href="advanced.debug-production-modes.html#figure.debug-window.analyze-layouts" title="Figure&nbsp;10.8.&nbsp;Debug Window Showing the Result of Analyze layouts.">Figure&nbsp;10.8, &ldquo;Debug Window Showing the Result of <span class="guilabel">Analyze layouts</span>.&rdquo;</a>). Checking the
+				<span class="guilabel">Emphasize component in UI</span> box will turn red the
+				background of the component that caused a warning, making it easy for
+				the developer to figure out which component each warning relates to. The
+				messages will also be displayed hierarchically, as a warning from a
+				containing component often causes more warnings from its child
+				components. A good rule of thumb is to work on the upper-level problems
+				first and only after that worry about the warnings from the children.
+			</p>
+			
+			<div class="figure"><a name="figure.debug-window.analyze-layouts"></a><p class="title"><b>Figure&nbsp;10.8.&nbsp;Debug Window Showing the Result of <span class="guilabel">Analyze layouts</span>.</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/debug/debug-window-analyze-layouts.png" align="middle" alt="Debug Window Showing the Result of Analyze layouts."></div>
+			</div></div><br class="figure-break">
+						
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N243B1"></a>10.4.3.&nbsp;Custom Layouts</h3></div></div></div>
+			
+
+			<p>
+				<code class="classname">CustomLayout</code> components can not be analyzed in the
+				same way as other layouts. For custom layouts, the <span class="guibutton">Analyze
+				layouts</span> button analyzes all contained relative-sized
+				components and checks if any relative dimension is calculated to zero so
+				that the component will be invisible. The error log will display a warning
+				for each of these invisible components. It would not be meaningful to
+				emphasize the component itself as it is not visible, so when you select
+				such an error, the parent layout of the component is emphasized if
+				possible.
+			</p>
+
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N243C0"></a>10.4.4.&nbsp;Debug Functions for Component Developers</h3></div></div></div>
+			
+
+			<p>
+				You can take advantage of the debug mode when developing client-side
+				components. The static function
+				<code class="methodname">ApplicationConnection.getConsole()</code> will return a
+				reference to a <code class="classname">Console</code> object which contains
+				logging methods such as <code class="methodname">log(String msg)</code> and
+				<code class="methodname">error(String msg)</code>.  These functions will print
+				messages to the Debug Window and Firebug console in the same way as other
+				debugging functionalities of Vaadin do. No messages will be
+				printed if the Debug Window is not open or if the application is running
+				in production mode.
+			</p>
+		</div>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="application.embedding.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="advanced.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="advanced.resources.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">10.3.&nbsp;Embedding Applications in Web Pages&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;10.5.&nbsp;Resources</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

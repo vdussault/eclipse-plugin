@@ -1,0 +1,117 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>6.6.&nbsp;Panel</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="layout.html" title="Chapter&nbsp;6.&nbsp;Managing Layout"><link rel="prev" href="layout.components.formlayout.html" title="6.5.&nbsp;FormLayout"><link rel="next" href="layout.components.splitpanel.html" title="6.7.&nbsp;SplitPanel"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>6.6.&nbsp;Panel</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">6.6.&nbsp;<code class="classname">Panel</code></th></tr><tr><td align="left" width="20%"><a accesskey="p" href="layout.components.formlayout.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;6.&nbsp;Managing Layout</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="layout.components.splitpanel.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="layout.components.panel"></a>6.6.&nbsp;<code class="classname">Panel</code></h2></div></div></div>
+        
+
+        <p>
+            <code class="classname">Panel</code> is a simple container with a frame and an
+            optional caption. The content area is bound to a an inner layout component for
+            laying out the contained components. The default content layout is a
+            <code class="classname">VerticalLayout</code>, but you can change it with the
+            <code class="methodname">setContent()</code> method to be any class implementing the
+            <code class="classname">ComponentContainer</code> interface.
+        </p>
+
+        <p>
+            The caption can have an icon in addition to the text.
+        </p>
+
+        <pre class="programlisting">// Create a panel with a caption.
+final Panel panel = new Panel("Contact Information");
+panel.addStyleName("panelexample");
+
+// The width of a Panel is 100% by default, make it
+// shrink to fit the contents.
+panel.setWidth(Sizeable.SIZE_UNDEFINED, 0);
+
+// Create a layout inside the panel
+final FormLayout form = new FormLayout();
+
+// Have some margin around it.
+form.setMargin(true);
+
+// Add some components
+form.addComponent(new TextField("Name"));
+form.addComponent(new TextField("Email"));
+
+// Set the layout as the root layout of the panel
+panel.setContent(form);</pre>
+
+        <p>
+            The resulting layout will look as follows.
+        </p>
+        
+        <div class="figure"><a name="figure.layout.panel"></a><p class="title"><b>Figure&nbsp;6.6.&nbsp;A <code class="classname">Panel</code> Layout</b></p><div class="figure-contents">
+            
+            <div class="mediaobject" align="center"><img src="img/layout/panel.png" align="middle" alt="A Panel Layout"></div>
+        </div></div><br class="figure-break">	
+
+        <p>
+			See <a href="layout.root-layout.html" title="6.2.&nbsp;Window and Panel Root Layout">Section&nbsp;6.2, &ldquo;Window and Panel Root Layout&rdquo;</a> for more information about setting
+			the content layout.
+		</p>
+
+        <div class="simplesect" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N22972"></a>CSS Style Rules</h3></div></div></div>
+            
+            
+            <pre class="programlisting">.v-panel {}
+.v-panel-caption {}
+.v-panel-nocaption {}
+.v-panel-content {}
+.v-panel-deco {}</pre>
+
+            <p>
+                The entire panel has <code class="literal">v-panel</code> style. A panel
+                consists of three parts: the caption, content, and bottom decorations
+                (shadow). These can be styled with <code class="literal">v-panel-caption</code>,
+                <code class="literal">v-panel-content</code>, and
+                <code class="literal">v-panel-deco</code>, respectively. If the panel has no
+                caption, the caption element will have the style
+                <code class="literal">v-panel-nocaption</code>.
+            </p>
+            
+            <p>
+                The built-in <span class="emphasis"><em>light</em></span> style has no borders or border
+                decorations for the <code class="classname">Panel</code>. You enable it simply by
+                adding the <code class="literal">light</code> style name for the panel, as is done
+                in the example below.
+            </p>
+
+            <pre class="programlisting">// Have a window with a SplitPanel.
+final Window window = new Window("Window with a Light Panel");
+window.setWidth("400px");
+window.setHeight("200px");
+final SplitPanel splitter = new SplitPanel(SplitPanel.ORIENTATION_HORIZONTAL);
+window.setContent(splitter);
+
+// Create a panel with a caption.
+final Panel light = new Panel("Light Panel");
+light.setSizeFull();
+
+// The "light" style is a predefined style without borders.
+light.addStyleName("light");
+
+light.addComponent(new Label("The light Panel has no borders."));
+light.getLayout().setMargin(true);
+
+// The Panel will act as a "caption" of the left panel in SplitPanel.
+splitter.addComponent(light);
+splitter.setSplitPosition(250, Sizeable.UNITS_PIXELS);
+
+main.addWindow(window);</pre>
+
+			<p>
+				<a href="layout.components.panel.html#figure.layout.panel.light" title="Figure&nbsp;6.7.&nbsp;A Panel with Light Style">Figure&nbsp;6.7, &ldquo;A <code class="classname">Panel</code> with Light Style&rdquo;</a> shows the rendered
+				<code class="classname">Panel</code>.
+			</p>
+
+			<div class="figure"><a name="figure.layout.panel.light"></a><p class="title"><b>Figure&nbsp;6.7.&nbsp;A <code class="classname">Panel</code> with Light Style</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/layout/panel-light.png" align="middle" alt="A Panel with Light Style"></div>
+			</div></div><br class="figure-break">	
+            
+            <p>
+                The <span class="emphasis"><em>light</em></span> style is typical when using a
+                <code class="classname">Panel</code> as the root layout of a window or some
+                similar layout, as in the example above.
+            </p>
+        </div>
+    </div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="layout.components.formlayout.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="layout.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="layout.components.splitpanel.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">6.5.&nbsp;<code class="classname">FormLayout</code>&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;6.7.&nbsp;<code class="classname">SplitPanel</code></td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

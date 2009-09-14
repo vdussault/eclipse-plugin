@@ -1,0 +1,157 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Chapter&nbsp;4.&nbsp;Writing a Web Application</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="index.html" title="Book of Vaadin"><link rel="prev" href="architecture.events.html" title="3.5.&nbsp;Events and Listeners"><link rel="next" href="application.main-window.html" title="4.2.&nbsp;Managing the Main Window"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>Chapter&nbsp;4.&nbsp;Writing a Web Application</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Chapter&nbsp;4.&nbsp;Writing a Web Application</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="architecture.events.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="application.main-window.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="application"></a>Chapter&nbsp;4.&nbsp;Writing a Web Application</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="application.html#application.overview">4.1. Overview</a></span></dt><dt><span class="section"><a href="application.main-window.html">4.2. Managing the Main Window</a></span></dt><dt><span class="section"><a href="application.child-windows.html">4.3. Child Windows</a></span></dt><dd><dl><dt><span class="section"><a href="application.child-windows.html#application.child-window.openclose">4.3.1. Opening and Closing a Child Window</a></span></dt><dt><span class="section"><a href="application.child-windows.html#application.child-window.position">4.3.2. Window Positioning</a></span></dt><dt><span class="section"><a href="application.child-windows.html#application.child-windows.modal">4.3.3. Modal Windows</a></span></dt></dl></dd><dt><span class="section"><a href="application.events.html">4.4. Handling Events with Listeners</a></span></dt><dt><span class="section"><a href="application.resources.html">4.5. Referencing Resources</a></span></dt><dd><dl><dt><span class="section"><a href="application.resources.html#application.resources.api">4.5.1. Resource Interfaces and Classes</a></span></dt><dt><span class="section"><a href="application.resources.html#N210D8">4.5.2. File Resources</a></span></dt><dt><span class="section"><a href="application.resources.html#N210E9">4.5.3. Class Loader Resources</a></span></dt><dt><span class="section"><a href="application.resources.html#application.resources.theme">4.5.4. Theme Resources</a></span></dt><dt><span class="section"><a href="application.resources.html#application.resources.stream">4.5.5. Stream Resources</a></span></dt></dl></dd><dt><span class="section"><a href="application.close.html">4.6. Shutting Down an Application</a></span></dt><dd><dl><dt><span class="section"><a href="application.close.html#N21187">4.6.1. Closing an Application</a></span></dt><dt><span class="section"><a href="application.close.html#N211AD">4.6.2. Handling the Closing of a Window</a></span></dt></dl></dd><dt><span class="section"><a href="application.errors.html">4.7. Handling Errors</a></span></dt><dd><dl><dt><span class="section"><a href="application.errors.html#application.errors.error-indicator">4.7.1. Error Indicator and message</a></span></dt><dt><span class="section"><a href="application.errors.html#application.errors.notifications">4.7.2. Notifications</a></span></dt><dt><span class="section"><a href="application.errors.html#application.errors.unchecked-exceptions">4.7.3. Handling Uncaught Exceptions </a></span></dt></dl></dd><dt><span class="section"><a href="application.environment.html">4.8. Setting Up the Application Environment</a></span></dt><dd><dl><dt><span class="section"><a href="application.environment.html#N213DC">4.8.1. Creating Deployable WAR in Eclipse</a></span></dt><dt><span class="section"><a href="application.environment.html#N213F4">4.8.2. Web Application Contents</a></span></dt><dt><span class="section"><a href="application.environment.html#section.web.web-xml">4.8.3. Deployment Descriptor <code class="filename">web.xml</code></a></span></dt></dl></dd></dl></div>
+	
+
+    
+
+	<p>
+        This chapter provides the fundamentals of web application development with Vaadin,
+        concentrating on the basic elements of an application from a practical
+        point-of-view.
+	</p>
+
+	<p>
+		If you are a newcomer to AJAX development, you may benefit from <a href="advanced.html#advanced.application.pages" title="10.1.&nbsp;Special Characteristics of AJAX Applications">Section&nbsp;10.1, &ldquo;Special Characteristics of AJAX Applications&rdquo;</a>. It explains the role of pages in AJAX web
+		applications, and provides some basic design patterns for applications.
+	</p>
+
+	<div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="application.overview"></a>4.1.&nbsp;Overview</h2></div></div></div>
+		
+
+		<p>
+			An application made with Vaadin runs as a Java Servlet in a Servlet
+			container. The entry-point is the application class, which needs to create and
+			manage all necessary user interface components, including windows. User
+			interaction is handled with event listeners, simplified by binding user
+			interface components directly to data. Visual appearance is defined in themes
+			as CSS files. Icons, other images, and downloadable files are handled as
+			<span class="emphasis"><em>resources</em></span>, which can be external or served by the
+			application server or the application itself.
+		</p>
+		
+		<div class="figure"><a name="figure.application.architecture"></a><p class="title"><b>Figure&nbsp;4.1.&nbsp;Application Architecture</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/application/application-architecture-lo.png" align="middle" alt="Application Architecture"></div>
+		</div></div><br class="figure-break">
+
+		<p>
+			<a href="application.html#figure.application.architecture" title="Figure&nbsp;4.1.&nbsp;Application Architecture">Figure&nbsp;4.1, &ldquo;Application Architecture&rdquo;</a> above gives the basic
+			architecture of an application made with the Vaadin framework, with
+			all the major elements, which are introduced below and discussed in detail in
+			this chapter.
+		</p>
+
+		<p>
+			First of all, an application that uses Vaadin must define an
+			application class that inherits the abstract
+			<code class="classname">com.vaadin.Application</code> class.  The application
+			class must implement the <code class="methodname">init()</code> method.
+		</p>
+		
+		<pre class="programlisting">public class MyApp extends com.vaadin.Application {
+
+    public void init() { 
+        ... initialization code goes here ...
+    }
+}</pre>
+
+		<p>
+			Besides acting as the entry-point in the servlet, the
+			<code class="classname">Application</code> class provides facilities for window
+			access, execution control, and theme selection. The application API may seem
+			similar to Java Servlet API, but that is only superficial. Vaadin
+			framework associates requests with sessions so that an application class
+			instance is really a session object.  Because of this, you can develop web
+			applications much like you would develop desktop applications.
+		</p>
+		
+		<p>
+			The most important thing in the initialization is the creation of the main
+			window (see below), which any application has. This, and the deployment of the
+			application as a Java Servlet in the Servlet container, as described in <a href="application.environment.html" title="4.8.&nbsp;Setting Up the Application Environment">Section&nbsp;4.8, &ldquo;Setting Up the Application Environment&rdquo;</a>, are the minimal requirements for an
+			application.
+		</p>
+
+		<p>
+			Below is a short overview of the basic elements of an application:
+		</p>
+
+		<div class="variablelist"><dl><dt><span class="term">Windows</span></dt><dd>
+					<p>
+						An application always has a <span class="emphasis"><em>main window</em></span>, as
+						described in <a href="application.main-window.html" title="4.2.&nbsp;Managing the Main Window">Section&nbsp;4.2, &ldquo;Managing the Main Window&rdquo;</a>. An
+						application can actually have a number of such application-level
+						windows, all bound to the same application session, as described
+						in <a href="application.windows.html" title="10.2.&nbsp;Application-Level Windows">Section&nbsp;10.2, &ldquo;Application-Level Windows&rdquo;</a>. Application-level
+						windows can contain non-native sub-windows, which are essentially
+						floating layout components handled inside the browser.
+					</p>
+				</dd><dt><span class="term">User Interface Components</span></dt><dd>
+					<p>
+						The user interface consists of UI components that are created and
+						laid out by the application. User interaction with the components
+						causes events (see below) related to the component, which the
+						application must handle. Most components are bound to some data
+						using the Data Model (see below). You can make your own UI
+						components through either inheritance or composition. For a
+						thorough reference of UI components, see <a href="components.html" title="Chapter&nbsp;5.&nbsp;User Interface Components">Chapter&nbsp;5, <i xmlns:xlink="http://www.w3.org/1999/xlink">User Interface Components</i></a>, for layout components, see <a href="layout.html" title="Chapter&nbsp;6.&nbsp;Managing Layout">Chapter&nbsp;6, <i xmlns:xlink="http://www.w3.org/1999/xlink">Managing Layout</i></a>, and for composing components, see <a href="components.customcomponent.html" title="5.18.&nbsp;Component Composition with CustomComponent">Section&nbsp;5.18, &ldquo;Component Composition with <code class="classname">CustomComponent</code>&rdquo;</a>.
+					</p>
+				</dd><dt><span class="term">Events and Listeners</span></dt><dd>
+					<p>
+                        Events, and listeners that handle events, are the basis of
+                        handling user interaction in an application. <a href="architecture.events.html" title="3.5.&nbsp;Events and Listeners">Section&nbsp;3.5, &ldquo;Events and Listeners&rdquo;</a> gave an introduction to events and
+                        listeners from an architectural point-of-view, while <a href="application.events.html" title="4.4.&nbsp;Handling Events with Listeners">Section&nbsp;4.4, &ldquo;Handling Events with Listeners&rdquo;</a> later in this chapter takes a more
+                        practical view.
+                    </p>
+                </dd><dt><span class="term">Resources</span></dt><dd>
+					<p>
+						A user interface can display images or have links to web pages or
+						downloadable documents. These are <span class="emphasis"><em>resources</em></span>,
+						which can be external or provided by the web server or the
+						application itself. <a href="application.resources.html" title="4.5.&nbsp;Referencing Resources">Section&nbsp;4.5, &ldquo;Referencing Resources&rdquo;</a> gives
+						a practical overview of the different types of resources.
+					</p>
+				</dd><dt><span class="term">Themes</span></dt><dd>
+					<p>
+						The presentation and logic of the user interface are
+						separated. While the UI logic is handled as Java code, the
+						presentation is defined in <span class="emphasis"><em>themes</em></span> as
+						CSS. Vaadin provides a default theme. User-defined themes can, in
+						addition to style sheets, include HTML templates that define
+						custom layouts and other theme resources, such as images. Themes
+						are discussed in detail in <a href="themes.html" title="Chapter&nbsp;7.&nbsp;Themes">Chapter&nbsp;7, <i xmlns:xlink="http://www.w3.org/1999/xlink">Themes</i></a>, custom
+						layouts in <a href="layout.customlayout.html" title="6.11.&nbsp;Custom Layouts">Section&nbsp;6.11, &ldquo;Custom Layouts&rdquo;</a>, and theme
+						resources in <a href="application.resources.html#application.resources.theme" title="4.5.4.&nbsp;Theme Resources">Section&nbsp;4.5.4, &ldquo;Theme Resources&rdquo;</a>.
+					</p>
+				</dd><dt><span class="term">Data Binding</span></dt><dd>
+					<p>
+						Field components are essentially views to data, represented in a
+						<span class="emphasis"><em>data model</em></span>. Using the data model, the
+						components can update the application data directly, without the
+						need for any control code. A field component model is always bound
+						to a <span class="emphasis"><em>property</em></span>, an <span class="emphasis"><em>item</em></span>, or
+						a <span class="emphasis"><em>container</em></span>, depending on the field type.
+						While all the components have a default data model, they can be
+						bound to a user-defined data source. For example, you can bind a
+						table component to an SQL query response. For a complete overview
+						of data binding in Vaadin, please refer to <a href="datamodel.html" title="Chapter&nbsp;8.&nbsp;Binding Components to Data">Chapter&nbsp;8, <i xmlns:xlink="http://www.w3.org/1999/xlink">Binding Components to Data</i></a>.
+					</p>
+				</dd></dl></div>
+	</div>
+		
+	
+
+	 
+		
+    
+
+	
+
+	
+
+	
+	
+	
+
+	
+
+</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="architecture.events.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;<a accesskey="n" href="application.main-window.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">3.5.&nbsp;Events and Listeners&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;4.2.&nbsp;Managing the Main Window</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

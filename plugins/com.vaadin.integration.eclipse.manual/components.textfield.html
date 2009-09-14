@@ -1,0 +1,37 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>5.5.&nbsp;TextField</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="components.html" title="Chapter&nbsp;5.&nbsp;User Interface Components"><link rel="prev" href="components.link.html" title="5.4.&nbsp;Link"><link rel="next" href="components.richtextarea.html" title="5.6.&nbsp;RichTextArea"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>5.5.&nbsp;TextField</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">5.5.&nbsp;<code class="classname">TextField</code></th></tr><tr><td align="left" width="20%"><a accesskey="p" href="components.link.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;5.&nbsp;User Interface Components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="components.richtextarea.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="components.textfield"></a>5.5.&nbsp;<code class="classname">TextField</code></h2></div></div></div>
+		
+
+		<p>
+			<code class="classname">TextField</code> is one of the most common user
+			interface components and is highly versatile. It supports both
+			single- and multi-line editing, password input, and buffering.
+		</p>
+
+		<p>
+			The following example creates two simple text fields: a single-line
+			and a multi-line <code class="classname">TextField</code>.
+		</p>
+
+		<pre class="programlisting">/* Add a single-line text field. */
+TextField subject = new TextField("Subject");
+subject.setColumns(40);
+main.addComponent(subject);
+
+/* Add a multi-line text field. */
+TextField message = new TextField("Message");
+message.setRows(7);
+message.setColumns(40);
+main.addComponent(message);</pre>
+
+		<div class="figure"><a name="N217CE"></a><p class="title"><b>Figure&nbsp;5.5.&nbsp;Single- and Multi-Line Text Field Example</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/components/textfield-example.png" align="middle" alt="Single- and Multi-Line Text Field Example"></div>
+		</div></div><br class="figure-break">
+
+		<p>
+			Notice how font size affects the width of the text fields even though
+			the width was set with the same number of columns. This is a feature
+			of HTML.
+		</p>
+
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="components.link.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="components.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="components.richtextarea.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">5.4.&nbsp;<code class="classname">Link</code>&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;5.6.&nbsp;<code class="classname">RichTextArea</code></td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

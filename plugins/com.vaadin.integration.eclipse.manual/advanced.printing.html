@@ -1,0 +1,85 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>10.7.&nbsp;Printing</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="advanced.html" title="Chapter&nbsp;10.&nbsp;Advanced Web Application Topics"><link rel="prev" href="advanced.shortcuts.html" title="10.6.&nbsp;Shortcut Keys"><link rel="next" href="uidl.html" title="Appendix&nbsp;A.&nbsp;User Interface Definition Language (UIDL)"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>10.7.&nbsp;Printing</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">10.7.&nbsp;Printing</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="advanced.shortcuts.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;10.&nbsp;Advanced Web Application Topics</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="uidl.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="advanced.printing"></a>10.7.&nbsp;Printing</h2></div></div></div>
+		
+
+		<p>
+			Vaadin does not currently have any special support for
+			printing. Printing on the server-side is anyhow largely independent from the
+			web UI of an application. You just have to take care that the printing does
+			not block server requests, possibly by running printing in another thread.
+		</p>
+
+		<p>
+			For client-side printing, most browsers support printing the web page. The
+			<code class="methodname">print()</code> method in JavaScript opens the print window
+			of the browser. You can easily make a HTML button or link that prints the
+			current page by placing the custom HTML code inside a
+			<code class="classname">Label</code>.
+		</p>
+
+		<pre class="programlisting">main.addComponent(new Label("&lt;input type='button' onClick='print()' value='Click to Print'/&gt;", Label.CONTENT_XHTML));</pre>
+
+		<p>
+			This button would print the current page. Often you want to be able to print a
+			report or receipt and it should not have any UI components. In such a case you
+			could offer it as a PDF resource, or you could open a new window as is done
+			below and automatically launch printing.
+		</p>
+
+		<pre class="programlisting">// A button to open the printer-friendly page.
+Button printButton = new Button("Click to Print");
+main.addComponent(printButton);
+printButton.addListener(new Button.ClickListener() {
+    public void buttonClick(ClickEvent event) {
+        // Create a window that contains stuff you want to print.
+        Window printWindow = new Window("Window to Print");
+        
+        // Have some content to print.
+        printWindow.addComponent(
+                new Label("Here's some dynamic content."));
+        
+        // To execute the print() JavaScript, we need to run it
+        // from a custom layout.
+        CustomLayout scriptLayout = new CustomLayout("printpage");
+        printWindow.addComponent (scriptLayout);
+        
+        // Add the printing window as an application-level window.
+        main.getApplication().addWindow(printWindow);
+
+        // Open the printing window as a new browser window
+        main.open(new ExternalResource(printWindow.getURL()),
+                  "_new");
+    } 
+});</pre>
+
+		<p>
+			How the browser opens the window, as an actual window or just a tab, depends
+			on the browser. Notice that above we create a new window object each time the
+			print button is clicked, which leads to unused window objects. If this is a
+			real problem, you might want to reuse the same window object or clean up the
+			old ones - it's ok because the user doesn't interact with them later anyhow.
+		</p>
+
+		<p>
+			You will also need a custom layout that contains the
+			<code class="methodname">print()</code> JavaScript function that launches the
+			printing. Notice that the custom layout <span class="emphasis"><em>must</em></span> contain also
+			another element (below a <code class="literal">&lt;div&gt;</code>) in addition to the
+			<code class="literal">&lt;script&gt;</code> element.
+		</p>
+
+		<pre class="programlisting">&lt;div&gt;This is some static content.&lt;/div&gt;
+
+&lt;script type='text/javascript'&gt;
+    print();
+&lt;/script&gt;
+</pre>
+
+		<p>
+			Printing as PDF would not require creating a <code class="classname">Window</code>
+			object, but you would need to provide the content as a static or a dynamic
+			resource for the <code class="methodname">open()</code> method. Printing a PDF file
+			would obviously require a PDF viewer cabability (such as Adobe Reader) in the
+			browser.
+		</p>
+
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="advanced.shortcuts.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="advanced.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="uidl.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">10.6.&nbsp;Shortcut Keys&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Appendix&nbsp;A.&nbsp;User Interface Definition Language (UIDL)</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

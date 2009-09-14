@@ -1,0 +1,31 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>8.3.&nbsp;Holding properties in Items</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="datamodel.html" title="Chapter&nbsp;8.&nbsp;Binding Components to Data"><link rel="prev" href="datamodel.properties.html" title="8.2.&nbsp;Properties"><link rel="next" href="datamodel.container.html" title="8.4.&nbsp;Collecting items in Containers"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>8.3.&nbsp;Holding properties in Items</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">8.3.&nbsp;Holding properties in Items</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="datamodel.properties.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;8.&nbsp;Binding Components to Data</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="datamodel.container.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="datamodel.items"></a>8.3.&nbsp;Holding properties in Items</h2></div></div></div>
+		
+
+		<p>
+			<code class="classname">Item</code> is an object that contains a set of named
+			properties. Each property is identified by a property identifier (PID) and a
+			reference to the property can be queried from the
+			<code class="classname">Item</code>. <code class="classname">Item</code> defines inner interfaces
+			for maintaining the item property set and listening changes in the item property
+			set. Concrete examples or items include a row in a table (with its properties
+			corresponding to cells on the row), the data underlying a form (with properties
+			corresponding to individual fields) or a node in a filesystem tree.
+		</p>
+		
+		<p>
+			In addition to being used indirectly by many user interface components, items
+			provide the basic data model underlying <code class="classname">Form</code> components.
+			In simple cases, forms can even be generated automatically from items.
+			The properties of the item correspond to the fields of the form.
+		</p>
+
+		<p>
+			Items generally represent objects in the object-oriented model, but with the
+			exception that they are configurable and provide an event mechanism. The simplest
+			way of utilizing <code class="classname">Item</code> interface is to use existing Item
+			implementations. Provided utility classes include a configurable property set
+			(<code class="classname">PropertySetItem</code>) and a bean-to-item adapter
+			(<code class="classname">BeanItem</code>), in addition to which a
+			<code class="classname">Form</code> can also be used directly as an item.
+		</p>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="datamodel.properties.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="datamodel.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="datamodel.container.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">8.2.&nbsp;Properties&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;8.4.&nbsp;Collecting items in Containers</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

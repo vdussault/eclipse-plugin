@@ -1,0 +1,249 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>9.5.&nbsp;Server-Side Components</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="gwt.html" title="Chapter&nbsp;9.&nbsp;Developing Custom Components"><link rel="prev" href="gwt.widgetset.html" title="9.4.&nbsp;Defining a Widget Set"><link rel="next" href="gwt.usage.html" title="9.6.&nbsp;Using a Custom Component"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>9.5.&nbsp;Server-Side Components</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">9.5.&nbsp;Server-Side Components</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="gwt.widgetset.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;9.&nbsp;Developing Custom Components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="gwt.usage.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="gwt.server-side"></a>9.5.&nbsp;Server-Side Components</h2></div></div></div>
+		
+
+		<p>
+			Server-side components provide the API for user applications to build their
+			user interface. Many applications do not ever need to bother with the
+			client-side implementation of the standard components, but those that use
+			their own GWT widgets need to have corresponding server-side components.
+		</p>
+
+		<p>
+			A server-side component has two basic tasks: it has to be able to serialize
+			its state variables to the corresponding client-side component, and
+			deserialize any user input received from the client. Many of these tasks are
+			taken care of by the component framework.
+		</p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N23975"></a>9.5.1.&nbsp;Component Tag Name</h3></div></div></div>
+			
+			
+			<p>
+				Server-side components are identified with a unique UIDL tag name, which
+				must be returned by the <code class="methodname">getTag()</code> method. The tag
+				should follow XML rules for element names, that is, only characters a-z,
+				A-Z, 0-9, and _, and not begin with a number. Actually, as Vaadin
+				Release 5 uses a JSON notation for serialization, the tag syntax is more
+				relaxed, but we nevertheless recommend using a stricter syntax. UIDL is
+				detailed in <a href="uidl.html" title="Appendix&nbsp;A.&nbsp;User Interface Definition Language (UIDL)">Appendix&nbsp;A, <i xmlns:xlink="http://www.w3.org/1999/xlink">User Interface Definition Language (UIDL)</i></a> together with lists of reserved
+				tags. The server-side implementation of the Color Picker component defines
+				the tag as follows:
+			</p>
+
+			<pre class="programlisting">    public String getTag() {
+        return "colorpicker";
+    }</pre>
+    
+			<p>
+				On the client side, this tag is mapped to a GWT widget. The mapping from
+				server-side to client-side components is actually one to many; a
+				server-side component can manifest as several client-side components,
+				depending on its parameters. For example, a server-side
+				<code class="classname">Button</code> can manifest either as an
+				<code class="classname">VButton</code> or <code class="classname">VCheckBox</code> in
+				client, depending on the <span class="emphasis"><em>switchMode</em></span> attribute. For
+				the client side, see <a href="gwt.widgets.html" title="9.2.&nbsp;Google Web Toolkit Widgets">Section&nbsp;9.2, &ldquo;Google Web Toolkit Widgets&rdquo;</a> above.
+			</p>
+				
+            <p>
+                The serialization is broken down into server-client serialization and
+                client-server deserialization in the following sections.  We will also
+                present the complete example of the server-side implementation of the
+                Color Picker component below.
+            </p>
+
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gwt.server-side.serialization"></a>9.5.2.&nbsp;Server-Client Serialization</h3></div></div></div>
+			
+
+			
+			
+			<p>
+				The server-side implementation of a component must be able to serialize
+				its data into a UIDL message that is sent to the client. You need to
+				override the <code class="methodname">paintContent()</code> method, defined in
+				<code class="classname">AbstractComponent</code>. You should call the superclass
+				to allow it to paint its data as well.
+			</p>
+
+			<p>
+				The data is serialized with the variants of the
+				<code class="methodname">addAttribute()</code> and
+				<code class="methodname">addVariable()</code> methods for different basic data
+				types.
+			</p>
+
+			<p>
+				The UIDL API offered in <code class="classname">PaintTarget</code> is covered in
+				<a href="uidl.html#uidl.painting" title="A.1.&nbsp;API for Painting Components">Section&nbsp;A.1, &ldquo;API for Painting Components&rdquo;</a>.
+			</p>
+
+			<p>
+				
+			</p>
+
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gwt.server-side.deserialization"></a>9.5.3.&nbsp;Client-Server Deserialization</h3></div></div></div>
+			
+			
+			<p>
+				The server-side component must be able to receive state changes from the
+				client-side widget. This is done by overriding the
+				<code class="methodname">changeVariables()</code> method, defined in
+				<code class="classname">AbstractComponent</code>. A component should always call
+				the superclass implementation in the beginning to allow it handle its
+				variables.
+			</p>
+
+			<p>
+				The variables are given as objects in the <em class="parameter"><code>variables</code></em>
+				map, with the same key with which they were serialized on the
+				client-side. The object type is likewise the same as given for the
+				particular variable in <code class="methodname">updateVariable()</code> in the
+				client-side.
+			</p>
+
+			<pre class="programlisting">@Override
+public void changeVariables(Object source, Map variables) {
+    // Let superclass read any common variables.
+    super.changeVariables(source, variables);
+
+    // Sets the currently selected color
+    if (variables.containsKey("colorname") &amp;&amp; !isReadOnly()) {
+        final String newValue = (String)variables.get("colorname");
+
+        // Changing the property of the component will
+        // trigger a ValueChangeEvent
+        setValue(newValue, true);
+    }
+}</pre>
+
+			<p>
+				The above example handles variable changes for a field component
+				inheriting <code class="classname">AbstractField</code>. Fields have their value
+				as the value property of the object. Setting the value with
+				<code class="methodname">setValue()</code>, as above, will trigger a
+				<code class="classname">ValueChangeEvent</code>, which the user of the component
+				can catch with a <code class="classname">ValueChangeListener</code>.
+			</p>
+
+			<p>
+				Contained components, such as components inside a layout, are deserialized
+				by referencing them by their <span class="emphasis"><em>paintable identifier</em></span> or
+				<span class="emphasis"><em>PID</em></span>.
+			</p>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N239FA"></a>9.5.4.&nbsp;Extending Standard Components</h3></div></div></div>
+			
+
+			<p>
+				Extending standard components is one way to develop new components that
+				have some additional features.
+			</p>
+
+			<p>
+				Every component needs to have a unique UIDL tag that is used to create and
+				communicate with widgets on the client-side. The tag is normally unique
+				for server-side components. The minimal requirement for the server-side
+				component is that you reimplement the <code class="methodname">getId()</code>
+				method that provides the tag.
+			</p>
+
+			<p>
+				If your extension component contains any specific state variables, you
+				need to handle their serialization in
+				<code class="classname">paintContent()</code> and deserialization in
+				<code class="classname">changeVariables()</code> and call the superclass
+				implementation in the beginning. See <a href="gwt.server-side.html#gwt.server-side.serialization" title="9.5.2.&nbsp;Server-Client Serialization">Section&nbsp;9.5.2, &ldquo;Server-Client Serialization&rdquo;</a> <a href="gwt.server-side.html#gwt.server-side.deserialization" title="9.5.3.&nbsp;Client-Server Deserialization">Section&nbsp;9.5.3, &ldquo;Client-Server Deserialization&rdquo;</a> above for details.
+			</p>
+
+			<p>
+				The client-side implementation goes also much like for regular custom
+				widgets.
+			</p>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gwt.server-side.example.colorpicker"></a>9.5.5.&nbsp;Example: Color Picker Server-Side Component</h3></div></div></div>
+			
+
+			<p>
+				The following example provides the complete server-side
+				<code class="classname">ColorPicker</code> component for the Color Picker
+				example. It has only one state variable: the currently selected color,
+				which is stored as the property of the component. Implementation of the
+				<code class="classname">Property</code> interface is provided in the
+				<code class="classname">AbstractField</code> superclass of the component. The UIDL
+				tag name for the component is <code class="literal">colorpicker</code> and the state
+				is communicated through the <em class="parameter"><code>colorname</code></em> variable.
+			</p>
+
+			<pre class="programlisting">package com.vaadin.demo.colorpicker;
+
+import java.util.Map;
+import com.vaadin.terminal.PaintException;
+import com.vaadin.terminal.PaintTarget;
+import com.vaadin.ui.*;
+
+public class ColorPicker extends AbstractField {
+    public ColorPicker() {
+        super();
+        setValue(new String("white"));
+    }
+
+    /** The property value of the field is an Integer. */
+    public Class getType() {
+        return String.class;
+    }
+
+    /**
+     * Tag is the UIDL element name for client-server
+     * communications.
+     **/
+    public String getTag() {
+        return "colorpicker";
+    }
+    
+    /** Set the currently selected color. */
+    public void setColor(String newcolor) {
+        // Sets the color name as the property of the
+        // component. Setting the property will automatically
+        // cause repainting of the component with paintContent().
+        setValue(newcolor);
+    }
+    
+    /** Retrieve the currently selected color. */
+    public String getColor() {
+        return (String) getValue();
+    }
+
+    /** Paint (serialize) the component for the client. */
+    public void paintContent(PaintTarget target)
+                throws PaintException {
+        // Superclass writes any common attributes in the
+        // paint target.
+        super.paintContent(target);
+        
+        // Add the currently selected color as a variable in
+        // the paint target.
+        target.addVariable(this, "colorname", getColor());
+    }
+    
+    /** Deserialize changes received from client. */
+    public void changeVariables(Object source, Map variables) {
+        // Sets the currently selected color
+        if (variables.containsKey("colorname")
+            &amp;&amp; !isReadOnly()) {
+            String newValue = (String) variables.get("colorname");
+            
+            // Changing the property of the component will
+            // trigger a ValueChangeEvent
+            setValue(newValue,true);
+        }
+    }
+}</pre>
+
+		</div>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="gwt.widgetset.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="gwt.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="gwt.usage.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">9.4.&nbsp;Defining a Widget Set&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;9.6.&nbsp;Using a Custom Component</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

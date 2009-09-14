@@ -1,0 +1,88 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>5.7.&nbsp;Date and Time Input</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="components.html" title="Chapter&nbsp;5.&nbsp;User Interface Components"><link rel="prev" href="components.richtextarea.html" title="5.6.&nbsp;RichTextArea"><link rel="next" href="components.button.html" title="5.8.&nbsp;Button"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>5.7.&nbsp;Date and Time Input</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">5.7.&nbsp;Date and Time Input</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="components.richtextarea.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;5.&nbsp;User Interface Components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="components.button.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="components.datefield"></a>5.7.&nbsp;Date and Time Input</h2></div></div></div>
+		
+		<p>
+			The <code class="classname">DateField</code> component provides the means to display
+			and input date and time. The field comes in two variations:
+			<code class="classname">PopupDateField</code> with numeric input fields and a popup
+			calendar view and <code class="classname">InlineDateField</code> with the calendar
+			view always visible and the numeric input fields only for time. The
+			<code class="classname">DateField</code> base class defaults to the popup variation.
+		</p>
+
+		<p>
+			The example below illustrates the use of the
+			<code class="classname">DateField</code> with the default style. We set the
+			time of the <code class="classname">DateField</code> to current time with the
+			default constructor of the <code class="classname">java.util.Date</code>
+			class.
+		</p>
+
+		<pre class="programlisting">/* Create a DateField with the default style. */
+DateField date = new DateField();
+	
+/* Set the date and time to present. */
+date.setValue(new java.util.Date());</pre>
+
+		<div class="figure"><a name="N218A1"></a><p class="title"><b>Figure&nbsp;5.8.&nbsp;Example of the Date Field with Default Style</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/components/datefield-example1.png" align="middle" alt="Example of the Date Field with Default Style"></div>
+		</div></div><br class="figure-break">
+
+		<p>
+			The default style provides date input using a text box for the date
+			and combo boxes for the time, down to milliseconds. Pressing the
+			"..." button right of the date opens a month view for selecting the
+			date.
+		</p>
+
+		<p>
+			You probably will not need milliseconds in most applications, and
+			might not even need the time, but just the date. The visibility of
+			the input components is controlled by <span class="emphasis"><em>resolution</em></span>
+			of the field which can be set with
+			<code class="methodname">setResolution()</code> method. The method takes as
+			its parameters the lowest visible component, typically
+			<em class="parameter"><code>RESOLUTION_DAY</code></em> for just dates and
+			<em class="parameter"><code>RESOLUTION_MIN</code></em> for dates with time in hours
+			and minutes. Please see the API Reference for a complete list of resolution parameters.
+		</p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="components.datefield.calendar"></a>5.7.1.&nbsp;Calendar</h3></div></div></div>
+			
+
+			
+
+			<p>
+				The <em class="parameter"><code>calendar</code></em> style of the
+				<code class="classname">DateField</code> provides a date picker component
+				with a month view, just like the one in the default style that opens
+				by clicking the "..." button. The user can navigate months and years by
+				clicking the appropriate arrows.
+			</p>
+
+		<pre class="programlisting">// Create a DateField with the calendar style.
+DateField date = new DateField("Here is a calendar field");
+date.setStyle("calendar");
+	
+// Set the date and time to present.
+date.setValue(new java.util.Date());
+
+main.addComponent(date);</pre>
+
+		<div class="figure"><a name="N218E2"></a><p class="title"><b>Figure&nbsp;5.9.&nbsp;Example of the Date Field with Calendar Style</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/components/datefield-example2.png" align="middle" alt="Example of the Date Field with Calendar Style"></div>
+		</div></div><br class="figure-break">
+		</div>
+		
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N218FD"></a>5.7.2.&nbsp;DateField Locale</h3></div></div></div>
+			
+
+			<p>
+				The date fields use the locale set for the component, which defaults to
+				the system locale. You can set a custom locale with the
+				<code class="methodname">setLocale()</code> method of
+				<code class="classname">AbstractComponent</code>.
+			</p>
+		</div>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="components.richtextarea.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="components.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="components.button.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">5.6.&nbsp;<code class="classname">RichTextArea</code>&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;5.8.&nbsp;<code class="classname">Button</code></td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

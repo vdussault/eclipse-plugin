@@ -1,0 +1,167 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>1.4.&nbsp;Background</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="intro.html" title="Chapter&nbsp;1.&nbsp;Introduction"><link rel="prev" href="intro.overview.goals.html" title="1.3.&nbsp;Goals and Philosophy"><link rel="next" href="getting-started.html" title="Chapter&nbsp;2.&nbsp;Getting Started with Vaadin"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>1.4.&nbsp;Background</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">1.4.&nbsp;Background</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="intro.overview.goals.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;1.&nbsp;Introduction</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="getting-started.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="intro.overview.background"></a>1.4.&nbsp;Background</h2></div></div></div>
+        
+
+        <p>
+            The library was not written overnight. After working with web user
+            interfaces since the beginning of the Web, a group of developers got
+            together in 2000 to form IT Mill. The team had a desire to develop a new
+            programming paradigm that would support the creation of real user
+            interfaces for real applications using a real programming language.
+        </p>
+        
+        <p>
+            The library was originally called Millstone Library. The first version was
+            used in a large production application that IT Mill designed and
+            implemented for an international pharmaceutical company. IT Mill made the
+            application already in the year 2001 and it is still in use. Since then,
+            the company has produced dozens of large business applications with the
+            library and it has proven its ability to solve hard problems easily.
+        </p>
+        
+        <p>
+            The next generation of the library, IT Mill Toolkit Release 4, was
+            released in 2006. It introduced an entirely new AJAX-based presentation
+            engine. This allowed the development of AJAX applications without the need
+            to worry about communications between the client and the server.
+        </p>
+        
+        <div class="simplesect" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="intro.overview.background.toolkit-5"></a>Release 5 Into the Open</h3></div></div></div>
+            
+
+            <p>
+                IT Mill Toolkit 5, released at the end of 2007, took a significant
+                step further into AJAX. The client-side rendering of the user interface
+                was completely rewritten using GWT, the Google Web Toolkit. This allowed
+                the use of Java for developing all aspects of the framework. It also
+                allows easy integration of existing GWT components.
+            </p>
+
+            <p>
+                The Release 5 was published under the Apache License 2, an unrestrictive
+                open source license, to create faster expansion of the user base and make
+                the formation of a development community possible.
+            </p>
+
+            <p>
+                Stabilization of the release 5 took over a year of work from the
+                development team. It introduced a number of changes in the API, the
+                client-side customization layer, and the themes. Many significant changes
+                were done during the beta phase, until the stable version 5.3.0 was
+                released in March 2009.
+            </p>
+
+            <p>
+                IT Mill Toolkit 5 introduced many significant improvements both in the API
+                and in the functionality. Many of the user interface components in IT Mill
+                Toolkit 4 and before were available as styles for a basic set of
+                components. For example, the <code class="classname">Select</code> class allowed
+                selection of items from a list. Normally, it would show as a dropdown
+                list, but setting <code class="literal">setStyle("optiongroup")</code> would change
+                it to a radio button group. In Release 5, we have obsoleted the
+                <code class="methodname">setStyle()</code> method and provided distinct classes
+                for such variations. For example, we now have
+                <code class="classname">OptionGroup</code> that inherits the
+                <code class="classname">AbstractSelect</code> component. In a similar fashion, the
+                <code class="classname">Button</code> component had a
+                <em class="parameter"><code>switchMode</code></em> attribute, set with
+                <code class="methodname">setSwitchMode()</code>, that would turn the button into
+                a check box. Release 5 introduces a separate
+                <code class="classname">CheckBox</code> component. The
+                <code class="methodname">setStyle()</code> method actually had a dual function,
+                as it was also used to set the HTML element <em class="parameter"><code>class</code></em>
+                attribute for the components to allow styling in CSS. This functionality
+                has been changed to <code class="methodname">addStyle()</code> and
+                <code class="methodname">removeStyle()</code> methods.
+            </p>
+
+            <p>
+                The <code class="classname">OrderedLayout</code> was replaced (since the first
+                stable version 5.3.0) with specific <code class="classname">VerticalLayout</code>
+                and <code class="classname">HorizontalLayout</code> classes.
+            </p>
+
+            <p>
+                Release 5 introduced <span class="emphasis"><em>expansion ratio</em></span> for applicable
+                layout components. It allows you to designate one or more components as
+                expanding and set their relative expansion ratios. The layout will then
+                distribute the left-over space between the expanded components according
+                to the ratios.  The release also introduces a number of new user interface
+                components: <code class="classname">SplitPanel</code>,
+                <code class="classname">Slider</code>, <code class="classname">Notification</code>,
+                <code class="classname">LoginForm</code>, <code class="classname">MenuBar</code>,
+                <code class="classname">UriFragmentUtility</code> and
+                <code class="classname">RichTextEditor</code>.
+            </p>
+
+            <p>
+                The Client-Side Engine of IT Mill Toolkit was entirely
+                rewritten with Google Web Toolkit. This did not, by itself, cause any
+                changes in the API of IT Mill Toolkit, because GWT is a browser technology
+                that is well hidden behind the API. The transition from JavaScript
+                to GWT makes the development and integration of custom components and
+                customization of existing components much easier than before. It does,
+                however, require reimplementation of any existing custom client-side code
+                with GWT. See <a href="architecture.html" title="Chapter&nbsp;3.&nbsp;Architecture">Chapter&nbsp;3, <i xmlns:xlink="http://www.w3.org/1999/xlink">Architecture</i></a> for more information on the
+                impact of GWT on the architecture and <a href="gwt.html" title="Chapter&nbsp;9.&nbsp;Developing Custom Components">Chapter&nbsp;9, <i xmlns:xlink="http://www.w3.org/1999/xlink">Developing Custom Components</i></a> for details
+                regarding creation or integration of custom client-side components with
+                GWT.
+            </p>
+
+            <p>
+                The release introduced an entirely new, simplified architecture for
+                themes. Themes control the appearance of web applications with CSS and can
+                include images, HTML templates for custom layouts, and other related
+                resources. The old themeing architecture in Release 4 required use of some
+                JavaScript even in the simplest themes, and definition of a theme XML
+                descriptor. In Release 5, you simply include the CSS file for the theme
+                and any necessary graphics and HTML templates for custom layouts. For more
+                details on the revised theme architecture, see <a href="themes.html" title="Chapter&nbsp;7.&nbsp;Themes">Chapter&nbsp;7, <i xmlns:xlink="http://www.w3.org/1999/xlink">Themes</i></a>. Old CSS files are not compatible with Release 5, as
+                the HTML class style names of components have changed. As GWT implements
+                many components with somewhat different HTML elements than what IT Mill
+                Toolkit Release 4 used, styles may need to be updated also in that
+                respect.
+            </p>
+        </div>
+
+		<div class="simplesect" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N20385"></a>Birth of Vaadin Release 6</h3></div></div></div>
+			
+
+			<p>
+				In the spring 2009, IT Mill Toolkit was renamed as
+				<span class="emphasis"><em>Vaadin</em></span> to avoid common confusions with the name (IT
+				Mill is a company not the product) and to clarify the separation between
+				the company and the open source project. Vaadin means a female
+				semi-domesticated mountain reindeer in Finnish.
+			</p>
+
+			<p>
+				Vaadin 6 is still under development at the time of publication of this
+				book, so the book does not yet include all the new features in Vaadin
+				6. The most notable enhancements are the following external tools.
+			</p>
+
+			<div class="itemizedlist"><ul type="disc"><li>Eclipse Plugin</li><li>WYSIWYG user interface editor under Eclipse</li></ul></div>
+
+			<p>
+				The Eclipse Plugin allows easy creation of Vaadin projects and custom
+				client-side widgets. See <a href="getting-started.environment.html#getting-started.environment.eclipse-plugin" title="2.2.5.&nbsp;Vaadin Eclipse Plugin">Section&nbsp;2.2.5, &ldquo;Vaadin Eclipse Plugin&rdquo;</a> for details. The
+				WYSIWYG editor will make prototyping easy and new users of Vaadin should
+				find it especially useful or introducing oneself to Vaadin. Like Vaadin
+				itself, the tools are open source.
+			</p>
+
+			<p>
+				While the API in Vaadin 6 is essentially backward-compatible with IT Mill
+				Toolkit 5.4, the package names and some name prefixes were changed to
+				comply with the new product name:
+			</p>
+
+			<div class="itemizedlist"><ul type="disc"><li>Package name <span class="package">com.itmill.toolkit</span> was renamed as <span class="package">com.vaadin</span>.</li><li>The static resource directory <code class="literal">ITMILL</code> was changed to <code class="literal">VAADIN</code>.</li><li>Client-side widget prefix was changed from "<code class="literal">I</code>" to "<code class="literal">V</code>". </li><li>CSS style name prefix was changed from "<code class="literal">i-</code>" to "<code class="literal">v-</code>". </li></ul></div>
+
+			<p>
+				Other enhancements in Vaadin 6 are listed in the Release Notes, which also
+				gives detailed instructions for upgrading from IT Mill Toolkit 5.
+			</p>
+
+		</div>
+    </div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="intro.overview.goals.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="intro.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="getting-started.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">1.3.&nbsp;Goals and Philosophy&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Chapter&nbsp;2.&nbsp;Getting Started with Vaadin</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

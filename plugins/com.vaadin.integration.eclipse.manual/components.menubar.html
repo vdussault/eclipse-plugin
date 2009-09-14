@@ -1,0 +1,94 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>5.13.&nbsp;MenuBar</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="components.html" title="Chapter&nbsp;5.&nbsp;User Interface Components"><link rel="prev" href="components.tree.html" title="5.12.&nbsp;Tree"><link rel="next" href="components.embedded.html" title="5.14.&nbsp;Embedded"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>5.13.&nbsp;MenuBar</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">5.13.&nbsp;<code class="classname">MenuBar</code></th></tr><tr><td align="left" width="20%"><a accesskey="p" href="components.tree.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;5.&nbsp;User Interface Components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="components.embedded.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="components.menubar"></a>5.13.&nbsp;<code class="classname">MenuBar</code></h2></div></div></div>
+		
+
+		<p>
+			The <code class="classname">MenuBar</code> component allows creating horizontal
+			dropdown menus, much like the main menu in desktop applications.
+		</p>
+
+		<pre class="programlisting">// Create a menu bar
+final MenuBar menubar = new MenuBar();
+main.addComponent(menubar);</pre>
+
+		<p>
+			You insert the top-level menu items to a <code class="classname">MenuBar</code> object
+			with the <code class="methodname">addItem()</code> method. It takes a string label,
+			an icon resource, and a command as its parameters. The icon and command are
+			not required and can be <em class="parameter"><code>null</code></em>.
+		</p>
+
+		<pre class="programlisting">MenuBar.MenuItem beverages =
+      menubar.addItem("Beverages", null, null);</pre>
+
+		<p>
+			The command is called when the user clicks the item. A menu command is a class
+			that implements the <code class="classname">MenuBar.Command</code> interface.
+		</p>
+
+		<pre class="programlisting">// A feedback component
+final Label selection = new Label("-");
+main.addComponent(selection);
+
+// Define a common menu command for all the menu items.
+MenuBar.Command mycommand = new MenuBar.Command() {
+    public void menuSelected(MenuItem selectedItem) {
+        selection.setValue("Ordered a " +
+                           selectedItem.getText() +
+                           " from menu.");
+    }  
+};</pre>
+
+		<p>
+			The <code class="methodname">addItem()</code> method returns a
+			<code class="classname">MenuBar.MenuItem</code> object, which you can use to add
+			sub-menu items. The <code class="classname">MenuItem</code> has an identical
+			<code class="methodname">addItem()</code> method.
+		</p>
+
+		<pre class="programlisting">// Put some items in the menu hierarchically
+MenuBar.MenuItem beverages =
+    menubar.addItem("Beverages", null, null);
+MenuBar.MenuItem hot_beverages =
+    beverages.addItem("Hot", null, null);
+hot_beverages.addItem("Tea", null, mycommand);
+hot_beverages.addItem("Coffee", null, mycommand);
+MenuBar.MenuItem cold_beverages =
+    beverages.addItem("Cold", null, null);
+cold_beverages.addItem("Milk", null, mycommand);
+
+// Another top-level item
+MenuBar.MenuItem snacks =
+    menubar.addItem("Snacks", null, null);
+snacks.addItem("Weisswurst", null, mycommand);
+snacks.addItem("Salami", null, mycommand);
+
+// Yet another top-level item
+MenuBar.MenuItem services =
+    menubar.addItem("Services", null, null);
+services.addItem("Car Service", null, mycommand);</pre>
+
+		<p>
+			The menu will look as follows:
+		</p>
+
+		<div class="figure"><a name="N220D5"></a><p class="title"><b>Figure&nbsp;5.25.&nbsp;Menu Bar</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/components/menubar-example1.png" align="middle" alt="Menu Bar"></div>
+		</div></div><br class="figure-break">
+
+		<div class="simplesect" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N220F0"></a>CSS Style Rules</h3></div></div></div>
+			
+			
+			<pre class="programlisting">.v-menubar { }
+.gwt-MenuItem {}
+.gwt-MenuItem-selected {}</pre>
+			
+			<p>
+				The menu bar has the overall style name
+				<code class="literal">.v-menubar</code>. Each menu item has
+				<code class="literal">.gwt-MenuItem</code> style normally and
+				<code class="literal">.gwt-MenuItem-selected</code> when the item is selected.
+			</p>
+			
+		</div>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="components.tree.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="components.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="components.embedded.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">5.12.&nbsp;<code class="classname">Tree</code>&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;5.14.&nbsp;<code class="classname">Embedded</code></td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

@@ -1,0 +1,161 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>5.14.&nbsp;Embedded</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="components.html" title="Chapter&nbsp;5.&nbsp;User Interface Components"><link rel="prev" href="components.menubar.html" title="5.13.&nbsp;MenuBar"><link rel="next" href="components.upload.html" title="5.15.&nbsp;Upload"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>5.14.&nbsp;Embedded</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">5.14.&nbsp;<code class="classname">Embedded</code></th></tr><tr><td align="left" width="20%"><a accesskey="p" href="components.menubar.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;5.&nbsp;User Interface Components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="components.upload.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="components.embedded"></a>5.14.&nbsp;<code class="classname">Embedded</code></h2></div></div></div>
+		
+
+		<p>
+			The <code class="classname">Embedded</code> component allows displaying embedded media
+			objects, such as images, animations, or any embeddable media type supported by
+			the browser. The contents of an <code class="classname">Embedded</code> component are
+			managed as <span class="emphasis"><em>resources</em></span>. For documentation on resources, see
+			<a href="application.resources.html" title="4.5.&nbsp;Referencing Resources">Section&nbsp;4.5, &ldquo;Referencing Resources&rdquo;</a>.
+		</p>
+
+		<p>
+			The following example displays an image from the same Java package as the
+			class itself using the class loader.
+		</p>
+
+		<pre class="programlisting">Embedded image = new Embedded("Yes, logo:",
+    new ClassResource("vaadin-logo.png", this));
+main.addComponent(image);</pre>
+
+        
+		<div class="figure"><a name="N22124"></a><p class="title"><b>Figure&nbsp;5.26.&nbsp;Embedded Image</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/components/embedded-example1.png" align="middle" alt="Embedded Image"></div>
+		</div></div><br class="figure-break">
+
+		<p>
+			The <code class="classname">Embedded</code> component supports several different
+			content types, which are rendered differently in HTML. You can set the content
+			type with <code class="methodname">setType()</code>, although for images, as in the
+			above example, the type is determined automatically.
+		</p>
+        
+        <div class="variablelist"><dl><dt><span class="term"><em class="parameter"><code>Embedded.TYPE_OBJECT</code></em></span></dt><dd>
+                    The default embedded type, allows embedding certain file types inside
+                    HTML <code class="sgmltag-element">&lt;object&gt;</code> and <code class="sgmltag-element">&lt;embed&gt;</code> elements.
+                </dd><dt><span class="term"><em class="parameter"><code>Embedded.TYPE_IMAGE</code></em></span></dt><dd>
+                    Embeds an image inside a HTML <code class="sgmltag-element">&lt;img&gt;</code> element.
+                </dd><dt><span class="term"><em class="parameter"><code>Embedded.TYPE_BROWSER</code></em></span></dt><dd>
+                    Embeds a browser frame inside a HTML <code class="sgmltag-element">&lt;iframe&gt;</code>
+                    element.
+                </dd></dl></div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N22174"></a>5.14.1.&nbsp;Embedded Objects</h3></div></div></div>
+			
+
+			<p>
+				The <em class="parameter"><code>Embedded.TYPE_OBJECT</code></em> is the default and most
+				generic embedded type, which allows embedding media objects inside HTML
+				<code class="sgmltag-element">&lt;object&gt;</code> and <code class="sgmltag-element">&lt;embed&gt;</code> elements. You need
+				define the MIME type for the object type.
+			</p>
+
+			<p>
+				Currently, only Shockwave Flash animations are supported (MIME type
+				<code class="literal">application/x-shockwave-flash</code>).
+			</p>
+
+			<pre class="programlisting">// Create a Shockware Flash resource
+final ClassResource flashResource =
+    new ClassResource("itmill_spin.swf", getApplication());
+
+// Display the resource in a Embedded compoant
+final Embedded embedded =
+    new Embedded("Embedded Caption", flashResource);
+
+// This is the default type, but we set it anyway.
+embedded.setType(Embedded.TYPE_OBJECT);
+
+// This is recorgnized automatically, but set it anyway.
+embedded.setMimeType("application/x-shockwave-flash");</pre>
+
+			<p>
+				You can set object parameters with
+				<code class="methodname">setParameter()</code>, which takes a parameter's name
+				and value as strings. The object parameters are included in the HTML as
+				<code class="sgmltag-element">&lt;param&gt;</code> elements.
+			</p>
+		</div>
+		
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N22199"></a>5.14.2.&nbsp;Embedded Images</h3></div></div></div>
+			
+
+			<p>
+				Images are embedded with the type
+				<em class="parameter"><code>Embedded.TYPE_IMAGE</code></em>, although you do not normally
+				need to set the type explicitly, as it is recognized automatically from
+				the MIME type of the resource, as in the example above.
+			</p>
+
+			<p>
+				You can find another example of displaying an image from
+				<code class="classname">FileResource</code> in <a href="components.upload.html" title="5.15.&nbsp;Upload">Section&nbsp;5.15, &ldquo;<code class="classname">Upload</code>&rdquo;</a>. Another example, in <a href="application.resources.html#application.resources.stream" title="4.5.5.&nbsp;Stream Resources">Section&nbsp;4.5.5, &ldquo;Stream Resources&rdquo;</a>, shows how you can generate the
+				content of an <code class="classname">Embedded</code> component dynamically using
+				a <code class="classname">StreamResource</code>.
+			</p>
+			
+			<p>
+				If you have a dynamically generated image, for example with a
+				<code class="classname">StreamResource</code>, and the data changes, you need to
+				reload the image in the browser. Because of how caching is handled in some
+				browsers, you are best off by renaming the filename of the resource with a
+				unique name, such as one including a timestamp. You should set cache time
+				to zero with <code class="methodname">setCacheTime()</code> for the resource
+				object when you create it.
+
+				
+			</p>
+
+			<pre class="programlisting">// Create the stream resource with some initial filename.
+StreamResource imageResource =
+    new StreamResource(imageSource, "initial-filename.png",
+                       getApplication());
+
+// Instruct browser not to cache the image.
+imageResource.setCacheTime(0);
+
+// Display the image in an Embedded component.
+Embedded embedded = new Embedded("", imageResource);</pre>
+
+			<p>
+				When refreshing, you also need to call
+				<code class="methodname">requestRepaint()</code> for the
+				<code class="classname">Embedded</code> object.
+			</p>
+
+			<pre class="programlisting">// This needs to be done, but is not sufficient.
+embedded.requestRepaint();
+
+// Generate a filename with a timestamp.
+SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+String filename = "myfilename-" + df.format(new Date()) + ".png";
+
+// Replace the filename in the resource.
+imageResource.setFilename(makeImageFilename());</pre>
+
+			<p>
+				You can find more detailed information about the
+				<code class="classname">StreamResource</code> in <a href="application.resources.html#application.resources.stream" title="4.5.5.&nbsp;Stream Resources">Section&nbsp;4.5.5, &ldquo;Stream Resources&rdquo;</a>.
+			</p>
+			
+		</div>
+		
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N221DC"></a>5.14.3.&nbsp;Browser Frames</h3></div></div></div>
+			
+
+			<p>
+				The browser frame type allows you to embed external content inside an HTML
+				<code class="sgmltag-element">&lt;iframe&gt;</code> element. You can refer to a URL with an
+				<code class="classname">ExternalResource</code> object. URLs are given with the
+				standard Java <code class="classname">URL</code> class.
+			</p>
+
+			<pre class="programlisting">URL url = new URL("http://dev.itmill.com/");
+Embedded browser = new Embedded("", new ExternalResource(url));
+browser.setType(Embedded.TYPE_BROWSER);
+main.addComponent(browser);</pre>
+
+		</div>
+		
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="components.menubar.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="components.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="components.upload.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">5.13.&nbsp;<code class="classname">MenuBar</code>&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;5.15.&nbsp;<code class="classname">Upload</code></td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

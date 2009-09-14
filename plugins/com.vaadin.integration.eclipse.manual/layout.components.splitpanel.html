@@ -1,0 +1,112 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>6.7.&nbsp;SplitPanel</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="layout.html" title="Chapter&nbsp;6.&nbsp;Managing Layout"><link rel="prev" href="layout.components.panel.html" title="6.6.&nbsp;Panel"><link rel="next" href="layout.components.tabsheet.html" title="6.8.&nbsp;TabSheet"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>6.7.&nbsp;SplitPanel</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">6.7.&nbsp;<code class="classname">SplitPanel</code></th></tr><tr><td align="left" width="20%"><a accesskey="p" href="layout.components.panel.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;6.&nbsp;Managing Layout</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="layout.components.tabsheet.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="layout.components.splitpanel"></a>6.7.&nbsp;<code class="classname">SplitPanel</code></h2></div></div></div>
+        
+        
+        <p>
+            <code class="classname">SplitPanel</code> is a two-component container that divides
+            the available space into two areas to accomodate the two components. The split
+            direction is vertical by default, but you can change it with
+            <code class="methodname">setOrientation()</code>.
+        </p>
+
+        <p>
+            You can set the two components with the dedicated
+            <code class="methodname">setFirstComponent()</code> and
+            <code class="methodname">setSecondComponent()</code> methods, or with the regular
+            <code class="methodname">addComponent()</code> method.
+        </p>
+
+        <pre class="programlisting">SplitPanel splitpanel = new SplitPanel();
+
+// Set the orientation.
+splitpanel.setOrientation(SplitPanel.ORIENTATION_HORIZONTAL);
+
+// Put two components in the container.
+splitpanel.setFirstComponent(new Label("Left Panel"));
+splitpanel.setSecondComponent(new Label("Right Panel"));</pre>
+
+        <p>
+            A split bar that divides the two panels is enabled by default. The user can
+            drag the bar with mouse to change the split position. To disable the bar, lock
+            the split position with <code class="methodname">setLocked(true)</code>.
+        </p>
+        
+        <p>
+            The following example shows how you can create a layout with two nested
+            <code class="classname">SplitPanel</code> components (one of which has a locked split
+            position):
+        </p>
+
+        <pre class="programlisting">// A top-level panel to put everything in.
+Panel panel = new Panel("Nested SplitPanels");
+
+// Allow it to shrink to the size of the contained SplitPanel.
+panel.setSizeUndefined();
+
+// Have a vertical SplitPanel as the main component.
+SplitPanel vertical = new SplitPanel();
+panel.addComponent(vertical);
+
+// Set the size of the SplitPanel rather than the containing Panel,
+// because then we know how much space we have for the panels.
+vertical.setHeight("150px");
+vertical.setWidth("250px");
+
+// Set the split position to 50 pixels, which is more than
+// enough height for the Label in the upper panel.
+vertical.setSplitPosition(50, SplitPanel.UNITS_PIXELS);
+
+// Put a label in the upper panel.
+vertical.addComponent(new Label("The contents of the upper area."));
+
+// Put a horizontal SplitPanel in the lower area.
+SplitPanel horizontal = new SplitPanel();
+horizontal.setOrientation(SplitPanel.ORIENTATION_HORIZONTAL);
+horizontal.setSplitPosition(65); // percent
+vertical.addComponent(horizontal);
+
+// The lower SplitPanel is locked, so the user cannot move
+// the split position.
+horizontal.setLocked(true);
+
+// Component in the left panel:
+horizontal.addComponent(new Label("Lower left area. "+
+              "The text on the left wraps around as needed."));
+
+// Component in the right panel:
+horizontal.addComponent(new Label("Lower right area. "+
+              "The text on the right also wraps around."));</pre>
+
+        <div class="figure"><a name="figure.splitpanel.example1"></a><p class="title"><b>Figure&nbsp;6.8.&nbsp;A Layout With Nested SplitPanels</b></p><div class="figure-contents">
+            
+            <div class="mediaobject" align="center"><img src="img/layout/splitpanel-example1.png" align="middle" alt="A Layout With Nested SplitPanels"></div>
+        </div></div><br class="figure-break">
+
+		<div class="simplesect" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N22A04"></a>CSS Style Rules</h3></div></div></div>
+			
+
+			<pre class="programlisting">/* For a horizontal SplitPanel. */
+.v-splitpanel-horizontal {}
+.v-splitpanel-hsplitter {}
+.v-splitpanel-hsplitter-locked {}
+
+/* For a vertical SplitPanel. */
+.v-splitpanel-vertical {}
+.v-splitpanel-vsplitter {}
+.v-splitpanel-vsplitter-locked {}
+
+/* The two container panels. */
+.v-splitpanel-first-container {}  /* Top or left panel. */
+.v-splitpanel-second-container {} /* Bottom or right panel. */</pre>
+
+            <p>
+                The entire accordion has the style
+                <code class="literal">v-splitpanel-horizontal</code> or
+                <code class="literal">v-splitpanel-vertical</code>. The split bar or
+                <span class="emphasis"><em>splitter</em></span> between the two content panels has either
+                the <code class="literal">...-splitter</code> or
+                <code class="literal">...-splitter-locked</code> style, depending on whether its
+                position is locked or not.
+            </p>
+            
+		</div>
+    </div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="layout.components.panel.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="layout.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="layout.components.tabsheet.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">6.6.&nbsp;<code class="classname">Panel</code>&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;6.8.&nbsp;<code class="classname">TabSheet</code></td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

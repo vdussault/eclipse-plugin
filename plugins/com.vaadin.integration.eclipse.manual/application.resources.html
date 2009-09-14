@@ -1,0 +1,252 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>4.5.&nbsp;Referencing Resources</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="application.html" title="Chapter&nbsp;4.&nbsp;Writing a Web Application"><link rel="prev" href="application.events.html" title="4.4.&nbsp;Handling Events with Listeners"><link rel="next" href="application.close.html" title="4.6.&nbsp;Shutting Down an Application"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>4.5.&nbsp;Referencing Resources</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">4.5.&nbsp;Referencing Resources</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="application.events.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;4.&nbsp;Writing a Web Application</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="application.close.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="application.resources"></a>4.5.&nbsp;Referencing Resources</h2></div></div></div>
+		
+
+		<p>
+			Web applications work over the web and have various resources, such
+			as images or downloadable files, that the web browser has to get from
+			the server. These resources are typically used in
+			<code class="classname">Embedded</code> (images) or
+			<code class="classname">Link</code> (downloadable files) user interface
+			components. Various components, such as
+			<code class="classname">TabSheet</code>, can also include icons, which are
+			also handled as resources.
+		</p>
+
+		<p>
+			A web server can handle many of such requests for static resources without
+			having to ask them from the application, or the
+			<code class="classname">Application</code> object can provide them. For dynamic
+			resources, the user application must be able to create them
+			dynamically. Vaadin provides resource request interfaces for applications so
+			that they can return various kinds of resources, such as files or dynamically
+			created resources. These include the <code class="classname">StreamResource</code>
+			class and URI and parameter handlers described in <a href="advanced.resources.html#section.application.resources.uri" title="10.5.1.&nbsp;URI Handlers">Section&nbsp;10.5.1, &ldquo;URI  Handlers&rdquo;</a> and <a href="advanced.resources.html#section.application.resources.parameters" title="10.5.2.&nbsp;Parameter Handlers">Section&nbsp;10.5.2, &ldquo;Parameter Handlers&rdquo;</a>, respectively.
+		</p>
+
+		<p>
+			Vaadin provides also low-level facilities for retrieving the
+			URI and other parameters of a HTTP request. We will first look into
+			how applications can provide various kinds of resources and then look
+			into low-level interfaces for handling URIs and parameters to provide
+			resources and functionalities.
+		</p>
+
+		<p>
+			Notice that using URI or parameter handlers to create "pages" is not
+			meaningful in Vaadin or in AJAX applications
+			generally. Please see <a href="advanced.html#advanced.application.pages" title="10.1.&nbsp;Special Characteristics of AJAX Applications">Section&nbsp;10.1, &ldquo;Special Characteristics of AJAX Applications&rdquo;</a> for
+			a detailed explanation.
+		</p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="application.resources.api"></a>4.5.1.&nbsp;Resource Interfaces and Classes</h3></div></div></div>
+			
+		
+			<p>
+				Vaadin has two interfaces for resources: a generic
+				<code class="classname">Resource</code> interface and a more specific
+				<code class="classname">ApplicationResource</code> interface for resources
+				provided by the application.
+			</p>
+
+			<div class="figure"><a name="figure.resource.classdiagram"></a><p class="title"><b>Figure&nbsp;4.4.&nbsp;Resource Interface and Class Diagram</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/application/resource_classdiagram-lo.png" align="middle" alt="Resource Interface and Class Diagram"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				<code class="classname">ApplicationResource</code> resources are managed
+				by the <code class="classname">Application</code> class. When you create
+				such a resource, you give the application object to the
+				constructor. The constructor registers the resource in the
+				application using the <code class="classname">addResource</code>
+				method.
+			</p>
+
+			<p>
+				<code class="classname">Application</code> manages requests for the
+				resources and allows accessing resources using a URI. The URI
+				consists of the base name of the application and a relative name
+				of the resource. The relative name is
+				<code class="literal">"APP/"+resourceid+"/"+filename</code>, for example
+				<code class="literal">"APP/1/myimage.png"</code>. The
+				<code class="varname">resourceid</code> is a generated numeric identifier
+				to make resources unique, and <code class="varname">filename</code> is the
+				file name of the resource given in the constructor of its
+				class. However, the application using a resource does not usually
+				need to consider its URI. It only needs to give the resource to
+				an appropriate <code class="classname">Embedded</code> or
+				<code class="classname">Link</code> or some other user interface
+				component, which manages the rendering of the URI.
+			</p>
+
+			<p>
+			</p>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N210D8"></a>4.5.2.&nbsp;File Resources</h3></div></div></div>
+			
+
+			<p>
+				File resources are files stored anywhere in the file system. The
+				use of file resources generally falls into two main categories:
+				downloadable files and embedded images.
+			</p>
+
+			<p>
+				A file object that can be accessed as a file resource is defined with the
+				standard <code class="classname">java.io.File</code> class. You can create the
+				file either with an absolute or relative path, but the base path of the
+				relative path depends on the installation of the web server. For example,
+				in Apache Tomcat, the default current directory is the installation path of
+				Tomcat.
+			</p>
+
+			
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N210E9"></a>4.5.3.&nbsp;Class Loader Resources</h3></div></div></div>
+			
+
+			<p>
+				The <code class="classname">ClassResource</code> allows resources to be loaded
+				from the deployed package of the application using Java Class Loader.  The one-line example below loads an image resource from
+				the application package and displays it in an
+				<code class="classname">Embedded</code> component.
+			</p>
+
+			<pre class="programlisting">mainwindow.addComponent(new Embedded ("",
+        new ClassResource("smiley.jpg",
+                  mainwindow.getApplication())));</pre>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="application.resources.theme"></a>4.5.4.&nbsp;Theme Resources</h3></div></div></div>
+			
+            
+
+			<p>
+				Theme resources are files included in a theme, typically images. See <a href="themes.html" title="Chapter&nbsp;7.&nbsp;Themes">Chapter&nbsp;7, <i xmlns:xlink="http://www.w3.org/1999/xlink">Themes</i></a> for more information on themes.
+			</p>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="application.resources.stream"></a>4.5.5.&nbsp;Stream Resources</h3></div></div></div>
+			
+		
+			<p>
+				Stream resources are application resources that allow creating
+				dynamic resource content. Charts are typical examples of dynamic
+				images. To define a stream resource, you need to implement the
+				<code class="classname">StreamResource.StreamSource</code> interface and
+				its <code class="methodname">getStream</code> method. The method needs
+				to return an <code class="classname">InputStream</code> from which the
+				stream can be read.
+			</p>
+
+			<p>
+				The following example demonstrates the creation of a simple
+				image in PNG image format. 
+			</p>
+
+			<pre class="programlisting">import java.awt.image.*;
+
+public class MyImageSource
+             implements StreamResource.StreamSource {
+    ByteArrayOutputStream imagebuffer = null;
+    int reloads = 0;
+    
+    /* We need to implement this method that returns
+     * the resource as a stream. */
+    public InputStream getStream () {
+        /* Create an image and draw something on it. */
+        BufferedImage image = new BufferedImage (200, 200,
+                               BufferedImage.TYPE_INT_RGB);
+        Graphics drawable = image.getGraphics();
+        drawable.setColor(Color.lightGray);
+        drawable.fillRect(0,0,200,200);
+        drawable.setColor(Color.yellow);
+        drawable.fillOval(25,25,150,150);
+        drawable.setColor(Color.blue);
+        drawable.drawRect(0,0,199,199);
+        drawable.setColor(Color.black);
+        drawable.drawString("Reloads="+reloads, 75, 100);
+        reloads++;
+
+        try {
+            /* Write the image to a buffer. */
+            imagebuffer = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", imagebuffer);
+            
+            /* Return a stream from the buffer. */
+            return new ByteArrayInputStream(
+                         imagebuffer.toByteArray());
+        } catch (IOException e) {
+            return null;
+        }
+    }
+}</pre>
+
+			<p>
+				The content of the generated image is dynamic, as it updates the
+				reloads counter with every call. The
+				<code class="classname">ImageIO</code>.<code class="methodname">write()</code>
+				method writes the image to an output stream, while we had to
+				return an input stream, so we stored the image contents to a
+				temporary buffer.
+			</p>
+
+			<p>
+				You can use resources in various ways. Some user interface components, such as
+				<code class="classname">Link</code> and <code class="classname">Embedded</code>,
+				take their parameters as a resource.
+			</p>
+
+			<p>
+				Below we display the image with the
+				<code class="classname">Embedded</code> component.  The
+				<code class="classname">StreamResource</code> constructor gets a
+				reference to the application and registers itself in the
+				application's resources. Assume that <code class="varname">main</code> is a
+				reference to the main window and <code class="varname">this</code> is the
+				application object.
+			</p>
+
+			<pre class="programlisting">// Create an instance of our stream source.
+StreamResource.StreamSource imagesource = new MyImageSource ();
+	
+// Create a resource that uses the stream source and give it a name.
+// The constructor will automatically register the resource in
+// the application.
+StreamResource imageresource =
+        new StreamResource(imagesource, "myimage.png", this);
+	
+// Create an embedded component that gets its contents
+// from the resource.
+main.addComponent(new Embedded("Image title", imageresource));</pre>
+
+			<p>
+				The image will look as follows:
+			</p>
+
+			<div class="figure"><a name="figure.resource.streamresource"></a><p class="title"><b>Figure&nbsp;4.5.&nbsp;Screenshot of the stream resource example with an embedded image</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/application/application_streamresource.png" align="middle" alt="Screenshot of the stream resource example with an embedded image"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				We named the resource as <code class="filename">myimage.png</code>. The
+				application adds a resource key to the file name of the resource
+				to make it unique.  The full URI will be like
+				<code class="uri">http://localhost:8080/testbench/APP/1/myimage.png</code>. The
+				end <code class="uri">APP/1/myimage.png</code> is the
+				<span class="emphasis"><em>relative</em></span> part of the URI. You can get the
+				relative part of a resource's URI from the application with
+				<code class="methodname">Application.getRelativeLocation()</code>.
+			</p>
+
+			<p>
+				Another solution for creating dynamic content is an URI handler, possibly
+				together with a parameter handler. See <a href="advanced.resources.html#section.application.resources.uri" title="10.5.1.&nbsp;URI Handlers">Section&nbsp;10.5.1, &ldquo;URI  Handlers&rdquo;</a> and <a href="advanced.resources.html#section.application.resources.parameters" title="10.5.2.&nbsp;Parameter Handlers">Section&nbsp;10.5.2, &ldquo;Parameter Handlers&rdquo;</a>.
+			</p>
+
+		</div>
+
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="application.events.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="application.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="application.close.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">4.4.&nbsp;Handling Events with Listeners&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;4.6.&nbsp;Shutting Down an Application</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

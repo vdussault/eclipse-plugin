@@ -1,0 +1,307 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>2.2.&nbsp;Setting up the Development Environment</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="getting-started.html" title="Chapter&nbsp;2.&nbsp;Getting Started with Vaadin"><link rel="prev" href="getting-started.html" title="Chapter&nbsp;2.&nbsp;Getting Started with Vaadin"><link rel="next" href="getting-started.quickstart.html" title="2.3.&nbsp;QuickStart with Eclipse"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>2.2.&nbsp;Setting up the Development Environment</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">2.2.&nbsp;Setting up the Development Environment</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="getting-started.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;2.&nbsp;Getting Started with Vaadin</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="getting-started.quickstart.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="getting-started.environment"></a>2.2.&nbsp;Setting up the Development Environment</h2></div></div></div>
+		
+		
+		<p>
+			This section gives a step-by-step guide for setting up
+			a development environment. Vaadin supports a
+			wide variety of tools, so you can use any IDE for
+			writing the code, most web browsers for viewing the
+			results, any operating system or processor supported
+			by the Java 1.5 platform, and almost any Java server for
+			deploying the results.
+		</p>
+
+		<p>
+			In this example, we use the following toolchain:
+
+			<div class="itemizedlist"><ul type="disc"><li><a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.microsoft.com/windowsxp/" target="_top">Windows XP</a> or Linux or Mac</li><li><a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://java.sun.com/javase/downloads/index.jsp" target="_top">Sun Java 2 Standard Edition 6.0</a> (Java 1.5 or newer is required)</li><li><a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.eclipse.org/downloads/" target="_top">Eclipse IDE for Java EE Developers (Ganymede version)</a></li><li><a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://tomcat.apache.org/" target="_top">Apache Tomcat 6.0 (Core)</a></li><li><a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.getfirefox.com/" target="_top">Firefox 3.0.7</a></li><li><a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.getfirebug.com/" target="_top">Firebug 1.3.3 (optional)</a></li><li><a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://vaadin.com/download/" target="_top">Vaadin 6.x.x</a></li></ul></div>
+
+			The above is a good choice of tools, but you can use almost any tools you are comfortable with.
+		</p>
+
+		<div class="figure"><a name="figure.toolchain"></a><p class="title"><b>Figure&nbsp;2.2.&nbsp;Development Toolchain and Process</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/intro/toolchain-lo.png" align="middle" alt="Development Toolchain and Process"></div>
+		</div></div><br class="figure-break">
+
+		<p>
+			<a href="getting-started.environment.html#figure.toolchain" title="Figure&nbsp;2.2.&nbsp;Development Toolchain and Process">Figure&nbsp;2.2, &ldquo;Development Toolchain and Process&rdquo;</a> illustrates the development
+			environment and process. You develop your application as an Eclipse
+			project. The project must include, in addition to your source code, the Vaadin
+			Library. It can also include your project-specific themes.
+		</p>
+
+		<p>
+			You must compile and deploy a project to a web container before you can use
+			use it. You can deploy a project through the Web Tools Platform for Eclipse,
+			which allows automatic deployment of web applications from Eclipse. You can
+			deploy a project also manually, by creating a web application archive (WAR)
+			and deploying it through the web container's interface.
+		</p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="getting-started.environment.java"></a>2.2.1.&nbsp;Installing Java SDK</h3></div></div></div>
+			
+
+			<p>
+				Java SDK is required by Vaadin and also by the Eclipse IDE.
+				Vaadin is compatible with Java 1.5	and later editions. 
+			</p>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N205CC"></a>Windows</h4></div></div></div>
+				
+
+				<div class="orderedlist"><ol type="1"><li>
+						<p>
+							Download Sun Java 2 Standard Edition 6.0 from 
+							<a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://java.sun.com/javase/downloads/index.jsp" target="_top">
+							http://java.sun.com/javase/downloads/index.jsp</a>
+						</p>
+					</li><li>
+						<p>
+							Install the Java SDK by running the installer. The default options 
+							are fine.
+						</p>
+					</li></ol></div>			 
+			</div>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N205E5"></a>Linux / UNIX</h4></div></div></div>
+				
+
+				<div class="orderedlist"><ol type="1"><li>
+						<p> 
+						Download Sun Java 2 Standard Edition 6.0 from <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://java.sun.com/javase/downloads/index.jsp" target="_top">
+						http://java.sun.com/javase/downloads/index.jsp</a>
+						</p>
+					</li><li>
+						<p>
+						Decompress it under a suitable base directory, such as
+					<code class="filename">/opt</code>. For example, for Java SDK, enter (either as
+					root or with <span><strong class="command">sudo</strong></span> in Linux):
+
+					<pre class="screen"><code class="prompt">#</code> <span><strong class="command">cd</strong></span> <em class="replaceable"><code>/opt</code></em>
+<code class="prompt">#</code> <span><strong class="command">sh</strong></span> <em class="replaceable"><code>(path-to-installation-package)/jdk-6u1-linux-i586.bin</code></em></pre>
+
+					and follow the instructions in the installer.
+						
+						</p>
+						</li></ol></div>
+			</div>
+		</div>
+		
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="getting-started.environment.eclipse"></a>2.2.2.&nbsp;Installing Eclipse IDE</h3></div></div></div>
+			
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N2061E"></a>Windows</h4></div></div></div>
+				
+
+				<div class="orderedlist"><p>
+						Eclipse is now installed in
+						<code class="filename">C:\dev\eclipse</code> and can be started from
+						there (by double clicking eclipse.exe).
+					</p><ol type="1"><li>
+						<p>
+							Download Eclipse IDE for Java EE Developers (Ganymede version) from 
+							<a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.eclipse.org/downloads/" target="_top">
+							http://www.eclipse.org/downloads/</a>
+						</p>
+					</li><li>
+						<p>
+							Decompress the Eclipse IDE package to a suitable
+							directory. You are free to select any directory and to use any
+							ZIP decompressor, but in this example we decompress the ZIP
+							file by just double-clicking it and selecting "Extract all
+							files" task from Windows compressed folder task. In our
+							installation example, we use <code class="filename">C:\dev</code> as
+							the target directory.
+						</p>
+					</li></ol></div>
+			</div>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N20640"></a>Linux / UNIX</h4></div></div></div>
+				
+
+				<p>
+					You have two basic options for installing Eclipse in Linux and UNIX:
+					you can either install it using the package manager of your
+					operating system or by downloading and installing the packages
+					manually. The <span class="emphasis"><em>manual installation method is
+					recommended</em></span>, because the latest versions of the packages
+					available in a Linux package repository may be incompatible with
+					Eclipse plugins that are not installed using the package
+					manager.
+				</p>
+
+			<div class="orderedlist"><ol type="1"><li>
+						<p>
+					Download Download Eclipse IDE for Java EE Developers (Ganymede version) from  
+							<a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.eclipse.org/downloads/" target="_top">
+								http://www.eclipse.org/downloads/</a>
+					</p>
+					</li><li>
+					<p>
+					Decompress the Eclipse package into a suitable base directory.  It is
+					important to make sure that there is no old Eclipse installation in the 
+					target directory. Installing a new version on top of an	old one probably 
+					renders Eclipse unusable.
+					</p>
+					</li><li>
+					<p>
+					Eclipse should normally be installed as a regular user, as this makes
+					installation of plugins easier. Eclipse also stores some user settings
+					in the installation directory. To install the package, enter:
+
+					<pre class="screen"><code class="prompt">$</code> <span><strong class="command">tar</strong></span> zxf <em class="replaceable"><code>(path-to-installation-package)/eclipse-jee-ganymede-SR2-linux-gtk.tar.gz</code></em></pre>
+
+					This will extract the package to a subdirectory with the name
+					<code class="filename">eclipse</code>.
+					</p>
+					</li><li>
+				<p>
+					You may wish to add the Eclipse installation directory and the
+					<code class="filename">bin</code> subdirectory in the installation directory of
+					Java SDK to your system or user PATH.
+				</p>
+				</li></ol></div>
+				
+				<p>
+					An alternative to the above procedure is to use the package management 
+					system of your operating system. For example, in Ubuntu Linux, which includes
+					Sun Java SDK and Eclipse in its APT repository, you can install the
+					programs from a package manager GUI or from command-line with a
+					command such as:
+				</p>
+
+					<pre class="screen"><code class="prompt">$</code> <span><strong class="command">sudo apt-get</strong></span> install sun-java6-jdk eclipse</pre>
+
+				<p>
+					This is, however, <span class="emphasis"><em>not recommended</em></span>, because the
+					Eclipse package may not include all the necessary Java EE tools, most
+					importantly the Web Standard Tools, and it may cause incompatibilities
+					with some components that are not installed with the package
+					management system of your operating system.
+				</p>
+
+			</div>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="getting-started.environment.tomcat"></a>2.2.3.&nbsp;Installing Apache Tomcat</h3></div></div></div>
+			
+
+			<p>
+				Apache Tomcat is a lightweight Java web server suitable for both
+				development and production. There are many ways to install it, but here we
+				simply decompress the installation package.
+			</p>
+
+			<p>
+				<span class="emphasis"><em>Apache Tomcat should be installed with user
+				permissions.</em></span> During development, you will be running 
+				Eclipse or some other IDE with user permissions, but deploying 
+				web applications to a Tomcat server that is installed system-wide 
+				requires administrator or root permissions.
+			</p>
+
+			<div class="orderedlist"><ol type="1"><li>
+					<p>
+						Download the installation package:
+					</p>
+					<p>
+						Apache Tomcat 6.0 (Core Binary Distribution) from
+						<code class="uri">http://tomcat.apache.org/</code>
+					</p>
+				</li><li>
+					<p>
+						Decompress Apache Tomcat package to a suitable target directory,
+						such as <code class="filename">C:\dev</code> (Windows) or
+						<code class="filename">/opt</code> (Linux or Mac OS X). The Apache Tomcat
+						home directory will be
+						<code class="filename">C:\dev\apache-tomcat-6.0.x</code> or
+						<code class="filename">/opt/apache-tomcat-6.0.x</code>,
+						respectively.
+					</p>
+				</li></ol></div>			 
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="getting-started.environment.firebug"></a>2.2.4.&nbsp;Firefox and Firebug</h3></div></div></div>
+			
+
+			<p>
+				Vaadin supports many web browsers and you can use any of them for
+				development. If you plan to create a custom theme, customized layouts or new
+				user interface components, we recommend that you use Firefox together with 
+				Firebug for debugging. Vaadin contains special support for Firebug
+				and can show debug information in its console.
+			</p>
+			
+			<p>
+				If you do not have Firefox installed already, go to <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.getfirefox.com/" target="_top">
+				www.getfirefox.com</a> and download and run the installer.
+			</p>
+
+			<p>
+				<span class="emphasis"><em>Optional</em></span>. After installing Firefox, use it to open <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.getfirebug.com/" target="_top"> http://www.getfirebug.com/</a>. Follow
+				the instructions on the site to install the latest stable version of Firebug 
+				available for the browser. You might need to tell Firefox to allow the installation
+				by clicking the yellow warning bar at the top of the browser-window.
+			</p>
+			
+			<p>When Firebug is installed, it can be enabled at any time from the bottom
+			right corner of the Firefox window. <a href="getting-started.environment.html#figure.firebug.calc" title="Figure&nbsp;2.3.&nbsp;Firebug Debugger for Firefox">Figure&nbsp;2.3, &ldquo;Firebug Debugger for Firefox&rdquo;</a> shows an example of what Firebug looks like.</p>
+
+			 <div class="figure"><a name="figure.firebug.calc"></a><p class="title"><b>Figure&nbsp;2.3.&nbsp;Firebug Debugger for Firefox</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/intro/firebug.png" align="middle" alt="Firebug Debugger for Firefox"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				Now that you have installed the development environment, you can proceed to
+				creating your first application.
+			</p>
+		</div>
+		
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="getting-started.environment.eclipse-plugin"></a>2.2.5.&nbsp;Vaadin Eclipse Plugin</h3></div></div></div>
+			
+	
+			<p>
+				You can develop Vaadin applications with any IDE or even without an IDE. For Eclipse IDE
+				users, Vaadin includes a special integration plugin that makes the development process easier. The plugin
+				includes wizards for creating new Vaadin-based projects, UI components (composites), themes,
+				client-side widgets and widgetsets. Plugin includes a WYSIWYG editor for editing your custom
+				UI components visually. It has a full round-trip support to make WYSIWYG editor integrate 
+				seamlessy to your development process. Plugin even includes a copy of this book to make 
+				it browseable directly inside Eclipse IDE.
+			</p>
+			
+			<p>
+				The plugin can be installed as follows:
+			</p>
+	
+			<div class="orderedlist"><ol type="1"><li>
+					Start Eclipse.
+				</li><li>
+						Select 
+						<span class="guimenu">Help</span> &rarr; <span class="guimenuitem">Software Updates...</span>.
+				</li><li>
+						Select <span class="guibutton">Available Software</span> tab.
+				</li><li>
+					Add the Vaadin plugin update-site by pressing <span class="guibutton">Add Site...</span>. The URL of
+					the site is <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://vaadin.com/eclipse" target="_top">http://vaadin.com/eclipse</a>.
+				</li><li>
+					Select to install all pluging on the Vaadin Update Site from the tree and press <span class="guibutton">Install...</span>
+				</li></ol></div>
+	
+			<p>
+				Detailed and up-to-date installation instructions for the Eclipse plugin can be found in 
+				<a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://vaadin.com/eclipse" target="_top">http://vaadin.com/eclipse</a>. 
+			</p>
+			
+			<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Eclipse plugin includes everything you need </h3>
+				
+	
+				The plugin includes Vaadin library and documentation. Thus it is not completely necessary
+				to download Vaadin distribution package if you are installing the plugin.
+			</div>
+	
+		</div>
+
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="getting-started.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="getting-started.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="getting-started.quickstart.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Chapter&nbsp;2.&nbsp;Getting Started with Vaadin&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;2.3.&nbsp;QuickStart with Eclipse</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

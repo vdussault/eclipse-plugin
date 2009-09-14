@@ -1,0 +1,169 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>5.15.&nbsp;Upload</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="components.html" title="Chapter&nbsp;5.&nbsp;User Interface Components"><link rel="prev" href="components.embedded.html" title="5.14.&nbsp;Embedded"><link rel="next" href="components.form.html" title="5.16.&nbsp;Form"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>5.15.&nbsp;Upload</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">5.15.&nbsp;<code class="classname">Upload</code></th></tr><tr><td align="left" width="20%"><a accesskey="p" href="components.embedded.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;5.&nbsp;User Interface Components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="components.form.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="components.upload"></a>5.15.&nbsp;<code class="classname">Upload</code></h2></div></div></div>
+		
+		
+		<p>
+			The <code class="classname">Upload</code> component allows a user to upload
+			files to the server. It displays a file name entry box, a file
+			selection button, and an upload submit button. The user can either
+			write the filename in the text area or click the <span class="guibutton">Browse</span> button to
+			select a file. After the file is selected, the user sends the file by
+			pressing the upload submit button.
+		</p>
+
+		<pre class="programlisting">// Create the Upload component.
+Upload upload = new Upload("Upload the file here", this);</pre>
+
+		<div class="figure"><a name="figure.ui.upload"></a><p class="title"><b>Figure&nbsp;5.27.&nbsp;Upload Component</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/components/upload.png" align="middle" alt="Upload Component"></div>
+		</div></div><br class="figure-break">
+
+		<p>
+			You can set the text of the upload button with
+			<code class="methodname">setButtonCaption()</code>, as in the example above, but it
+			is difficult to change the look of the <span class="guibutton">Browse</span>
+			button. This is a security feature of web browsers. The language of the
+			<span class="guibutton">Browse</span> button is determined by the browser, so if you
+			wish to have the language of the <code class="classname">Upload</code> component
+			consistent, you will have to use the same language in your application.
+		</p>
+
+		<pre class="programlisting">upload.setButtonCaption("Upload Now");</pre>
+
+		<p>
+			The uploaded files are typically stored as files in a file system, in
+			a database, or as temporary objects in memory. The upload component
+			writes the received data to an
+			<code class="classname">java.io.OutputStream</code> so you have plenty of
+			freedom in how you can process the upload content.
+		</p>
+		
+		<p>
+			To use the <code class="classname">Upload</code> component, you need to
+			define a class that implements the
+			<code class="classname">Upload.Receiver</code> interface. The
+			<code class="methodname">receiveUpload()</code> method is called when the
+			user clicks the submit button. The method must return an
+			<code class="classname">OutputStream</code>. To do this, it typically creates
+			a <code class="classname">File</code> or a memory buffer where the stream is
+			written. The method gets the file name and MIME type of the file, as
+			reported by the browser.
+		</p>
+
+		<p>
+			When an upload is finished, successfully or unsuccessfully, the
+			<code class="classname">Upload</code> component will emit the
+			<code class="classname">Upload.FinishedEvent</code> event. To receive it, you
+			need to implement the <code class="classname">Upload.FinishedListener</code>
+			interface, and register the listening object in the
+			<code class="classname">Upload</code> component. The event object will also
+			include the file name, MIME type, and length of the file. Notice that
+			the more specific <code class="classname">Upload.FailedEvent</code> and
+			<code class="classname">Upload.SucceededEvent</code> events will be called in
+			the cases where the upload failed or succeeded, respectively.
+		</p>
+
+		<p>
+			The following example allows uploading images to
+			<code class="filename">/tmp/uploads</code> directory in (UNIX) filesystem (the
+			directory must exist or the upload fails). The component displays the last
+			uploaded image in an <code class="classname">Embedded</code> component.
+		</p>
+
+		<pre class="programlisting">import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import com.vaadin.terminal.FileResource;
+import com.vaadin.ui.*;
+
+public class MyUploader extends CustomComponent
+                        implements Upload.SucceededListener,
+                                   Upload.FailedListener,
+                                   Upload.Receiver {
+
+    Panel root;         // Root element for contained components.
+    Panel imagePanel;   // Panel that contains the uploaded image.
+    File  file;         // File to write to.
+
+    MyUploader() {
+        root = new Panel("My Upload Component");
+        setCompositionRoot(root);
+
+        // Create the Upload component.
+        final Upload upload =
+                new Upload("Upload the file here", this);
+
+        // Use a custom button caption instead of plain "Upload".
+        upload.setButtonCaption("Upload Now");
+
+        // Listen for events regarding the success of upload.
+        upload.addListener((Upload.SucceededListener) this);
+        upload.addListener((Upload.FailedListener) this);
+
+        root.addComponent(upload);
+        root.addComponent(new Label("Click 'Browse' to "+
+                "select a file and then click 'Upload'."));
+
+        // Create a panel for displaying the uploaded image.
+        imagePanel = new Panel("Uploaded image");
+        imagePanel.addComponent(
+                         new Label("No image uploaded yet"));
+        root.addComponent(imagePanel);
+    }
+
+    // Callback method to begin receiving the upload.
+    public OutputStream receiveUpload(String filename,
+                                      String MIMEType) {
+        FileOutputStream fos = null; // Output stream to write to
+        file = new File("/tmp/uploads/" + filename);
+        try {
+            // Open the file for writing.
+            fos = new FileOutputStream(file);
+        } catch (final java.io.FileNotFoundException e) {
+            // Error while opening the file. Not reported here.
+            e.printStackTrace();
+            return null;
+        }
+
+        return fos; // Return the output stream to write to
+    }
+
+    // This is called if the upload is finished.
+    public void uploadSucceeded(Upload.SucceededEvent event) {
+        // Log the upload on screen.
+        root.addComponent(new Label("File " + event.getFilename()
+                + " of type '" + event.getMIMEType()
+                + "' uploaded."));
+        
+        // Display the uploaded file in the image panel.
+        final FileResource imageResource =
+                new FileResource(file, getApplication());
+        imagePanel.removeAllComponents();
+        imagePanel.addComponent(new Embedded("", imageResource));
+    }
+
+    // This is called if the upload fails.
+    public void uploadFailed(Upload.FailedEvent event) {
+        // Log the failure on screen.
+        root.addComponent(new Label("Uploading "
+                + event.getFilename() + " of type '"
+                + event.getMIMEType() + "' failed."));
+    }
+}</pre>
+
+		<p>
+			The example does not check the type of the uploaded files in any way, which
+			will cause an error if the content is anything else but an image. The program
+			also assumes that the MIME type of the file is resolved correctly based on the
+			file name extension. After uploading an image, the component will look as show
+			in <a href="components.upload.html#figure.ui.upload.example" title="Figure&nbsp;5.28.&nbsp;Image Upload Example">Figure&nbsp;5.28, &ldquo;Image Upload Example&rdquo;</a> below. The browser shows the
+			<span class="guibutton">Browse</span> button localized.
+		</p>
+
+        
+		<div class="figure"><a name="figure.ui.upload.example"></a><p class="title"><b>Figure&nbsp;5.28.&nbsp;Image Upload Example</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/components/upload-example.png" align="middle" alt="Image Upload Example"></div>
+		</div></div><br class="figure-break">
+
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="components.embedded.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="components.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="components.form.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">5.14.&nbsp;<code class="classname">Embedded</code>&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;5.16.&nbsp;<code class="classname">Form</code></td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

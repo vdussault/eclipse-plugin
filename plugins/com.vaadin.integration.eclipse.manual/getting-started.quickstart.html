@@ -1,0 +1,324 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>2.3.&nbsp;QuickStart with Eclipse</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="getting-started.html" title="Chapter&nbsp;2.&nbsp;Getting Started with Vaadin"><link rel="prev" href="getting-started.environment.html" title="2.2.&nbsp;Setting up the Development Environment"><link rel="next" href="getting-started.first-project.html" title="2.4.&nbsp;Your First Project with Vaadin"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>2.3.&nbsp;QuickStart with Eclipse</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">2.3.&nbsp;QuickStart with Eclipse</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="getting-started.environment.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;2.&nbsp;Getting Started with Vaadin</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="getting-started.first-project.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="getting-started.quickstart"></a>2.3.&nbsp;QuickStart with Eclipse</h2></div></div></div>
+		
+
+		<p>
+			Eager to start developing you own applications using Vaadin? This section 
+			presents a QuickStart into running and debugging Vaadin demos under Eclipse. 
+			The	QuickStart includes a web server, so you do not need to have a full-weight
+			web container such as Apache Tomcat installed.
+		</p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N20747"></a>2.3.1.&nbsp;Starting Eclipse</h3></div></div></div>
+			
+			
+			<p>
+				If you have followed the instructions in <a href="getting-started.environment.html" title="2.2.&nbsp;Setting up the Development Environment">Section&nbsp;2.2, &ldquo;Setting up the Development Environment&rdquo;</a> you can start Eclipse by
+				running <code class="filename">C:\dev\eclipse\eclipse.exe</code> (Windows)
+				or <code class="filename">/opt/eclipse/eclipse</code> (Linux or OS X).
+			</p>
+
+			<p>
+				When starting Eclipse for the first time, it asks where to save
+				the workspace. You can select any directory, but here we select
+				<code class="filename"> C:\dev\workspace</code> (Windows) or
+				<code class="filename">/home/&lt;user&gt;/workspace</code> (Linux or OS
+				X). We suggest that you also set this as the default.
+			</p>
+
+			<p>
+				Close the Eclipse "Welcome" -screen when you are ready to continue.
+			</p>
+			
+		</div>
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N20765"></a>2.3.2.&nbsp;Importing Vaadin as a Project</h3></div></div></div>
+			
+
+			<p>
+				If you have not yet downloaded the Vaadin package, instructions
+				for downloading and unpacking are available at <a href="getting-started.html#getting-started.package.installing" title="2.1.1.&nbsp;Installing the Installation Package">Section&nbsp;2.1.1, &ldquo;Installing the Installation Package&rdquo;</a>.
+			</p>
+			
+			<p>
+				The installation directory of Vaadin contains all necessary
+				files to allow importing it as a ready-to-run Eclipse project:
+			</p>
+
+			<div class="orderedlist"><ol type="1"><li>
+					<p>
+						Start Eclipse with any workspace you like. Switch to the Java Perspective 
+						through 
+						<span class="guimenu">Window</span> &rarr; <span class="guisubmenu">Open
+						Perspective</span> &rarr; <span class="guimenuitem">Java</span>.
+					</p>
+				</li><li>
+					<p>
+						Select <span class="guimenu">File</span> &rarr; <span class="guimenuitem">Import...</span> to open the import dialog.
+					</p>
+				</li><li>
+					<p>
+						In the <span class="guilabel">Import</span> dialog, select
+						<span class="guimenu">General</span> &rarr; <span class="guimenuitem">Existing
+						Projects into Workspace</span> and click
+						<span class="guibutton">Next</span>.
+					</p>
+				</li><li>
+					<p>
+						In the <span class="guimenuitem">Select root
+						directory</span> option, click the
+						<span class="guibutton">Browse</span> button, and select the folder where
+						you unpacked Vaadin, e.g. 
+						<code class="filename">c:/dev/vaadin-windows-6.x.x</code>. Click
+						<span class="guibutton">OK</span> in the selection window. The Projects list 
+						now shows a project named <span class="guilabel">vaadin-examples</span>. 
+						Click <span class="guibutton">Finish</span> in the <span class="guilabel">Import</span>
+						window to finish importing the project.
+					</p>
+
+					<p>
+						The newly imported project should look like <a href="getting-started.quickstart.html#figure.toolkit-example-eclipse-project" title="Figure&nbsp;2.4.&nbsp;Vaadin demo project imported into Eclipse">Figure&nbsp;2.4, &ldquo;Vaadin demo project imported into Eclipse&rdquo;</a>.
+					</p>
+
+					<div class="figure"><a name="figure.toolkit-example-eclipse-project"></a><p class="title"><b>Figure&nbsp;2.4.&nbsp;Vaadin demo project imported into Eclipse</b></p><div class="figure-contents">
+						
+						<div class="mediaobject" align="center"><img src="img/intro/quickstart-newproject4.png" align="middle" alt="Vaadin demo project imported into Eclipse"></div>
+					</div></div><br class="figure-break">
+
+					<p>
+						You can now browse the source code of the demo applications in Eclipse. 
+						The next section describes how you can run the demos.
+					</p>
+				</li></ol></div>
+
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="getting-started.quickstart.demo.run"></a>2.3.3.&nbsp;Running the Demo Applications in Eclipse</h3></div></div></div>
+			
+
+			<p>
+				Once the project is imported, as described above, you can run the Content
+				Browser, including the demo applications, as follows:
+			</p>
+
+			<div class="orderedlist"><ol type="1"><li>
+					From the main menu, select
+					<span class="guimenu">Run</span> &rarr; <span class="guimenuitem">Run
+					Configurations...</span>.
+				</li><li>
+					From the list on the left, select <span class="guimenu">Java
+					Application</span> &rarr; <span class="guimenuitem">Vaadin Web
+					Mode</span>.
+				</li><li>
+					Click <span class="guibutton">Run</span>.
+				</li></ol></div>
+
+			<p>
+				Note that after the application has been launched once, it appears in the
+				Favorites list. You can then click on the small dropdown arrow on the right side of the
+				<span class="guibutton">Run</span> button on Eclipse toolbar and select
+				<span class="guimenuitem">Vaadin Web Mode</span>.
+			</p>
+
+			<div class="screenshot">
+				<div class="mediaobject" align="center"><img src="img/intro/quickstart-rundemo1.png" align="middle"></div>
+			</div>
+			
+			<p>
+				Running the application in Web Mode will start an embedded web server and 
+				open a browser window with the Content Browser. The default system web 
+				browser is opened; make sure that the browser is compatible with 
+				Vaadin. The <span class="guilabel">Console</span> view in the lower pane 
+				of Eclipse will	display text printed to standard output by the application. 
+				Clicking on	the red <span class="guibutton">Terminate</span> button will stop the server.
+			</p>
+
+			<div class="figure"><a name="N20835"></a><p class="title"><b>Figure&nbsp;2.5.&nbsp;Vaadin Content Browser Started Under Eclipse</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/intro/quickstart-rundemo3.png" align="middle" alt="Vaadin Content Browser Started Under Eclipse"></div>
+			</div></div><br class="figure-break">
+
+
+			<p>
+				Note that executing the web application locally may cause a security
+				warning from your firewall software because of the started web server.
+				You need to allow connections to port 8888 for the Content Browser to work.
+				Also, if the web service fails to start, make sure that no other
+				service is using port 8888.
+			</p>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N20854"></a>Launching the Hosted Mode Browser</h4></div></div></div>
+				
+
+				<p>
+					The Hosted Mode Browser of Google Web Toolkit is a special web browser
+					that runs the client-side GWT Java code as Java runtime instead of
+					JavaScript. This allows you to debug the client-side components
+					in an IDE such as Eclipse.
+				</p>
+
+				<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Hosted Mode Browser in Linux</h3>
+					
+					
+					The Hosted Mode Browser in Google Web Toolkit 1.5.62/Linux is 
+					not compatible with Vaadin. If you want to debug client-side code
+					in Linux you should download the experimental OOPHM-version of Vaadin.
+					This contains a newer GWT which supports using a normal browser for debugging.
+					This is explained more in <a href="gwt.development.html#gwt.development.oophm" title="9.7.7.&nbsp;Out of Process Hosted Mode (OOPHM)">Section&nbsp;9.7.7, &ldquo;Out of Process Hosted Mode (OOPHM)&rdquo;</a>.
+					<span class="emphasis"><em>Note that you should not use the OOPHM version of Vaadin in production
+					environments, only for debugging.</em></span>
+				</div>
+
+				<p>
+					To run the demo applications in the Hosted Mode Browser of Google Web
+					Toolkit, follow the following steps:
+				</p>
+
+				<div class="orderedlist"><ol type="1"><li>
+						If not already started, start the demo application in Web Mode as
+						described above. We only need the server so close the web browser which is
+						automatically opened.
+					</li><li>
+						From the main menu, select
+						<span class="guimenu">Run</span> &rarr; <span class="guimenuitem">Debug Configurations...
+						</span>.
+					</li><li>
+						From the list select <span class="guimenu">Java
+						Application</span> &rarr; <span class="guimenuitem">Vaadin Hosted
+						Mode</span>.
+					</li><li>
+						Click <span class="guibutton">Debug</span>.
+					</li></ol></div>
+
+				<p>
+					<span class="strong"><strong>Starting demo applications under the Hosted
+					Mode Browser can take considerable time!</strong></span> This is especially
+					true for the Reservation and Color Picker applications, which require
+					compilation of custom widget sets. During this time, the Hosted Mode
+					Browser is unresponsive and does not update its window. Compiling widget sets
+					can take 5-30 seconds, depending on the hardware.
+				</p>
+
+				<p>
+					As with the Web Mode launcher, after you have run the Hosted Mode launcher once, 
+					you	can click the dropdown marker on right of the <span class="guibutton">Debug</span> 
+					button in the toolbar and select <span class="guimenuitem">Vaadin Hosted Mode</span>.
+				</p>
+
+				<p>
+					To use the Hosted Mode Browser in other projects, you need to
+					create a launch configuration in Eclipse. See <a href="gwt.development.html#gwt.hosted-mode" title="9.7.6.&nbsp;Hosted Mode Browser">Section&nbsp;9.7.6, &ldquo;Hosted Mode Browser&rdquo;</a> for more detailed information
+					about the Hosted Mode Browser and how to create the launch
+					configuration.
+				</p>
+			</div>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N208A0"></a>How to Stop the Run</h4></div></div></div>
+				
+
+				<p>
+					To stop the launched Jetty web container that serves the Content
+					Browser web application, select the <span class="guilabel">Console</span> tab
+					and click on the <span class="guibutton">Terminate</span> button.
+				</p>
+
+				<div class="figure"><a name="N208AE"></a><p class="title"><b>Figure&nbsp;2.6.&nbsp;Terminating a Launch</b></p><div class="figure-contents">
+					
+					<div class="mediaobject" align="center"><img src="img/intro/quickstart-stopdemo1.png" align="middle" alt="Terminating a Launch"></div>
+				</div></div><br class="figure-break">
+
+				<p>
+					To clean up all terminated launches from the
+					<span class="guilabel">Console</span> window, click on the <span class="guibutton">Remove
+					All Terminated Launches</span> button.
+				</p>
+
+				<div class="figure"><a name="N208D2"></a><p class="title"><b>Figure&nbsp;2.7.&nbsp;Removing Terminated Launches</b></p><div class="figure-contents">
+					
+					<div class="mediaobject" align="center"><img src="img/intro/quickstart-stopdemo2.png" align="middle" alt="Removing Terminated Launches"></div>
+				</div></div><br class="figure-break">
+			</div>
+
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="getting-started.quickstart.demo.debug"></a>2.3.4.&nbsp;Debugging the Demo Applications in Eclipse</h3></div></div></div>
+			
+			
+			<p>
+				At some point when developing an application, you want to debug it. Running a web
+				application in debug mode is easy in Eclipse. Next, we will show you how to debug
+				the demo applications by inserting a breakpoint in the Calc example.
+			</p>
+
+			<div class="orderedlist"><ol type="1"><li>
+					Make sure to stop any previous <span class="guilabel">Run</span> command as
+					instructed above at the end of <a href="getting-started.quickstart.html#getting-started.quickstart.demo.run" title="2.3.3.&nbsp;Running the Demo Applications in Eclipse">Section&nbsp;2.3.3, &ldquo;Running the Demo Applications in Eclipse&rdquo;</a>.
+				</li><li>
+					<p>
+						Select 
+						<span class="guimenu">Run</span> &rarr; <span class="guimenuitem">Debug Configurations...</span>
+						from the main menu and the Debug configuration window will open.
+					</p>
+				</li><li>
+					<p>
+						Select <span class="guimenu">Java
+						Application</span> &rarr; <span class="guimenuitem">Vaadin Web
+						Mode</span> and click
+						<span class="guibutton">Debug</span>. The server will start and the web
+						browser will open.
+					</p>
+				</li><li>
+					<p>
+						Open the source code for the Calc program. It is located in
+						<code class="filename">WebContent/WEB-INF/src/com.vaadin.demo.Calc</code>. 
+						<code class="filename">WebContent/WEB-INF/src</code> is the project's source folder, 
+						shown right below the JRE System Library. Double-click
+						the class to open the source code in the editor.
+					</p>
+				</li><li>
+					<p>
+						Insert a breakpoint in the <code class="methodname">init()</code> 
+						by right-clicking on the gray bar on the left of the editor window
+						to open the context menu, and select
+						<span class="guimenuitem">Toggle
+						Breakpoint</span>.
+					</p>
+				</li><li>
+					<p>
+						Switch to the browser window and click the
+						<span class="guibutton">Calc</span> link (below 
+						<span class="guilabel">More Examples</span>) to open it.
+					</p>
+				</li><li>
+					<p>
+						Eclipse encouters the breakpoint and asks to switch to the Debug
+						perspective. Click <span class="guibutton">Yes</span>. The debug window
+						will show the current line where the execution stopped as 
+						illustrated in <a href="getting-started.quickstart.html#figure.getting-started.quickstart.debug" title="Figure&nbsp;2.8.&nbsp;Execution Stopped at Breakpoint in Debug Perspective in Eclipse">Figure&nbsp;2.8, &ldquo;Execution Stopped at Breakpoint in Debug Perspective in Eclipse&rdquo;</a>:
+					</p>
+
+					<div class="figure"><a name="figure.getting-started.quickstart.debug"></a><p class="title"><b>Figure&nbsp;2.8.&nbsp;Execution Stopped at Breakpoint in Debug Perspective in Eclipse</b></p><div class="figure-contents">
+						
+						<div class="mediaobject" align="center"><img src="img/intro/quickstart-debug-stopped.png" align="middle" alt="Execution Stopped at Breakpoint in Debug Perspective in Eclipse"></div>
+					</div></div><br class="figure-break">
+				</li><li>
+					<p>
+						You can now step forward or use any commands you would normally use when debugging an application in Eclipse.
+						Note that you can only debug the application code in this way. If you are running the Hosted Mode browser
+						you can also insert break-points in client side component code and debug it.  
+					</p>
+				</li></ol></div>
+		</div>
+		
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="getting-started.quickstart.skeleton"></a>2.3.5.&nbsp;Using QuickStart as a Project Skeleton</h3></div></div></div>
+			
+
+			<p>
+				If you like, you can also use the imported Vaadin demo project
+				as a skeleton for your own project. Just remove any unnecessary files or 
+				files related to the demo applications from the project. 
+				
+				The proper way of creating a new Vaadin project will be described in the next section:
+				<a href="getting-started.first-project.html" title="2.4.&nbsp;Your First Project with Vaadin">Section&nbsp;2.4, &ldquo;Your First Project with Vaadin&rdquo;</a>.
+			</p>
+
+		</div>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="getting-started.environment.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="getting-started.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="getting-started.first-project.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">2.2.&nbsp;Setting up the Development Environment&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;2.4.&nbsp;Your First Project with Vaadin</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

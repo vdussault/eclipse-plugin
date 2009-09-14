@@ -1,0 +1,241 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>6.4.&nbsp;GridLayout</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="layout.html" title="Chapter&nbsp;6.&nbsp;Managing Layout"><link rel="prev" href="layout.components.orderedlayout.html" title="6.3.&nbsp;VerticalLayout and HorizontalLayout"><link rel="next" href="layout.components.formlayout.html" title="6.5.&nbsp;FormLayout"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>6.4.&nbsp;GridLayout</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">6.4.&nbsp;<code class="classname">GridLayout</code></th></tr><tr><td align="left" width="20%"><a accesskey="p" href="layout.components.orderedlayout.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;6.&nbsp;Managing Layout</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="layout.components.formlayout.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="layout.components.gridlayout"></a>6.4.&nbsp;<code class="classname">GridLayout</code></h2></div></div></div>
+        
+        
+        <p>
+            <code class="classname">GridLayout</code> container lays components out on a grid
+            of defined width and height. The columns and rows of the grid serve as
+            coordinates that are used for laying out components on the grid. Each
+            component can use multiple cells from the grid, defined as an area
+            (x1,y1,x2,y2), although they typically take up only a single grid cell.
+        </p>
+        
+        <p>
+            The grid layout maintains a cursor for adding components in left-to-right,
+            top-to-bottom order. If the cursor goes past the bottom-right corner, it
+            will automatically extend the grid downwards.
+        </p>
+        
+        <p>
+            The following example demonstrates the use of
+            <code class="classname">GridLayout</code>. The
+            <code class="methodname">addComponent</code> takes a component and optional
+            coordinates. The coordinates can be given for a single cell or for an area
+            in x,y (column,row) order. The coordinate values have a base value of
+            0. If coordinates are not given, the cursor will be used.
+        </p>
+        
+        <pre class="programlisting">/* Create a 4 by 4 grid layout. */
+GridLayout grid = new GridLayout(4, 4);
+grid.addStyleName("example-gridlayout");
+
+/* Fill out the first row using the cursor. */
+grid.addComponent(new Button("R/C 1"));
+for (int i = 0; i &lt; 3; i++) {
+    grid.addComponent(new Button("Col " + (grid.getCursorX() + 1)));
+}
+
+/* Fill out the first column using coordinates. */
+for (int i = 1; i &lt; 4; i++) {
+    grid.addComponent(new Button("Row " + i), 0, i);
+}
+
+/* Add some components of various shapes. */
+grid.addComponent(new Button("3x1 button"), 1, 1, 3, 1);
+grid.addComponent(new Label("1x2 cell"), 1, 2, 1, 3);
+InlineDateField date = new InlineDateField("A 2x2 date field");
+date.setResolution(DateField.RESOLUTION_DAY);
+grid.addComponent(date, 2, 2, 3, 3);</pre>
+
+        <p>
+            The resulting layout will look as follows. The borders have been
+            made visible to illustrate the layout cells.
+        </p>
+        
+        <div class="figure"><a name="figure.ui.gridlayout"></a><p class="title"><b>Figure&nbsp;6.3.&nbsp;The Grid Layout Component</b></p><div class="figure-contents">
+            
+            <div class="mediaobject" align="center"><img src="img/layout/gridlayout.png" align="middle" alt="The Grid Layout Component"></div>
+        </div></div><br class="figure-break">
+
+        <p>
+            A component to be placed on the grid must not overlap with existing
+            components. A conflict causes throwing a
+            <code class="classname">GridLayout.OverlapsException</code>.
+        </p>
+
+        <div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N22837"></a>6.4.1.&nbsp;Sizing Grid Cells</h3></div></div></div>
+            
+            
+            <p>
+                You can define the size of both a grid layout and its components in
+                either fixed or percentual units, or leave the size undefined
+                altogether, as described in <a href="components.features.html#components.features.sizeable" title="5.2.1.&nbsp;Sizing Components">Section&nbsp;5.2.1, &ldquo;Sizing Components&rdquo;</a>. <a href="layout.settings.html#layout.settings.size" title="6.10.1.&nbsp;Layout Size">Section&nbsp;6.10.1, &ldquo;Layout Size&rdquo;</a> gives an introduction to sizing of
+                layouts.
+            </p>
+
+            <p>
+                The size of the <code class="classname">GridLayout</code> component is
+                undefined by default, so it will shrink to fit the size of the
+                components placed inside it. In most cases, especially if you set a
+                defined size for the layout but do not set the contained components to
+                full size, there will be some unused space. The position of the
+                non-full components within the grid cells will be determined by their
+                <span class="emphasis"><em>alignment</em></span>. See <a href="layout.settings.html#layout.settings.alignment" title="6.10.2.&nbsp;Layout Cell Alignment">Section&nbsp;6.10.2, &ldquo;Layout Cell Alignment&rdquo;</a> for details on how to align the
+                components inside the cells.
+            </p>
+            
+            <p>
+                The components contained within a <code class="classname">GridLayout</code>
+                layout can be laid out in a number of different ways depending on how
+                you specify their height or width. The layout options are similar to
+                <code class="classname">HorizontalLayout</code> and
+                <code class="classname">VerticalLayout</code>, as described in <a href="layout.components.orderedlayout.html" title="6.3.&nbsp;VerticalLayout and HorizontalLayout">Section&nbsp;6.3, &ldquo;<code class="classname">VerticalLayout</code> and <code class="classname">HorizontalLayout</code>&rdquo;</a>.
+            </p>
+            
+            <p>
+                <span class="bold"><strong>Warning:</strong></span> <span class="emphasis"><em>A layout that
+					contains components with percentual size must have a defined
+					size</em></span>! If a layout has undefined size and component has,
+                say, 100% size, the component would fill the space given by the
+                layout, while the layout would shrink to fit the space taken by the
+                component, which is a paradox. This requirement holds for height and
+                width separately. The debug mode allows detecting such invalid cases;
+                see <a href="advanced.debug-production-modes.html#advanced.debug-production-modes.debug.mode" title="10.4.1.&nbsp;Debug Mode">Section&nbsp;10.4.1, &ldquo;Debug Mode&rdquo;</a>.
+            </p>
+
+            <p>
+                Often, you want to have one or more rows or columns that take all the
+                available space left over from non-expanding rows or columns. You need
+                to set the rows or columns as <span class="emphasis"><em>expanding</em></span> with
+                <code class="methodname">setRowExpandRatio()</code> and
+                <code class="methodname">setColumnExpandRatio()</code>. The first parameter
+                for these methods is the index of the row or column to set as
+                expanding. The second parameter for the methods is an expansion ratio,
+                which is relevant if there are more than one expanding row or column,
+                but its value is irrelevant if there is only one. With multiple
+                expanding rows or columns, the ratio parameter sets the relative
+                portion how much a specific row/column will take in relation with the
+                other expanding rows/columns.
+            </p>
+
+            <pre class="programlisting">GridLayout grid = new GridLayout(3,2);
+grid.addStyleName("gridexpandratio");
+
+// Layout containing relatively sized components must have a defined size.
+grid.setWidth("600px");
+grid.setHeight("200px");
+
+// Add content
+grid.addComponent(new Label("Shrinking column&lt;br/&gt;Shrinking row", Label.CONTENT_XHTML));
+grid.addComponent(new Label("Expanding column (1:)&lt;br/&gt;Shrinking row", Label.CONTENT_XHTML));
+grid.addComponent(new Label("Expanding column (5:)&lt;br/&gt;Shrinking row", Label.CONTENT_XHTML));
+
+grid.addComponent(new Label("Shrinking column&lt;br/&gt;Expanding row", Label.CONTENT_XHTML));
+grid.addComponent(new Label("Expanding column (1:)&lt;br/&gt;Expanding row", Label.CONTENT_XHTML));
+grid.addComponent(new Label("Expanding column (5:)&lt;br/&gt;Expanding row", Label.CONTENT_XHTML));
+
+// Set different expansion ratios for the two columns
+grid.setColumnExpandRatio(1, 1);
+grid.setColumnExpandRatio(2, 5);
+
+// Set the bottom row to expand
+grid.setRowExpandRatio(1, 1);
+
+// Align and size the labels.
+for (int col=0; col&lt;grid.getColumns(); col++) {
+    for (int row=0; row&lt;grid.getRows(); row++) {
+        Component c = grid.getComponent(col, row);
+        grid.setComponentAlignment(c, Alignment.TOP_CENTER);
+        
+        // Make the labels high to illustrate the empty horizontal space.
+        if (col != 0 || row != 0) {
+            c.setHeight("100%");
+        }
+    }
+}</pre>
+
+            <div class="figure"><a name="figure.ui.gridlayout.sizing.expanding"></a><p class="title"><b>Figure&nbsp;6.4.&nbsp;Expanding Rows and Columns in <code class="classname">GridLayout</code></b></p><div class="figure-contents">
+                
+                <div class="mediaobject" align="center"><img src="img/layout/gridlayout_sizing_expanding.png" align="middle" alt="Expanding Rows and Columns in GridLayout"></div>
+            </div></div><br class="figure-break">
+
+            <p>
+                If the size of the contained components is undefined or fixed, the
+                expansion ratio is of the <span class="emphasis"><em>excess</em></span> space, as in
+                <a href="layout.components.gridlayout.html#figure.ui.gridlayout.sizing.expanding" title="Figure&nbsp;6.4.&nbsp;Expanding Rows and Columns in GridLayout">Figure&nbsp;6.4, &ldquo;Expanding Rows and Columns in <code class="classname">GridLayout</code>&rdquo;</a> (excess
+                horizontal space shown in white). However, if the size of the all the
+                contained components in the expanding rows or columns is defined as a
+                percentage, the ratio is calculated from the
+                <span class="emphasis"><em>overall</em></span> space available for the percentually
+                sized components. For example, if we had a 100 pixels wide grid layout
+                with two columns with 1.0 and 4.0 respective expansion ratios, and all
+                the components in the grid were set as
+                <code class="methodname">setWidth("100%")</code>, the columns would have
+                respective widths of 20 and 80 pixels, regardless of the minimum size
+                of their contained components.
+            </p>
+            
+        </div>
+        
+        <div class="simplesect" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N2289F"></a>CSS Style Rules</h3></div></div></div>
+            
+            
+            <pre class="programlisting">.v-gridlayout {}
+.v-gridlayout-margin {}</pre>
+
+            <p>
+                The <span class="markup">v-gridlayout</span> is the root element of the
+                <code class="classname">GridLayout</code> component. The
+                <span class="markup">v-gridlayout-margin</span> is a simple element inside it
+                that allows setting a padding between the outer element and the cells.
+            </p>
+
+            <p>
+                For styling the individual grid cells, you should style the components
+                inserted in the cells. The implementation structure of the grid can
+                change, so depending on it, as is done in the example below, is not
+                generally recommended. Normally, if you want to have, for example, a
+                different color for a certain cell, just make set the component inside
+                it <code class="methodname">setSizeFull()</code>, and add a style name for
+                it. Sometimes you may need to use a layout component between a cell
+                and its actual component just for styling.
+            </p>
+
+            <p>
+                The following example shows how to make the grid borders visible, as
+                in <a href="layout.components.gridlayout.html#figure.ui.gridlayout.sizing.expanding" title="Figure&nbsp;6.4.&nbsp;Expanding Rows and Columns in GridLayout">Figure&nbsp;6.4, &ldquo;Expanding Rows and Columns in <code class="classname">GridLayout</code>&rdquo;</a>.
+            </p>
+            
+            <pre class="programlisting">.v-gridlayout-gridexpandratio {
+    background: blue; /* Creates a "border" around the layout grid. */
+    margin:     10px; /* Empty space around the layout. */
+}
+
+/* Add padding through which the background color of the grid shows. */
+.v-gridlayout-gridexpandratio .v-gridlayout-margin {
+    padding: 2px;     
+}
+
+/* Add cell borders and make the cell backgrounds white.
+ * Warning: This depends heavily on the HTML structure. */
+.v-gridlayout-gridexpandratio &gt; div &gt; div &gt; div {
+    padding:    2px;   /* Layout's background will show through. */
+    background: white; /* The cells will be colored white. */
+}
+
+/* Components inside the layout. This is a safe way to style the cells. */
+.v-gridlayout-gridexpandratio .v-label {
+    text-align: left;
+    background: #ffffc0; /* Pale yellow */
+}</pre>
+            
+            <p>
+                You should beware of <code class="literal">margin</code>,
+                <code class="literal">padding</code>, and <code class="literal">border</code> settings in
+                CSS as they can mess up the layout. The dimensions of layouts are
+                calculated in the Client-Side Engine of Vaadin and some
+                settings can interfere with these calculations. For more information,
+                on margins and spacing, see <a href="layout.settings.html#layout.settings.spacing" title="6.10.3.&nbsp;Layout Cell Spacing">Section&nbsp;6.10.3, &ldquo;Layout Cell Spacing&rdquo;</a>
+                and <a href="layout.settings.html#layout.settings.margins" title="6.10.4.&nbsp;Layout Margins">Section&nbsp;6.10.4, &ldquo;Layout Margins&rdquo;</a>
+            </p>
+        </div>
+    </div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="layout.components.orderedlayout.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="layout.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="layout.components.formlayout.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">6.3.&nbsp;<code class="classname">VerticalLayout</code> and <code class="classname">HorizontalLayout</code>&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;6.5.&nbsp;<code class="classname">FormLayout</code></td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

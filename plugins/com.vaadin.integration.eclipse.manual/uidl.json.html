@@ -1,0 +1,92 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>A.2.&nbsp;JSON Rendering</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="uidl.html" title="Appendix&nbsp;A.&nbsp;User Interface Definition Language (UIDL)"><link rel="prev" href="uidl.html" title="Appendix&nbsp;A.&nbsp;User Interface Definition Language (UIDL)"><link rel="next" href="vaadin.html" title="Appendix&nbsp;B.&nbsp;Songs of Vaadin"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>A.2.&nbsp;JSON Rendering</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">A.2.&nbsp;JSON Rendering</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="uidl.html">Prev</a>&nbsp;</td><th align="center" width="60%">Appendix&nbsp;A.&nbsp;User Interface Definition Language (UIDL)</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="vaadin.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="uidl.json"></a>A.2.&nbsp;JSON Rendering</h2></div></div></div>
+		
+
+		<p>
+			Vaadin 5 uses JSON, a lightweight data-interchange format, to communicate UI
+			rendering with the browser, because it is very fast to parse compared to
+			XML. JSON messages are essentially JavaScript statements that can be directly
+			evaluated by the browser. The client-side engine of Vaadin parses and
+			evaluates the UIDL messages with the JSON library that comes with the Google
+			Web Toolkit.
+		</p>
+
+		<p>
+			<a href="architecture.technology.html#architecture.technology.json" title="3.2.3.&nbsp;JSON">Section&nbsp;3.2.3, &ldquo;JSON&rdquo;</a> gave a general introduction to
+			JSON as part of the architecture of Vaadin. In this section, we look
+			into the technical details of the format. The technical details of the JSON
+			messages are useful mainly for debugging purposes, for example using the
+			Firebug plugin for Mozilla Firefox.
+		</p>
+
+		<p>
+			To view a UIDL message, open the Firebug panel in Firefox, select
+			<span class="guilabel">Net</span> tab, select a "<code class="literal">POST UIDL</code>" request,
+			open the <span class="guilabel">Response</span> tab, and click <span class="guibutton">Load
+			Response</span>. This displays the entire UIDL message, as shown in <a href="uidl.json.html#figure.uidl.json.firebug" title="Figure&nbsp;A.1.&nbsp;Debugging UIDL Messages with Firebug">Figure&nbsp;A.1, &ldquo;Debugging UIDL Messages with Firebug&rdquo;</a> below.
+		</p>
+
+		<div class="figure"><a name="figure.uidl.json.firebug"></a><p class="title"><b>Figure&nbsp;A.1.&nbsp;Debugging UIDL Messages with Firebug</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/debug/firebug-net-uidl.png" align="middle" alt="Debugging UIDL Messages with Firebug"></div>
+		</div></div><br class="figure-break">
+
+		<p>
+			JSON messages are represented as nested lists and associative arrays (objects
+			with named properties) in JavaScript syntax. At the top level, we can find an
+			associative array with the following fields:
+		</p>
+
+		<div class="variablelist"><dl><dt><span class="term">changes</span></dt><dd>
+					<p>Changes to the UI caused by the request.</p>
+				</dd><dt><span class="term">meta</span></dt><dd>
+					<p>Meta-information regarding the response and the application
+					state.</p>
+				</dd><dt><span class="term">resources</span></dt><dd>
+					<p>Information about application resources.</p>
+				</dd><dt><span class="term">locales</span></dt><dd>
+					<p>Locale-specific data for locale-dependent components, such as
+					names of months and weekdays.</p>
+				</dd></dl></div>
+
+		<p>
+			The "<code class="literal">changes</code>" field contains the actual UI changes as a
+			list of components. Components that can contain other components are
+			represented in a recursive list structure.
+		</p>
+
+		<p>
+			A component is represented as a list that first contains the UIDL tag of the
+			component, which identifies its class, followed by data fields. The basic
+			representation of component data as attributes and variables is defined in the
+			base classes of the framework. Attributes are represented as an associative
+			array and variables as a separate associative array inside the special
+			"<code class="literal">v</code>" attribute. For example, a <code class="classname">Button</code>
+			component is communicated with a JSON representation such as the following:
+		</p>
+
+		<pre class="programlisting">["button",
+ {"id": "PID5",
+  "immediate": true,
+  "caption": "7",
+  "v":{"state":false}}
+] </pre>
+
+		<p>
+			A component can give its data also in additional fields in the list instead of
+			the attributes or variables, as is done for the <code class="classname">Label</code>
+			component:
+		</p>
+
+		<pre class="programlisting">["label",
+ {"id": "PID4",
+  "width": "100.0%"},
+ "Some text here"] </pre>
+
+		<p>
+			The meta-information field can contain certain types of information, which are
+			not displayed in the UI, but used by the client-side engine. The
+			<code class="literal">repaintAll</code> parameter tells that the changes include the
+			entire window contents, not just partial changes. Other data includes
+			redirection details for expired sessions.
+		</p>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="uidl.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="uidl.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="vaadin.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Appendix&nbsp;A.&nbsp;User Interface Definition Language (UIDL)&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Appendix&nbsp;B.&nbsp;Songs of Vaadin</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

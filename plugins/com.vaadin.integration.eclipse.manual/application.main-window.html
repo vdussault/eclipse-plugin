@@ -1,0 +1,48 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>4.2.&nbsp;Managing the Main Window</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="application.html" title="Chapter&nbsp;4.&nbsp;Writing a Web Application"><link rel="prev" href="application.html" title="Chapter&nbsp;4.&nbsp;Writing a Web Application"><link rel="next" href="application.child-windows.html" title="4.3.&nbsp;Child Windows"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>4.2.&nbsp;Managing the Main Window</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">4.2.&nbsp;Managing the Main Window</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="application.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;4.&nbsp;Writing a Web Application</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="application.child-windows.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="application.main-window"></a>4.2.&nbsp;Managing the Main Window</h2></div></div></div>
+		
+
+		<p>
+			As explained in <a href="advanced.html#advanced.application.pages" title="10.1.&nbsp;Special Characteristics of AJAX Applications">Section&nbsp;10.1, &ldquo;Special Characteristics of AJAX Applications&rdquo;</a>, an AJAX web
+			application usually runs in a single "web page" in a browser window. The page
+			is generally not reloaded after it is opened initially, but it communicates
+			user interaction with the server through AJAX communications. A window in an
+			AJAX application is therefore more like a window in a desktop application and
+			less like a web page.
+		</p>
+
+		<p>
+			A <code class="classname">Window</code> is the top-level container of a user interface
+			displayed in a browser window. As an AJAX application typically runs on a
+			single "page" (URL), there is usually just one window -- the main window. The
+			main window can be accessed using the URL of the application. You set the main
+			window with the <code class="methodname">setMainWindow()</code> method of the
+			<code class="classname">Application</code> class.
+		</p>
+
+		<pre class="programlisting">import com.vaadin.ui.*;
+
+public class HelloWorld extends com.vaadin.Application {
+    public void init() { 
+        Window main = new Window("The Main Window"); 
+        setMainWindow(main);
+
+        <span class="emphasis"><em>... fill the main window with components ...</em></span>
+    }
+}</pre>
+
+        <p>
+            You can add components to the main window, or to any other window, with the
+            <code class="classname">addComponent()</code> method, which actually adds the given
+            component to the root layout component bound to the window. If you wish to use
+            other than the default root layout, you can set it with
+            <code class="methodname">setContent()</code>, as explained in <a href="layout.root-layout.html" title="6.2.&nbsp;Window and Panel Root Layout">Section&nbsp;6.2, &ldquo;Window and Panel Root Layout&rdquo;</a>.
+        </p>
+		
+		<p>
+			Vaadin has two basic kinds of windows: <span class="emphasis"><em>application-level
+			windows</em></span>, such as the main window, and <span class="emphasis"><em>child
+			windows</em></span> (or sub-windows) inside the application-level windows. The
+			child windows are explained in the next section, while application-level
+			windows are covered in <a href="application.windows.html" title="10.2.&nbsp;Application-Level Windows">Section&nbsp;10.2, &ldquo;Application-Level Windows&rdquo;</a>.
+		</p>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="application.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="application.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="application.child-windows.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Chapter&nbsp;4.&nbsp;Writing a Web Application&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;4.3.&nbsp;Child Windows</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

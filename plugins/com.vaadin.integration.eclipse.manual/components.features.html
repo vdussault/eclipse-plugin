@@ -1,0 +1,112 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>5.2.&nbsp;Common Component Features</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="components.html" title="Chapter&nbsp;5.&nbsp;User Interface Components"><link rel="prev" href="components.html" title="Chapter&nbsp;5.&nbsp;User Interface Components"><link rel="next" href="components.label.html" title="5.3.&nbsp;Label"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>5.2.&nbsp;Common Component Features</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">5.2.&nbsp;Common Component Features</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="components.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;5.&nbsp;User Interface Components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="components.label.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="components.features"></a>5.2.&nbsp;Common Component Features</h2></div></div></div>
+		
+
+        <p>
+            The component base classes and interfaces provide a large number of
+            features. Let us look at some of the most commonly needed features. Features
+            not documented here can be found from the Java API Refefence.
+        </p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="components.features.sizeable"></a>5.2.1.&nbsp;Sizing Components</h3></div></div></div>
+			
+
+			<p>
+				Vaadin components are sizeable; not in the sense that they were
+				fairly large or that the number of the components and their features are
+				sizeable, but in the sense that you can make them fairly large on the
+				screen if you like, or small or whatever size.
+			</p>
+
+			<p>
+				The <code class="classname">Sizeable</code> interface, shared by all components,
+				provides a number of manipulation methods and constants for setting the
+				height and width of a component in absolute or relative units, or for
+				leaving the size undefined.
+			</p>
+
+			<p>
+				The size of a component can be set with
+				<code class="methodname">setWidth()</code> and
+				<code class="methodname">setHeight()</code> methods. The methods take the size as
+				a floating-point value. You need to give the unit of the measure as the
+				second parameter for the above methods. The available units are listed in
+				<a href="components.features.html#components.features.sizeable.units.table" title="Table&nbsp;5.1.&nbsp;Size Units">Table&nbsp;5.1, &ldquo;Size Units&rdquo;</a> below.
+			</p>
+
+			<pre class="programlisting">mycomponent.setWidth(100, Sizeable.UNITS_PERCENTAGE);
+mycomponent.setWidth(400, Sizeable.UNITS_PIXELS);</pre>
+
+			<p>
+				Alternatively, you can speficy the size as a string. The format of such a
+				string must follow the HTML/CSS standards for specifying measures.
+			</p>
+
+			<pre class="programlisting">mycomponent.setWidth("100%");
+mycomponent.setHeight("400px");</pre>
+
+			<p>
+				The "<code class="literal">100%</code>" percentage value makes the component take
+				all available size in the particular direction (see the description of
+				<em class="parameter"><code>Sizeable.UNITS_PERCENTAGE</code></em> in the table below). You
+				can also use the shorthand method <code class="methodname">setSizeFull()</code>
+				to set the size to 100% in both directions.
+			</p>
+
+			<p>
+				The size can be <span class="emphasis"><em>undefined</em></span> in either or both
+				dimensions, which means that the component will take the minimum necessary
+				space. Most components have undefined size by default, but some layouts
+				have full size in horizontal direction. You can set the height or width as
+				undefined with <em class="parameter"><code>Sizeable.SIZE_UNDEFINED</code></em> parameter
+				for <code class="methodname">setWidth()</code> and
+				<code class="methodname">setHeight()</code>.
+			</p>
+
+			<p>
+				You always need to keep in mind that <span class="emphasis"><em>a layout with undefined
+				size may not contain components with defined relative size</em></span>,
+				such as "full size". See <a href="layout.settings.html#layout.settings.size" title="6.10.1.&nbsp;Layout Size">Section&nbsp;6.10.1, &ldquo;Layout Size&rdquo;</a> for
+				details.
+			</p>
+
+			<p>
+				The <a href="components.features.html#components.features.sizeable.units.table" title="Table&nbsp;5.1.&nbsp;Size Units">Table&nbsp;5.1, &ldquo;Size Units&rdquo;</a> lists the
+				available units and their codes defined in the
+				<code class="classname">Sizeable</code> interface.
+			</p>
+
+			<div class="table"><a name="components.features.sizeable.units.table"></a><p class="title"><b>Table&nbsp;5.1.&nbsp;Size Units</b></p><div class="table-contents">
+				
+				<table summary="Size Units" border="1"><colgroup><col><col><col></colgroup><tbody><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>UNITS_PIXELS</code></em></td><td align="left" valign="top">px</td><td align="left" valign="top">The <span class="emphasis"><em>pixel</em></span> is the basic
+							hardware-specific measure of one physical display
+							pixel.</td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>UNITS_POINTS</code></em></td><td align="left" valign="top">pt</td><td align="left" valign="top">The <span class="emphasis"><em>point</em></span> is a typographical unit,
+							which is usually defined as 1/72 inches or about 0.35
+							mm. However, on displays the size can vary significantly
+							depending on display metrics.</td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>UNITS_PICAS</code></em></td><td align="left" valign="top">pc</td><td align="left" valign="top">The <span class="emphasis"><em>pica</em></span> is a typographical unit,
+							defined as 12 points, or 1/7 inches or about 4.233 mm. On
+							displays, the size can vary depending on display
+							metrics.</td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>UNITS_EM</code></em></td><td align="left" valign="top">em</td><td align="left" valign="top">A unit relative to the used font, the width of the
+							upper-case "M" letter.</td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>UNITS_EX</code></em></td><td align="left" valign="top">ex</td><td align="left" valign="top">A unit relative to the used font, the height of the
+							lower-case "x" letter.</td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>UNITS_MM</code></em></td><td align="left" valign="top">mm</td><td align="left" valign="top">A physical length unit, millimeters on the surface of a
+							display device. However, the actual size depends on the
+							display, its metrics in the operating system, and the
+							browser.</td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>UNITS_CM</code></em></td><td align="left" valign="top">cm</td><td align="left" valign="top">A physical length unit,
+							<span class="emphasis"><em>centimeters</em></span> on the surface of a display
+							device. However, the actual size depends on the display, its
+							metrics in the operating system, and the browser.</td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>UNITS_INCH</code></em></td><td align="left" valign="top">in</td><td align="left" valign="top">A physical length unit, <span class="emphasis"><em>inches</em></span> on the surface of a
+							display device. However, the actual size depends on the
+							display, its metrics in the operating system, and the
+							browser.</td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>UNITS_PERCENTAGE</code></em></td><td align="left" valign="top">%</td><td align="left" valign="top">A relative percentage of the available size. For
+							example, for the top-level layout <em class="parameter"><code>100%</code></em>
+							would be the full width or height of the browser window. The
+							percentage value must be between 0 and 100.</td></tr></tbody></table>
+			</div></div><br class="table-break">
+
+			<p>
+				If a component inside <code class="classname">HorizontalLayout</code> or
+				<code class="classname">VerticalLayout</code> has full size in the namesake
+				direction of the layout, the component will expand to take all available
+				space not needed by the other components. See <a href="layout.settings.html#layout.settings.size" title="6.10.1.&nbsp;Layout Size">Section&nbsp;6.10.1, &ldquo;Layout Size&rdquo;</a> for details.
+			</p>
+		</div>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="components.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="components.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="components.label.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Chapter&nbsp;5.&nbsp;User Interface Components&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;5.3.&nbsp;<code class="classname">Label</code></td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

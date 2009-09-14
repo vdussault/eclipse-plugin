@@ -1,0 +1,565 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>5.16.&nbsp;Form</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="components.html" title="Chapter&nbsp;5.&nbsp;User Interface Components"><link rel="prev" href="components.upload.html" title="5.15.&nbsp;Upload"><link rel="next" href="components.progressindicator.html" title="5.17.&nbsp;ProgressIndicator"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>5.16.&nbsp;Form</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">5.16.&nbsp;<code class="classname">Form</code></th></tr><tr><td align="left" width="20%"><a accesskey="p" href="components.upload.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;5.&nbsp;User Interface Components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="components.progressindicator.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="components.form"></a>5.16.&nbsp;<code class="classname">Form</code></h2></div></div></div>
+		
+
+		<p>
+			Most web applications need forms. The <code class="classname">Form</code> component in
+			Vaadin offers an easy way to create forms where the fields can be
+			automatically generated from a data source that is bound to the form. The
+			<code class="classname">BeanItem</code> adapter allows the data sources to be just
+			JavaBeans or Plain Old Java Objects (POJOs) with just the setter and getter
+			methods. <code class="classname">Form</code> manages buffering so that the form
+			contents can be committed to the data source only when filling the form is
+			complete, and before that, the user can discard any changes.
+		</p>
+
+		<p>
+			The <code class="classname">Form</code> component is also a layout, with a bounding
+			box, a caption, a description field, and a special error indicator. As such,
+			it can also be used within logical forms to group input fields.
+		</p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="components.form.layout"></a>5.16.1.&nbsp;Form as a User Interface Component</h3></div></div></div>
+			
+
+			<p>To begin with the <code class="classname">Form</code>, it is a UI component with
+			a layout suitable for its purpose. A <code class="classname">Form</code> has a
+			caption, a description, a layout that contains the fields, an error indicator,
+			and a footer, as illustrated in <a href="components.form.html#figure.ui.form.layout" title="Figure&nbsp;5.29.&nbsp;Layout of the Form Component">Figure&nbsp;5.29, &ldquo;Layout of the Form Component&rdquo;</a>
+			below. Unlike with other components, the caption is shown within the
+			border. (See the details below on how to enable the border with CSS, as it may
+			not be enabled in the default style.)</p>
+
+			<div class="figure"><a name="figure.ui.form.layout"></a><p class="title"><b>Figure&nbsp;5.29.&nbsp;Layout of the Form Component</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/components/form-example3.png" align="middle" alt="Layout of the Form Component"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				Unlike most components, <code class="classname">Form</code> does not accept the
+				caption in the constructor, as forms are often captionless, but you can
+				give the caption with the <code class="methodname">setCaption()</code>. While the
+				description text, which you can set with
+				<code class="classname">setDescription()</code>, is shown as a tooltip in most
+				other components, a <code class="classname">Form</code> displays it in top of the
+				form box as shown in the figure above.
+			</p>
+
+			<pre class="programlisting"><code class="classname">Form</code> form = new <code class="classname">Form</code>();
+form.setCaption("Form Caption");
+form.setDescription("This is a description of the Form that is " +
+        "displayed in the upper part of the form. You normally " +
+        "enter some descriptive text about the form and its " +
+        "use here.");
+</pre>
+
+			<p>
+				<code class="classname">Form</code> has <code class="classname">FormLayout</code>
+				as its default layout, but you can set any other layout with
+				<code class="methodname">setContent()</code>. See
+				<a href="layout.components.formlayout.html" title="6.5.&nbsp;FormLayout">Section&nbsp;6.5, &ldquo;<code class="classname">FormLayout</code>&rdquo;</a> for more information.
+				Note that the <code class="classname">Form</code> itself handles layout for
+				the description, the footer and other common elements of the form.
+				The user-set layout only manages the contained fields and their
+				captions.
+			</p>
+
+			<p>
+				The <code class="classname">Form</code> is most of all a container for fields so
+				it offers many kinds of automation for creating and managing fields. You
+				can, of course, create fields directly in the layout, but it is usually
+				more desirable to bind the fields to the connected data source.
+			</p>
+
+			<pre class="programlisting"><span class="emphasis"><em>// Add a field directly to the layout. This field will
+// not be bound to the data source Item of the form.</em></span>
+form.getLayout().addComponent(new TextField("A Field"));
+
+<span class="emphasis"><em>// Add a field and bind it to an named item property.</em></span>
+form.addField("another", new TextField("Another Field"));</pre>
+
+			<p>
+				Binding forms and their fields to data objects is described further in
+				<a href="components.form.html#components.form.binding" title="5.16.2.&nbsp;Binding Form to Data">Section&nbsp;5.16.2, &ldquo;Binding Form to Data&rdquo;</a> below.
+			</p>
+
+			<p>
+				The <code class="classname">Form</code> has a special error indicator inside the
+				form. The indicator can show the following types of error messages:
+			</p>
+
+			<div class="itemizedlist"><ul type="disc"><li>Errors set with the <code class="methodname">setComponentError()</code>
+				method of the form. For example:
+				<pre class="programlisting">form.setComponentError(new UserError("This is the error indicator of the Form."));</pre>
+				</li><li>Errors caused by a validator attached to the
+				<code class="classname">Form</code> with
+				<code class="methodname">addValidator()</code>.</li><li>Errors caused by validators attached to the fields inside forms,
+				if <code class="methodname">setValidationVisible(true)</code> is set for the
+				form. This type of validation is explained futher in <a href="components.form.html#components.form.validation" title="5.16.3.&nbsp;Validating Form Input">Section&nbsp;5.16.3, &ldquo;Validating Form Input&rdquo;</a> below.</li><li>Errors from automatic validation of fields set as
+				<span class="emphasis"><em>required</em></span> with
+				<code class="methodname">setRequired(true)</code> if an error message has also been
+				set with <code class="methodname">setRequiredError()</code>.</li></ul></div>
+
+			<p>
+				Only a single error is displayed in the error indicator at a time.
+			</p>
+
+			<p>
+				Finally, <code class="classname">Form</code> has a footer area. The footer is a
+				<code class="classname">HorizontalLayout</code> by default, but you can
+				change it with <code class="methodname">setFooter()</code>.
+			</p>
+
+			<pre class="programlisting"><span class="emphasis"><em>// Set the footer layout.</em></span>
+form.setFooter(new VerticalLayout());
+
+form.getFooter().addComponent(
+        new Label("This is the footer area of the Form. "+
+                  "You can use any layout here. "+
+                  "This is nice for buttons."));
+
+// Have a button bar in the footer.
+<code class="classname">HorizontalLayout</code> okbar = new <code class="classname">HorizontalLayout</code>();
+okbar.setHeight("25px");
+form.getFooter().addComponent(okbar);</pre>
+
+<span class="emphasis"><em>// Add an Ok (commit), Reset (discard), and Cancel buttons
+// for the form.</em></span>
+<code class="classname">Button</code> okbutton = new <code class="classname">Button</code>("OK", form, "commit");
+okbar.addComponent(okbutton);
+okbar.setComponentAlignment(okbutton, Alignment.TOP_RIGHT);
+okbar.addComponent(new <code class="classname">Button</code>("Reset", form, "discard"));
+okbar.addComponent(new <code class="classname">Button</code>("Cancel"));
+
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="components.form.layout.css"></a>CSS Style Rules</h4></div></div></div>
+				
+
+				<pre class="programlisting">.v-form {}
+.v-form legend
+.v-form fieldset {}
+.v-form-error {}
+.v-form-errormessage {}
+.v-form-description {}</pre>
+
+				<p>
+					The top-level style name of a <code class="classname">Form</code> component is
+					<code class="literal">v-form</code>. It is important to notice that the form is
+					implemented as a HTML <code class="literal">&lt;fieldset&gt;</code>, which
+					allows placing the caption (or "legend") inside the border. It would
+					not be so meaningful to set a border for the top-level form
+					element. The following example sets a border around the form, as is
+					done in <a href="components.form.html#figure.ui.form.layout" title="Figure&nbsp;5.29.&nbsp;Layout of the Form Component">Figure&nbsp;5.29, &ldquo;Layout of the Form Component&rdquo;</a> above.
+				</p>
+
+				<pre class="programlisting">.v-form fieldset {
+    border: thin solid;
+}</pre>
+
+				<p>
+					The top-level element of the form has the style name
+					<code class="literal">v-form-error</code> if a component error has been set for
+					the form.
+				</p>
+
+			</div>
+
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="components.form.binding"></a>5.16.2.&nbsp;Binding Form to Data</h3></div></div></div>
+			
+
+			<p>
+				The main purpose of the <code class="classname">Form</code> component is that you
+				can bind it to a data source and let the <code class="classname">Form</code>
+				generate and manage fields automatically. The data source can be any class
+				that implements the <code class="classname">Item</code> interface, which is part
+				of the Vaadin Data Model, as described in <a href="datamodel.html" title="Chapter&nbsp;8.&nbsp;Binding Components to Data">Chapter&nbsp;8, <i xmlns:xlink="http://www.w3.org/1999/xlink">Binding Components to Data</i></a>. You can either implement the
+				<code class="classname">Item</code> interface yourself, which can be overly
+				complicated, or use the ready <code class="classname">BeanItem</code> adapter to
+				bind the form to any JavaBean object. You can also use
+				<code class="classname">PropertysetItem</code> to bind the form to an ad hoc set
+				of <code class="classname">Property</code> objects, resembling a 
+				<code class="classname">Map</code>.
+			</p>
+
+			<p>
+				Let us consider the following simple JavaBean with proper setter and
+				getter methods for the member variables.
+			</p>
+
+			<pre class="programlisting">/** A simple JavaBean. */
+public class PersonBean {
+    String name;
+    String city;
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getCity() {
+        return city;
+    }
+}</pre>
+
+			<p>
+				We can now bind this bean to a <code class="classname">Form</code> using the
+				<code class="classname">BeanItem</code> adapter as follows.
+			</p>
+
+			<pre class="programlisting"><span class="emphasis"><em>// Create a form and use FormLayout as its layout.</em></span>
+final <code class="classname">Form</code> form = new <code class="classname">Form</code>();
+
+<span class="emphasis"><em>// Set form caption and description texts</em></span>
+form.setCaption("Contact Information");
+form.setDescription("Please specify name of the person and the city where the person lives in.");
+
+<span class="emphasis"><em>// Create the custom bean.</em></span>
+<code class="classname">PersonBean</code> bean = new <code class="classname">PersonBean</code>();
+
+<span class="emphasis"><em>// Create a bean item that is bound to the bean.</em></span>
+<code class="classname">BeanItem</code> item = new <code class="classname">BeanItem</code>(bean);
+
+<span class="emphasis"><em>// Bind the bean item as the data source for the form.</em></span>
+form.setItemDataSource(item);</pre>
+
+			<p>
+				The <code class="classname">Form</code> uses <code class="classname">FormLayout</code>
+				layout by default and automatically generates the fields for each of the
+				bean properties, as shown in <a href="components.form.html#figure.ui.form.binding.bean" title="Figure&nbsp;5.30.&nbsp;Form Automatically Generated from a Bean">Figure&nbsp;5.30, &ldquo;Form Automatically Generated from a Bean&rdquo;</a>
+				below.
+			</p>
+
+			<div class="figure"><a name="figure.ui.form.binding.bean"></a><p class="title"><b>Figure&nbsp;5.30.&nbsp;Form Automatically Generated from a Bean</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/components/form-example1.png" align="middle" alt="Form Automatically Generated from a Bean"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				The automatically determined order of the fields can be undesirable. To
+				set the order properly, you can use the
+				<code class="methodname">setVisibleItemProperties()</code> method of the
+				<code class="classname">Form</code>, which takes an ordered collection as its
+				parameter. Fields that are not listed in the collection are not included
+				in the form.
+			</p>
+
+			<pre class="programlisting"><span class="emphasis"><em>// Set the order of the items in the form.</em></span>
+<code class="classname">Vector</code> order = new <code class="classname">Vector</code>();
+order.add("city");
+order.add("name");
+form.setVisibleItemProperties(order);</pre>
+
+			<p>
+				The form uses the property identifiers as the captions of the fields by
+				default. If you want to have more proper captions for the fields, which is
+				often the case, you need to use a <code class="classname">FieldFactory</code> to
+				create the fields, as is shown in the section below.
+			</p>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="components.form.binding.fieldfactory"></a>Generating Proper Fields with a <code class="classname">FieldFactory</code></h4></div></div></div>
+				
+
+				<p>
+					The form generates the fields automatically using very coarse logic. A
+					<code class="classname">String</code>, <code class="classname">int</code>, or
+					<code class="classname">double</code> will result in a
+					<code class="classname">TextField</code> alike, regardless of the meaning of
+					the field. You might want to have a city name to be input with a combo
+					box, for example. You can create such custom fields by implementing
+					the proper methods in the <code class="classname">FieldFactory</code>
+					interface.
+				</p>
+
+				<p>
+					The <code class="classname">FieldFactory</code> interface has four different
+					<code class="classname">createField()</code> methods for creating the fields,
+					each with a slightly different set of parameters. Each of the methods
+					is used in different situations; please use debugger to find which one
+					is used in your case.
+				</p>
+
+				
+
+				<p>
+					The <em class="parameter"><code>type</code></em> is the class of the item property:
+					<code class="classname">String</code> for both of the bean properties in our
+					example. The <em class="parameter"><code>uiContext</code></em> is reference to UI
+					component that will contain the fields, in this case the
+					<code class="classname">Form</code> component. The
+					<em class="parameter"><code>propertyId</code></em> is the identifier of the property,
+					usually a <code class="classname">String</code>. In our example, it can be
+					either the "<code class="literal">name</code>" or "<code class="literal">city</code>"
+					property of the bean. The <em class="parameter"><code>item</code></em> is a reference
+					to the <code class="classname">Item</code> implementation instance, which is
+					in the above example a <code class="classname">BeanItem</code> bound to a bean
+					object. The <em class="parameter"><code>property</code></em> parameter is a plain
+					property (object-type pair). You can use these parameters in the logic
+					for creating the proper field object.
+				</p>
+
+				<p>
+					The easiest and safest way to make a custom field factory is to extend
+					the default <code class="classname">BaseFieldFactory</code> implementation, as
+					we don in the example below:
+				</p>
+
+			<pre class="programlisting">class MyFieldFactory extends BaseFieldFactory {
+    @Override
+    public Field createField(Item item, Object propertyId,
+                             Component uiContext) {
+        
+        // Identify the fields by their Property ID.
+        String pid = (String) propertyId;
+        if (pid.equals("name")) {
+            return new TextField("Name");
+        } else if (pid.equals("city")) {
+            Select select = new Select("City");
+            select.addItem("Berlin");
+            select.addItem("Helsinki");
+            select.addItem("London");
+            select.addItem("New York");
+            select.addItem("Turku");
+            select.setNewItemsAllowed(true);
+            return select;
+        }
+        
+        // Let BaseFieldFactory create other possible fields.
+        return super.createField(item, propertyId, uiContext);
+    }
+}</pre>
+
+				<p>
+					You set the custom field factory as the field factory of the
+					<code class="classname">Form</code> with
+					<code class="methodname">setFieldFactory()</code>:
+				</p>
+
+				<pre class="programlisting">form.setFieldFactory(new MyFieldFactory());</pre>
+				<p>
+					Our example will now look as shown below:
+				</p>
+
+				<div class="figure"><a name="figure.ui.form.binding.fieldfactory"></a><p class="title"><b>Figure&nbsp;5.31.&nbsp;Form Fields Generated with a <code class="classname">FieldFactory</code></b></p><div class="figure-contents">
+					
+					<div class="mediaobject" align="center"><img src="img/components/form-example2.png" align="middle" alt="Form Fields Generated with a FieldFactory"></div>
+				</div></div><br class="figure-break">
+			</div>
+		</div>
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="components.form.validation"></a>5.16.3.&nbsp;Validating Form Input</h3></div></div></div>
+			
+
+			<p>
+				Validation of the form input is one of the most important tasks in
+				handling forms. The fields in Vaadin can be bound to
+				validators. The validation provides feedback about bad input and the forms
+				can also manage validation results and accept the input only if all
+				validations are successful. Fields can also be set as
+				<span class="emphasis"><em>required</em></span>, which is a special built-in validator. The
+				validators work on the server-side.
+			</p>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N22493"></a>Using Validators in Forms</h4></div></div></div>
+				
+
+				<p>
+					Validators check the validity of input and, if the input is invalid,
+					can provide an error message through an exception. Validators are classes
+					that implement the <code class="classname">Validator</code> interface. The
+					interface has two methods that you must implement:
+					<code class="methodname">isValid()</code> that returns the success or failure
+					as a truth value, and <code class="methodname">validate()</code>, which
+					reports a failure with an exception. The exception can be associated
+					with an error message describing the details of the error.
+				</p>
+
+				<p>
+					Simple validators that only need to produce a single error message
+					in case the validation fails can inherit from
+					<code class="classname">AbstractValidator</code> or
+					<code class="classname">AbstractStringValidator</code>.
+					The Vaadin also provides a number of standard validators,
+					including <code class="classname">IntegerValidator</code> and
+					<code class="classname">DoubleValidator</code> for validating numerical
+					input, <code class="classname">StringLengthValidator</code>,
+					<code class="classname">EmailValidator</code> and the more general
+					<code class="classname">RegexpValidator</code> for checking that a string
+					matches a Java regular expression:  
+				</p>
+				
+				<pre class="programlisting">// Postal code that must be 5 digits (10000-99999).
+TextField field = new TextField("Postal Code");
+field.setColumns(5);
+
+// Create the validator
+Validator postalCodeValidator = new RegexpValidator(
+    "[1-9][0-9]{4}", "Postal code must be a number 10000-99999.");
+field.addValidator(postalCodeValidator);</pre>
+
+				<p>
+					If you are using a custom <code class="classname">FieldFactory</code> to
+					generate the fields, you may want to set the validators for fields
+					there. It is useful to have the form in <span class="emphasis"><em>immediate</em></span>
+					mode:
+				</p>
+
+				<pre class="programlisting">// Set the form to act immediately on user input. This is
+// necessary for the validation of the fields to occur immediately
+// when the input focus changes and not just on commit.
+form.setImmediate(true);</pre>
+
+				<p>
+					Validation is done always when you call the
+					<code class="methodname">commit()</code> method of the
+					<code class="classname">Form</code>.
+				</p>
+
+				<pre class="programlisting">// The Commit button calls form.commit().
+Button commit = new Button("Commit", form, "commit");</pre>
+
+				<p>
+					If any of the validators in the form fail, the commit will fail and a
+					validation exception message is displayed in the error indicator of
+					the form. If the commit is successful, the input data is written to
+					the data source. Notice that <code class="methodname">commit()</code> also
+					implicitly sets <code class="methodname">setValidationVisible(true)</code> (if
+					<code class="methodname">setValidationVisibleOnCommit()</code> is
+					<em class="parameter"><code>true</code></em>, as is the default). This makes the error
+					indicators visible even if they were previously not visible.
+				</p>
+
+				<div class="figure"><a name="N224E9"></a><p class="title"><b>Figure&nbsp;5.32.&nbsp;Form Validation in Action</b></p><div class="figure-contents">
+					
+					<div class="mediaobject" align="center"><img src="img/components/form-validation-1.png" align="middle" alt="Form Validation in Action"></div>
+				</div></div><br class="figure-break">
+
+				<p>
+					For cases in which more complex error handling is required, the
+					validator can also implement the <code class="classname">Validator</code>
+					interface directly:
+				</p>
+				
+				<pre class="programlisting">// Create the validator
+Validator postalCodeValidator = new Validator() {
+
+    // The isValid() method returns simply a boolean value, so
+    // it can not return an error message.
+    public boolean isValid(Object value) {
+        if (value == null || !(value instanceof String)) {
+            return false;
+        }
+
+        return ((String) value).matches("[1-9][0-9]{4}");
+    }
+
+    // Upon failure, the validate() method throws an exception
+    // with an error message.
+    public void validate(Object value)
+                throws InvalidValueException {
+        if (!isValid(value)) {
+            if (value != null &amp;&amp;
+                value.toString().startsWith("0")) {
+                throw new InvalidValueException(
+                    "Postal code must not start with a zero.");
+            } else {
+                throw new InvalidValueException(
+                    "Postal code must be a number 10000-99999.");
+            }
+        }
+    }
+};</pre>
+
+			</div>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N22505"></a>Required Fields in Forms</h4></div></div></div>
+				
+
+				<p>
+					Setting a field as <em class="parameter"><code>required</code></em> outside a form is
+					usually just a visual clue to the user. Leaving a required field empty
+					does not display any error indicator in the empty field as a failed
+					validation does. However, if you set a form field as required with
+					<code class="methodname">setRequired(true)</code> and give an error message
+					with <code class="methodname">setRequiredError()</code> and the user leaves
+					the required field empty, the form will display the error message in
+					its error indicator.
+				</p>
+
+				<pre class="programlisting">form.getField("name").setRequired(true);
+form.getField("name").setRequiredError("Name is missing");
+form.getField("address").setRequired(true); // No error message</pre>
+
+				<p>
+					To have the validation done immediately when the fields lose focus,
+					you should set the form as <span class="emphasis"><em>immediate</em></span>, as was done
+					in the section above.
+				</p>
+				
+				<div class="figure"><a name="N22520"></a><p class="title"><b>Figure&nbsp;5.33.&nbsp;Empty Required Field After Clicking Commit</b></p><div class="figure-contents">
+					
+					<div class="mediaobject" align="center"><img src="img/components/form-required-example1.png" align="middle" alt="Empty Required Field After Clicking Commit"></div>
+				</div></div><br class="figure-break">
+
+				<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3>
+                    <p>
+                        It is important that you provide the user with feedback
+                        from failed validation of required fields either by setting an
+                        error message or by providing the feedback by other
+                        means.
+                    </p>
+
+                    <p>
+                        Otherwise, when a user clicks the <span class="guibutton">Ok</span> button
+                        (commits the form), the button does not appear to work and the
+                        form does not indicate any reason. As an alternative to setting
+                        the error message, you can handle the validation error and provide
+                        the feedback about the problem with a different mechanism.
+                    </p>
+				</div>
+			</div>
+
+		</div>
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="components.form.buffering"></a>5.16.4.&nbsp;Buffering Form Data</h3></div></div></div>
+			
+
+			<p>
+                Buffering means keeping the edited data in a buffer and writing it to the data
+                source only when the <code class="methodname">commit()</code> method is called for the
+                component. If the user has made changes to a buffer, calling
+                <code class="methodname">discard()</code> restores the buffer from the data
+                source. Buffering is actually a feature of all <code class="classname">Field</code>
+                components and <code class="classname">Form</code> is a
+                <code class="classname">Field</code>. <code class="classname">Form</code> manages the buffering of
+                its contained fields so that if <code class="methodname">commit()</code> or
+                <code class="methodname">discard()</code> is called for the <code class="classname">Form</code>, it
+                calls the respective method for all of its managed fields.
+			</p>
+
+            <pre class="programlisting">final Form form = new Form();
+...add components...
+
+// Enable buffering.
+form.setWriteThrough(false);
+
+// The Ok button calls form.commit().
+Button commit = new Button("Ok", form, "commit");
+
+// The Restore button calls form.discard().
+Button restore = new Button("Restore", form, "discard");</pre>
+
+            <p>
+                The Form example in the Feature Browser of Vaadin demonstrates buffering in
+                forms. The <span class="emphasis"><em>Widget caching demo</em></span> in Additional demos demonstrates
+                buffering in other <code class="classname">Field</code> components, its source code is
+                available in <code class="filename">BufferedComponents.java</code>.
+            </p>
+
+		</div>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="components.upload.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="components.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="components.progressindicator.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">5.15.&nbsp;<code class="classname">Upload</code>&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;5.17.&nbsp;<code class="classname">ProgressIndicator</code></td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

@@ -1,0 +1,341 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>10.3.&nbsp;Embedding Applications in Web Pages</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="advanced.html" title="Chapter&nbsp;10.&nbsp;Advanced Web Application Topics"><link rel="prev" href="application.windows.html" title="10.2.&nbsp;Application-Level Windows"><link rel="next" href="advanced.debug-production-modes.html" title="10.4.&nbsp;Debug and Production Mode"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>10.3.&nbsp;Embedding Applications in Web Pages</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">10.3.&nbsp;Embedding Applications in Web Pages</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="application.windows.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;10.&nbsp;Advanced Web Application Topics</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="advanced.debug-production-modes.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="application.embedding"></a>10.3.&nbsp;Embedding Applications in Web Pages</h2></div></div></div>
+		
+
+		<p>
+			Many web applications and especially web sites are not all AJAX, but AJAX is
+			used only for specific functionalities. In practice, many web applications are
+			a mixture of dynamic web pages and AJAX applications embedded to such
+			pages.
+		</p>
+
+		<p>
+			Embedding Vaadin applications is easy. There are two basic ways to
+			embed them. One is to have a <code class="literal">&lt;div&gt;</code> placeholder for
+			the web application and load the Vaadin Client-Side Engine with a
+			simple JavaScript code. The second method is even easier, which is to simply use the
+			<code class="literal">&lt;iframe&gt;</code> element.  Both of these methods have
+			advantages and disadvantages. The <code class="literal">&lt;div&gt;</code> method can
+			only embed one application in a page, while the
+			<code class="literal">&lt;iframe&gt;</code> method can embed as many as needed. One
+			disadvantage of the <code class="literal">&lt;iframe&gt;</code> method is that the size
+			of the <code class="literal">&lt;iframe&gt;</code> element is not flexible according to
+			the content while the <code class="literal">&lt;div&gt;</code> method allows such
+			flexibility. The following sections look closer into these two embedding
+			methods.
+		</p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N24147"></a>10.3.1.&nbsp;Embedding Inside a <code class="literal">div</code> Element</h3></div></div></div>
+			
+
+			
+
+			<p>
+                <span class="emphasis"><em>The loading code for the Client-Side Engine changed in IT Mill
+                toolkit version 5.1.2 and the explanation below is no longer compatible
+                with Vaadin. Please view the source code of the initial page of your
+                application in your browser.</em></span>
+
+                
+            </p>
+
+			<p>
+				You can embed a Vaadin application inside a web page with a
+				method that is equivalent to loading the initial page content from the
+				application servlet in a non-embedded application. Normally, the
+				<code class="classname">ApplicationServlet</code> servlet generates an initial
+				page that contains the correct parameters for the specific
+				application. You can easily configure it to load multiple Vaadin
+				applications on the same page, assuming that they use the same widget set.
+			</p>
+
+			<p>
+				 You can view the initial page for your application easily simply by
+				 opening the application in a web browser and viewing the HTML source
+				 code. You could just copy and paste the embedding code from the default
+				 initial page. It has, however, some extra functionality that is not
+				 normally needed: it generates some of the script content with
+				 <code class="methodname">document.write()</code> calls, which is useful only
+				 when you are running the application as a portlet in a portal. The method
+				 outlined below is much simpler.
+			</p>
+
+			<p>
+				The <code class="filename">WebContent/multiapp.html</code> file included in the
+				Vaadin installation package provides an example of embedding (multiple)
+				Vaadin applications in a page. After launching the demo application, you
+				can view the example at URL
+				<code class="uri">http://localhost:8888/multiapp.html</code>. Notice that the example
+				assumes the use of root context for the applications
+				(<em class="parameter"><code>/</code></em>).
+			</p>
+
+			
+
+			<p>
+				Embedding requires four elements inside the HTML document:
+			</p>
+
+			<div class="orderedlist"><ol type="1"><li>
+					<p>
+						In the <code class="literal">&lt;head&gt;</code> element, you need to define
+						the application URI and parameters and load the Vaadin
+						Client-Side Engine. The <code class="varname">vaadin</code> variable is an
+						associative map that can contain various runtime data used by the
+						Client-Side Engine of Vaadin. The
+						<code class="varname">vaadinConfigurations</code> item is itself an
+						associate map that contains parameters for each of the
+						applications embedded in the page. The map must contain the
+						following items:
+					</p>
+
+                    <div class="variablelist"><dl><dt><span class="term"><code class="classname">appUri</code></span></dt><dd>
+                                The application URI consists of the context and the
+                                application path. If the context is
+                                <code class="literal">/mycontext</code> and the application path is
+                                <code class="literal">myapp</code>, the
+                                <em class="parameter"><code>appUri</code></em> would be
+                                <code class="literal">/mycontext/myapp</code>. The
+                                <code class="filename">multiapp.html</code> example assumes the use
+                                of root context, which is used in the demo application.
+                            </dd><dt><span class="term"><code class="classname">pathInfo</code></span></dt><dd>
+                                The <em class="parameter"><code>PATHINFO</code></em> parameter for the
+                                Servlet.
+                            </dd><dt><span class="term"><code class="classname">themeUri</code></span></dt><dd>
+                                URI of the application theme. The URI must include
+                                application context and the path to the theme
+                                directory. Themes are, by default, stored under the
+                                <code class="filename">/VAADIN/themes/</code> path.
+                            </dd><dt><span class="term"><code class="classname">versionInfo</code></span></dt><dd>
+                                This item is itself an associative map that contains two
+                                parameters: <em class="parameter"><code>vaadinVersion</code></em> contains
+                                the version number of the Vaadin version used by the
+                                application. The <em class="parameter"><code>applicationVersion</code></em>
+                                parameter contains the version of the particular
+                                application.
+                            </dd></dl></div>
+
+					<p>
+						The following example defines two applications to run in the same
+						window: the Calculator and Hello World examples. In the example,
+						the application context is <code class="literal">/tk5</code>.
+					</p>
+
+					<pre class="programlisting">&lt;script type="text/javascript"&gt;
+    var vaadin = {
+        vaadinConfigurations: {
+            '<span class="bold"><strong>calc</strong></span>': {
+                appUri:'<span class="bold"><strong>/tk5/Calc</strong></span>',
+                pathInfo: '<span class="bold"><strong>/</strong></span>',
+                themeUri: '<span class="bold"><strong>/tk5/VAADIN/themes/example</strong></span>',
+                versionInfo : {
+                    vaadinVersion:"5.9.9-INTERNAL-
+                         NONVERSIONED-DEBUG-BUILD",
+                    applicationVersion:"NONVERSIONED"
+                }
+            },
+            '<span class="bold"><strong>hello</strong></span>': {
+                appUri:'<span class="bold"><strong>/tk5/HelloWorld</strong></span>',
+                pathInfo: '<span class="bold"><strong>/</strong></span>',
+                themeUri: '<span class="bold"><strong>/tk5/VAADIN/themes/example</strong></span>',
+                versionInfo : {
+                    vaadinVersion:"5.9.9-INTERNAL-
+                          NONVERSIONED-DEBUG-BUILD",
+                    applicationVersion:"NONVERSIONED"
+                }
+            }
+        }};
+&lt;/script&gt;</pre>
+				</li><li>
+					<p>
+						Loading the Vaadin Client-Side Engine is done with the
+						following kind of line in the <code class="literal">&lt;head&gt;</code>
+						element:
+					</p>
+
+					<pre class="programlisting">&lt;script language='javascript' src='/<span class="emphasis"><em>vaadin-examples</em></span>/VAADIN/widgetsets/com.vaadin.terminal.gwt.DefaultWidgetSet/com.vaadin.terminal.gwt.DefaultWidgetSet.nocache.js'&gt;&lt;/script&gt;</pre>
+
+					<p>
+						The engine URI consists of the context of the web application,
+						<code class="literal">vaadin-examples</code> above, followed by the path
+						to the JavaScript (<code class="filename">.js</code>) file of the widget
+						set, relative to the <code class="filename">WebContent</code>
+						directory. The file contains the Client-Side Engine compiled for
+						the particular widget set. The line above assumes the use of the
+						default widget set of Vaadin. If you have made custom
+						widgets that are defined in a custom widget set, you need to use
+						the path to the compiled widget set file. Widget sets must be
+						compiled under the
+						<code class="filename">WebContent/VAADIN/widgetsets</code> directory.
+					</p>
+
+				</li><li>
+					<p>
+						In the <code class="literal">&lt;html&gt;</code> element, you need to do a
+						routine inclusion of GWT history <code class="literal">iframe</code>
+						element as follows:
+					</p>
+
+					<pre class="programlisting">&lt;iframe id="__gwt_historyFrame"
+        style="width:0;height:0;border:0"&gt;&lt;/iframe&gt;</pre>
+
+				</li><li>
+					<p>
+						The location of the Vaadin application is defined with a
+						<code class="literal">div</code> placeholder element having
+						<code class="literal">id="itmill-ajax-window"</code> as follows:
+					</p>
+
+					<pre class="programlisting">&lt;div id="itmill-ajax-window"/&gt;</pre>
+				</li></ol></div>
+
+			<p>
+				Below is a complete example of embedding an application. It works
+				out-of-the-box with the <span class="application">Calculator</span> demo
+				application.
+			</p>
+
+			<pre class="programlisting">&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"&gt;
+&lt;html xmlns="http://www.w3.org/1999/xhtml" &gt;
+  &lt;head&gt;
+    &lt;title&gt;Embedding Example&lt;/title&gt;
+
+    &lt;!-- Set parameters for the Vaadin Client-Side Engine. --&gt;
+    &lt;script type="text/javascript"&gt;
+	    var vaadin = {appUri:'Calc', pathInfo: '/'};
+    &lt;/script&gt;
+    
+    &lt;!-- Load the Vaadin Client-Side Engine. --&gt;
+    &lt;script language='javascript' src='/vaadin-examples/VAADIN/widgetsets/com.vaadin.terminal.gwt.DefaultWidgetSet/com.vaadin.terminal.gwt.DefaultWidgetSet.nocache.js'&gt;&lt;/script&gt;
+
+    &lt;!-- We can stylize the web application. --&gt;
+    &lt;style&gt;
+        #vaadin-ajax-window {background: #c0c0ff;}
+        .v-button {background: pink;}
+    &lt;/style&gt;
+  &lt;/head&gt;
+
+  &lt;body&gt;
+    &lt;!-- This &lt;iframe&gt; element is required by GWT. --&gt;
+    &lt;iframe id="__gwt_historyFrame"
+            style="width:0;height:0;border:0"&gt;&lt;/iframe&gt;
+    
+    &lt;h1&gt;This is a HTML page&lt;/h1&gt;
+    &lt;p&gt;Below is the Vaadin application inside a table:&lt;/p&gt;
+    &lt;table align="center" border="3" style="background: yellow;"&gt;
+      &lt;tr&gt;&lt;th&gt;The Calculator&lt;/th&gt;&lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;
+          &lt;!-- Placeholder &lt;div&gt; for the Vaadin application --&gt;
+          &lt;div id="vaadin-ajax-window"/&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/table&gt;	
+  &lt;/body&gt;
+&lt;/html&gt;</pre>
+
+			<p>
+				The page will look as follows:
+			</p>
+
+			<div class="figure"><a name="figure.embedding.div"></a><p class="title"><b>Figure&nbsp;10.5.&nbsp;Embedded Application</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/application/embedding2.png" align="middle" alt="Embedded Application"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				You can style the web application with themes as described in <a href="themes.html" title="Chapter&nbsp;7.&nbsp;Themes">Chapter&nbsp;7, <i xmlns:xlink="http://www.w3.org/1999/xlink">Themes</i></a>. The Client-Side Engine loads the style sheets
+				required by the application. In addition, you can do styling in the
+				embedding page, as was done in the example above.
+			</p>
+
+			<p>
+				The <span class="application">Reservation Demo</span> and <span class="application">Windowed
+				Demos</span> provide similar examples of embedding an application
+				in a web page. The embedding web pages are
+				<code class="filename">WebContent/reservr.html</code> and
+				<code class="filename">WebContent/windoweddemos.html</code>, respectively.
+			</p>
+
+			<p>
+				The disadvantage of this embedding method is that there can only be one
+				web application embedded in a page. One is usually enough, but if it is
+				not, you need to use the <code class="literal">&lt;iframe&gt;</code> method below.
+			</p>
+
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N2427B"></a>10.3.2.&nbsp;Embedding Inside an <code class="literal">iframe</code> Element</h3></div></div></div>
+			
+
+			<p>
+				Embedding a Vaadin application inside an
+				<code class="literal">&lt;iframe&gt;</code> element is even easier than the method
+				described above, as it does not require definition of any Vaadin specific
+				definitions. The use of <code class="literal">&lt;iframe&gt;</code> makes it
+				possible to embed multiple web applications or two different views to the
+				same application on the same page.
+			</p>
+
+			<p>
+				You can embed an application with an element such as the following:
+			</p>
+
+			<pre class="programlisting">&lt;iframe src="/vaadin-examples/Calc"&gt;&lt;/iframe&gt;</pre>
+
+			<p>
+				The problem with <code class="literal">&lt;iframe&gt;</code> elements is that their
+				size of is not flexible depending on the content of the frame, but the
+				content must be flexible to accommodate in the frame. You can set the size
+				of an <code class="literal">&lt;iframe&gt;</code> element with
+				<code class="literal">height</code> and <code class="literal">width</code> attributes.
+			</p>
+
+			<p>
+				Below is a complete example of using the <code class="literal">&lt;iframe&gt;</code>
+				to embed two applications in a web page.
+			</p>
+
+			<pre class="programlisting">&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"&gt;
+&lt;html xmlns="http://www.w3.org/1999/xhtml" &gt;
+  &lt;head&gt;
+    &lt;title&gt;Embedding in IFrame&lt;/title&gt;
+  &lt;/head&gt;
+
+  &lt;body style="background: #d0ffd0;"&gt;
+    &lt;h1&gt;This is a HTML page&lt;/h1&gt;
+    &lt;p&gt;Below are two Vaadin applications embedded inside
+       a table:&lt;/p&gt;
+
+    &lt;table align="center" border="3"&gt;
+      &lt;tr&gt;
+        &lt;th&gt;The Calculator&lt;/th&gt;
+        &lt;th&gt;The Color Picker&lt;/th&gt;
+      &lt;/tr&gt;
+      &lt;tr valign="top"&gt;
+        &lt;td&gt;
+          &lt;iframe src="/vaadin-examples/Calc" height="200"
+                  width="150" frameborder="0"&gt;&lt;/iframe&gt;
+        &lt;/td&gt;
+        &lt;td&gt;
+          &lt;iframe src="/vaadin-examples/colorpicker"
+                  height="330" width="400"
+                  frameborder="0"&gt;&lt;/iframe&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/table&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</pre>
+
+			<p>
+				The page will look as shown in <a href="application.embedding.html#figure.embedding.iframe" title="Figure&nbsp;10.6.&nbsp;Vaadin Applications Embedded Inside IFrames">Figure&nbsp;10.6, &ldquo;Vaadin Applications Embedded Inside IFrames&rdquo;</a>
+				below.
+			</p>
+
+			<div class="figure"><a name="figure.embedding.iframe"></a><p class="title"><b>Figure&nbsp;10.6.&nbsp;Vaadin Applications Embedded Inside IFrames</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/application/embedding3.png" align="middle" alt="Vaadin Applications Embedded Inside IFrames"></div>
+			</div></div><br class="figure-break">
+		</div>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="application.windows.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="advanced.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="advanced.debug-production-modes.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">10.2.&nbsp;Application-Level Windows&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;10.4.&nbsp;Debug and Production Mode</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

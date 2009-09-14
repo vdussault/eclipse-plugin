@@ -1,0 +1,228 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>6.8.&nbsp;TabSheet</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="layout.html" title="Chapter&nbsp;6.&nbsp;Managing Layout"><link rel="prev" href="layout.components.splitpanel.html" title="6.7.&nbsp;SplitPanel"><link rel="next" href="layout.components.accordion.html" title="6.9.&nbsp;Accordion"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>6.8.&nbsp;TabSheet</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">6.8.&nbsp;<code class="classname">TabSheet</code></th></tr><tr><td align="left" width="20%"><a accesskey="p" href="layout.components.splitpanel.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;6.&nbsp;Managing Layout</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="layout.components.accordion.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="layout.components.tabsheet"></a>6.8.&nbsp;<code class="classname">TabSheet</code></h2></div></div></div>
+        
+        
+        <p>
+            The <code class="classname">TabSheet</code> is a multicomponent container that
+            allows switching between the components with "tabs". The tabs are
+            organized as a tab bar at the top of the tab sheet. Clicking on a tab
+            opens its contained component in the main display area of the layout.
+        </p>
+
+		<p>
+			You add new tabs to a tab sheet with the <code class="methodname">addTab()</code>
+			method. The simple version of the method takes as its parameter the root
+			component of the tab. You can use the root component to retrieve its
+			corresponding <code class="classname">Tab</code> object. Typically, you put a layout
+			component as the root component.
+		</p>
+
+        <pre class="programlisting">// Create an empty tab sheet.
+TabSheet tabsheet = new TabSheet();
+
+// Create a component to put in a tab and put
+// some content in it.
+VerticalLayout myTabRoot = new VerticalLayout();
+myTabRoot.addComponent(new Label("Hello, I am a Tab!"));
+
+// Add the component to the tab sheet as a new tab.
+tabsheet.addTab(myTabRoot);
+
+// Get the Tab holding the component and set its caption.
+tabsheet.getTab(myTabRoot).setCaption("My Tab");</pre>
+        
+        <p>
+			Each tab in a tab sheet is represented as a <code class="classname">Tab</code> object,
+			which manages the tab caption, icon, and attributes such as hidden and
+			visible. You can set the caption with <code class="methodname">setCaption()</code>
+			and the icon with <code class="methodname">setIcon()</code>. If the component added
+			with <code class="methodname">addTab()</code> has a caption or icon, it is used as
+			the default for the <code class="classname">Tab</code> object. However, changing the
+			attributes of the root component later does not affect the tab, but you must
+			make the setting through the <code class="classname">Tab</code> object. The
+			<code class="methodname">addTab()</code> returns the new <code class="classname">Tab</code>
+			object, so you can easily set an attribute using the reference.
+        </p>
+
+        <pre class="programlisting">// Set an attribute using the returned reference
+tabsheet.addTab(myTab).setCaption("My Tab");</pre>
+
+        <p>
+            You can also give the caption and the icon as parameters for the
+            <code class="methodname">addTab()</code> method. The following example demonstrates
+            the creation of a simple tab sheet, where each tab shows a different
+            <code class="classname">Label</code> component. The tabs have an icon, which are (in
+            this example) loaded as Java class loader resources from the application.
+        </p>
+
+        <pre class="programlisting">TabSheet tabsheet = new TabSheet();
+
+// Make the tabsheet shrink to fit the contents.
+tabsheet.setSizeUndefined();
+
+tabsheet.addTab(new Label("Contents of the first tab"),
+          "First Tab",
+          new ClassResource("images/Mercury_small.png", this));
+tabsheet.addTab(new Label("Contents of the second tab"),
+          "Second Tab",
+          new ClassResource("images/Venus_small.png", this));
+tabsheet.addTab(new Label("Contents of the third tab"),
+          "Third tab",
+          new ClassResource("images/Earth_small.png", this));</pre>
+
+        <div class="figure"><a name="figure.tabsheet.example1"></a><p class="title"><b>Figure&nbsp;6.9.&nbsp;A Simple TabSheet Layout</b></p><div class="figure-contents">
+            
+            <div class="mediaobject" align="center"><img src="img/components/tabsheet-example1.png" align="middle" alt="A Simple TabSheet Layout"></div>
+        </div></div><br class="figure-break">
+
+        <p>
+            The <code class="methodname">hideTabs()</code> method allows hiding the tab bar
+            entirely. This can be useful in tabbed document interfaces (TDI) when there is
+            only one tab. An individual tab can be made invisible by setting
+            <code class="methodname">setVisible(false)</code> for the <code class="classname">Tab</code>
+            object. A tab can be disabled by setting
+            <code class="methodname">setEnabled(false)</code>.
+        </p>
+
+        <p>
+            Clicking on a tab selects it. This fires a
+            <code class="classname">TabSheet.SelectedTabChangeEvent</code>, which you can handle
+            by implementing the <code class="classname">TabSheet.SelectedTabChangeListener</code>
+            interface. The source component of the event, which you can retrieve with
+            <code class="methodname">getSource()</code> method of the event, will be the
+            <code class="classname">TabSheet</code> component. You can find the currently selected
+            tab with <code class="methodname">getSelectedTab()</code> and select (open) a
+            particular tab programmatically with
+            <code class="methodname">setSelectedTab()</code>. Notice that also adding the first
+            tab fires the <code class="classname">SelectedTabChangeEvent</code>, which may cause
+            problems in your handler if you assume that everything is initialized before
+            the first change event.
+        </p>
+        
+        <p>
+            The example below demonstrates handling <code class="classname">TabSheet</code>
+            related events and enabling and disabling tabs. The sort of logic used in
+            the example is useful in sequential user interfaces, often called
+            <span class="emphasis"><em>wizards</em></span>, where the user goes through the tabs one by
+            one, but can return back if needed.
+        </p>
+
+        <pre class="programlisting">import com.vaadin.ui.*;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
+
+public class TabSheetExample extends CustomComponent implements
+        Button.ClickListener, TabSheet.SelectedTabChangeListener {
+    TabSheet tabsheet = new TabSheet();
+    Button tab1 = new Button("Push this button");
+    Label tab2 = new Label("Contents of Second Tab");
+    Label tab3 = new Label("Contents of Third Tab");
+
+    TabSheetExample() {
+        setCompositionRoot(tabsheet);
+
+        // Listen for changes in tab selection.
+        tabsheet.addListener(this);
+
+        // First tab contains a button, for which we
+        // listen button click events.
+        tab1.addListener(this);
+        
+        // This will cause a selectedTabChange() call.
+        tabsheet.addTab(tab1, "First Tab", null);
+
+        // A tab that is initially invisible.
+        tabsheet.addTab(tab2, "Second Tab", null);
+        tabsheet.getTab(tab2).setVisible(false);
+
+        // A tab that is initially disabled.
+        tabsheet.addTab(tab3, "Third tab", null);
+        tabsheet.getTab(tab3).setEnabled(false);
+    }
+
+    public void buttonClick(ClickEvent event) {
+        // Enable the invisible and disabled tabs.
+    	tabsheet.getTab(tab2).setVisible(true);
+    	tabsheet.getTab(tab3).setEnabled(true);
+
+        // Change selection automatically to second tab.
+        tabsheet.setSelectedTab(tab2);
+    }
+
+    public void selectedTabChange(SelectedTabChangeEvent event) {
+        // Cast to a TabSheet. This isn't really necessary in
+    	// this example, as we have only one TabSheet component,
+    	// but would be useful if there were multiple TabSheets.
+        final TabSheet source = (TabSheet) event.getSource();
+
+        if (source == tabsheet) {
+            // If the first tab was selected.
+            if (source.getSelectedTab() == tab1) {
+            	// The 2. and 3. tabs may not have been set yet.
+            	if (tabsheet.getTab(tab2) != null
+            		&amp;&amp; tabsheet.getTab(tab3) != null) {
+            		tabsheet.getTab(tab2).setVisible(false);
+            		tabsheet.getTab(tab3).setEnabled(false);
+            	}
+            }
+        }
+    }
+}</pre>
+
+        <div class="figure"><a name="figure.tabsheet.example2"></a><p class="title"><b>Figure&nbsp;6.10.&nbsp;A TabSheet with Hidden and Disabled Tabs</b></p><div class="figure-contents">
+            
+            <div class="mediaobject" align="center"><img src="img/components/tabsheet-example2.png" align="middle" alt="A TabSheet with Hidden and Disabled Tabs"></div>
+        </div></div><br class="figure-break">
+
+		<div class="simplesect" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N22ABF"></a>CSS Style Rules</h3></div></div></div>
+			
+
+			<pre class="programlisting">.v-tabsheet {}
+.v-tabsheet-tabs {}
+.v-tabsheet-content {}
+.v-tabsheet-deco {}
+.v-tabsheet-tabcontainer {}
+.v-tabsheet-tabsheetpanel {}
+.v-tabsheet-hidetabs {}
+
+.v-tabsheet-scroller {}
+.v-tabsheet-scrollerPrev {}
+.v-tabsheet-scrollerNext {}
+.v-tabsheet-scrollerPrev-disabled{}
+.v-tabsheet-scrollerNext-disabled{}
+
+.v-tabsheet-tabitem {}
+.v-tabsheet-tabitem-selected {}
+.v-tabsheet-tabitemcell {}
+.v-tabsheet-tabitemcell-first {}
+
+.v-tabsheet-tabs td {}
+.v-tabsheet-spacertd {}</pre>
+
+            <p>
+                The entire tabsheet has the <code class="literal">v-tabsheet</code> style.
+                A tabsheet consists of three main parts: the tabs on the top, the
+                main content pane, and decorations around the tabsheet.
+            </p>
+            
+            <p>
+                The tabs area at the top can be styled with
+                <code class="literal">v-tabsheet-tabs</code>,
+                <code class="literal">v-tabsheet-tabcontainer</code> and
+                <code class="literal">v-tabsheet-tabitem*</code>.
+            </p>
+            
+            <p>
+             	The style <code class="literal">v-tabsheet-spacertd</code> is used for any
+             	empty space after the tabs. If the tabsheet has too little space to
+             	show all tabs, scroller buttons enable browsing the full tab list.
+             	These use the styles <code class="literal">v-tabsheet-scroller*</code>.
+            </p>
+            
+            <p>
+                The content area where the tab contents are shown can be styled with
+                <code class="literal">v-tabsheet-content</code>, and the surrounding decoration
+                with <code class="literal">v-tabsheet-deco</code>.
+            </p>
+
+		</div>
+    </div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="layout.components.splitpanel.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="layout.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="layout.components.accordion.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">6.7.&nbsp;<code class="classname">SplitPanel</code>&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;6.9.&nbsp;<code class="classname">Accordion</code></td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

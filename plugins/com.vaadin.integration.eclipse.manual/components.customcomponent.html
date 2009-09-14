@@ -1,0 +1,47 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>5.18.&nbsp;Component Composition with CustomComponent</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="components.html" title="Chapter&nbsp;5.&nbsp;User Interface Components"><link rel="prev" href="components.progressindicator.html" title="5.17.&nbsp;ProgressIndicator"><link rel="next" href="layout.html" title="Chapter&nbsp;6.&nbsp;Managing Layout"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>5.18.&nbsp;Component Composition with CustomComponent</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">5.18.&nbsp;Component Composition with <code class="classname">CustomComponent</code></th></tr><tr><td align="left" width="20%"><a accesskey="p" href="components.progressindicator.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;5.&nbsp;User Interface Components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="layout.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="components.customcomponent"></a>5.18.&nbsp;Component Composition with <code class="classname">CustomComponent</code></h2></div></div></div>
+		
+
+		
+
+		<p>
+			The ease of making new user interface components is one of the core features
+			of Vaadin. New components can be created at several levels. Typically, you
+			simply combine existing built-in components to produce composite
+			components. In many applications, such composite components make up the
+			majority of the user interface. 
+		</p>
+
+		<p>
+			The easiest way to create new components is to combine existing ones. This can
+			be done in two basic ways: inheritance and management. With inheritance, you
+			inherit some containing class, typically
+			<code class="classname">CustomComponent</code> or some abstract class such as
+			<code class="classname">AbstractComponent</code>,
+			<code class="classname">AbstractField</code>, or
+			<code class="classname">AbstractComponentContainer</code>. With management, you create
+			a class that creates the needed components under some layout and handles their
+			events. Both of these patterns are used extensively in the examples in <a href="components.html" title="Chapter&nbsp;5.&nbsp;User Interface Components">Chapter&nbsp;5, <i xmlns:xlink="http://www.w3.org/1999/xlink">User Interface Components</i></a> and elsewhere.
+		</p>
+
+        <p>
+            The <code class="classname">CustomComponent</code> class is a simple implementation of
+            the <code class="classname">Component</code> interface that provides a simple way to
+            create new user interface components by the composition of existing
+            components.
+        </p>
+
+        <p>
+            Composition is done by inheriting the <code class="classname">CustomComponent</code>
+            class and setting the <span class="emphasis"><em>composite root</em></span> inside the component
+            with <code class="methodname">setCompositionRoot()</code>. The composite root is
+            typically a layout component that contains multiple components.
+        </p>
+
+        
+
+		<p>
+			You can also create your own low-level components, for example existing Google
+			Web Toolkit components. It is also possible to extend the functionality of
+			existing components. Development of custom GWT components is covered in <a href="gwt.html" title="Chapter&nbsp;9.&nbsp;Developing Custom Components">Chapter&nbsp;9, <i xmlns:xlink="http://www.w3.org/1999/xlink">Developing Custom Components</i></a>.
+		</p>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="components.progressindicator.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="components.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="layout.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">5.17.&nbsp;<code class="classname">ProgressIndicator</code>&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Chapter&nbsp;6.&nbsp;Managing Layout</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

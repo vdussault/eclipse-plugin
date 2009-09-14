@@ -1,0 +1,73 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Chapter&nbsp;8.&nbsp;Binding Components to Data</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="index.html" title="Book of Vaadin"><link rel="prev" href="themes.creating.html" title="7.3.&nbsp;Creating and Using Themes"><link rel="next" href="datamodel.properties.html" title="8.2.&nbsp;Properties"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>Chapter&nbsp;8.&nbsp;Binding Components to Data</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Chapter&nbsp;8.&nbsp;Binding Components to Data</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="themes.creating.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="datamodel.properties.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="datamodel"></a>Chapter&nbsp;8.&nbsp;Binding Components to Data</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="datamodel.html#datamodel.overview">8.1. Overview</a></span></dt><dt><span class="section"><a href="datamodel.properties.html">8.2. Properties</a></span></dt><dt><span class="section"><a href="datamodel.items.html">8.3. Holding properties in Items</a></span></dt><dt><span class="section"><a href="datamodel.container.html">8.4. Collecting items in Containers</a></span></dt><dd><dl><dt><span class="section"><a href="datamodel.container.html#N23544">8.4.1. Iterating Over a Container</a></span></dt></dl></dd></dl></div>
+	
+
+	<div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="datamodel.overview"></a>8.1.&nbsp;Overview</h2></div></div></div>
+		
+
+		<p>
+			
+			The Vaadin Data Model is one of the core concepts of the library. To
+			allow the view (user interface components) to access the application data directly,
+			we have introduced a standard data interface. Application data needs a common
+			interface so that the data can be accessed by the view and the controller alike.
+			In Vaadin, we have solved this with the Data Model.
+		</p>
+
+		<div class="figure"><a name="N23450"></a><p class="title"><b>Figure&nbsp;8.1.&nbsp;Vaadin Data Model</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/arch/datamodel-sml.png" align="middle" alt="Vaadin Data Model"></div>
+		</div></div><br class="figure-break">
+		
+		<p>
+			The Vaadin Data Model allows binding user interface components directly
+			to the data they show and modify. There are three nested levels of hierarchy in
+			the data model: <span class="emphasis"><em>property</em></span>, <span class="emphasis"><em>item</em></span> and
+			<span class="emphasis"><em>container</em></span>. Using a spreadsheet application as an analogy,
+			these would correspond to the data underlying a cell, a row and a table,
+			respectively. The components would display the data in these and optionally
+			allow direct editing of the corresponding entities.
+		</p>
+
+		<p>
+			The Data Model is realized as a set of interface classes in the fittingly named
+			package <code class="classname">com.vaadin.data</code>. The package contains
+			the interfaces <code class="classname">Property</code>, <code class="classname">Item</code>, and
+			<code class="classname">Container</code>, along with a number of more specialized interfaces
+			and classes.
+		</p>
+
+		<p>
+			Notice that the Data Model does not define data representation, but only
+			interfaces. This leaves the representation fully to the implementation of the
+			containers. The representation can be almost anything, such as a Java object
+			structure, a filesystem, or a database query.
+		</p>
+
+		<p>
+			The Data Model is used heavily in UI components of Vaadin.  A key feature of
+			all UI components is that they can either maintain their data by themselves or be
+			bound to an external data source. Various components also implement some of these
+			interfaces themselves, so you can actually use them as data sources for other
+			components.
+		</p>
+		
+		<p>
+			The Data Model has many important and useful features, such as
+			support for change notification, transactions,
+			validation, and lazy loading.
+
+			
+		</p>
+	</div>
+
+	
+
+	
+
+	
+
+
+
+
+	
+</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="themes.creating.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;<a accesskey="n" href="datamodel.properties.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">7.3.&nbsp;Creating and Using Themes&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;8.2.&nbsp;Properties</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

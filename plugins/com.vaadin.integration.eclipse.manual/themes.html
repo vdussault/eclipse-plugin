@@ -1,0 +1,90 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Chapter&nbsp;7.&nbsp;Themes</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="index.html" title="Book of Vaadin"><link rel="prev" href="layout.customlayout.html" title="6.11.&nbsp;Custom Layouts"><link rel="next" href="themes.css.html" title="7.2.&nbsp;Introduction to Cascading Style Sheets"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>Chapter&nbsp;7.&nbsp;Themes</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Chapter&nbsp;7.&nbsp;Themes</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="layout.customlayout.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="themes.css.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="themes"></a>Chapter&nbsp;7.&nbsp;Themes</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="themes.html#themes.overview">7.1. Overview</a></span></dt><dt><span class="section"><a href="themes.css.html">7.2. Introduction to Cascading Style Sheets</a></span></dt><dd><dl><dt><span class="section"><a href="themes.css.html#N22F49">7.2.1. Basic CSS Rules</a></span></dt><dt><span class="section"><a href="themes.css.html#N22FD2">7.2.2. Matching by Element Class</a></span></dt><dt><span class="section"><a href="themes.css.html#N2307E">7.2.3. Matching by Descendant Relationship</a></span></dt><dt><span class="section"><a href="themes.css.html#N23129">7.2.4. Notes on Compatibility</a></span></dt></dl></dd><dt><span class="section"><a href="themes.creating.html">7.3. Creating and Using Themes</a></span></dt><dd><dl><dt><span class="section"><a href="themes.creating.html#N2316B">7.3.1. Styling Standard Components</a></span></dt><dt><span class="section"><a href="themes.creating.html#themes.creating.using">7.3.2. Using Themes</a></span></dt><dt><span class="section"><a href="themes.creating.html#themes.creating.inheritance">7.3.3. Theme Inheritance</a></span></dt></dl></dd></dl></div>
+	
+
+	<p>
+		This chapter provides details about using and creating <span class="emphasis"><em>themes</em></span>
+		that control the visual look of web applications using Cascading Style Sheets
+		(CSS) and other theme resources. We provide an introduction to CSS, especially
+		concerning the styling of HTML by element classes.
+	</p>
+
+	<div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="themes.overview"></a>7.1.&nbsp;Overview</h2></div></div></div>
+		
+
+		<p>
+			Vaadin separates the appearance of the user interface from its logic
+			using <span class="emphasis"><em>themes</em></span>. Themes can include CSS style sheets, custom
+			HTML layouts, and any necessary graphics used by them. Theme resources can
+			also be accessed from an application with <code class="classname">ThemeResource</code>
+			objects.
+		</p>
+
+		<p>
+			You place custom themes under the
+			<code class="filename">WebContents/VAADIN/themes/</code> folder of the web application.
+			This location is fixed -- the folder "VAADIN" specifies that these are static
+			resources specific to Vaadin. The folder should normally contain also
+			the built-in themes, although you can let them be loaded dynamically from
+			the Vaadin JAR (even though that is somewhat inefficient).  <a href="themes.html#figure.themes.theme-contents" title="Figure&nbsp;7.1.&nbsp;Theme Contents">Figure&nbsp;7.1, &ldquo;Theme Contents&rdquo;</a> illustrates the contents of a theme.
+		</p>
+
+		<div class="figure"><a name="figure.themes.theme-contents"></a><p class="title"><b>Figure&nbsp;7.1.&nbsp;Theme Contents</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/themes/theme-contents-lo.png" align="middle" alt="Theme Contents"></div>
+		</div></div><br class="figure-break">
+
+		<p>
+			The name of a theme folder defines the name of the theme. The name is used in
+			the <code class="methodname">setTheme()</code> call. A theme must contain the
+			<code class="filename">styles.css</code> stylesheet, but other contents have free
+			naming. We suggest a convention for naming the folders as
+			<code class="filename">img</code> for images, <code class="filename">layouts</code> for custom
+			layouts, and <code class="filename">css</code> for additional stylesheets.
+		</p>
+
+		<p>
+			Custom themes that use an existing complete theme need to inherit the
+			theme. See <a href="themes.creating.html#section.themes.default" title="Built-in Themes">the section called &ldquo;Built-in Themes&rdquo;</a> and <a href="themes.creating.html#themes.creating.inheritance" title="7.3.3.&nbsp;Theme Inheritance">Section&nbsp;7.3.3, &ldquo;Theme Inheritance&rdquo;</a> for details on inheriting a
+			theme. Copying and modifying a complete theme is also possible, but it may
+			need more work to maintain if the modifications are small.
+		</p>
+
+		<p>
+			You use a theme with a simple <code class="methodname">setTheme()</code> method call
+			for the <code class="classname">Application</code> object as follows:
+		</p>
+
+		<pre class="programlisting">public class MyApplication extends com.vaadin.Application {
+    public void init() {
+        setTheme("demo");
+        ...
+    }
+}</pre>
+
+		<p>
+			An application can use different themes for different users and switch between
+			themes during execution. For smaller changes, a theme can contain alternate
+			styles for user interface components, which can be changed as needed.
+		</p>
+
+		<p>
+			In addition to style sheets, a theme can contain HTML templates for custom
+			layouts used with <code class="classname">CustomLayout</code>. See <a href="layout.customlayout.html" title="6.11.&nbsp;Custom Layouts">Section&nbsp;6.11, &ldquo;Custom Layouts&rdquo;</a> for details.
+		</p>
+
+		<p>
+			Resources provided in a theme can also be accessed using the
+			<code class="classname">ThemeResource</code> class, as described in <a href="application.resources.html#application.resources.theme" title="4.5.4.&nbsp;Theme Resources">Section&nbsp;4.5.4, &ldquo;Theme Resources&rdquo;</a>. This allows using theme resources, such
+			as images, for example in <code class="classname">Embedded</code> objects and other
+			objects that allow inclusion of images using resources.
+		</p>
+
+		<pre class="programlisting"></pre>
+	</div>
+
+	
+	
+	
+
+
+</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="layout.customlayout.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;<a accesskey="n" href="themes.css.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">6.11.&nbsp;Custom Layouts&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;7.2.&nbsp;Introduction to Cascading Style Sheets</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

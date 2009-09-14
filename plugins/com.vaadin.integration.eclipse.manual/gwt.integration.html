@@ -1,0 +1,386 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>9.3.&nbsp;Integrating a GWT Widget</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="gwt.html" title="Chapter&nbsp;9.&nbsp;Developing Custom Components"><link rel="prev" href="gwt.widgets.html" title="9.2.&nbsp;Google Web Toolkit Widgets"><link rel="next" href="gwt.widgetset.html" title="9.4.&nbsp;Defining a Widget Set"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>9.3.&nbsp;Integrating a GWT Widget</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">9.3.&nbsp;Integrating a GWT Widget</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="gwt.widgets.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;9.&nbsp;Developing Custom Components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="gwt.widgetset.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="gwt.integration"></a>9.3.&nbsp;Integrating a GWT Widget</h2></div></div></div>
+		
+		
+		<p>
+			Integration of GWT widgets with Vaadin can be done in two basic ways:
+			by modifying the original class or by inheriting it and adding the integration
+			code in the subclass. The latter way is actually the way the standard
+			client-side components in Vaadin are done: they simply inherit the
+			corresponding standard GWT widgets. For example,
+			<code class="classname">VButton</code> inherits GWT <code class="classname">Button</code>.
+		</p>
+
+		<p>
+			The integration code has the following tasks:
+		</p>
+
+		<div class="itemizedlist"><ul type="disc"><li>Manage CSS style class</li><li>Receive component state from server</li><li>Send state changes caused by user interaction to server</li></ul></div>
+		
+		<p>
+			The integration is broken down in the following sections into server-client
+			deserialization done in <code class="methodname">updateFromUIDL()</code> and
+			client-server serialization done with
+			<code class="methodname">updateVariable()</code>. The complete example of the
+			integration of the Color Picker widget is given at the end of this section.
+		</p>
+
+		<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Naming Conventions</h3>
+			
+
+			<p>
+				While the use of Vaadin does not require the use of any particular naming
+				conventions for GWT widgets, some notes regarding naming may be
+				necessary. Even though Java package names make it possible to use
+				identical class names in the same context, it may be useful to try to make
+				them more distinctive to avoid any inconvenience. GWT uses plain names
+				for its standard widgets, such as <code class="classname">Button</code>. The
+				standard components of Vaadin use identical or similar names, but that
+				does not cause any inconvenience, because the GWT widgets and server-side
+				components of Vaadin are never used in the same context. For the
+				client-side components of Vaadin, we use the "<code class="literal">V</code>"
+				prefix, for example <code class="classname">VButton</code>. In the Color Picker
+				example, we use <code class="classname">GwtColorPicker</code> for the GWT widget
+				and <code class="classname">VColorPicker</code> for the integration
+				implementation. You may wish to follow similar conventions.
+			</p>
+
+			<p>
+				Notice that the naming convention changed when IT Mill Toolkit was renamed
+				as Vaadin. The prefix for client-side widgets in IT Mill Toolkit was
+				<code class="literal">I</code>, which was changed to <code class="literal">V</code> in
+				Vaadin. Similarly, CSS style name prefixes were changed from
+				<code class="literal">i-</code> to <code class="literal">v-</code>.
+			</p>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gwt.integration.deserialization"></a>9.3.1.&nbsp;Deserialization of Component State from Server</h3></div></div></div>
+			
+	
+			<p>
+				To receive data from the server, a widget must implement the
+				<code class="classname">Paintable</code> interface and its
+				<code class="methodname">updateFromUIDL()</code> method. The idea is that the
+				method "paints" the user interface description by manipulating the HTML
+				tree on the browser. Typically, when using composite GWT components, most
+				of the DOM tree manipulation is done by standard GWT widgets.
+			</p>
+
+			<p>
+				An implementation of the <code class="methodname">updateFromUIDL()</code> method
+				must include some routine tasks:
+			</p>
+
+			<div class="itemizedlist"><ul type="disc"><li>
+					Call <code class="methodname">updateComponent()</code> and return if it
+					succeeds
+				</li><li>Manage the component identifier</li><li>
+					Manage a reference to the <code class="classname">ApplicationConnection</code>
+					object. The widget needs to know it to be able to initiate a server
+					request when a browser event occurs.
+				</li></ul></div>
+			
+			<p>
+				The latter two of these tasks are not needed if the widget does not handle
+				any user input that needs to be sent to server.
+			</p>
+
+			<p>
+				The following excerpt provides a skeleton for the
+				<code class="methodname">updateFromUIDL()</code> method and shows how the
+				component identifier and connection object reference are managed by a
+				widget.
+			</p>
+
+	<pre class="programlisting">    String uidlId;
+    ApplicationConnection client;
+
+    ...
+
+    public void updateFromUIDL(UIDL uidl,
+            ApplicationConnection client) {
+        if (client.updateComponent(this, uidl, true))
+            return;
+ 
+        this.client = client;
+        uidlId = uidl.getId();
+
+        ...
+    }</pre>
+
+			<p>
+				The <code class="methodname">updateComponent()</code> call has several functions
+				important for different kinds of components. It updates various default
+				attributes, such as <em class="parameter"><code>disabled</code></em>,
+				<em class="parameter"><code>readonly</code></em>, <em class="parameter"><code>invisible</code></em>, and
+				(CSS) <em class="parameter"><code>style</code></em> attributes.  If the
+				<em class="parameter"><code>manageCaption</code></em> argument is <code class="literal">true</code>,
+				the call will also update the caption of the component. By default, the
+				caption is managed by the parent layout of the component. Components,
+				such as a <code class="classname">Button</code>, that manage the caption
+				themselves, do not need management of the caption.
+			</p>
+
+			<p>
+				The <code class="methodname">updateComponent()</code> is also part of the
+				transmutation mechanism that allows a single server-side component to have
+				alternative client-side implementations, based on its parameters. For
+				example, the <code class="classname">Button</code> server-side component can
+				manifest either as a clickable <code class="classname">VButton</code> or as a
+				switchable <code class="classname">VCheckBox</code> widget on the client-side. If
+				the parameters are changed, the client-side widget can be replaced with
+				another dynamically. Determination of the correct implementation is done
+				in a <code class="classname">WidgetSet</code>. If
+				<code class="methodname">updateComponent()</code> returns
+				<span class="returnvalue">true</span>, the client-side engine can attempt to
+				replace the implementation. For more details on the transmutation
+				mechanism, see <a href="gwt.widgetset.html" title="9.4.&nbsp;Defining a Widget Set">Section&nbsp;9.4, &ldquo;Defining a Widget Set&rdquo;</a>.
+			</p>
+
+			<p>
+				The component identifier is used when the component needs to serialize its
+				updated state to server. The reference to the application connection
+				manager is needed to make the server request. If a component does not have
+				any state changes that need to be sent to the server, management of the
+				variables is not needed. See <a href="gwt.integration.html#gwt.integration.serialization" title="9.3.2.&nbsp;Serialization of Component State to Server">Section&nbsp;9.3.2, &ldquo;Serialization of Component State to Server&rdquo;</a> below for further details.
+			</p>
+
+			<p>
+				The design of the client-side framework of Vaadin, because the
+				<code class="classname">Paintable</code> is an interface and can not store any
+				references.  Having an API layer between GWT and custom widgets would be a
+				much more complicated solution.
+			</p>
+			
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gwt.integration.serialization"></a>9.3.2.&nbsp;Serialization of Component State to Server</h3></div></div></div>
+			
+			
+			<p>
+				User input is handled in GWT widgets with events.
+			</p>
+
+			<p>
+				User input is passed to the server using the
+				<code class="methodname">updateVariable()</code> method. If the
+				<em class="parameter"><code>immediate</code></em> parameter is
+				<em class="parameter"><code>false</code></em>, the value is simply added to a queue to be
+				sent to the server at next AJAX request. If the argument is
+				<em class="parameter"><code>true</code></em>, the AJAX request is made immediately, and
+				will include all queued updates to variables. The
+				<em class="parameter"><code>immediate</code></em> argument is described in more detail
+				below.
+			</p>
+
+			<pre class="programlisting">if (uidl_id == null || client == null)
+    return;
+
+client.updateVariable(uidl_id, "myvariable",
+                      newvalue, immediate);</pre>
+
+			<p>
+				The <em class="parameter"><code>client</code></em> of the above example is a reference to
+				the <code class="classname">ApplicationConnection</code> object that manages
+				server requests. The <em class="parameter"><code>uidl_id</code></em> argument is the UIDL
+				identifier obtained during a <code class="methodname">updateFromUIDL()</code>
+				call with <code class="methodname">uidl.getId()</code> method.
+			</p>
+
+			<p>
+				The <code class="methodname">updateVariable()</code> method has several varieties
+				to send variables of different types.
+			</p>
+
+			<div class="table"><a name="N2382D"></a><p class="title"><b>Table&nbsp;9.1.&nbsp;UIDL Variable Types</b></p><div class="table-contents">
+				
+				<table summary="UIDL Variable Types" border="1"><colgroup><col><col><col></colgroup><thead><tr valign="top"><th align="left" valign="top">Type</th><th align="left" valign="top">Description</th><th align="left" valign="top">UIDL Type</th></tr></thead><tbody><tr valign="top"><td align="left" valign="top"><code class="constant">String</code></td><td align="left" valign="top">
+								String object.
+							</td><td align="left" valign="top">s</td></tr><tr valign="top"><td align="left" valign="top"><code class="constant">int</code></td><td align="left" valign="top">
+								Native integer value.
+							</td><td align="left" valign="top">i</td></tr><tr valign="top"><td align="left" valign="top"><code class="constant">long</code></td><td align="left" valign="top">
+								Native long integer value.
+							</td><td align="left" valign="top">l</td></tr><tr valign="top"><td align="left" valign="top"><code class="constant">float</code></td><td align="left" valign="top">
+								Native single-precision floating-point value.
+							</td><td align="left" valign="top">f</td></tr><tr valign="top"><td align="left" valign="top"><code class="constant">double</code></td><td align="left" valign="top">
+								Native double-precision floating-point value.
+							</td><td align="left" valign="top">d</td></tr><tr valign="top"><td align="left" valign="top"><code class="constant">boolean</code></td><td align="left" valign="top">
+								Native boolean value.
+							</td><td align="left" valign="top">b</td></tr><tr valign="top"><td align="left" valign="top"><code class="constant">Object[]</code></td><td align="left" valign="top">
+								Array of object data. The
+								<code class="methodname">toString()</code> method is used to
+								serialize each of the objects. The content strings are
+								escaped with <code class="methodname">escapeString()</code>, to
+								allow characters such as quotes.
+							</td><td align="left" valign="top">a</td></tr></tbody></table>
+			</div></div><br class="table-break">
+
+			<p>
+				This serialization mechanism is intended to be as simple as possible
+				in most cases, when the user input is typically just one state
+				variable, while also allowing the serialization of more complex data,
+				if necessary.
+			</p>
+			
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N238B6"></a>Immediateness</h4></div></div></div>
+				
+				
+				<p>
+					Server-side components that inherit
+					<code class="classname">AbstractComponent</code> have an
+					<em class="parameter"><code>immediate</code></em> attribute, set with
+					<code class="methodname">setImmediate()</code>. This attribute dictates
+					whether a component makes a server request immediately when its state
+					changes, or only afterwards. For example, there is no need to send the
+					contents of a "Username" <code class="classname">TextField</code> before the
+					"Login" button has been clicked. On the other hand, the server can set
+					the <code class="classname">TextField</code> as immediate to receive changes
+					for example when the component loses focus.
+				</p>
+
+				<p>
+					Most widgets should support immediateness by receiving the
+					<em class="parameter"><code>immediate</code></em> attribute from the UIDL message that
+					renders the widget. The following example is extracted from the
+					<code class="classname">VTextField</code> implementation.
+				</p>
+
+				<pre class="programlisting">// Store the immediate attribute in a member variable
+private boolean immediate = false;
+...
+
+public void updateFromUIDL(UIDL uidl,
+                           ApplicationConnection client) {
+    if(client.updateComponent(this, uidl, true))
+        return;
+
+    // Receive and store the immediate attribute
+    immediate  = uidl.getBooleanAttribute("immediate");
+    ...
+}
+
+public void onChange(Widget sender) {
+    if(client != null &amp;&amp; id != null) {
+        // Use the stored immediate attribute to say
+        // whether or not make the server request
+        //  immediately.
+        client.updateVariable(id, "text", getText(),
+                              immediate);
+    }
+}</pre>
+
+				<p>
+					In some widgets, the <em class="parameter"><code>immediate</code></em> attribute would
+					have little meaning, and in fact an accidental
+					<em class="parameter"><code>false</code></em> value would cause undesired
+					behaviour. For example, a button is always expected to send a request
+					to the server when it is clicked. Such widgets can simply use
+					<em class="parameter"><code>true</code></em> for the <em class="parameter"><code>immediate</code></em>
+					argument in <code class="methodname">updateVariable()</code>. For example,
+					<code class="classname">VButton</code> does as follows:
+					</p>
+
+				<pre class="programlisting">public void onClick(Widget sender) {
+    if (id == null || client == null)
+        return;
+    client.updateVariable(id, "state", true,
+                          /* always immediate */ true);
+}</pre>
+
+			</div>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gwt.integration.example.colorpicker"></a>9.3.3.&nbsp;Example: Integrating the Color Picker Widget</h3></div></div></div>
+			
+
+			<p>
+				Below is a complete example of an integration component for the Color
+				Picker example. It demonstrates all the basic tasks needed for the
+				integration of a GWT widget with its server-side counterpart component.
+			</p>
+
+		<pre class="programlisting">import com.vaadin.terminal.gwt.client.ApplicationConnection;
+import com.vaadin.terminal.gwt.client.Paintable;
+import com.vaadin.terminal.gwt.client.UIDL;
+
+public class VColorPicker extends GwtColorPicker
+                          implements Paintable {
+
+    /** Set the CSS class name to allow styling. */
+    public static final String CLASSNAME = "example-colorpicker";
+
+    /** Component identifier in UIDL communications. */
+    String uidlId;
+
+    /** Reference to the server connection object. */
+    ApplicationConnection client;
+
+    /**
+     * The constructor should first call super() to initialize
+     * the component and then handle any initialization relevant
+     * to Vaadin.
+     */
+    public VColorPicker() {
+        // The superclass has a lot of relevant initialization
+        super();
+
+        // This method call of the Paintable interface sets
+        // the component style name in DOM tree
+        setStyleName(CLASSNAME);
+    }
+
+    /**
+     * This method must be implemented to update the client-side
+     * component from UIDL data received from server.
+     * 
+     * This method is called when the page is loaded for the
+     * first time, and every time UI changes in the component
+     * are received from the server.
+     */
+    public void updateFromUIDL(UIDL uidl,
+                               ApplicationConnection client) {
+        // This call should be made first. Ensure correct
+        // implementation, and let the containing layout
+        // manage the caption, etc.
+        if (client.updateComponent(this, uidl, true))
+            return;
+
+        // Save reference to server connection object to be
+        // able to send user interaction later
+        this.client = client;
+
+        // Save the UIDL identifier for the component
+        uidlId = uidl.getId();
+
+        // Get value received from server and actualize it
+        // in the GWT component
+        setColor(uidl.getStringVariable("colorname"));
+    }
+
+    /**
+     * Override the method to communicate the new value
+     * to server.
+     **/
+    public void setColor(String newcolor) {
+        // Ignore if no change
+        if (newcolor.equals(currentcolor.getText()))
+            return;
+
+        // Let the original implementation to do
+        // whatever it needs to do
+        super.setColor(newcolor);
+
+        // Updating the state to the server can not be done
+        // before the server connection is known, i.e., before
+        // updateFromUIDL() has been called.
+        if (uidlId == null || client == null)
+            return;
+
+        // Communicate the user interaction parameters to server.
+        // This call will initiate an AJAX request to the server.
+        client.updateVariable(uidlId, "colorname",
+                              newcolor, true);
+    }
+}</pre>
+
+		</div>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="gwt.widgets.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="gwt.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="gwt.widgetset.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">9.2.&nbsp;Google Web Toolkit Widgets&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;9.4.&nbsp;Defining a Widget Set</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

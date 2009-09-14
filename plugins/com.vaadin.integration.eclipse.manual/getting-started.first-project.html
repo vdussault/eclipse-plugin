@@ -1,0 +1,313 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>2.4.&nbsp;Your First Project with Vaadin</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="getting-started.html" title="Chapter&nbsp;2.&nbsp;Getting Started with Vaadin"><link rel="prev" href="getting-started.quickstart.html" title="2.3.&nbsp;QuickStart with Eclipse"><link rel="next" href="architecture.html" title="Chapter&nbsp;3.&nbsp;Architecture"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>2.4.&nbsp;Your First Project with Vaadin</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">2.4.&nbsp;Your First Project with Vaadin</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="getting-started.quickstart.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;2.&nbsp;Getting Started with Vaadin</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="architecture.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="getting-started.first-project"></a>2.4.&nbsp;Your First Project with Vaadin</h2></div></div></div>
+		
+
+		<p>
+			This section gives detailed instructions for creating a new project that uses
+			Vaadin. The task will include the following steps:
+		</p>
+
+		<div class="orderedlist"><ol type="1"><li>
+				Create a new project in the Eclipse IDE using the plugin.
+			</li><li>
+				Write the source code.
+			</li><li>
+				Configure and start Tomcat (or some other web server).
+			</li><li>
+				Open a web browser to use the web application.
+			</li></ol></div>
+
+		<p>
+			We also show you how to debug the application in the debug mode in Eclipse.
+		</p>
+		
+		<p>
+			If you have not installed the Vaadin and set up your development
+			environment, see <a href="getting-started.html#getting-started.package.installing" title="2.1.1.&nbsp;Installing the Installation Package">Section&nbsp;2.1.1, &ldquo;Installing the Installation Package&rdquo;</a>
+			and <a href="getting-started.environment.html" title="2.2.&nbsp;Setting up the Development Environment">Section&nbsp;2.2, &ldquo;Setting up the Development Environment&rdquo;</a> for detailed instructions.
+		</p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="getting-started.first-project.creation"></a>2.4.1.&nbsp;Creating the Project</h3></div></div></div>
+			
+
+			<p>
+				Let us create the first application project with the tools installed in
+				the previous section. First launch Eclipse and follow the following steps:
+			</p>
+
+			<div class="orderedlist"><div class="screenshot">
+						<div class="mediaobject" align="center"><img src="img/intro/myproject-vaadin.png" align="middle"></div>
+					</div><ol type="1"><li>
+					Start creating a new project by selecting from the menu
+					<span class="guimenu">File</span> &rarr; <span class="guisubmenu">New</span> &rarr; <span class="guimenuitem">Project...</span>.
+				</li><li>
+					From the New Project window that opens, select
+					<span class="guimenu">Web</span> &rarr; <span class="guimenuitem">Dynamic Web
+					Project</span> and click
+					<span class="guibutton">Next</span>.
+
+					<div class="screenshot">
+						<div class="mediaobject" align="center"><img src="img/intro/newProject.png" align="middle"></div>
+					</div>
+				</li><li>
+					<p>
+						Enter the <span class="guilabel">Project name</span>, such as "<code class="literal">myproject</code>", and leave
+						<span class="guilabel">Use default location</span> selected to create the new
+						project under the default workspace location. 
+					</p>
+					<p>
+						Check that the <span class="guilabel">Target runtime</span>,
+						that is the web container, is correct. For example, if you installed Apache Tomcat, check that
+						it is selected here.
+					</p>
+					<p>
+						Change the configuration to <span class="guilabel">Vaadin Project</span>. If that 
+						configuration is not available, install Vaadin Eclipse Plugin as described in the section
+						<a href="getting-started.environment.html#getting-started.environment.eclipse-plugin" title="2.2.5.&nbsp;Vaadin Eclipse Plugin">Section&nbsp;2.2.5, &ldquo;Vaadin Eclipse Plugin&rdquo;</a>.
+					</p>
+					<p>Click <span class="guibutton">Next</span>.</p>
+
+					<div class="screenshot">
+						<div class="mediaobject" align="center"><img src="img/intro/myproject-settings.png" align="middle"></div>
+					</div>
+				</li><li>
+					<p>
+						The wizard will suggest <code class="filename">myproject</code> for a context
+						name. This will be the subpath in the URL, for example
+						<code class="filename">http://localhost:8080/myproject</code>. The default for the
+						application root will be <code class="filename">/</code> (root).
+					</p>
+			
+					<div class="screenshot">
+						<div class="mediaobject" align="center"><img src="img/intro/myproject-web.png" align="middle"></div>
+					</div>
+
+					<p>
+						You can just accept the defaults and click
+						<span class="guibutton">Next</span>.
+					</p>
+				</li><li>
+					<p>
+						Vaadin project wizard offers to create a project template for us. Let's 
+						accept that and leave the application name, package and main application class name
+						to defaults. Click
+						<span class="guibutton">Finish</span>. The wizard closes and creates the
+						project.
+					</p>
+				</li><li>
+					Eclipse asks to switch to J2EE perspective. A Dynamic Web Project uses
+					an external web server and the J2EE perspective provides tools to
+					control the server and manage application deployment. Click
+					<span class="guibutton">Yes</span>.
+				</li></ol></div>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="getting-started.first-project.coding"></a>2.4.2.&nbsp;Exploring the Project</h3></div></div></div>
+			
+
+			<p>
+				We see that the plugin has done all the work for us: vaadin libraries are installed in 
+				the projects <code class="filename">WebContent/WEB-INF/lib</code> directory, an application class
+				skeleton has been written to <code class="filename">src</code> directory and <code class="filename">WebContent/WEB-INF/web.xml</code>
+				already contains a deployment descriptor.
+			</p>
+
+			<div class="figure"><a name="N20A83"></a><p class="title"><b>Figure&nbsp;2.9.&nbsp;A New Dynamic Web Project</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/intro/myproject-created.png" align="middle" alt="A New Dynamic Web Project"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				The application class created by the plugin contains the following code:
+			</p>
+
+			<pre class="programlisting">package com.example.myproject;
+
+import com.vaadin.Application;
+import com.vaadin.ui.*;
+public class MyprojectApplication extends Application
+{
+   @Override 
+   public void init() {
+      Window mainWindow = 
+         new Window("Myproject Application");
+      Label label = new Label("Hello Vaadin user");
+      mainWindow.addComponent(label);
+      setMainWindow(mainWindow);
+   }
+}
+</pre>
+
+			<p>
+				Let's add a button to the application in order to make it a bit more interesting. The resulting <code class="methodname">init()</code> method
+				could look something like:
+			</p>
+<pre class="programlisting">public void init() {
+   final Window mainWindow = 
+      new Window("Myproject Application");
+   Label label = new Label("Hello Vaadin user");
+   mainWindow.addComponent(label);
+   mainWindow.addComponent(
+      new Button("What is the time?",
+         new Button.ClickListener() {
+         public void buttonClick(ClickEvent event) {
+            mainWindow.showNotification(
+               "The time is " + new Date());
+         }
+      }));
+   setMainWindow(mainWindow);
+}
+</pre>
+
+			<p>
+				The deployment descriptor <code class="filename">WebContent/WEB-INF/web.xml</code> defines that the root of the
+				myproject application is served by "ApplicationServlet" that shows you application:
+			</p>
+
+			<div class="example"><a name="ex.web.calc"></a><p class="title"><b>Example&nbsp;2.1.&nbsp;Web.xml Deployment Descriptor for our project</b></p><div class="example-contents">
+				
+				<pre class="programlisting">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xmlns="http://java.sun.com/xml/ns/javaee" 
+  xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+  id="WebApp_ID" version="2.5"&gt;
+  &lt;display-name&gt;myproject&lt;/display-name&gt;
+  &lt;context-param&gt;
+  	&lt;description&gt;Vaadin production mode&lt;/description&gt;
+  	&lt;param-name&gt;productionMode&lt;/param-name&gt;
+  	&lt;param-value&gt;false&lt;/param-value&gt;
+  &lt;/context-param&gt;
+  &lt;servlet&gt;
+  	&lt;servlet-name&gt;Myproject Application&lt;/servlet-name&gt;
+  	&lt;servlet-class&gt;
+  	  com.vaadin.terminal.gwt.server.ApplicationServlet
+  	&lt;/servlet-class&gt;
+  	&lt;init-param&gt;
+      &lt;description&gt;Vaadin application class to start&lt;/description&gt;
+      &lt;param-name&gt;application&lt;/param-name&gt;
+      &lt;param-value&gt;
+        com.example.myproject.MyprojectApplication
+      &lt;/param-value&gt;
+  	&lt;/init-param&gt;
+  &lt;/servlet&gt;
+  &lt;servlet-mapping&gt;
+  	&lt;servlet-name&gt;Myproject Application&lt;/servlet-name&gt;
+  	&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;
+</pre>
+			</div></div><br class="example-break">
+			
+			<p>
+				For a more detailed treatment of the <code class="filename">web.xml</code> file,
+				see <a href="application.environment.html#section.web.web-xml" title="4.8.3.&nbsp;Deployment Descriptor web.xml">Section&nbsp;4.8.3, &ldquo;Deployment Descriptor <code class="filename">web.xml</code>&rdquo;</a>.
+			</p>
+		</div>
+			
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="getting-started.first-project.server"></a>2.4.3.&nbsp;Setting Up and Starting the Web Server</h3></div></div></div>
+			
+
+			<p>
+				Eclipse IDE for Java EE Developers has the Web Standard Tools package
+				installed, which supports control of various web servers and automatic
+				deployment of web content to the server when changes are made to a
+				project.
+			</p>
+
+			<p>
+				Make sure that Tomcat was installed with user permissions. Configuration
+				of the web server in Eclipse will fail if the user does not have write
+				permissions to the configuration and deployment directories under the
+				Tomcat installation directory.
+			</p>
+
+			<p>
+				Follow the following steps.
+			</p>
+
+			<div class="orderedlist"><ol type="1"><li>
+					Switch to the <span class="guimenuitem">Servers</span> tab in the lower panel in
+					Eclipse. List of servers should be empty after Eclipse is
+					installed. Right-click on the empty area in the panel and select
+					<span class="guimenu">New</span> &rarr; <span class="guimenuitem">Server</span>.
+
+					<div class="screenshot">
+						<div class="mediaobject" align="center"><img src="img/intro/tomcat-startserver-1.png" align="middle"></div>
+					</div>
+				</li><li>
+					Select <span class="guimenu">Apache</span> &rarr; <span class="guimenuitem">Tomcat v6.0
+					Server</span> and set <span class="guilabel">Server's host
+					name</span> as <code class="literal">localhost</code>, which should be the
+					default. If you have only one Tomcat installed, <span class="guilabel">Server
+					runtime</span> has only one choice. Click
+					<span class="guibutton">Next</span>.
+
+					<div class="screenshot">
+						<div class="mediaobject" align="center"><img src="img/intro/tomcat-startserver-2.png" align="middle"></div>
+					</div>
+					
+				</li><li>
+					Add your project to the server by selecting it on the left and
+					clicking <span class="guibutton">Add</span> to add it to the configured
+					projects on the right. Click <span class="guibutton">Finish</span>.
+
+					<div class="screenshot">
+						<div class="mediaobject" align="center"><img src="img/intro/tomcat-startserver-3.png" align="middle"></div>
+					</div>
+				</li><li>
+					The server and the project are now installed in Eclipse and are shown
+					in the <span class="guilabel">Servers</span> tab. To start the server,
+					right-click on the server and select
+					<span class="guimenuitem">Debug</span>. To start the server in non-debug
+					mode, select <span class="guimenuitem">Start</span>.
+
+					<div class="screenshot">
+						<div class="mediaobject" align="center"><img src="img/intro/tomcat-startserver-4.png" align="middle"></div>
+					</div>
+				</li><li>
+					The server starts and the WebContent directory of the project is
+					published to the server on <code class="uri">http://localhost:8080/myproject/</code>.
+
+					<div class="screenshot">
+						<div class="mediaobject" align="center"><img src="img/intro/tomcat-startserver-5.png" align="middle"></div>
+					</div>
+				</li></ol></div>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="getting-started.first-project.run"></a>2.4.4.&nbsp;Running and Debugging</h3></div></div></div>
+			
+	
+			<p>
+				Starting your application is as easy as selecting <span class="guilabel">myproject</span> from the 
+				<span class="guilabel">Project Explorer</span> and then <span class="guimenu">Run</span> &rarr; <span class="guimenuitem">Debug As</span> &rarr; <span class="guimenuitem">Debug	 on Server</span>. 
+				Eclipse then opens the application in built-in web browser.
+				
+			</p>
+			
+			<div class="figure"><a name="N20BA7"></a><p class="title"><b>Figure&nbsp;2.10.&nbsp;Running a Vaadin Application</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/intro/runningMyProject.png" align="middle" alt="Running a Vaadin Application"></div>
+			</div></div><br class="figure-break">
+			
+			<p>
+				You can insert break points in the
+				Java code by double-clicking on the left margin bar of the source code
+				window. For example, if you
+				insert a breakpoint in the <code class="methodname">buttonClick()</code> method
+				and click the <span class="guibutton">What is the time?</span> button, Eclipse will ask
+				to switch to the Debug perspective. Debug perspective will show where the execution stopped at the
+				breakpoint. You can examine and change the state of the application. To continue execution, select <span class="guimenuitem">Resume</span> from
+				<span class="guimenu">Run</span> menu.
+			</p>
+			
+			<div class="figure"><a name="N20BD1"></a><p class="title"><b>Figure&nbsp;2.11.&nbsp;Debugging a Vaadin Application</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/intro/debuggingMyProject.png" align="middle" alt="Debugging a Vaadin Application"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				The procedure described above allows debugging the server-side
+				application. For
+				more information on debugging client-side widgets, see <a href="gwt.development.html#gwt.hosted-mode" title="9.7.6.&nbsp;Hosted Mode Browser">Section&nbsp;9.7.6, &ldquo;Hosted Mode Browser&rdquo;</a>.
+			</p>
+		</div>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="getting-started.quickstart.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="getting-started.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="architecture.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">2.3.&nbsp;QuickStart with Eclipse&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Chapter&nbsp;3.&nbsp;Architecture</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

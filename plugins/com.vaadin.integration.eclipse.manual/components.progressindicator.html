@@ -1,0 +1,130 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>5.17.&nbsp;ProgressIndicator</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="components.html" title="Chapter&nbsp;5.&nbsp;User Interface Components"><link rel="prev" href="components.form.html" title="5.16.&nbsp;Form"><link rel="next" href="components.customcomponent.html" title="5.18.&nbsp;Component Composition with CustomComponent"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>5.17.&nbsp;ProgressIndicator</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">5.17.&nbsp;<code class="classname">ProgressIndicator</code></th></tr><tr><td align="left" width="20%"><a accesskey="p" href="components.form.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;5.&nbsp;User Interface Components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="components.customcomponent.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="components.progressindicator"></a>5.17.&nbsp;<code class="classname">ProgressIndicator</code></h2></div></div></div>
+		
+
+		<p>
+			The <code class="classname">ProgressIndicator</code> component allows displaying the
+			progress of a task graphically. The progress is given as a floating-point
+			value between 0.0 and 1.0.
+		</p>
+
+		<div class="figure"><a name="N22582"></a><p class="title"><b>Figure&nbsp;5.34.&nbsp;The Progress Indicator Component</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/components/progressindicator-example1.png" align="middle" alt="The Progress Indicator Component"></div>
+		</div></div><br class="figure-break">
+
+		<p>
+			The progress indicator polls the server for updates for its value. If the
+			value has changed, the progress is updated. Notice that the user application
+			does not have to handle any polling event, but updating the component is done
+			automatically.
+		</p>
+
+		<p>
+			Creating a progress indicator is just like with any other component. You
+			can give the initial progress value as a parameter for the constructor. The default
+			polling frequency is 1000 milliseconds (one second), but you can set some
+			other interval with the <code class="methodname">setPollingInterval()</code> method.
+		</p>
+
+		<pre class="programlisting">// Create the indicator
+final ProgressIndicator indicator =
+        new ProgressIndicator(new Float(0.0));
+main.addComponent(indicator);
+
+// Set polling frequency to 0.5 seconds.
+indicator.setPollingInterval(500);</pre>
+
+		<div class="simplesect" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N2259F"></a>CSS Style Rules</h3></div></div></div>
+			
+				
+			<pre class="programlisting">/* Base element. */
+.v-progressindicator {}
+
+/* Progress indication element on top of the base. */
+.v-progressindicator div {}</pre>
+
+			<p>
+				The default style for the progress indicator uses an animated GIF image
+				(<code class="filename">img/base.gif</code>) as the base background for the
+				component. The progress is a <code class="literal">&lt;div&gt;</code> element inside
+				the base. When the progress element grows, it covers more and more of the
+				base background. By default, the graphic of the progress element is
+				defined in <code class="filename">img/progress.png</code> under the default style
+				directory. See
+				<code class="filename">com.vaadin.terminal.gwt/public/default/progressindicator/progressindicator.css</code>.
+			</p>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N225B7"></a>5.17.1.&nbsp;Doing Heavy Computation</h3></div></div></div>
+			
+
+			<p>
+				The progress indicator is often used to display the progress of a heavy
+				server-side computation task. In the following example, we create a thread
+				in the server to do some "heavy work". All the thread needs to do is to
+				set the value of the progress indicator with
+				<code class="methodname">setValue()</code> and the current progress is displayed
+				automatically when the browser polls the server.
+			</p>
+
+			<pre class="programlisting">// Create an indicator that makes you look busy
+final ProgressIndicator indicator =
+        new ProgressIndicator(new Float(0.0));
+main.addComponent(indicator);
+
+// Set polling frequency to 0.5 seconds.
+indicator.setPollingInterval(500);
+
+// Add a button to start working
+final Button button = new Button("Click to start");
+main.addComponent(button);
+
+// Another thread to do some work
+class WorkThread extends Thread {
+    public void run () {
+        double current = 0.0;
+        while (true) {
+            // Do some "heavy work"
+            try {
+                sleep(50); // Sleep for 50 milliseconds
+            } catch (InterruptedException) {}
+            
+            // Show that you have made some progress:
+            // grow the progress value until it reaches 1.0.
+            current += 0.01;
+            if (current&gt;1.0)
+                indicator.setValue(new Float(1.0));
+            else 
+                indicator.setValue(new Float(current));
+            
+            // After all the "work" has been done for a while,
+            // take a break.
+            if (current &gt; 1.2) {
+                // Restore the state to initial.
+                indicator.setValue(new Float(0.0));
+                button.setVisible(true);
+                break;
+            }
+        }
+    }
+}
+
+// Clicking the button creates and runs a work thread
+button.addListener(new Button.ClickListener() {
+    public void buttonClick(ClickEvent event) {
+        final WorkThread thread = new WorkThread();
+        thread.start();
+        
+        // The button hides until the work is done.
+        button.setVisible(false);
+    }
+});</pre>
+
+			<div class="figure"><a name="N225C6"></a><p class="title"><b>Figure&nbsp;5.35.&nbsp;Starting Heavy Work</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/components/progressindicator-example2.png" align="middle" alt="Starting Heavy Work"></div>
+			</div></div><br class="figure-break">
+			
+		</div>
+
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="components.form.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="components.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="components.customcomponent.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">5.16.&nbsp;<code class="classname">Form</code>&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;5.18.&nbsp;Component Composition with <code class="classname">CustomComponent</code></td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

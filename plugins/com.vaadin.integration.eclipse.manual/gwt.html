@@ -1,0 +1,158 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Chapter&nbsp;9.&nbsp;Developing Custom Components</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="index.html" title="Book of Vaadin"><link rel="prev" href="datamodel.container.html" title="8.4.&nbsp;Collecting items in Containers"><link rel="next" href="gwt.widgets.html" title="9.2.&nbsp;Google Web Toolkit Widgets"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>Chapter&nbsp;9.&nbsp;Developing Custom Components</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Chapter&nbsp;9.&nbsp;Developing Custom Components</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="datamodel.container.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="gwt.widgets.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="gwt"></a>Chapter&nbsp;9.&nbsp;Developing Custom Components</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="gwt.html#gwt.overview">9.1. Overview</a></span></dt><dt><span class="section"><a href="gwt.widgets.html">9.2. Google Web Toolkit Widgets</a></span></dt><dd><dl><dt><span class="section"><a href="gwt.widgets.html#gwt.widgets.extending">9.2.1. Extending a Vaadin Widget</a></span></dt><dt><span class="section"><a href="gwt.widgets.html#gwt.widgets.example.colorpicker">9.2.2. Example: A Color Picker GWT Widget</a></span></dt><dt><span class="section"><a href="gwt.widgets.html#gwt.widgets.styling">9.2.3. Styling GWT Widgets</a></span></dt></dl></dd><dt><span class="section"><a href="gwt.integration.html">9.3. Integrating a GWT Widget</a></span></dt><dd><dl><dt><span class="section"><a href="gwt.integration.html#gwt.integration.deserialization">9.3.1. Deserialization of Component State from Server</a></span></dt><dt><span class="section"><a href="gwt.integration.html#gwt.integration.serialization">9.3.2. Serialization of Component State to Server</a></span></dt><dt><span class="section"><a href="gwt.integration.html#gwt.integration.example.colorpicker">9.3.3. Example: Integrating the Color Picker Widget</a></span></dt></dl></dd><dt><span class="section"><a href="gwt.widgetset.html">9.4. Defining a Widget Set</a></span></dt><dd><dl><dt><span class="section"><a href="gwt.widgetset.html#gwt.widgetset.moduledescriptor">9.4.1. GWT Module Descriptor</a></span></dt></dl></dd><dt><span class="section"><a href="gwt.server-side.html">9.5. Server-Side Components</a></span></dt><dd><dl><dt><span class="section"><a href="gwt.server-side.html#N23975">9.5.1. Component Tag Name</a></span></dt><dt><span class="section"><a href="gwt.server-side.html#gwt.server-side.serialization">9.5.2. Server-Client Serialization</a></span></dt><dt><span class="section"><a href="gwt.server-side.html#gwt.server-side.deserialization">9.5.3. Client-Server Deserialization</a></span></dt><dt><span class="section"><a href="gwt.server-side.html#N239FA">9.5.4. Extending Standard Components</a></span></dt><dt><span class="section"><a href="gwt.server-side.html#gwt.server-side.example.colorpicker">9.5.5. Example: Color Picker Server-Side Component</a></span></dt></dl></dd><dt><span class="section"><a href="gwt.usage.html">9.6. Using a Custom Component</a></span></dt><dd><dl><dt><span class="section"><a href="gwt.usage.html#gwt.usage.example.colorpicker">9.6.1. Example: Color Picker Application</a></span></dt><dt><span class="section"><a href="gwt.usage.html#gwt.usage.deployment">9.6.2. Web Application Deployment</a></span></dt></dl></dd><dt><span class="section"><a href="gwt.development.html">9.7. GWT Widget Development</a></span></dt><dd><dl><dt><span class="section"><a href="gwt.development.html#gwt.development.eclipse">9.7.1. Creating a Widget Project in Eclipse</a></span></dt><dt><span class="section"><a href="gwt.development.html#gwt.development.import-gwt">9.7.2. Importing GWT Installation Package</a></span></dt><dt><span class="section"><a href="gwt.development.html#gwt.development.module-creation">9.7.3. Creating a GWT Module</a></span></dt><dt><span class="section"><a href="gwt.development.html#gwt.development.compiler">9.7.4. Compiling GWT Widget Sets</a></span></dt><dt><span class="section"><a href="gwt.development.html#gwt.development.compiler.result">9.7.5. Ready to Run</a></span></dt><dt><span class="section"><a href="gwt.development.html#gwt.hosted-mode">9.7.6. Hosted Mode Browser</a></span></dt><dt><span class="section"><a href="gwt.development.html#gwt.development.oophm">9.7.7. Out of Process Hosted Mode (OOPHM)</a></span></dt></dl></dd></dl></div>
+	
+
+	<p>
+		This chapter describes how you can create custom client-side components as Google
+		Web Toolkit (GWT) widgets and how you integrate them with Vaadin. The client-side
+		implementations of all standard user interface components in Vaadin use the same
+		client-side interfaces and patterns.
+	</p>
+
+	<p>
+		Google Web Toolkit is intended for developing browser-based user interfaces using
+		the Java language, which is compiled into JavaScript. Knowledge of such
+		client-side technologies is usually not needed with Vaadin, as its
+		repertoire of user interface components should be sufficient for most
+		applications. The easiest way to create custom components in Vaadin is to
+		make composite components with the <code class="classname">CustomComponent</code>
+		class. See <a href="components.customcomponent.html" title="5.18.&nbsp;Component Composition with CustomComponent">Section&nbsp;5.18, &ldquo;Component Composition with <code class="classname">CustomComponent</code>&rdquo;</a> for more details on the
+		composite components. In some cases, however, you may need to either make
+		modifications to existing components or create new or integrate existing GWT
+		widgets with your application.
+	</p>
+
+	<p>
+		If you need more background on the architecture, <a href="architecture.client-side.html" title="3.4.&nbsp;Client-Side Engine">Section&nbsp;3.4, &ldquo;Client-Side Engine&rdquo;</a> gives an introduction to the
+		architecture of the Vaadin Client-Side Engine. If you are new to Google
+		Web Toolkit, <a href="architecture.technology.html#architecture.technology.gwt" title="3.2.2.&nbsp;Google Web Toolkit">Section&nbsp;3.2.2, &ldquo;Google Web Toolkit&rdquo;</a> gives an introduction to
+		GWT and its role in the architecture of Vaadin.
+	</p>
+
+	<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">On Terminology</h3>
+		
+		<p>
+			Google Web Toolkit uses the term <span class="emphasis"><em>widget</em></span> for user
+			interface components. In this book, we use the term widget to refer to
+			client-side components made with Google Web Toolkit, while using the term
+			<span class="emphasis"><em>component</em></span> in a general sense and also in the special sense
+			for server-side components.
+		</p>
+	</div>
+
+	<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Eclipse plugin</h3>
+		
+		<p>
+			This chapter does not cover the use of new Vaadin Eclipse plugin. The plugin
+			will greatly simplify the process of building new widgets and composing widgetsets.
+			After introducing yourself with the concepts involved with developing custom
+			components, read about the plugin on 
+			http://vaadin.com/eclipse.
+		</p>
+	</div>
+
+	<div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="gwt.overview"></a>9.1.&nbsp;Overview</h2></div></div></div>
+		
+
+		<p>
+			Google Web Toolkit (GWT) is an integral part of Vaadin since Release
+			5. All rendering of user interface components in a web browser is programmed
+			with GWT. Using custom GWT widgets is easy in Vaadin. This chapter
+			gives an introduction to GWT widgets and details on how to integrate them with
+			Vaadin.
+		</p>
+		
+		<p>
+			On the client side, in the web browser, you have the Vaadin
+			Client-Side Engine. It uses the GWT framework, and both are compiled into a
+			JavaScript runtime component. The client-side engine is contained in the
+			<span class="package">com.vaadin.terminal.gwt.client</span> package and the
+			client-side implementations of various user interface components are in the
+			<span class="package">com.vaadin.terminal.gwt.client.ui</span> package. You can
+			find the source code for these packages in the Vaadin installation
+			package. You make custom components by inheriting GWT widget classes. To
+			integrate them with Vaadin, you have to implement the
+			<code class="classname">Paintable</code> interface of the Client-Side Engine that
+			provides the AJAX communications with the server-side application. To enable
+			the custom widgets, you also need to implement a <span class="emphasis"><em>widget
+			set</em></span>. A widget set is a factory class that can instantiate your
+			widgets. It needs to inherit the <code class="classname">DefaultWidgetSet</code> that
+			acts as the factory for the standard widgets. You can also define stylesheets
+			for custom widgets. A client-side module is defined in a GWT Module
+			Descriptor.
+		</p>
+
+		<p>
+			To summarize, to implement a client-side widget that is integrated with
+			Vaadin, you need the following:
+		</p>
+
+		<div class="itemizedlist"><ul type="disc"><li>A GWT widget that implements the <code class="classname">Paintable</code>
+			interface of the Vaadin Client-Side Engine</li><li>A widget factory (a "widget set") that can create the custom widget or widgets</li><li>Default CSS style sheet for the widget set (optional)</li><li>A GWT Module Descriptor (<code class="filename">.gwt.xml</code>) that describes the entry point and style sheet</li></ul></div>
+
+		<p>
+			On the server side, you need to implement a server-side component that manages
+			serialization and deserialization of its attributes with the client-side
+			widget. A server-side component usually inherits the
+			<code class="classname">AbstractComponent</code> or
+			<code class="classname">AbstractField</code> class and implements either the
+			<code class="methodname">paintContent()</code> or the more generic
+			<code class="methodname">paint()</code> method to serialize its data to the
+			client. These methods "paint" the component by generating a UIDL element that
+			is sent to the client. The UIDL element contains all the relevant information
+			about the component, and you can easily add your own attributes to it.
+			Upon reception of UIDL messages, the client-side engine (using the widget
+			set) creates or updates user interface widgets as needed.
+		</p>
+
+		<p>
+			<a href="gwt.html#figure.gwt.widget-files" title="Figure&nbsp;9.1.&nbsp;Color Picker Module">Figure&nbsp;9.1, &ldquo;Color Picker Module&rdquo;</a> illustrates the folder
+			hierarchy of the Color Picker example used in this chapter. The example is
+			available in the demo application of Vaadin with URL
+			<code class="filename">/colorpicker/</code>. You can find the full source code of the
+			application in the source module for the demos in the installation package.
+		</p>
+
+		<div class="figure"><a name="figure.gwt.widget-files"></a><p class="title"><b>Figure&nbsp;9.1.&nbsp;Color Picker Module</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/gwt/gwt-widget-files-lo.png" align="middle" alt="Color Picker Module"></div>
+		</div></div><br class="figure-break">
+
+		<p>
+			The <code class="filename">ColorPickerApplication.java</code> application provides an
+			example of using the <code class="classname">ColorPicker</code> custom component. To
+			allow accessing the application, it must be defined in the deployment
+			descriptor <code class="filename">web.xml</code>. See <a href="application.environment.html#section.web.web-xml" title="4.8.3.&nbsp;Deployment Descriptor web.xml">Section&nbsp;4.8.3, &ldquo;Deployment Descriptor <code class="filename">web.xml</code>&rdquo;</a> for details. The source code for the
+			server-side component is located in the same folder.
+		</p>
+
+		<p>
+			A client-side widget set must be developed within a single source module
+			tree. This is because GWT Compiler takes as its argument the root folder of
+			the source code, in the Color Picker example the
+			<code class="filename">colorpicker.gwt.client</code> module, and compiles all the
+			contained Java source files into JavaScript. The path to the source files, the
+			entry point class, and the style sheet are specified in the
+			<code class="filename">WidgetSet.gwt.xml</code> descriptor for the GWT Compiler. The
+			<code class="filename">WidgetSet.java</code> provides source code for the entry point,
+			which is a factory class for creating the custom widget objects. The actual
+			custom widget is split into two classes:
+			<code class="classname">GwtColorPicker</code>, a pure GWT widget, and
+			<code class="classname">VColorPicker</code> that provides the integration with
+			Vaadin. The default style sheet for the widget set is provided in
+			<code class="filename">gwt/public/colorpicker/styles.css</code>.
+		</p>
+
+	</div>
+
+	
+
+	
+	
+	
+		
+	
+	
+	
+
+	
+</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="datamodel.container.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;<a accesskey="n" href="gwt.widgets.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">8.4.&nbsp;Collecting items in Containers&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;9.2.&nbsp;Google Web Toolkit Widgets</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

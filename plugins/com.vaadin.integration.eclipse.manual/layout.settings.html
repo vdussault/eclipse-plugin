@@ -1,0 +1,483 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>6.10.&nbsp;Layout Formatting</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="layout.html" title="Chapter&nbsp;6.&nbsp;Managing Layout"><link rel="prev" href="layout.components.accordion.html" title="6.9.&nbsp;Accordion"><link rel="next" href="layout.customlayout.html" title="6.11.&nbsp;Custom Layouts"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>6.10.&nbsp;Layout Formatting</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">6.10.&nbsp;Layout Formatting</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="layout.components.accordion.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;6.&nbsp;Managing Layout</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="layout.customlayout.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="layout.settings"></a>6.10.&nbsp;Layout Formatting</h2></div></div></div>
+		
+
+		<p>
+			While the formatting of layouts is mainly done with style sheets, just as with
+			other components, style sheets are not ideal or even possible to use in some
+			situations. For example, CSS does not allow defining the spacing of table
+			cells, which is done with the <em class="parameter"><code>cellspacing</code></em> attribute in
+			HTML.
+		</p>
+
+		<p>
+			Moreover, as many layout sizes are calculated dynamically in the Client-Side
+			Engine of Vaadin, some CSS settings can fail altogether.
+		</p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="layout.settings.size"></a>6.10.1.&nbsp;Layout Size</h3></div></div></div>
+			
+
+			<p>
+				The size of a layout component can be specified with the
+				<code class="methodname">setWidth()</code> and
+				<code class="methodname">setHeight()</code> methods defined in the
+				<code class="classname">Sizeable</code> interface, just like for any component. It
+				can also be undefined, in which case the layout shrinks to fit the
+				component(s) inside it. <a href="components.features.html#components.features.sizeable" title="5.2.1.&nbsp;Sizing Components">Section&nbsp;5.2.1, &ldquo;Sizing Components&rdquo;</a>
+				gives details on the interface.
+			</p>
+
+			<div class="figure"><a name="figure.layout.settings.size.undefined"></a><p class="title"><b>Figure&nbsp;6.12.&nbsp;<code class="classname">HorizontalLayout</code> with Undefined vs Defined size</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/layout/layout_size_undefined_vs_defined.png" align="middle" alt="HorizontalLayout with Undefined vs Defined size"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				Many layout components take 100% width by default, while they have the
+				height undefined.
+			</p>
+
+			<p>
+				The sizes of components inside a layout can also be defined as a
+				percentage of the space available in the layout, for example with
+				<code class="methodname">setWidth("100%");</code> or with the (most commonly used
+				method) <code class="methodname">setFullSize()</code> that sets 100% size in both
+				directions. If you use a percentage in a
+				<code class="classname">HorizontalLayout</code>,
+				<code class="classname">VerticalLayout</code>, or
+				<code class="classname">GridLayout</code>, you will also have to set the component
+				as <span class="emphasis"><em>expanding</em></span>, as noted below.
+			</p>
+
+			<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3>
+                <p>
+                    <span class="emphasis"><em>A layout that contains components with percentual size must
+                    have a defined size</em></span>!
+                </p>
+
+                <p>
+                    If a layout has undefined size and a contained component has, say,
+                    100% size, the component will try to fill the space given by the
+                    layout, while the layout will shrink to fit the space taken by the
+                    component, which is a paradox. This requirement holds for height and
+                    width separately. The debug mode allows detecting such invalid cases;
+                    see <a href="advanced.debug-production-modes.html#advanced.debug-production-modes.debug.mode" title="10.4.1.&nbsp;Debug Mode">Section&nbsp;10.4.1, &ldquo;Debug Mode&rdquo;</a>.
+                </p>
+			</div>
+
+			<p>
+				For example:
+			</p>
+
+			<pre class="programlisting">// This takes 100% width but has undefined height.
+VerticalLayout layout = new VerticalLayout();
+
+// A button that takes all the space available in the layout.
+Button button = new Button("100%x100% button");
+button.setSizeFull();
+layout.addComponent(button);
+
+// We must set the layout to a defined height vertically, in
+// this case 100% of its parent layout, which also must
+// not have undefined size.
+layout.setHeight("100%");</pre>
+
+			<p>
+				The default layout of <code class="classname">Window</code> and
+				<code class="classname">Panel</code> is <code class="classname">VerticalLayout</code> with
+				undefined height. If you insert enough components in such a layout, it
+				will grow outside the bottom of the view area and scrollbars will appear
+				in the browser. If you want your application to use all the
+				browser view, nothing more or less, you should use
+				<code class="methodname">setFullSize()</code> for the root layout.
+			</p>
+
+			<pre class="programlisting">// Create the main window.
+Window main = new Window("Main Window");
+setMainWindow(main);
+
+// Use full size.
+main.getLayout().setSizeFull();</pre>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N22BBC"></a>Expanding Components</h4></div></div></div>
+				
+
+				<p>
+					If you set a <code class="classname">HorizontalLayout</code> to a defined size
+					horizontally or a <code class="classname">VerticalLayout</code> vertically,
+					and there is space left over from the contained components, the extra
+					space is distributed equally between the component cells. The
+					components are aligned within these cells, according to their
+					alignment setting, top left by default, as in the example below.
+				</p>
+
+				<div class="mediaobject" align="center"><img src="img/layout/horizontallayout_width_defined.png" align="middle"></div>
+
+				<p>
+					Often, you don't want such empty space, but want one or more
+					components to take all the leftover space. You need to set such a
+					component to 100% size and use
+					<code class="methodname">setExpandRatio()</code>. If there is just one
+					such expanding component in the layout, the ratio parameter is irrelevant.
+				</p>
+				
+				<div class="mediaobject" align="center"><img src="img/layout/horizontallayout_width_expanding.png" align="middle"></div>
+
+				<p>
+					If you set multiple components as expanding, the expand ratio dictates
+					how large proportion of the available space (overall or excess
+					depending on whether the components are sized as a percentage or not)
+					each component takes. In the example below, the buttons have 1:2:3
+					ratio for the expansion.
+				</p>
+
+				<div class="mediaobject" align="center"><img src="img/layout/horizontallayout_width_expand_ratios.png" align="middle"></div>
+
+				<p>
+					<code class="classname">GridLayout</code> has corresponding method for both of
+					its directions, <code class="methodname">setRowExpandRatio()</code> and
+					<code class="methodname">setColumnExpandRatio()</code>.
+				</p>
+
+				<p>
+					Expansion is dealt in detail in the documentation of the layout
+					components that support it. See <a href="layout.components.orderedlayout.html" title="6.3.&nbsp;VerticalLayout and HorizontalLayout">Section&nbsp;6.3, &ldquo;<code class="classname">VerticalLayout</code> and <code class="classname">HorizontalLayout</code>&rdquo;</a> and <a href="layout.components.gridlayout.html" title="6.4.&nbsp;GridLayout">Section&nbsp;6.4, &ldquo;<code class="classname">GridLayout</code>&rdquo;</a> for details on components
+					with relative sizes.
+				</p>
+			</div>
+
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="layout.settings.alignment"></a>6.10.2.&nbsp;Layout Cell Alignment</h3></div></div></div>
+			
+
+			<p>
+				You can set the alignment of the component inside a specific layout cell
+				with the <code class="methodname">setComponentAlignment()</code> method. The
+				method takes as its parameters the component contained in the cell to be
+				formatted, and the horizontal and vertical alignment.
+			</p>
+
+			<p>
+				<a href="layout.settings.html#figure.layout.settings.alignment" title="Figure&nbsp;6.13.&nbsp;Cell Alignments">Figure&nbsp;6.13, &ldquo;Cell Alignments&rdquo;</a> illustrates the
+				alignment of components within a <code class="classname">GridLayout</code>.
+			</p>
+
+			<div class="figure"><a name="figure.layout.settings.alignment"></a><p class="title"><b>Figure&nbsp;6.13.&nbsp;Cell Alignments</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/layout/layout_alignment.png" align="middle" alt="Cell Alignments"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				The easiest way to set alignments is to use the constants defined in the
+				<code class="classname">Alignment</code> class. Let us look how the buttons in the
+				top row of the above <code class="classname">GridLayout</code> are aligned with
+				constants:
+			</p>
+
+			<pre class="programlisting">// Create a grid layout
+final GridLayout grid = new GridLayout(3, 3);
+
+grid.setWidth(400, Sizeable.UNITS_PIXELS);
+grid.setHeight(200, Sizeable.UNITS_PIXELS);
+
+Button topleft = new Button("Top Left");
+grid.addComponent(topleft, 0, 0);
+grid.setComponentAlignment(topleft, Alignment.TOP_LEFT);
+
+Button topcenter = new Button("Top Center");
+grid.addComponent(topcenter, 1, 0);
+grid.setComponentAlignment(topcenter, Alignment.TOP_CENTER);
+
+Button topright = new Button("Top Right");
+grid.addComponent(topright, 2, 0);
+grid.setComponentAlignment(topright, Alignment.TOP_RIGHT);
+...</pre>
+
+			<p>
+				The following table lists all the <code class="classname">Alignment</code>
+				constants by their respective locations:
+			</p>
+
+			<div class="table"><a name="N22C4F"></a><p class="title"><b>Table&nbsp;6.1.&nbsp;Alignment Constants</b></p><div class="table-contents">
+				
+				<table summary="Alignment Constants" border="1"><colgroup><col><col><col></colgroup><tbody><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>TOP_LEFT</code></em></td><td align="left" valign="top"><em class="parameter"><code>TOP_CENTER</code></em></td><td align="left" valign="top"><em class="parameter"><code>TOP_RIGHT</code></em></td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>MIDDLE_LEFT</code></em></td><td align="left" valign="top"><em class="parameter"><code>MIDDLE_CENTER</code></em></td><td align="left" valign="top"><em class="parameter"><code>MIDDLE_RIGHT</code></em></td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>BOTTOM_LEFT</code></em></td><td align="left" valign="top"><em class="parameter"><code>BOTTOM_CENTER</code></em></td><td align="left" valign="top"><em class="parameter"><code>BOTTOM_RIGHT</code></em></td></tr></tbody></table>
+			</div></div><br class="table-break">
+
+			<p>
+				Another way to specify the alignments is to create an
+				<code class="classname">Alignment</code> object and specify the horizontal and
+				vertical alignment with separate constants. You can specify either of the
+				directions, in which case the other alignment direction is not modified,
+				or both with a bitmask operation between the two directions.
+			</p>
+
+			<pre class="programlisting">Button middleleft = new Button("Middle Left");
+grid.addComponent(middleleft, 0, 1);
+grid.setComponentAlignment(middleleft,
+          new Alignment(Bits.ALIGNMENT_VERTICAL_CENTER | 
+                        Bits.ALIGNMENT_LEFT));
+
+Button middlecenter = new Button("Middle Center");
+grid.addComponent(middlecenter, 1, 1);
+grid.setComponentAlignment(middlecenter,
+          new Alignment(Bits.ALIGNMENT_VERTICAL_CENTER |
+                        Bits.ALIGNMENT_HORIZONTAL_CENTER));
+
+Button middleright = new Button("Middle Right");
+grid.addComponent(middleright, 2, 1);
+grid.setComponentAlignment(middleright,
+          new Alignment(Bits.ALIGNMENT_VERTICAL_CENTER |
+                        Bits.ALIGNMENT_RIGHT));</pre>
+
+			<p>
+				Obviously, you may combine only one vertical bitmask with one horizontal
+				bitmask, though you may leave either one out. The following table lists
+				the available alignment bitmask constants:
+			</p>
+
+			<div class="table"><a name="N22C9A"></a><p class="title"><b>Table&nbsp;6.2.&nbsp;Alignment Bitmasks</b></p><div class="table-contents">
+				
+				<table summary="Alignment Bitmasks" border="1"><colgroup><col><col></colgroup><tbody><tr valign="top"><td rowspan="3" align="left" valign="top">Horizontal</td><td align="left" valign="top"><em class="parameter"><code>Bits.ALIGNMENT_LEFT</code></em></td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>Bits.ALIGNMENT_HORIZONTAL_CENTER</code></em></td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>Bits.ALIGNMENT_RIGHT</code></em></td></tr><tr valign="top"><td rowspan="3" align="left" valign="top">Vertical</td><td align="left" valign="top"><em class="parameter"><code>Bits.ALIGNMENT_TOP</code></em></td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>Bits.ALIGNMENT_VERTICAL_CENTER</code></em></td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>Bits.ALIGNMENT_BOTTOM</code></em></td></tr></tbody></table>
+			</div></div><br class="table-break">
+
+			<p>
+				You can determine the current alignment of a component with
+				<code class="methodname">getComponentAlignment()</code>, which returns an
+				<code class="classname">Alignment</code> object. The class provides a number of
+				getter methods for decoding the alignment, which you can also get as a
+				bitmask value.
+			</p>
+
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="layout.settings.spacing"></a>6.10.3.&nbsp;Layout Cell Spacing</h3></div></div></div>
+			
+			
+			<p>
+				The <code class="classname">VerticalLayout</code>,
+				<code class="classname">HorizontalLayout</code>, and
+				<code class="classname">GridLayout</code> layouts offer a
+				<code class="methodname">setSpacing()</code> method for enabling space between
+				the cells in the layout. Enabling the spacing adds a spacing style for all
+				cells except the first so that, by setting the left or top padding, you
+				can specify the amount of spacing.
+			</p>
+
+			<p>
+				To enable spacing, simply call <code class="methodname">setSpacing(true)</code>
+				for the layout as follows:
+			</p>
+
+			<pre class="programlisting">HorizontalLayout layout2 = new HorizontalLayout();
+layout2.addStyleName("spacingexample");
+layout2.setSpacing(true);
+layout2.addComponent(new Button("Component 1"));
+layout2.addComponent(new Button("Component 2"));
+layout2.addComponent(new Button("Component 3"));
+
+VerticalLayout layout4 = new VerticalLayout();
+layout4.addStyleName("spacingexample");
+layout4.setSpacing(true);
+layout4.addComponent(new Button("Component 1"));
+layout4.addComponent(new Button("Component 2"));
+layout4.addComponent(new Button("Component 3"));</pre>
+
+			<p>
+				In practise, the <code class="methodname">setSpacing()</code> method toggles
+				between the "<code class="literal">v-COMPONENTCLASSNAME-spacing-on</code>" and
+				"<code class="literal">-off</code>" CSS class names in the cell elements. Elements
+				having those class names can be used to define the spacing metrics in a
+				theme.
+			</p>
+				
+			<p>
+				The layouts have a spacing style name to define spacing also when spacing
+				is off. This allows you to define a small default spacing between
+				components by default and a larger one when the spacing is actually
+				enabled.
+			</p>
+
+			<p>
+				Spacing can be horizontal (for <code class="classname">HorizontalLayout</code>),
+				vertical (for <code class="classname">VerticalLayout</code>), or both (for
+				<code class="classname">GridLayout</code>). The name of the spacing style for
+				horizontal and vertical spacing is the base name of the component style
+				name plus the "<code class="literal">-spacing-on</code>" suffix, as shown in the
+				following table:
+			</p>
+
+			<div class="table"><a name="N22D26"></a><p class="title"><b>Table&nbsp;6.3.&nbsp;Spacing Style Names</b></p><div class="table-contents">
+				
+				<table summary="Spacing Style Names" border="1"><colgroup><col><col></colgroup><tbody><tr valign="top"><td align="left" valign="top"><code class="classname">VerticalLayout</code></td><td align="left" valign="top"><code class="literal">v-verticallayout-spacing-on</code></td></tr><tr valign="top"><td align="left" valign="top"><code class="classname">HorizontalLayout</code></td><td align="left" valign="top"><code class="literal">v-horizontallayout-spacing-on</code></td></tr><tr valign="top"><td align="left" valign="top"><code class="classname">GridLayout</code></td><td align="left" valign="top"><code class="literal">v-gridlayout-spacing-on</code></td></tr></tbody></table>
+			</div></div><br class="table-break">
+
+			<p>
+				In the CSS example below, we specify the exact amount of spacing for the
+				code example given above, for the layouts with the custom
+				"<code class="literal">spacingexample</code>" style:
+			</p>
+
+			<pre class="programlisting">/* Set the amount of horizontal cell spacing in a
+ * specific element with the "-spacingexample" style. */
+.v-horizontallayout-spacingexample .v-horizontallayout-spacing-on {
+    padding-left: 30px;
+}
+
+/* Set the amount of vertical cell spacing in a
+ * specific element with the "-spacingexample" style. */
+.v-verticallayout-spacingexample .v-verticallayout-spacing-on {
+    padding-top: 30px;
+}
+
+/* Set the amount of both vertical and horizontal cell spacing
+ * in a specific element with the "-spacingexample" style. */
+.v-gridlayout-spacingexample .v-gridlayout-spacing-on {
+    padding-top: 30px;
+    padding-left: 50px;
+}</pre>
+
+			<p>
+				The resulting layouts will look as shown in <a href="layout.settings.html#figure.layout.spacing" title="Figure&nbsp;6.14.&nbsp;Layout Spacings">Figure&nbsp;6.14, &ldquo;Layout Spacings&rdquo;</a>, which also shows the layouts with
+				no spacing.
+			</p>
+
+			<div class="figure"><a name="figure.layout.spacing"></a><p class="title"><b>Figure&nbsp;6.14.&nbsp;Layout Spacings</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/layout/layout_spacing.png" align="middle" alt="Layout Spacings"></div>
+			</div></div><br class="figure-break">
+
+			<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3>
+				<p>
+					Spacing is unrelated to "cell spacing" in HTML tables. While many
+					layout components are implemented with HTML tables in the browser,
+					this implementation is not guaranteed to stay the same and at least
+					<code class="classname">Vertical</code>-/<code class="classname">HorizontalLayout</code>
+					could be implemented with <code class="literal">&lt;div&gt;</code> elements as
+					well. In fact, as GWT compiles widgets separately for different
+					browsers, the implementation could even vary between browsers.
+				</p>
+				<p>
+				    Also note that HTML elements with spacing classnames don't necessarily
+				    exist in a component after rendering, because the Client-Side Engine
+				    of Vaadin processes them.
+				</p>
+			</div>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="layout.settings.margins"></a>6.10.4.&nbsp;Layout Margins</h3></div></div></div>
+			
+
+			<p>
+				By default, layout components do not have any margin around them. You can
+				add margin with CSS directly to the layout component. Below we set margins
+				for a specific layout component (here a <code class="literal">horizontallayout</code>):
+			</p>
+
+			<pre class="programlisting">layout1.addStyleName("marginexample1");</pre>
+			<pre class="programlisting">.v-<span class="emphasis"><em>horizontallayout</em></span>-marginexample1
+        .v-<span class="emphasis"><em>horizontallayout</em></span>-margin {
+	padding-left:   200px;
+	padding-right:  100px;
+	padding-top:    50px;
+	padding-bottom: 25px;
+}</pre>
+
+			<p>
+				Similar settings exist for other layouts such as <code class="literal">verticallayout</code>. 
+			</p>
+
+			<p>
+				The layout size calculations require the margins to be defined as
+				CSS <code class="literal">padding</code> rather than as CSS
+				<code class="literal">margin</code>.   
+			</p>
+
+			<p>
+				As an alternative to the pure CSS method, you can set up a margin around the
+				layout that can be enabled with <code class="methodname">setMargin(true)</code>.
+				The margin element has some default margin widths, but you can adjust the
+				widths in CSS if you need to.
+			</p>
+
+			<p>
+				Let us consider the following example, where we enable the margin on all
+				sides of the layout:
+			</p>
+
+			<pre class="programlisting">// Create a layout
+HorizontalLayout layout2 = new HorizontalLayout();
+containinglayout.addComponent(
+    new Label("Layout with margin on all sides:"));
+containinglayout.addComponent(layout2);
+        
+// Set style name for the layout to allow styling it
+layout2.addStyleName("marginexample");
+        
+// Have margin on all sides around the layout
+layout2.setMargin(true);
+        
+// Put something inside the layout
+layout2.addComponent(new Label("Cell 1"));
+layout2.addComponent(new Label("Cell 2"));
+layout2.addComponent(new Label("Cell 3"));</pre>
+
+			<p>
+				You can enable the margins only for specific sides. The margins are
+				specified for the <code class="methodname">setMargin()</code> method in clockwise
+				order for top, right, bottom, and left margin. The following would enable
+				the top and left margins:
+			</p>
+
+			<pre class="programlisting">layout2.setMargin(true, false, false, true);</pre>
+
+			<p>
+				You can specify the actual margin widths in the CSS if you are not
+				satisfied with the default widths (in this example for a
+				<code class="classname">HorizontalLayout</code>):
+			</p>
+
+			<pre class="programlisting">.v-<span class="emphasis"><em>horizontallayout</em></span>-marginexample .v-<span class="emphasis"><em>horizontallayout</em></span>-margin-left   {padding-left:   200px;}
+.v-<span class="emphasis"><em>horizontallayout</em></span>-marginexample .v-<span class="emphasis"><em>horizontallayout</em></span>-margin-right  {padding-right:  100px;}
+.v-<span class="emphasis"><em>horizontallayout</em></span>-marginexample .v-<span class="emphasis"><em>horizontallayout</em></span>-margin-top    {padding-top:    50px; }
+.v-<span class="emphasis"><em>horizontallayout</em></span>-marginexample .v-<span class="emphasis"><em>horizontallayout</em></span>-margin-bottom {padding-bottom: 25px; }</pre>
+
+			<p>
+				The resulting margins are shown in <a href="layout.settings.html#figure.layout.margin" title="Figure&nbsp;6.15.&nbsp;Layout Margins">Figure&nbsp;6.15, &ldquo;Layout Margins&rdquo;</a>
+				below. The two ways produce identical margins.
+			</p>
+
+			<div class="figure"><a name="figure.layout.margin"></a><p class="title"><b>Figure&nbsp;6.15.&nbsp;Layout Margins</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/layout/layout_margin.png" align="middle" alt="Layout Margins"></div>
+			</div></div><br class="figure-break">
+
+			<div class="simplesect" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N22E16"></a>CSS Style Rules</h4></div></div></div>
+				
+
+				<p>
+					The CSS style names for the margin widths for
+					<code class="methodname">setMargin()</code> consist of the specific layout
+					name plus <code class="literal">-margin-left</code> and so on.
+					The CSS style names for CSS-only margins consist of the specific
+					layout name plus <code class="literal">-margin</code>. 
+					Below, the style rules are given for
+					<code class="classname">VerticalLayout</code>:
+				</p>
+
+				<pre class="programlisting">/* Alternative 1: CSS only style */
+.v-<span class="emphasis"><em>verticallayout</em></span>-margin {
+    padding-left:   ___px;
+    padding-right:  ___px;
+    padding-top:    ___px;
+    padding-bottom: ___px;
+}
+/* Alternative 2: CSS rules to be enabled in code */
+.v-<span class="emphasis"><em>verticallayout</em></span>-margin-left   {padding-left:   ___px;}
+.v-<span class="emphasis"><em>verticallayout</em></span>-margin-right  {padding-right:  ___px;}
+.v-<span class="emphasis"><em>verticallayout</em></span>-margin-top    {padding-top:    ___px;}
+.v-<span class="emphasis"><em>verticallayout</em></span>-margin-bottom {padding-bottom: ___px;}</pre>
+				
+			</div>
+		</div>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="layout.components.accordion.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="layout.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="layout.customlayout.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">6.9.&nbsp;<code class="classname">Accordion</code>&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;6.11.&nbsp;Custom Layouts</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

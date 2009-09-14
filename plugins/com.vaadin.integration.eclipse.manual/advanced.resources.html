@@ -1,0 +1,209 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>10.5.&nbsp;Resources</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="advanced.html" title="Chapter&nbsp;10.&nbsp;Advanced Web Application Topics"><link rel="prev" href="advanced.debug-production-modes.html" title="10.4.&nbsp;Debug and Production Mode"><link rel="next" href="advanced.shortcuts.html" title="10.6.&nbsp;Shortcut Keys"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>10.5.&nbsp;Resources</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">10.5.&nbsp;Resources</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="advanced.debug-production-modes.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;10.&nbsp;Advanced Web Application Topics</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="advanced.shortcuts.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="advanced.resources"></a>10.5.&nbsp;Resources</h2></div></div></div>
+		
+
+		<p>
+			In addition to high-level resource classes described in <a href="application.resources.html" title="4.5.&nbsp;Referencing Resources">Section&nbsp;4.5, &ldquo;Referencing Resources&rdquo;</a>, Vaadin provides low-level facilities
+			for retrieving the URI and other parameters of HTTP requests. In the
+			following, we will look into low-level interfaces for handling URIs and
+			parameters to provide resources and functionalities.
+		</p>
+
+		<p>
+			Notice that using URI or parameter handlers to create "pages" is not
+			meaningful in Vaadin or in AJAX applications generally. See <a href="advanced.html#advanced.application.pages" title="10.1.&nbsp;Special Characteristics of AJAX Applications">Section&nbsp;10.1, &ldquo;Special Characteristics of AJAX Applications&rdquo;</a> for reasons.
+		</p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="section.application.resources.uri"></a>10.5.1.&nbsp;URI  Handlers</h3></div></div></div>
+			
+
+			<p>
+				The URI parameter for the application is useful mainly for two purposes:
+				for providing some special functionality according to the URI or for
+				providing dynamic content. Dynamic content can also be provided with
+				<code class="classname">StreamResource</code>.
+			</p>
+
+			<p>
+				You can retrieve the URI for the HTTP request made for your
+				application by implementing the
+				<code class="classname">com.vaadin.terminal.URIHandler</code>
+				interface. The handler class needs to be registered in the main
+				window object of your application with the
+				<code class="methodname">addURIHandler()</code> method. You then get the
+				URI by implementing the <code class="methodname">handleURI()</code>
+				method. The method gets two parameters: a context and a URI
+				relative to the context. The context is the base URI for your
+				application.
+			</p>
+
+			<pre class="programlisting">public void init() {
+    final Window main = new Window("Hello window");
+    setMainWindow(main);
+
+    URIHandler uriHandler = new URIHandler() {
+        public DownloadStream handleURI(URL context,
+                                        String relativeUri) {
+            // Do something here
+            System.out.println("handleURI=" + relativeUri);
+
+            // Should be null unless providing dynamic data.
+            return null;
+        }
+    };
+    main.addURIHandler(uriHandler);
+
+}</pre>
+
+			<p>
+				If you have multiple URI handlers attached to a window, they are executed
+				after one another. The URI handlers should return
+				<em class="parameter"><code>null</code></em>, unless you wish to provide dynamic content
+				with the call. Other URI handlers attached to the window will not be
+				executed after some handler returns non-null data. The combined parameter
+				and URI handler example below shows how to create dynamic content with a
+				URI handler.
+			</p>
+
+			<p>
+				Notice that if you do provide dynamic content with a URI handler, the
+				dynamic content is returned in the HTTP response. If the handler makes any
+				changes to the UI state of the application, these changes are not rendered
+				in the browser, as they are usually returned in the HTTP response made by
+				the Application object and now the custom URI handler overrides the
+				default behaviour. If your client-side code makes a server call that does
+				update the UI state, the client-side must initiate an update from the
+				server. For example, if you have an integration situation where you make a
+				JavaScript call to the server, handle the request with a URI handler,
+				and the server state changes as a side-effect, you can use the
+				<code class="methodname">vaadin.forceSync()</code> method to force the update.
+			</p>
+
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="section.application.resources.parameters"></a>10.5.2.&nbsp;Parameter Handlers</h3></div></div></div>
+			
+		
+			<p>
+				You can retrieve the parameters passed to your application by
+				implementing the
+				<code class="classname">com.vaadin.terminal.ParameterHandler</code>
+				interface. The handler class needs to be registered in the main
+				window object of your application with the
+				<code class="methodname">addParameterHandler()</code> method. You then
+				get the parameters in the
+				<code class="methodname">handleParameters()</code> method. The
+				parameters are passes as a map from string key to a vector of
+				string values.
+			</p>
+
+			<pre class="programlisting">class MyParameterHandler implements ParameterHandler {
+    public void handleParameters(Map parameters) {
+        // Print out the parameters to standard output
+        for (Iterator it = parameters.keySet().iterator();
+             it.hasNext();) {
+            String key   = (String) it.next();
+            String value = ((String[]) parameters.get(key))[0];
+            System.out.println("Key: "+key+", value: "+value);
+        }
+    }
+}</pre>
+
+			<p>
+				The parameter handler is not called if there are no parameters. Parameter
+				handler is called before the URI handler, so if you handle both, you might
+				typically want to just store the URI parameters in the parameter handler
+				and do actual processing in URI handler. This allows you, for example, to
+				create dynamic resources based on the URI parameters.
+			</p>
+
+			<pre class="programlisting">import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.URL;
+import java.util.Map;
+import javax.imageio.ImageIO;
+import com.vaadin.terminal.*;
+
+/**
+ * Demonstrates handling URI parameters and the URI itself to
+ * create a dynamic resource.
+ */
+public class MyDynamicResource implements URIHandler,
+                                          ParameterHandler {
+    String textToDisplay = "- no text given -";
+
+    /**
+     * Handle the URL parameters and store them for the URI
+     * handler to use.
+     */
+    public void handleParameters(Map parameters) {
+        // Get and store the passed HTTP parameter.
+        if (parameters.containsKey("text"))
+            textToDisplay =
+                ((String[])parameters.get("text"))[0];
+    }
+
+    /**
+     * Provides the dynamic resource if the URI matches the
+     * resource URI. The matching URI is "/myresource" under
+     * the application URI context.
+     * 
+     * Returns null if the URI does not match. Otherwise
+     * returns a download stream that contains the response
+     * from the server.
+     */
+    public DownloadStream handleURI(URL context,
+                                    String relativeUri) {
+        // Catch the given URI that identifies the resource,
+        // otherwise let other URI handlers or the Application
+        // to handle the response.
+        if (!relativeUri.startsWith("myresource"))
+            return null;
+        
+        // Create an image and draw some background on it.
+        BufferedImage image = new BufferedImage (200, 200,
+                                    BufferedImage.TYPE_INT_RGB);
+        Graphics drawable = image.getGraphics();
+        drawable.setColor(Color.lightGray);
+        drawable.fillRect(0,0,200,200);
+        drawable.setColor(Color.yellow);
+        drawable.fillOval(25,25,150,150);
+        drawable.setColor(Color.blue);
+        drawable.drawRect(0,0,199,199);
+        
+        // Use the parameter to create dynamic content.
+        drawable.setColor(Color.black);
+        drawable.drawString("Text: "+textToDisplay, 75, 100);
+
+        try {
+            // Write the image to a buffer.
+            ByteArrayOutputStream imagebuffer =
+                    new ByteArrayOutputStream();
+            ImageIO.write(image, "png", imagebuffer);
+
+            // Return a stream from the buffer.
+            ByteArrayInputStream istream =
+                    new ByteArrayInputStream(
+                            imagebuffer.toByteArray());
+            return new DownloadStream (istream,null,null);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+}</pre>
+
+			<p>
+				When you use the dynamic resource class in your application, you obviously
+				need to provide the same instance of the class as both types of handler:
+			</p>
+
+			<pre class="programlisting">MyDynamicResource myresource = new MyDynamicResource();
+mainWindow.addParameterHandler(myresource);
+mainWindow.addURIHandler(myresource);</pre>
+
+			<div class="figure"><a name="N24435"></a><p class="title"><b>Figure&nbsp;10.9.&nbsp;Dynamic Resource with URI Parameters</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/application/paramhandler-screen.png" align="middle" alt="Dynamic Resource with URI Parameters"></div>
+			</div></div><br class="figure-break">
+		</div>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="advanced.debug-production-modes.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="advanced.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="advanced.shortcuts.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">10.4.&nbsp;Debug and Production Mode&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;10.6.&nbsp;Shortcut Keys</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

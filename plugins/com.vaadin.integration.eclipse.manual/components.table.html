@@ -1,0 +1,758 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>5.11.&nbsp;Table</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="components.html" title="Chapter&nbsp;5.&nbsp;User Interface Components"><link rel="prev" href="components.selecting.html" title="5.10.&nbsp;Selecting Items"><link rel="next" href="components.tree.html" title="5.12.&nbsp;Tree"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>5.11.&nbsp;Table</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">5.11.&nbsp;<code class="classname">Table</code></th></tr><tr><td align="left" width="20%"><a accesskey="p" href="components.selecting.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;5.&nbsp;User Interface Components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="components.tree.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="components.table"></a>5.11.&nbsp;<code class="classname">Table</code></h2></div></div></div>
+		
+
+		<p>
+			The <code class="classname">Table</code> component is intended for presenting tabular
+			data organized in rows and columns. The <code class="classname">Table</code> is one of
+			the most versatile components in Vaadin. Table cells can include text
+			or arbitrary UI components. You can easily implement editing of the table data,
+			for example clicking on a cell could change it to a text field for editing.
+		</p>
+
+		<p>
+			The data contained in a <code class="classname">Table</code> is managed using the Data
+			Model of Vaadin (see <a href="datamodel.html" title="Chapter&nbsp;8.&nbsp;Binding Components to Data">Chapter&nbsp;8, <i xmlns:xlink="http://www.w3.org/1999/xlink">Binding Components to Data</i></a>), through
+			the <code class="classname">Container</code> interface of the
+			<code class="classname">Table</code>. This makes it possible to bind a table directly
+			to a data souce such as a database query. Only the visible part of the table
+			is loaded into the browser and moving the visible window with the scrollbar loads
+			content from the server. While the data is being loaded, a tooltip will be
+			displayed that shows the current range and total number of items in the
+			table. The rows of the table are <span class="emphasis"><em>items</em></span> in the container
+			and the columns are <span class="emphasis"><em>properties</em></span>. Each table row (item) is
+			identified with an <span class="emphasis"><em>item identifier</em></span> (IID), and each column
+			(property) with a <span class="emphasis"><em>property identifier</em></span> (PID).
+		</p>
+
+		<p>
+			When creating a table, you first need to define columns with
+			<code class="methodname">addContainerProperty()</code>. This method comes in two
+			flavours. The simpler one takes the property ID of the column and uses it also
+			as the caption of the column. The more complex one allows differing PID and
+			header for the column. This may make, for example, internationalization of
+			table headers easier, because if a PID is internationalized, the
+			internationalization has to be used everywhere where the PID is used. The
+			complex form of the method also allows defining an icon for the column from a
+			resource. The "default value" parameter is used when new properties (columns)
+			are added to the table, to fill in the missing values. (This default has no
+			meaning in the usual case, such as below, where we add items after defining
+			the properties.)
+		</p>
+
+        <pre class="programlisting">/* Create the table with a caption. */
+Table table = new Table("This is my Table");
+
+/* Define the names and data types of columns.
+ * The "default value" parameter is meaningless here. */
+table.addContainerProperty("First Name", String.class,  null);
+table.addContainerProperty("Last Name",  String.class,  null);
+table.addContainerProperty("Year",       Integer.class, null);
+
+/* Add a few items in the table. */
+table.addItem(new Object[] {
+    "Nicolaus","Copernicus",new Integer(1473)}, new Integer(1));
+table.addItem(new Object[] {
+    "Tycho",   "Brahe",     new Integer(1546)}, new Integer(2));
+table.addItem(new Object[] {
+    "Giordano","Bruno",     new Integer(1548)}, new Integer(3));
+table.addItem(new Object[] {
+    "Galileo", "Galilei",   new Integer(1564)}, new Integer(4));
+table.addItem(new Object[] {
+    "Johannes","Kepler",    new Integer(1571)}, new Integer(5));
+table.addItem(new Object[] {
+    "Isaac",   "Newton",    new Integer(1643)}, new Integer(6));</pre>
+
+		<p>
+			In this example, we used an increasing <code class="classname">Integer</code> object
+			as the Item Identifier, given as the second parameter to
+			<code class="methodname">addItem()</code>. The actual rows are given simply as object
+			arrays, in the same order in which the properties were added. The objects must
+			be of the correct class, as defined in the
+			<code class="methodname">addContainerProperty()</code> calls.
+		</p>
+
+		<div class="figure"><a name="N21D58"></a><p class="title"><b>Figure&nbsp;5.18.&nbsp;Basic Table Example</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/components/table-example1.png" align="middle" alt="Basic Table Example"></div>
+		</div></div><br class="figure-break">
+
+		<p>
+			Scalability of the <code class="classname">Table</code> is largely dictated by
+			the container. The default <code class="classname">IndexedContainer</code> is
+			relatively heavy and can cause scalability problems, for example, when
+			updating the values. Use of an optimized application-specific
+			container is recommended. Table does not have a limit for the number
+			of items and is just as fast with hundreds of thousands of items as
+			with just a few. With the current implementation of scrolling, there
+			is a limit of around 500 000 rows, depending on the browser and the pixel
+			height of rows.
+		</p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="components.table.selecting"></a>5.11.1.&nbsp;Selecting Items in a Table</h3></div></div></div>
+			
+
+			<p>
+				The <code class="classname">Table</code> allows selecting one or more items by
+				clicking them with the mouse. When the user selects an item, the IID of the
+				item will be set as the property of the table and a
+				<code class="classname">ValueChangeEvent</code> is triggered. To enable selection,
+				you need to set the table <span class="emphasis"><em>selectable</em></span>. You will also
+				need to set it as <span class="emphasis"><em>immediate</em></span> in most cases, as we do
+				below, because without it, the change in the property will not be
+				communicated immediately to the server.
+			</p>
+
+			<p>
+				The following example shows how to enable the selection of items in a
+				<code class="classname">Table</code> and how to handle
+				<code class="classname">ValueChangeEvent</code> events that are caused by changes
+				in selection. You need to handle the event with the
+				<code class="methodname">valueChange()</code> method of the
+				<code class="classname">Property.ValueChangeListener</code> interface.
+			</p>
+
+			<pre class="programlisting">// Allow selecting items from the table.
+table.setSelectable(true);
+
+// Send changes in selection immediately to server.
+table.setImmediate(true);
+
+// Shows feedback from selection.
+final Label current = new Label("Selected: -");
+
+// Handle selection change.
+table.addListener(new Property.ValueChangeListener() {
+    public void valueChange(ValueChangeEvent event) {
+        current.setValue("Selected: " + table.getValue());
+    }
+});</pre>
+
+			<div class="figure"><a name="N21D9A"></a><p class="title"><b>Figure&nbsp;5.19.&nbsp;Table Selection Example</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/components/table-example2.png" align="middle" alt="Table Selection Example"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				If the user clicks on an already selected item, the selection will
+				deselected and the table property will have <em class="parameter"><code>null</code></em>
+				value. You can disable this behaviour by setting
+				<code class="methodname">setNullSelectionAllowed(false)</code> for the table.
+			</p>
+
+			<p>
+				A table can also be in <span class="emphasis"><em>multiselect</em></span> mode, where a user
+				can select and unselect any item by clicking on it. The mode is enabled
+				with the <code class="methodname">setMultiSelect()</code> method of the
+				<code class="classname">Select</code> interface of
+				<code class="classname">Table</code>. Selecting an item triggers a
+				<code class="classname">ValueChangeEvent</code>, which will have as its parameter
+				an array of item identifiers.
+			</p>
+		</div>
+		
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="components.table.css"></a>5.11.2.&nbsp;CSS Style Rules</h3></div></div></div>
+			
+
+            <p>
+                Styling the overall style of a <code class="classname">Table</code> can be done
+                with the following CSS rules.
+            </p>
+
+			<pre class="programlisting">.v-table {}
+  .v-table-header-wrap {}
+    .v-table-header {}
+      .v-table-header-cell {}
+        .v-table-resizer {} /* Column resizer handle. */
+        .v-table-caption-container {}
+  .v-table-body {}
+    .v-table-row-spacer {}
+    .v-table-table {}
+      .v-table-row {}
+        .v-table-cell-content {}</pre>
+
+			<p>
+				Notice that some of the widths and heights in a table are calculated
+				dynamically and can not be set in CSS.
+			</p>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N21DDA"></a>Setting Individual Cell Styles</h4></div></div></div>
+				
+
+				<p>
+					The <code class="classname">Table.CellStyleGenerator</code> interface allows
+					you to set the CSS style for each individual cell in a table. You need
+					to implement the <code class="methodname">getStyle()</code>, which gets the
+					row (item) and column (property) identifiers as parameters and can
+					return a style name for the cell. The returned style name will be
+					concatenated to prefix "<code class="literal">v-table-cell-content-</code>".
+				<p>
+
+				</p>
+					Alternatively, you
+					can use a <code class="classname">Table.ColumnGenerator</code> (see <a href="components.table.html#components.table.columngenerator" title="5.11.4.&nbsp;Generated Table Columns">Section&nbsp;5.11.4, &ldquo;Generated Table Columns&rdquo;</a>) to generate the actual UI
+					components of the cells and add style names to them. A cell style
+					generator is not used for the cells in generated columns.
+				</p>
+			
+				<pre class="programlisting">Table table = new Table("Table with Cell Styles");
+table.addStyleName("checkerboard");
+
+// Add some columns in the table. In this example, the property
+// IDs of the container are integers so we can determine the
+// column number easily.
+table.addContainerProperty("0", String.class, null, "", null, null);
+for (int i=0; i&lt;8; i++)
+    table.addContainerProperty(""+(i+1), String.class, null,
+                         String.valueOf((char) (65+i)), null, null);
+
+// Add some items in the table.
+table.addItem(new Object[]{
+    "1", "R", "N", "B", "Q", "K", "B", "N", "R"}, new Integer(0));
+table.addItem(new Object[]{
+    "2", "P", "P", "P", "P", "P", "P", "P", "P"}, new Integer(1));
+for (int i=2; i&lt;6; i++)
+    table.addItem(new Object[]{String.valueOf(i+1), 
+                 "", "", "", "", "", "", "", ""}, new Integer(i));
+table.addItem(new Object[]{
+    "7", "P", "P", "P", "P", "P", "P", "P", "P"}, new Integer(6));
+table.addItem(new Object[]{
+    "8", "R", "N", "B", "Q", "K", "B", "N", "R"}, new Integer(7));
+table.setPageLength(8);
+
+// Set cell style generator
+table.setCellStyleGenerator(new Table.CellStyleGenerator() {
+    public String getStyle(Object itemId, Object propertyId) {
+        int row = ((Integer)itemId).intValue();
+        int col = Integer.parseInt((String)propertyId);
+        
+        // The first column.
+        if (col == 0)
+            return "rowheader";
+        
+        // Other cells.
+        if ((row+col)%2 == 0)
+            return "black";
+        else
+            return "white";
+    }
+});</pre>
+				
+				<p>
+					You can then style the cells, for example, as follows:
+				</p>
+
+				<pre class="programlisting">/* Center the text in header. */
+.v-table-header-cell {
+    text-align: center;
+}
+
+/* Basic style for all cells. */
+.v-table-checkerboard .v-table-cell-content {
+    text-align: center;
+    vertical-align: middle;
+    padding-top: 12px;
+    width: 20px;
+    height: 28px;
+}
+
+/* Style specifically for the row header cells. */
+.v-table-cell-content-rowheader {
+	background: #E7EDF3
+     url(../default/table/img/header-bg.png) repeat-x scroll 0 0;
+}
+
+/* Style specifically for the "white" cells. */
+.v-table-cell-content-white {
+    background: white;
+    color: black;
+}
+
+/* Style specifically for the "black" cells. */
+.v-table-cell-content-black {
+    background: black;
+    color: white;
+}</pre>
+
+				<p>
+					The table will look as shown in <a href="components.table.html#figure.components.table.cell-style" title="Figure&nbsp;5.20.&nbsp;Cell Style Generator for a Table">Figure&nbsp;5.20, &ldquo;Cell Style Generator for a Table&rdquo;</a>.
+				</p>
+
+				<div class="figure"><a name="figure.components.table.cell-style"></a><p class="title"><b>Figure&nbsp;5.20.&nbsp;Cell Style Generator for a Table</b></p><div class="figure-contents">
+					
+					<div class="mediaobject" align="center"><img src="img/components/table-cellstylegenerator1.png" align="middle" alt="Cell Style Generator for a Table"></div>
+				</div></div><br class="figure-break">
+			</div>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="components.table.features"></a>5.11.3.&nbsp;Table Features</h3></div></div></div>
+			
+			
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N21E29"></a>Page Length and Scrollbar</h4></div></div></div>
+				
+
+				<p>
+					The default style for <code class="classname">Table</code> provides a table
+					with a scrollbar. The scrollbar is located at the right side of the
+					table and becomes visible when the number of items in the table
+					exceeds the page length, that is, the number of visible items. You can
+					set the page length with <code class="methodname">setPageLength()</code>.
+				</p>
+
+				<p>
+					Setting the page length to zero makes all the rows in a table visible,
+					no matter how many rows there are. Notice that this also effectively
+					disables buffering, as all the entire table is loaded to the browser
+					at once. Using such tables to generate reports does not scale up very
+					well, as there is some inevitable overhead in rendering a table with
+					Ajax. For very large reports, generating HTML directly is a more
+					scalable solution.
+				</p>
+			</div>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N21E3B"></a>Organizing Columns</h4></div></div></div>
+				
+			
+				<p>
+					The default scrollable style supports most of the table features. User
+					can resize the columns by dragging their borders, change the sorting
+					by clicking on the column headers, collapse the columns if
+					<em class="parameter"><code>columnCollapsingAllowed</code></em> is
+					<em class="parameter"><code>true</code></em>, and reorder them if
+					<em class="parameter"><code>columnReorderingAllowed</code></em> is
+					<em class="parameter"><code>true</code></em>. You can set the column width of
+					individual columns with <code class="methodname">setColumnWidth()</code>.
+				</p>
+			</div>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N21E53"></a>Components Inside a Table</h4></div></div></div>
+				
+
+				<p>
+					The cells of a <code class="classname">Table</code> can contain any user
+					interface components, not just strings. If the rows are higher than
+					the row height defined in the default theme, you have to define the
+					proper row height in a custom theme.
+				</p>
+
+				<p>
+					When handling events for components inside a
+					<code class="classname">Table</code>, such as for the
+					<code class="classname">Button</code> in the example below, you usually need
+					to know the item the component belongs to. Components do not
+					themselves know about the table or the specific item in which a
+					component is contained.  Therefore, the handling method must use some
+					other means for finding out the Item ID of the item. There are a few
+					possibilities. Usually the easiest way is to use the
+					<code class="methodname">setData()</code> method to attach an arbitrary
+					object to a component. You can subclass the component and include the
+					identity information there. You can also simply search the entire
+					table for the item with the component, although that solution may not
+					be so scalable.
+				</p>
+
+				<p>
+					The example below includes table rows with a
+					<code class="classname">Label</code> in XHTML formatting mode, a multiline
+					<code class="classname">TextField</code>, a <code class="classname">CheckBox</code>,
+					and a <code class="classname">Button</code> that shows as a link.
+				</p>
+
+				<pre class="programlisting">// Create a table and add a style to allow setting the row height in theme.
+final Table table = new Table();
+table.addStyleName("components-inside");
+
+/* Define the names and data types of columns.
+ * The "default value" parameter is meaningless here. */
+table.addContainerProperty("Sum",            Label.class,     null);
+table.addContainerProperty("Is Transferred", CheckBox.class,  null);
+table.addContainerProperty("Comments",       TextField.class, null);
+table.addContainerProperty("Details",        Button.class,    null);
+
+/* Add a few items in the table. */
+for (int i=0; i&lt;100; i++) {
+    // Create the fields for the current table row
+    Label sumField = new Label(String.format(
+                   "Sum is &lt;b&gt;$%04.2f&lt;/b&gt;&lt;br/&gt;&lt;i&gt;(VAT incl.)&lt;/i&gt;",
+                   new Object[] {new Double(Math.random()*1000)}),
+                               Label.CONTENT_XHTML);
+    CheckBox transferredField = new CheckBox("is transferred");
+    
+    // Multiline text field. This required modifying the 
+    // height of the table row.
+    TextField commentsField = new TextField();
+    commentsField.setRows(3);
+    
+    // The Table item identifier for the row.
+    Integer itemId = new Integer(i);
+    
+    // Create a button and handle its click. A Button does not
+    // know the item it is contained in, so we have to store the
+    // item ID as user-defined data.
+    Button detailsField = new Button("show details");
+    detailsField.setData(itemId);
+    detailsField.addListener(new Button.ClickListener() {
+        public void buttonClick(ClickEvent event) {
+            // Get the item identifier from the user-defined data.
+            Integer itemId = (Integer)event.getButton().getData();
+            getWindow().showNotification("Link "+
+                                   itemId.intValue()+" clicked.");
+        } 
+    });
+    detailsField.addStyleName("link");
+    
+    // Create the table row.
+    table.addItem(new Object[] {sumField, transferredField,
+                                commentsField, detailsField},
+                  itemId);
+}
+
+// Show just three rows because they are so high.
+table.setPageLength(3);</pre>
+
+				<p>
+					The row height has to be set higher than the default with a style rule
+					such as the following:
+				</p>
+
+				<pre class="programlisting">/* Table rows contain three-row TextField components. */
+.v-table-components-inside .v-table-cell-content {
+	height: 54px;
+}</pre>
+
+				<p>
+					The table will look as shown in <a href="components.table.html#figure.components.table.components-inside" title="Figure&nbsp;5.21.&nbsp;Components in a Table">Figure&nbsp;5.21, &ldquo;Components in a Table&rdquo;</a>.
+				</p>
+
+				<div class="figure"><a name="figure.components.table.components-inside"></a><p class="title"><b>Figure&nbsp;5.21.&nbsp;Components in a Table</b></p><div class="figure-contents">
+					
+					<div class="mediaobject" align="center"><img src="img/components/table-components.png" align="middle" alt="Components in a Table"></div>
+				</div></div><br class="figure-break">
+			</div>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N21E9D"></a>Editing the Values of a Table</h4></div></div></div>
+				
+
+				<p>
+					Normally, a <code class="classname">Table</code> simply displays the items and
+					their fields as text. If you want to allow the user to edit the
+					values, you can either put them inside components as we did above, or
+					you can simply call <code class="methodname">setEditable(true)</code> and the
+					cells are automatically turned into editable fields.
+				</p>
+
+				<p>
+					Let us begin with a regular table with a some columns with usual Java
+					types, namely a <code class="classname">Date</code>,
+					<code class="classname">Boolean</code>, and a <code class="classname">String</code>.
+				</p>
+
+				<pre class="programlisting">// Create a table. It is by default not editable.
+final Table table = new Table();
+
+// Define the names and data types of columns.
+table.addContainerProperty("Date",     Date.class,  null);
+table.addContainerProperty("Work",     Boolean.class, null);
+table.addContainerProperty("Comments", String.class,  null);
+
+// Add a few items in the table.
+for (int i=0; i&lt;100; i++) {
+    Calendar calendar = new GregorianCalendar(2008,0,1);
+    calendar.add(Calendar.DAY_OF_YEAR, i);
+    
+    // Create the table row.
+    table.addItem(new Object[] {calendar.getTime(),
+                                new Boolean(false),
+                                ""},
+                  new Integer(i)); // Item identifier
+}
+
+table.setPageLength(8);
+layout.addComponent(table);</pre>
+
+				<p>
+					You could put the table in editable mode right away if you need
+					to. We'll continue the example by adding a mechanism to switch the
+					<code class="classname">Table</code> from and to the editable mode.
+				</p>
+
+				<pre class="programlisting">final CheckBox switchEditable = new CheckBox("Editable");
+switchEditable.addListener(new Property.ValueChangeListener() {
+    public void valueChange(ValueChangeEvent event) {
+        table.setEditable(((Boolean)event.getProperty()
+                             .getValue()).booleanValue());
+    }
+});
+switchEditable.setImmediate(true);
+layout.addComponent(switchEditable);</pre>
+
+				<p>
+					Now, when you check to checkbox, the components in the table turn into
+					editable fields, as shown in <a href="components.table.html#figure.component.table.editable" title="Figure&nbsp;5.22.&nbsp;A Table in Normal and Editable Mode">Figure&nbsp;5.22, &ldquo;A Table in Normal and Editable Mode&rdquo;</a>.
+				</p>
+
+				<div class="figure"><a name="figure.component.table.editable"></a><p class="title"><b>Figure&nbsp;5.22.&nbsp;A Table in Normal and Editable Mode</b></p><div class="figure-contents">
+					
+					<div class="mediaobject" align="center"><img src="img/components/table-editable1+2.png" align="middle" alt="A Table in Normal and Editable Mode"></div>
+				</div></div><br class="figure-break">
+
+				<p>
+					The field components that allow editing the values of particular types
+					are defined in a field factory that implements the
+					<code class="classname">FieldFactory</code> interface. The default
+					implementation is <code class="classname">BaseFieldFactory</code>, which
+					offers the following crude mappings:
+				</p>
+
+				<div class="table"><a name="N21EF0"></a><p class="title"><b>Table&nbsp;5.2.&nbsp;Type to Field Mappings in <code class="classname">BaseFieldFactory</code></b></p><div class="table-contents">
+					
+					<table summary="Type to Field Mappings in BaseFieldFactory" border="1"><colgroup><col><col></colgroup><thead><tr valign="top"><th align="left" valign="top">Property Type</th><th align="left" valign="top">Mapped to Field Class</th></tr></thead><tbody><tr valign="top"><td align="left" valign="top"><code class="classname">Date</code></td><td align="left" valign="top">A <code class="classname">DateField</code>. </td></tr><tr valign="top"><td align="left" valign="top"><code class="classname">Boolean</code></td><td align="left" valign="top">A <code class="classname">CheckBox</code>.</td></tr><tr valign="top"><td align="left" valign="top"><code class="classname">Item</code></td><td align="left" valign="top">A <code class="classname">Form</code>. The fields of the
+								form are automatically created from the item's properties
+								using the default field factory, that is,
+								<code class="classname">BaseFieldFactory</code>. The normal use
+								for this property type is inside a
+								<code class="classname">Form</code> and is less useful inside a
+								<code class="classname">Table</code>.</td></tr><tr valign="top"><td align="left" valign="top"><span class="emphasis"><em>others</em></span></td><td align="left" valign="top">A <code class="classname">TextField</code>. The text field
+								manages conversions from the basic types, if
+								possible.</td></tr></tbody></table>
+				</div></div><br class="table-break">
+
+				<p>
+					Field factories are covered with more detail in <a href="components.form.html#components.form.binding" title="5.16.2.&nbsp;Binding Form to Data">Section&nbsp;5.16.2, &ldquo;Binding Form to Data&rdquo;</a>. In the default
+					<code class="classname">BaseFieldFactory</code> (you might want to look the
+					source code), the mappings are defined in
+					<code class="methodname">createField(<code class="classname">Class</code> type,
+					<code class="classname">Component</code> uiContext)</code> method, but
+					you can implement any other of the abstract
+					<code class="classname">FieldFactory</code> methods, depending on your
+					needs. You could just implement the
+					<code class="classname">FieldFactory</code> interface, but We recommend that
+					you extend the <code class="classname">BaseFieldFactory</code> according to
+					your needs.
+				</p>
+
+			</div>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N21F6A"></a>Iterating Over a Table</h4></div></div></div>
+				
+
+				<p>
+					As the items in a <code class="classname">Table</code> are not indexed, iterating
+					over the items has to be done using an iterator. The
+					<code class="methodname">getItemIds()</code> method of the
+					<code class="classname">Container</code> interface of <code class="classname">Table</code>
+					returns a <code class="classname">Collection</code> of item identifiers over which
+					you can iterate using an <code class="classname">Iterator</code>. For an example
+					about iterating over a <code class="classname">Table</code>, please see <a href="datamodel.container.html" title="8.4.&nbsp;Collecting items in Containers">Section&nbsp;8.4, &ldquo;Collecting items in Containers&rdquo;</a>. Notice that you may not modify the
+					<code class="classname">Table</code> during iteration, that is, add or remove
+					items. Changing the data is allowed.
+				</p>
+			</div>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="components.table.columngenerator"></a>5.11.4.&nbsp;Generated Table Columns</h3></div></div></div>
+			
+
+			<p>
+				You might want to have a column that has values calculated from other
+				columns. Or you might want to format table columns in some way, for
+				example if you have columns that display currencies. The
+				<code class="classname">ColumnGenerator</code> interface allows defining custom
+				generators for such columns.
+			</p>
+
+			<p>
+				You add new generated columns to a <code class="classname">Table</code> with
+				<code class="methodname">addGeneratedColumn()</code>. It takes the column
+				identifier as its parameters. Usually you want to have a more
+				user-friendly and possibly internationalized column header. You can set
+				the header and a possible icon by calling
+				<code class="methodname">addContainerProperty()</code>
+				<span class="emphasis"><em>before</em></span> adding the generated column.
+			</p>
+
+			<pre class="programlisting">// Define table columns. 
+table.addContainerProperty(
+    "date",     Date.class,   null, "Date",         null, null);
+table.addContainerProperty(
+    "quantity", Double.class, null, "Quantity (l)", null, null);
+table.addContainerProperty(
+    "price",    Double.class, null, "Price (e/l)",  null, null);
+table.addContainerProperty(
+    "total",    Double.class, null, "Total (e)",    null, null);
+
+// Define the generated columns and their generators.
+table.addGeneratedColumn("date",
+                         new DateColumnGenerator());
+table.addGeneratedColumn("quantity",
+                         new ValueColumnGenerator("%.2f l"));
+table.addGeneratedColumn("price",
+                         new PriceColumnGenerator());
+table.addGeneratedColumn("total",
+                         new ValueColumnGenerator("%.2f e"));</pre>
+
+			<p>
+				Notice that the <code class="methodname">addGeneratedColumn()</code> always
+				places the generated columns as the last column, even if you defined some
+				other order previously. You will have to set the proper order with
+				<code class="methodname">setVisibleColumns()</code>.
+			</p>
+
+			<pre class="programlisting">table.setVisibleColumns(new Object[] {"date", "quantity", "price", "total"});</pre>
+
+			<p>
+				The generators are objects that implement the
+				<code class="classname">Table.ColumnGenerator</code> interface and its
+				<code class="methodname">generateCell()</code> method. The method gets the
+				identity of the item and column as its parameters, in addition to the
+				table object. It has to return a component object.
+			</p>
+				
+			<p>
+				The following example defines a generator for formatting
+				<code class="classname">Double</code> valued fields according to a format string
+				(as in <code class="classname">java.util.Formatter</code>).
+			</p>
+
+			<pre class="programlisting">/** Formats the value in a column containing Double objects. */
+class ValueColumnGenerator implements Table.ColumnGenerator {
+    String format; /* Format string for the Double values. */
+
+    /**
+     * Creates double value column formatter with the given
+     * format string.
+     */
+    public ValueColumnGenerator(String format) {
+        this.format = format;
+    }
+
+    /**
+     * Generates the cell containing the Double value.
+     * The column is irrelevant in this use case.
+     */
+    public Component generateCell(Table source, Object itemId,
+                                  Object columnId) {
+        // Get the object stored in the cell as a property
+        Property prop =
+            source.getItem(itemId).getItemProperty(columnId);
+        if (prop.getType().equals(Double.class)) {
+            Label label = new Label(String.format(format,
+                    new Object[] { (Double) prop.getValue() }));
+            
+            // Set styles for the column: one indicating that it's
+            // a value and a more specific one with the column
+            // name in it. This assumes that the column name
+            // is proper for CSS.
+            label.addStyleName("column-type-value");
+            label.addStyleName("column-" + (String) columnId);
+            return label;
+        }
+        return null;
+    }
+}</pre>
+
+			<p>
+				If you wish to have a custom style for the cells, you have to set it in
+				the generator. A <code class="classname">CellStyleGenerator</code> defined for a
+				table will not be called for the cells of generated columns.
+			</p>
+
+			<p>
+				The generator is called for all the visible (or more accurately cached)
+				items in a table. If the user scrolls the table to another position in the
+				table, the columns of the new visible rows are generated dynamically. The
+				columns in the visible (cached) rows are also generated always when an
+				item has a value change. It is therefore usually safe to calculate the
+				value of generated cells from the values of different rows (items).
+			</p>
+
+			<p>
+				When you set a table as <em class="parameter"><code>editable</code></em>, regular fields
+				will change to editing fields. When the user changes the values in the
+				fields, the generated columns will be updated automatically. Putting a
+				table with generated columns in editable mode has a few quirks. The
+				editable mode of <code class="classname">Table</code> does not affect generated
+				columns. You have two alternatives: either you generate the editing fields
+				in the generator or, in case of formatter generators, remove the generator
+				in the editable mode. The example below uses the latter approach.
+			</p>
+
+			<pre class="programlisting">// Have a check box that allows the user
+// to make the quantity and total columns editable.
+final CheckBox editable = new CheckBox(
+    "Edit the input values - calculated columns are regenerated");
+
+editable.setImmediate(true);
+editable.addListener(new ClickListener() {
+    public void buttonClick(ClickEvent event) {
+        table.setEditable(editable.booleanValue());
+        
+        // The columns may not be generated when we want to
+        // have them editable.
+        if (editable.booleanValue()) {
+            table.removeGeneratedColumn("quantity");
+            table.removeGeneratedColumn("total");
+        } else { // Not editable
+            // Show the formatted values.
+            table.addGeneratedColumn("quantity",
+                new ValueColumnGenerator("%.2f l"));
+            table.addGeneratedColumn("total",
+                new ValueColumnGenerator("%.2f e"));
+        }
+        // The visible columns are affected by removal
+        // and addition of generated columns so we have
+        // to redefine them.
+        table.setVisibleColumns(new Object[] {"date", "quantity",
+                 "price", "total", "consumption", "dailycost"});
+    }
+});</pre>
+
+            <p>
+                You will also have to set the editing fields in
+                <em class="parameter"><code>immediate</code></em> mode to have the update occur immediately
+                when an edit field loses the focus. You can set the fields in
+                <em class="parameter"><code>immediate</code></em> mode with the a custom
+                <code class="classname">FieldFactory</code>, such as the one given below:
+            </p>
+
+			<pre class="programlisting">public class ImmediateFieldFactory extends BaseFieldFactory {
+    public Field createField(Class type, Component uiContext) {
+        // Let the BaseFieldFactory create the fields
+        Field field = super.createField(type, uiContext);
+        
+        // ...and just set them as immediate
+        ((AbstractField)field).setImmediate(true);
+        
+        return field;
+    }
+}
+...
+table.setFieldFactory(new ImmediateFieldFactory());</pre>
+
+			<p>
+				If you generate the editing fields with the column generator, you avoid
+				having to use such a field factory, but of course have to generate the
+				fields for both normal and editable modes.
+			</p>
+
+			<p>
+				<a href="components.table.html#figure.ui.table.generated" title="Figure&nbsp;5.23.&nbsp;Table with Generated Columns in Normal and Editable Mode">Figure&nbsp;5.23, &ldquo;Table with Generated Columns in Normal and Editable Mode&rdquo;</a> shows a table with
+				columns calculated (blue) and simply formatted (black) with column
+				generators.
+			</p>
+
+			<div class="figure"><a name="figure.ui.table.generated"></a><p class="title"><b>Figure&nbsp;5.23.&nbsp;Table with Generated Columns in Normal and Editable Mode</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/components/table-generatedcolumns1.png" align="middle" alt="Table with Generated Columns in Normal and Editable Mode"></div>
+				<div class="mediaobject" align="center"><img src="img/components/table-generatedcolumns2.png" align="middle" alt="Table with Generated Columns in Normal and Editable Mode"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				You can find the complete generated columns example in the Feature Browser
+				demo application in the installation package, in
+				<code class="classname">com.vaadin.demo.featurebrowser.GeneratedColumnExample.java</code>.
+			</p>
+
+		</div>
+
+		
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="components.selecting.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="components.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="components.tree.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">5.10.&nbsp;Selecting Items&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;5.12.&nbsp;<code class="classname">Tree</code></td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

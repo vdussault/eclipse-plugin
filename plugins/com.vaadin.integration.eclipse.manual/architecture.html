@@ -1,0 +1,147 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Chapter&nbsp;3.&nbsp;Architecture</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="index.html" title="Book of Vaadin"><link rel="prev" href="getting-started.first-project.html" title="2.4.&nbsp;Your First Project with Vaadin"><link rel="next" href="architecture.technology.html" title="3.2.&nbsp;Technological Background"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>Chapter&nbsp;3.&nbsp;Architecture</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Chapter&nbsp;3.&nbsp;Architecture</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="getting-started.first-project.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="architecture.technology.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="architecture"></a>Chapter&nbsp;3.&nbsp;Architecture</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="architecture.html#architecture.overview">3.1. Overview</a></span></dt><dt><span class="section"><a href="architecture.technology.html">3.2. Technological Background</a></span></dt><dd><dl><dt><span class="section"><a href="architecture.technology.html#architecture.technology.ajax">3.2.1. AJAX</a></span></dt><dt><span class="section"><a href="architecture.technology.html#architecture.technology.gwt">3.2.2. Google Web Toolkit</a></span></dt><dt><span class="section"><a href="architecture.technology.html#architecture.technology.json">3.2.3. JSON</a></span></dt></dl></dd><dt><span class="section"><a href="architecture.server-side.html">3.3. Applications as Java Servlet Sessions</a></span></dt><dt><span class="section"><a href="architecture.client-side.html">3.4. Client-Side Engine</a></span></dt><dt><span class="section"><a href="architecture.events.html">3.5. Events and Listeners</a></span></dt></dl></div>
+	
+
+	<p>
+		This chapter provides an introduction to the architecture of Vaadin at
+		somewhat technical level.
+	</p>
+
+	<div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="architecture.overview"></a>3.1.&nbsp;Overview</h2></div></div></div>
+		
+
+		<p>
+			In <a href="intro.html" title="Chapter&nbsp;1.&nbsp;Introduction">Chapter&nbsp;1, <i xmlns:xlink="http://www.w3.org/1999/xlink">Introduction</i></a>, we gave a short introduction to the
+			general architecture of Vaadin. Let us now look deeper into it. <a href="architecture.html#figure.architecture.detailed" title="Figure&nbsp;3.1.&nbsp;Vaadin Architecture">Figure&nbsp;3.1, &ldquo;Vaadin Architecture&rdquo;</a> below illustrates the architecture.
+		</p>
+
+		<div class="figure-float"><div class="figure"><a name="figure.architecture.detailed"></a><p class="title"><b>Figure&nbsp;3.1.&nbsp;Vaadin Architecture</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/intro/architecture-detailed-lo.png" align="middle" alt="Vaadin Architecture"></div>
+		</div></div><br class="figure-break"></div>
+
+		<p>
+			Vaadin consists of a <span class="emphasis"><em>web application
+			API</em></span>, a horde of <span class="emphasis"><em>user interface
+			components</em></span>, <span class="emphasis"><em>themes</em></span> for controlling
+			the appearance, and a <span class="emphasis"><em>data model</em></span> that allows
+			binding the user interface components directly to data. Behind the
+			curtains it also employs a <span class="emphasis"><em>terminal adapter</em></span> to
+			receive requests from web browsers and make responses by rendering the
+			pages.
+		</p>
+
+		<p>
+			An application using Vaadin runs as a servlet in a Java web server,
+			serving HTTP requests. The terminal adapter receives client requests through
+			the web server's Java Servlet API, and inteprets them to user events for a
+			particular session. An event is associated with a UI component and delivered
+			to the application. As the application logic makes changes to the UI
+			components, the terminal adapter renders them in the web browser by generating
+			a response. In AJAX rendering mode, a client-side JavaScript component
+			receives the responses and uses them to make any necessary changes to the page
+			in the browser.
+		</p>
+
+		<p>
+			The top level of a user application consists of an application class that
+			inherits <code class="classname">com.vaadin.Application</code>.  It creates the
+			UI components (see below) it needs, receives events regarding them,
+			and makes necessary changes to the components. For detailed information about
+			inheriting the <code class="classname">Application</code>, see <a href="application.html" title="Chapter&nbsp;4.&nbsp;Writing a Web Application">Chapter&nbsp;4, <i xmlns:xlink="http://www.w3.org/1999/xlink">Writing a Web Application</i></a>.
+		</p>
+
+		<p>
+			The major parts of the architecture and their function are as follows:
+		</p>
+
+		
+		<div class="variablelist"><dl><dt><span class="term">User Interface Components</span></dt><dd>
+					<p>
+						The user interface consists of UI components that are created and
+						laid out by the application. Each server-side component has a
+						client-side counterpart, with which the user interacts. The
+						server-side components can serialize themselves over the client
+						connection using a terminal adapter. The client-side components,
+						in turn, can serialize user interaction back to the application,
+						which is received in the server-side components as events. The
+						components relay these events to the application logic. Most
+						components are bound to a data source (see below). For a complete
+						description of UI component architecture, see <a href="components.html" title="Chapter&nbsp;5.&nbsp;User Interface Components">Chapter&nbsp;5, <i xmlns:xlink="http://www.w3.org/1999/xlink">User Interface Components</i></a>.
+					</p>
+				</dd><dt><span class="term">Client-Side Engine</span></dt><dd>
+					<p>
+						The Client-Side Engine of Vaadin manages the rendering in
+						the web browser using Google Web Toolkit (GWT). It communicates
+						user interaction and UI changes with the server-side Terminal
+						Adapter using the User Interface Definition Language (UIDL), a
+						JSON-based language. The communications are made using
+						asynchronous HTTP or HTTPS requests. See <a href="architecture.client-side.html" title="3.4.&nbsp;Client-Side Engine">Section&nbsp;3.4, &ldquo;Client-Side Engine&rdquo;</a>.
+					</p>
+				</dd><dt><span class="term">Terminal Adapter</span></dt><dd>
+					<p>
+						The UI components do not render themselves directly as a web page,
+						but use a <span class="emphasis"><em>Terminal Adapter</em></span>.  This abstraction layer
+						allows users to use Vaadin applications with practically
+						any web browser. Releases 3 and 4 of Vaadin supported
+						HTML and simple AJAX based rendering, while Release 5 supports
+						advanced AJAX-based rendering using Google Web Toolkit (GWT). You
+						could imagine some other browser technology, not even based on
+						HTML, and you - or we for that matter - could make it work just by
+						writing a new adapter. Your application would still just see the
+						Vaadin API. To allow for this sort of abstraction, UI components
+						communicate their changes to the Terminal Adapter, which renders
+						them for the user's browser. When the user does something in the web
+						page, the events are communicated to the terminal adapter (through
+						the web server) as asynchronous AJAX requests. The terminal
+						adapter delivers the user events to the UI components, which
+						deliver them to the application's UI logic.
+					</p>
+				</dd><dt><span class="term">Themes</span></dt><dd>
+					<p>
+						The user interface separates between presentation and logic. While
+						the UI logic is handled as Java code, the presentation is defined
+						in <span class="emphasis"><em>themes</em></span> as CSS. Vaadin provides a
+						default themes. User themes can, in addition to style sheets,
+						include HTML templates that define custom layouts and other
+						resources, such as images. Themes are discussed in detail in <a href="themes.html" title="Chapter&nbsp;7.&nbsp;Themes">Chapter&nbsp;7, <i xmlns:xlink="http://www.w3.org/1999/xlink">Themes</i></a>.
+					</p>
+				</dd><dt><span class="term">UIDL</span></dt><dd>
+					<p>
+						The Terminal Adapter draws the user interface to the web page and
+						any changes to it using a special User Interface Definition
+						Language (UIDL). The UIDL communications are done using JSON
+						(JavaScript Object Notation), which is a lightweight data
+						interchange format that is especially efficient for interfacing
+						with JavaScript-based AJAX code in the browser. See <a href="architecture.technology.html#architecture.technology.json" title="3.2.3.&nbsp;JSON">Section&nbsp;3.2.3, &ldquo;JSON&rdquo;</a> and <a href="uidl.html" title="Appendix&nbsp;A.&nbsp;User Interface Definition Language (UIDL)">Appendix&nbsp;A, <i xmlns:xlink="http://www.w3.org/1999/xlink">User Interface Definition Language (UIDL)</i></a> for details.
+					</p>
+				</dd><dt><span class="term">Events</span></dt><dd>
+					<p>
+						User interaction with UI components creates events, which are first
+						processed on the client side with JavaScript and then passed all the way
+						through the HTTP server, terminal adapter, and user component layers to the
+						application. See <a href="architecture.events.html" title="3.5.&nbsp;Events and Listeners">Section&nbsp;3.5, &ldquo;Events and Listeners&rdquo;</a>.
+					</p>
+				</dd><dt><span class="term">Data Model</span></dt><dd>
+					<p>
+						In addition to the user interface model, Vaadin provides a
+						<span class="emphasis"><em>data model</em></span> for interfacing data presented in UI
+						components. Using the data model, the user interface components can
+						update the application data directly, without the need for any control
+						code. All the UI components use this data model internally, but they can
+						be bound to a separate data source as well. For example, you can bind a
+						table component to an SQL query response. For a complete overview of the
+						Vaadin Data Model, please refer to <a href="datamodel.html" title="Chapter&nbsp;8.&nbsp;Binding Components to Data">Chapter&nbsp;8, <i xmlns:xlink="http://www.w3.org/1999/xlink">Binding Components to Data</i></a>.
+					</p>
+				</dd></dl></div>
+
+	</div>
+
+	
+
+	
+		
+	
+
+	
+
+</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="getting-started.first-project.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;<a accesskey="n" href="architecture.technology.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">2.4.&nbsp;Your First Project with Vaadin&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;3.2.&nbsp;Technological Background</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

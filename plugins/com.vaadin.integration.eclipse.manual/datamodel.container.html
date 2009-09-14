@@ -1,0 +1,112 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>8.4.&nbsp;Collecting items in Containers</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="datamodel.html" title="Chapter&nbsp;8.&nbsp;Binding Components to Data"><link rel="prev" href="datamodel.items.html" title="8.3.&nbsp;Holding properties in Items"><link rel="next" href="gwt.html" title="Chapter&nbsp;9.&nbsp;Developing Custom Components"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>8.4.&nbsp;Collecting items in Containers</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">8.4.&nbsp;Collecting items in Containers</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="datamodel.items.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;8.&nbsp;Binding Components to Data</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="gwt.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="datamodel.container"></a>8.4.&nbsp;Collecting items in Containers</h2></div></div></div>
+		
+
+		<p>
+			Container is the most advanced of the data model supported by Vaadin. It
+			provides a very flexible way of managing a set of items that share common
+			properties. Each item is identified by an item id. Properties can be requested from
+			container with item and property ids. Another way of accessing properties is to first
+			request an item from container and then request its properties from it.
+		</p>
+
+		<p>
+			By implementing a container interface, you can bind UI components directly
+			to data. As containers can be unordered, ordered, indexed, or hierarchical,
+			they can interface practically any kind of data representation. Vaadin
+			includes data connectors for some common data sources, such as the simple data
+			tables and filesystem.
+		</p>
+
+		<p>
+			The <code class="classname">Container</code> interface was designed with flexibility and
+			efficiency in mind. It contains inner interfaces that containers can optionally
+			implement for ordering the items sequentially, indexing the items and accessing
+			them hierarchically. Those ordering models provide the basis for the
+			<code class="classname">Table</code>, <code class="classname">Tree</code>, and
+			<code class="classname">Select</code> UI components. As with other data models, the
+			containers support events for notifying about changes made to their contents.
+		</p>
+
+		<p>
+			In addition to separate container objects, also many UI components are
+			containers in addition to being properties. This is especially true for
+			selectable components (that implement <code class="classname">Select</code>),
+			because they are containers that contain selectable items. Their property
+			is the currently selected item.
+			This is useful as it enables binding components to view and update each
+			others' data directly, and makes it easy to reuse already constructed data
+			models - e.g. a form could edit a row (item) of a table directly, and the
+			table could use a database container as its underlying container. The
+			fields of the form would correspond to the properties of the item, i.e.
+			the cells of the table row.
+			For more details on components, see <a href="components.html" title="Chapter&nbsp;5.&nbsp;User Interface Components">Chapter&nbsp;5, <i xmlns:xlink="http://www.w3.org/1999/xlink">User Interface Components</i></a>.
+		</p>
+
+		<p>
+			The library contains a set of utilities for converting between different container implementations by adding external
+			ordering or hierarchy into existing containers. In-memory containers implementing
+			indexed and hierarchical models provide easy-to-use tools for setting up in-memory
+			data storages. Such default container implementations include
+			<code class="classname">IndexedContainer</code>, which can be thought of as a generalization
+			of a two-dimensional data table, and <code class="classname">BeanItemContainer</code> which
+			maps standard Java objects (beans) to items of an indexed container. In addition,
+			the default containers include a hierarchical container for direct file system
+			browsing.
+		</p>
+
+        <div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N23544"></a>8.4.1.&nbsp;Iterating Over a Container</h3></div></div></div>
+            
+
+            <p>
+                As the items in a <code class="classname">Container</code> are not necessarily
+                indexed, iterating over the items has to be done using an
+                <code class="classname">Iterator</code>. The <code class="methodname">getItemIds()</code>
+                method of <code class="classname">Container</code> returns a
+                <code class="classname">Collection</code> of item identifiers over which you can
+                iterate. The following example demonstrates a typical case where you
+                iterate over the values of check boxes in a column of a
+                <code class="classname">Table</code> component. The context of the example is the
+                example used in <a href="components.table.html" title="5.11.&nbsp;Table">Section&nbsp;5.11, &ldquo;<code class="classname">Table</code>&rdquo;</a>.
+            </p>
+
+            <pre class="programlisting">// Collect the results of the iteration into this string.
+String items = "";
+
+// Iterate over the item identifiers of the table.
+for (Iterator i = table.getItemIds().iterator(); i.hasNext();) {
+    // Get the current item identifier, which is an integer.
+    int iid = (Integer) i.next();
+    
+    // Now get the actual item from the table.
+    Item item = table.getItem(iid);
+    
+    // And now we can get to the actual checkbox object.
+    Button button = (Button)
+            (item.getItemProperty("ismember").getValue());
+    
+    // If the checkbox is selected.
+    if ((Boolean)button.getValue() == true) {
+        // Do something with the selected item; collect the
+        // first names in a string.
+        items += item.getItemProperty("First Name")
+                     .getValue() + " ";
+    }
+}
+
+// Do something with the results; display the selected items.
+layout.addComponent (new Label("Selected items: " + items));</pre>
+
+            <p>
+                Notice that the <code class="methodname">getItemIds()</code> returns an
+                <span class="emphasis"><em>unmodifiable collection</em></span>, so the
+                <code class="classname">Container</code> may not be modified during iteration. You
+                can not, for example, remove items from the
+                <code class="classname">Container</code> during iteration. The modification
+                includes modification in another thread. If the
+                <code class="classname">Container</code> is modified during iteration, a
+                <code class="classname">ConcurrentModificationException</code> is thrown and the
+                iterator may be left in an undefined state.
+            </p>
+        </div>
+
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="datamodel.items.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="datamodel.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="gwt.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">8.3.&nbsp;Holding properties in Items&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Chapter&nbsp;9.&nbsp;Developing Custom Components</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

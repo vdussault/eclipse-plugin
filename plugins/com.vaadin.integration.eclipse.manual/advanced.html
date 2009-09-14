@@ -1,0 +1,102 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Chapter&nbsp;10.&nbsp;Advanced Web Application Topics</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="index.html" title="Book of Vaadin"><link rel="prev" href="gwt.development.html" title="9.7.&nbsp;GWT Widget Development"><link rel="next" href="application.windows.html" title="10.2.&nbsp;Application-Level Windows"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>Chapter&nbsp;10.&nbsp;Advanced Web Application Topics</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Chapter&nbsp;10.&nbsp;Advanced Web Application Topics</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="gwt.development.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="application.windows.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="advanced"></a>Chapter&nbsp;10.&nbsp;Advanced Web Application Topics</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="advanced.html#advanced.application.pages">10.1. Special Characteristics of AJAX Applications</a></span></dt><dt><span class="section"><a href="application.windows.html">10.2. Application-Level Windows</a></span></dt><dd><dl><dt><span class="section"><a href="application.windows.html#N23F99">10.2.1. Creating New Application-Level Windows</a></span></dt><dt><span class="section"><a href="application.windows.html#application.windows.dynamic">10.2.2. Creating Windows Dynamically</a></span></dt><dt><span class="section"><a href="application.windows.html#application.windows.closing">10.2.3. Closing Windows</a></span></dt><dt><span class="section"><a href="application.windows.html#application.windows.caveats">10.2.4. Caveats in Using Multiple Windows</a></span></dt></dl></dd><dt><span class="section"><a href="application.embedding.html">10.3. Embedding Applications in Web Pages</a></span></dt><dd><dl><dt><span class="section"><a href="application.embedding.html#N24147">10.3.1. Embedding Inside a <code class="literal">div</code> Element</a></span></dt><dt><span class="section"><a href="application.embedding.html#N2427B">10.3.2. Embedding Inside an <code class="literal">iframe</code> Element</a></span></dt></dl></dd><dt><span class="section"><a href="advanced.debug-production-modes.html">10.4. Debug and Production Mode</a></span></dt><dd><dl><dt><span class="section"><a href="advanced.debug-production-modes.html#advanced.debug-production-modes.debug.mode">10.4.1. Debug Mode</a></span></dt><dt><span class="section"><a href="advanced.debug-production-modes.html#N2435C">10.4.2. Analyzing Layouts</a></span></dt><dt><span class="section"><a href="advanced.debug-production-modes.html#N243B1">10.4.3. Custom Layouts</a></span></dt><dt><span class="section"><a href="advanced.debug-production-modes.html#N243C0">10.4.4. Debug Functions for Component Developers</a></span></dt></dl></dd><dt><span class="section"><a href="advanced.resources.html">10.5. Resources</a></span></dt><dd><dl><dt><span class="section"><a href="advanced.resources.html#section.application.resources.uri">10.5.1. URI  Handlers</a></span></dt><dt><span class="section"><a href="advanced.resources.html#section.application.resources.parameters">10.5.2. Parameter Handlers</a></span></dt></dl></dd><dt><span class="section"><a href="advanced.shortcuts.html">10.6. Shortcut Keys</a></span></dt><dt><span class="section"><a href="advanced.printing.html">10.7. Printing</a></span></dt></dl></div>
+	
+
+    <p>
+        This chapter covers various features and topics often needed in
+        applications. While other topics could be considered as "advanced", the first
+        section gives a brief introduction to AJAX development for beginners.
+    </p>
+
+	<div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="advanced.application.pages"></a>10.1.&nbsp;Special Characteristics of AJAX Applications</h2></div></div></div>
+		
+		
+		<p>
+            New to AJAX? This section is intended for people familiar with the development
+            of either traditional web applications or desktop applications, who are
+            entering AJAX-enabled web application development. AJAX application
+            development has a few special characteristics with respect to other types of
+            applications. Possibly the most important one is how the display is managed in
+            the web browser.
+		</p>
+
+		<p>
+			The web was originally not built for applications, but for hypertext
+			pages that you can view with a browser. The purpose of web pages is
+			to provide <span class="emphasis"><em>content</em></span> for the user. Application
+			software has a somewhat different purpose; usually to allow you to
+			work on some data or content, much of which is not ever intended to
+			be accessible through a web browser as web pages. As the web is
+			inherently page-based, conventional web applications had to work with
+			page requests and output HTML as response. JavaScript and AJAX have
+			made it possible to let go of the pages.
+		</p>
+
+		<p>
+			Pages are largely an unknown concept to conventional desktop
+			applications. At most, desktop applications can open multiple
+			windows, but usually they work with a single main window, with an
+			occasional dialog window here and there. Same goes usually for web
+			applications developed with Vaadin: an application typically
+			runs on a single page, changing the layout as needed and popping up
+			dialog boxes.
+		</p>
+
+		<p>
+			Not having to load pages and use hyperlinks to communicate all user
+			interaction is a relief for application development. However, they
+			are an important feature that ordinary desktop applications
+			lack. They allow referencing different functionalities of an
+			application or resources managed by the application. They are also
+			important for integration with external applications.
+		</p>
+
+		<p>
+			Certain resources can be identified through a
+			<em class="firstterm">URI</em> or <em class="firstterm">Universal Resource
+			Identifier</em>.  A URI can easily be passed around or stored
+			as a bookmark. We will see in <a href="advanced.resources.html#section.application.resources.uri" title="10.5.1.&nbsp;URI Handlers">Section&nbsp;10.5.1, &ldquo;URI  Handlers&rdquo;</a> how you can retrieve
+			the URI of a page request. Similarly, a page request can have query
+			parameters, which can be handled as detailed in <a href="advanced.resources.html#section.application.resources.parameters" title="10.5.2.&nbsp;Parameter Handlers">Section&nbsp;10.5.2, &ldquo;Parameter Handlers&rdquo;</a>.
+		</p>
+
+		<p>
+			Using URIs or request parameters to access functionalities or content
+			is not as straight-forward as in conventional page-based web
+			applications. Vaadin, just as any other AJAX framework, uses
+			browser cookies not just for tracking users but also for tracking the
+			application state. Cookies are unique in a browser, so any two
+			windows share the same cookies and therefore also the state. The
+			advantage is that you can close your browser and open it again and
+			the application will be in the state where you left off (except for
+			components such as text fields which did not have the immediate
+			attribute enabled). The disadvantage is that there is no good way to
+			distinguish between the windows, so there can usually be only a
+			single application window. Even if there were several, you would have
+			trouble with synchronization of application data between
+			windows. Many conventional page-based web applications simply ignore
+			out-of-sync situations, but such situations are risky for application
+			platforms that are intended to be stable. Therefore it is safer to work with a
+			single browser window. If you wish to have multiple windows in your
+			application, you can create them inside the main window as
+			<code class="classname">Window</code> objects. A URI can be used to fetch
+			resources that have no particular state or to provide an entry point
+			to the application.
+		</p>
+
+	</div>
+
+	
+
+	
+
+	
+
+	
+
+    
+
+	
+
+	
+
+</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="gwt.development.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;<a accesskey="n" href="application.windows.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">9.7.&nbsp;GWT Widget Development&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;10.2.&nbsp;Application-Level Windows</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

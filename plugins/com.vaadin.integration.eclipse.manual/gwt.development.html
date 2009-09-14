@@ -1,0 +1,770 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>9.7.&nbsp;GWT Widget Development</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="gwt.html" title="Chapter&nbsp;9.&nbsp;Developing Custom Components"><link rel="prev" href="gwt.usage.html" title="9.6.&nbsp;Using a Custom Component"><link rel="next" href="advanced.html" title="Chapter&nbsp;10.&nbsp;Advanced Web Application Topics"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>9.7.&nbsp;GWT Widget Development</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">9.7.&nbsp;GWT Widget Development</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="gwt.usage.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;9.&nbsp;Developing Custom Components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="advanced.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="gwt.development"></a>9.7.&nbsp;GWT Widget Development</h2></div></div></div>
+		
+		
+		<p>
+			Development of new GWT widgets includes management of the source code tree,
+			running and debugging the application with the GWT Hosted Mode Browser, and
+			compiling the widgets and the Vaadin Client-Side Engine to JavaScript
+			with the GWT Compiler.
+		</p>
+
+		<p>
+			You can use any IDE for developing GWT components for Vaadin. The
+			examples given in this book are for the Eclipse IDE. It allows easy launching
+			of the GWT Hosted Mode Browser, debugging, and running an external compiler
+			for GWT widget sets.
+		</p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gwt.development.eclipse"></a>9.7.1.&nbsp;Creating a Widget Project in Eclipse</h3></div></div></div>
+			
+
+			<p>
+				Creation of a Vaadin project that uses the default widget set
+				was covered in <a href="getting-started.first-project.html" title="2.4.&nbsp;Your First Project with Vaadin">Section&nbsp;2.4, &ldquo;Your First Project with Vaadin&rdquo;</a>. Developing
+				custom widgets creates a number of additional requirements for a
+				project. Let us review the steps required for creating a project. Details
+				for each step are given in the subsequent sections.
+			</p>
+
+			<div class="orderedlist"><ol type="1"><li>
+					Create a new project in the Eclipse IDE. (<a href="getting-started.first-project.html#getting-started.first-project.creation" title="2.4.1.&nbsp;Creating the Project">Section&nbsp;2.4.1</a>)
+				</li><li>
+					Import GWT directory into the project. (<a href="gwt.development.html#gwt.development.import-gwt" title="9.7.2.&nbsp;Importing GWT Installation Package">Section&nbsp;9.7.2</a> below)
+				</li><li>
+					Write the source code in a Java module. (<a href="gwt.development.html#gwt.development.module-creation" title="9.7.3.&nbsp;Creating a GWT Module">Section&nbsp;9.7.3</a> below)
+				</li><li>
+					<p>Write the <code class="filename">web.xml</code> Deployment Descriptor for the web application.</p>
+					<div class="itemizedlist"><ul type="disc"><li>
+							Define the custom widget set to use instead of the default
+							widget set. (<a href="gwt.usage.html#gwt.usage.deployment" title="9.6.2.&nbsp;Web Application Deployment">Section&nbsp;9.6.2</a> above)
+						</li></ul></div>
+				</li><li>
+					Compile the widget set to JavaScript runtime with GWT Compiler.  (<a href="gwt.development.html#gwt.development.compiler" title="9.7.4.&nbsp;Compiling GWT Widget Sets">Section&nbsp;9.7.4</a> below)
+				</li><li>
+					Configure the project in Apache Tomcat (or some other web container)
+					and start the server. (<a href="getting-started.first-project.html#getting-started.first-project.server" title="2.4.3.&nbsp;Setting Up and Starting the Web Server">Section&nbsp;2.4.3</a> below)
+				</li><li>
+					<p>Either:</p>
+
+					<div class="orderedlist"><ol type="a"><li>
+							Open a web browser to use the web application.
+						</li><li>
+							Debug the widgets with Hosted Mode Browser. (<a href="gwt.development.html#gwt.hosted-mode" title="9.7.6.&nbsp;Hosted Mode Browser">Section&nbsp;9.7.6</a>)
+						</li></ol></div>
+				</li></ol></div>
+
+			<p>
+				The contents of a ready widget development project are described in <a href="gwt.development.html#gwt.development.compiler.result" title="9.7.5.&nbsp;Ready to Run">Section&nbsp;9.7.5, &ldquo;Ready to Run&rdquo;</a>.
+			</p>
+
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gwt.development.import-gwt"></a>9.7.2.&nbsp;Importing GWT Installation Package</h3></div></div></div>
+			
+			
+			<p>
+				You will need to include the Google Web Toolkit in your project to develop
+				custom widgets. The installation directory of Vaadin includes
+				full GWT installation in the <code class="filename">gwt</code> subdirectory. The
+				package includes precompiled libraries and applications for the specific
+				platform of the installation. To use the libraries, you need to configure
+				them in the classpath of your project as described below.
+			</p>
+
+			<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Experimental OOPHM Package</h3>
+				
+
+				<p>
+					The Out of Process Hosted Mode, described in <a href="gwt.development.html#gwt.development.oophm" title="9.7.7.&nbsp;Out of Process Hosted Mode (OOPHM)">Section&nbsp;9.7.7, &ldquo;Out of Process Hosted Mode (OOPHM)&rdquo;</a>, is an experimental alternative for
+					the Hosted Mode Browser, which you will need to debug GWT widgets. It
+					runs the application in a regular browser instead of the built-in
+					browser, so it will later probably become the default
+					solution. <span class="emphasis"><em>The regular Hosted Mode Browser does not work on
+					Linux in Vaadin 6.0.</em></span> For the Linux platform, the OOPHM
+					package is the only option if you wish to debug GWT code.
+				</p>
+
+				<p>
+					The OOPHM version of GWT is included in the experimental
+					platform-independent OOPHM package of Vaadin, available from the
+					download site.
+				</p>
+			</div>
+		
+			<p>
+				You need to copy the <code class="filename">gwt</code> directory to your
+				project. You can either copy it with system tools or, if you are using
+				Eclipse, import the directory. You can import the directory as follows.
+			</p>
+
+			<div class="orderedlist"><ol type="1"><li>
+					Right-click on the project folder in <span class="guilabel">Project
+					Explorer</span> and select
+					<span class="guimenu">Import</span> &rarr; <span class="guimenuitem">Import...</span>.
+				</li><li>
+					From the Import dialog, select
+					<span class="guimenu">General</span> &rarr; <span class="guimenuitem">File
+					System</span> and click
+					<span class="guibutton">Next</span>.
+				</li><li>
+					Click <span class="guibutton">Browse</span> button of the "<span class="guilabel">From
+					directory</span>" field and browse to the <code class="filename">gwt</code>
+					directory under the Vaadin installation directory. Click
+					<span class="guibutton">Ok</span> in the file selection dialog.
+				</li><li>
+					Select the <code class="filename">gwt</code> entry in the list box for importing.
+				</li><li>
+					In the "<span class="guilabel">Into folder</span>" field, enter
+					<code class="filename">myproject/gwt</code>. (If you do not set this, all the
+					contents of the <code class="filename">gwt</code> directory will be imported
+					directly below the root directory of the project which is undesirable.)
+				</li><li>
+					Click <span class="guibutton">Finish</span>.
+				</li></ol></div>
+
+			<p>
+				If you copied the directory outside Eclipse with system tools, remember to
+				select your project folder in Eclipse and press <span><strong class="keycap">F5</strong></span> to
+				refresh the project.
+			</p>
+
+			<p>
+				GWT libraries must be included in the classpath of the
+				project. Right-click on the project folder in the <span class="guilabel">Project
+				Explorer</span> in Eclipse and select
+				<span class="guimenu">Properties</span>. Select
+				<span class="guimenu">Java Build
+				Path</span> &rarr; <span class="guimenuitem">Libraries</span>.
+			</p>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gwt.development.module-creation"></a>9.7.3.&nbsp;Creating a GWT Module</h3></div></div></div>
+			
+
+			<p>
+				This section gives details on writing an application module that includes
+				custom widgets.
+			</p>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N23B80"></a>Creating the Source Folder</h4></div></div></div>
+				
+
+				<p>
+					While the source files can be placed in any directory in ordinary
+					projects, usually in the <code class="filename">src</code> directory directly
+					under the project root, the widget build script described below in
+					<a href="gwt.development.html#gwt.development.compiler" title="9.7.4.&nbsp;Compiling GWT Widget Sets">Section&nbsp;9.7.4, &ldquo;Compiling GWT Widget Sets&rdquo;</a> as well as the GWT
+					Hosted Mode Browser assume that source files are located under the
+					<code class="filename">WebContent/WEB-INF/src</code> folder. The source folder
+					has to be created and designated as a source folder for the project.
+				</p>
+
+				<div class="orderedlist"><ol type="1"><li>
+						Right-click on the <code class="filename">WebContent/WEB-INF</code> folder
+						and select
+						<span class="guimenu">New</span> &rarr; <span class="guimenuitem">Folder</span>.
+					</li><li>
+						In the <span class="guilabel">New Folder</span> dialog, enter
+						<code class="filename">src</code> as the <span class="guilabel">Folder name</span>
+						and click <span class="guibutton">Finish</span>.
+					</li><li>
+						Right-click on the <code class="filename">src</code> folder and select
+						<span class="guimenu">Build Path</span> &rarr; <span class="guimenuitem">Use as
+						Source Folder</span>. 
+					</li></ol></div>
+
+				<p>
+					The folders designated as source folders are moved under the
+					<span class="guilabel">Java Resources</span> folder in the <span class="guilabel">Project
+					Explorer</span> of Eclipse. This is only a display feature; the
+					source directory remains in its original location in the filesystem.
+				</p>
+			</div>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N23BC5"></a>Creating Source Files</h4></div></div></div>
+				
+
+				
+
+				<p>
+					In Eclipse, you can insert a folder inside a source package in
+					<span class="guimenu">File</span> &rarr; <span class="guisubmenu">New</span> &rarr; <span class="guimenuitem">Folder</span>.
+				</p>
+			</div>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="gwt.development.module-creation.import"></a>Importing the ColorPicker Demo</h4></div></div></div>
+				
+				
+				<p>
+					If you want to use the Color Picker application as an application
+					skeleton, you need to import it under the source folder.
+				</p>
+
+				<div class="orderedlist"><ol type="1"><li>
+						Right-click on the source folder and select
+						<span class="guimenuitem">Import</span>.
+					</li><li>
+						In the <span class="guilabel">Import</span> dialog, select
+						<span class="guimenu">General</span> &rarr; <span class="guimenuitem">File
+						System</span> and click
+						<span class="guibutton">Next</span>.
+					</li><li>
+						Browse to
+						<code class="filename">WebContent/WEB-INF/src/com.vaadin/demo/colorpicker/</code>
+						and click <span class="guibutton">Ok</span> button in the <span class="guilabel">Import
+						from directory</span> dialog.
+					</li><li>
+						In the <span class="guilabel">Into folder</span> field, enter
+						<code class="filename">myproject/WebContent/WEB-INF/src/com.vaadin/demo/colorpicker</code>.
+					</li><li>
+						Check the <code class="filename">colorpicker</code> entry in the list box.
+					</li><li>
+						Click <span class="guibutton">Finish</span>.
+					</li></ol></div>
+
+				<p>
+					This will import the directory as
+					<span class="package">com.vaadin.demo.colorpicker</span> package. If you
+					want to use it as a skeleton for your own project, you should refactor
+					it to some other name. Notice that you will need to refactor the
+					package and application name manually in the
+					<code class="filename">web.xml</code> and <code class="filename">.gwt.xml</code>
+					descriptor files.
+				</p>
+			</div>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gwt.development.compiler"></a>9.7.4.&nbsp;Compiling GWT Widget Sets</h3></div></div></div>
+			
+
+			<p>
+				When running an application in a regular web browser, you need to compile
+				the Vaadin Client-Side Engine and your custom widget set to
+				JavaScript. This is done with the GWT Compiler. Vaadin
+				installation package includes an Ant build script
+				<code class="filename">build-widgetset.xml</code> in the
+				<code class="filename">WebContent/doc/example-source/</code> directory. To compile
+				the Color Picker widget set example, just change to the directory and
+				enter:
+			</p>
+
+			<pre class="screen"><code class="prompt">$</code> <span><strong class="command">ant -f build-widgetset.xml</strong></span></pre>
+
+			<p>
+                We advice that you copy the build script to your project and use it as a
+                template. Just set the paths in the "configure" target and the widget set
+                class name in the "compile-widgetset" target to suit your project.
+			</p>
+
+			<p>
+				Alternatively, you can launch the build script from Eclipse, by
+				right-clicking the script in Package Explorer and selecting
+				<span class="guimenu">Run As</span> &rarr; <span class="guimenuitem">Ant
+				Build</span>. Progress of the compilation is shown in
+				the <span class="guilabel">Console</span> window.
+			</p>
+
+			<p>
+				After compilation, <span class="emphasis"><em>refresh the project by selecting it and
+				pressing <span><strong class="keycap">F5</strong></span></em></span>. This makes Eclipse scan new
+				content and become aware of the output of the compilation in the
+				<code class="filename">WebContent/VAADIN/widgetsets/</code> directory. If the
+				project is not refreshed, the JavaScript runtime is not included in the
+				web application and running the application will result in an error
+				message such as the following:
+			</p>
+
+			<pre class="screen">Requested resource [VAADIN/widgetsets/com.vaadin.demo.colorpicker.gwt.ColorPickerWidgetSet/com.vaadin.demo.colorpicker.gwt.ColorPickerWidgetSet.nocache.js] not found from filesystem or through class loader. Add widgetset and/or theme JAR to your classpath or add files to WebContent/VAADIN folder.</pre>
+
+			<p>
+				Compilation with GWT is required also initially when using the Hosted Mode
+				Browser described in <a href="gwt.development.html#gwt.hosted-mode" title="9.7.6.&nbsp;Hosted Mode Browser">Section&nbsp;9.7.6, &ldquo;Hosted Mode Browser&rdquo;</a>. The
+				compilation with the GWT Compiler must be done at least once, as it
+				provides files that are used also by the Hosted Mode Browser, even though
+				the browser runs the GWT application in Java Virtual Machine instead of
+				JavaScript.
+			</p>
+
+			<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3>
+				<p>
+
+					Because GWT supports a slightly reduced version of Java, GWT
+					compilation can produce errors that do not occur with the Java
+					compiler integrated in the Eclipse IDE.
+				</p>
+			</div>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="gwt.development.compiler.compiling"></a>Compiling a Custom Widget Set</h4></div></div></div>
+				
+
+				<p>
+					If you wish to use the build script to compile your own widget sets,
+					open it in an editor. The build script contains some instructions in
+					the beginning of the file. You can use the
+					<em class="parameter"><code>compile-my-widgetset</code></em> target as a template for
+					your own widget sets.
+				</p>
+
+				<pre class="programlisting">&lt;!-- NOTE: Modify this example to compile your own widgetset  --&gt;
+&lt;target name="compile-widgetset" depends="init"&gt;
+  &lt;echo&gt;Compiling ColorPickerWidgetSet.&lt;/echo&gt;
+  &lt;echo&gt;Modify this script to compile your own widgetsets.&lt;/echo&gt;
+  &lt;java classname="com.google.gwt.dev.Compiler"
+        failonerror="yes" fork="yes" maxmemory="256m"&gt;
+
+    &lt;!-- Define the output directory. --&gt;
+    &lt;arg value="-war" /&gt;
+    &lt;arg value="${client-side-destination}" /&gt;
+
+    &lt;!-- Define your GWT widget set class here. --&gt;
+    &lt;arg value="<span class="bold"><strong>com.vaadin.demo.colorpicker.gwt.Col
+                orPickerWidgetSet</strong></span>"/&gt;
+
+    &lt;!-- Reserve more than the default amount of stack space. --&gt;
+    &lt;jvmarg value="-Xss1024k"/&gt;
+
+    &lt;!-- Prevent some X11 warnings on Linux/UNIX. --&gt;
+    &lt;jvmarg value="-Djava.awt.headless=true"/&gt;
+
+    &lt;classpath&gt;
+      &lt;path refid="compile.classpath"/&gt;
+    &lt;/classpath&gt;
+  &lt;/java&gt;
+&lt;/target&gt;</pre>
+
+				<p>
+					Replace the target name with your desired target name and the widget
+					set class name with your own class name.
+				</p>
+
+				<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Google Web Toolkit 1.6 Required</h3>
+					
+					
+					<p>
+						As of version 6.0, Vaadin requires GWT version 1.6 (included in
+						the installation package). The 1.6 version contains a new compiler
+						and the old <code class="classname">GWTCompiler</code> class used
+						previously for compiling GWT widgets is deprecated and replaced
+						with <code class="classname">com.google.gwt.dev.Compiler</code>. You
+						should update your existing widget set build scripts or launch
+						configurations to use the new compiler class. The only significant
+						API change is the output directory parameter, previously
+						<code class="literal">-out</code>, now <code class="literal">-war</code>, as shown in
+						the example above.
+					</p>
+				</div>
+
+				<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Java Stack Overflow Problems</h3>
+					
+
+					<p>
+						The <em class="parameter"><code>-Xss</code></em> parameter for the Java process may
+						be necessary if you experience stack overflow errors with the
+						default stack size. They occur especially with GWT 1.6, which uses
+						large amount of stack space.
+					</p>
+					
+					<p>
+						Notice further that the Windows version of Sun JRE 1.5 has a bug
+						that makes the stack size setting ineffective. The Windows version
+						also has a smaller default stack size than the other platforms. If
+						you experience the problem, we advice that you either use JRE 1.6
+						on the Windows platform or use a wrapper that circumvents the
+						problem. To use the wrapper, use class
+						<code class="classname">com.itmill.toolkit.launcher.WidgetsetCompiler</code>
+						in the build script instead of the regular compiler.
+					</p>
+				</div>
+
+				<p>
+					The <em class="parameter"><code>-Djava.awt.headless=true</code></em> is relevant in
+					Linux/UNIX platforms to avoid some X11 warnings.
+				</p>
+
+				<p>
+					You can now compile the widget set with the following command:
+				</p>
+
+				<pre class="screen"><code class="prompt">$</code> <span><strong class="command">ant -f build-widgetset.xml</strong></span></pre>
+			</div>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gwt.development.compiler.result"></a>9.7.5.&nbsp;Ready to Run</h3></div></div></div>
+			
+
+			<p>
+				<a href="gwt.development.html#figure.gwt.compiler.result.annotated" title="Figure&nbsp;9.5.&nbsp;Annotated Project Contents">Figure&nbsp;9.5, &ldquo;Annotated Project Contents&rdquo;</a> shows the contents of
+				a ready project.
+			</p>
+			
+			<div class="figure"><a name="figure.gwt.compiler.result.annotated"></a><p class="title"><b>Figure&nbsp;9.5.&nbsp;Annotated Project Contents</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/gwt/gwt-hostedmode-project-annotated-lo.png" align="middle" alt="Annotated Project Contents"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				Notice that the Package Explorer does not correspond with the file system
+				contents. Eclipse displays the items marked with asterisk (*) in a logical
+				location, instead of the physical location in the file system.
+			</p>
+
+			<p>
+				You can either run the application in web mode, as introduced in <a href="getting-started.first-project.html#getting-started.first-project.run" title="2.4.4.&nbsp;Running and Debugging">Section&nbsp;2.4.4</a>,
+				or debug it with the GWT Hosted Mode Browser, as detailed in the next
+				section.
+			</p>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gwt.hosted-mode"></a>9.7.6.&nbsp;Hosted Mode Browser</h3></div></div></div>
+			
+
+			<p>
+				The GWT Hosted Mode Browser allows easy debugging of GWT applications. The
+				GWT application is actually not compiled into JavaScript, as is done in
+				the deployment phase, but executed as a Java application. This makes it
+				possible to debug the application with, for example, the Eclipse IDE.
+			</p>
+
+			<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Experimental OOPHM Package</h3>
+				
+
+				<p>
+					The <span class="emphasis"><em>Out of Process Hosted Mode</em></span> (OOPHM), described
+					in <a href="gwt.development.html#gwt.development.oophm" title="9.7.7.&nbsp;Out of Process Hosted Mode (OOPHM)">Section&nbsp;9.7.7, &ldquo;Out of Process Hosted Mode (OOPHM)&rdquo;</a>, is an experimental
+					alternative for the Hosted Mode Browser, which you will need to debug
+					GWT widgets. It runs the application in a regular browser instead of
+					the built-in browser, so it will later probably become the default
+					solution. The OOPHM version of GWT is included in the experimental
+					platform-independent OOPHM package of Vaadin, available from the
+					download site.
+				</p>
+
+				<p>
+					<span class="emphasis"><em>The regular Hosted Mode Browser does not work on Linux in
+					Vaadin 6.0.</em></span> For the Linux platform, the OOPHM package is
+					the only option if you wish to debug GWT code.
+				</p>
+			</div>
+
+			<div class="figure"><a name="figure.gwt.hostedmodebrowser"></a><p class="title"><b>Figure&nbsp;9.6.&nbsp;Hosted Mode Browser</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/custom/gwt-colorpicker-3.png" align="middle" alt="Hosted Mode Browser"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				<a href="gwt.development.html#figure.gwt.hostedmodebrowser" title="Figure&nbsp;9.6.&nbsp;Hosted Mode Browser">Figure&nbsp;9.6, &ldquo;Hosted Mode Browser&rdquo;</a> shows the hosted mode
+				browser in action. On the left, you have the GWT Development Shell window. It
+				displays compilation information and possible errors that occur during
+				compilation. You can open a new browser window by clicking
+				<span class="guibutton">Hosted Browser</span>.
+			</p>
+
+			<p>
+				The browser window has a <span class="guibutton">Compile/Browse</span> button, which
+				runs the GWT Compiler to produce the JavaScript runtime and opens a
+				regular web browser to run the application in Web Mode. Notice that even
+				though it is possible to recompile the program with the button, GWT
+				Compiler must be run before launching the Hosted Mode Browser, as
+				described in <a href="gwt.development.html#gwt.development.compiler" title="9.7.4.&nbsp;Compiling GWT Widget Sets">Section&nbsp;9.7.4, &ldquo;Compiling GWT Widget Sets&rdquo;</a>.
+			</p>
+
+			<p>
+				Because GWT supports a slightly reduced version of Java, GWT compilation
+				can produce errors that do not occur with the Java compiler integrated in
+				the Eclipse IDE. Such errors will show up in the GWT Development Shell
+				window.
+			</p>
+
+			<p>
+				While the Hosted Mode Browser is a fast and easy way to debug
+				applications, it does not allow inspecting the HTML or DOM tree or network
+				traffic like Firebug does in Mozilla Firefox.
+			</p>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N23D3C"></a>Configuring Hosted Mode Launching in Eclipse</h4></div></div></div>
+				
+
+				<p>
+					This section gives details on configuring a launcher for the Hosted
+					Mode Browser in the Eclipse IDE. We use the QuickStart installation of
+					Vaadin covered in <a href="getting-started.quickstart.html" title="2.3.&nbsp;QuickStart with Eclipse">Section&nbsp;2.3, &ldquo;QuickStart with Eclipse&rdquo;</a>
+					as an example project. The project includes source code for the Color
+					Picker demo application.
+				</p>
+
+				<div class="orderedlist"><ol type="1"><li>
+						Select from menu
+						<span class="guimenu">Run</span> &rarr; <span class="guimenuitem">Debug...</span>
+						and the <span class="guilabel">Debug</span> configuration window will
+						open. Notice that it is not purposeful to run the Hosted Mode
+						Browser in the "<span class="guilabel">Run</span>" mode, because its entire
+						purpose is to allow debugging.
+					</li><li>
+						<p>
+							Select the <span class="guimenu">Java
+							Application</span> folder and click on the
+							<span class="guibutton">New</span> button to create a new launch
+							configuration.
+						</p>
+
+						<div class="figure"><a name="N23D64"></a><p class="title"><b>Figure&nbsp;9.7.&nbsp;Creating New Launch Configuration</b></p><div class="figure-contents">
+							
+							<div class="mediaobject" align="center"><img src="img/gwt/gwt-hostedmode-launch-1.png" align="middle" alt="Creating New Launch Configuration"></div>
+						</div></div><br class="figure-break">
+					</li><li>
+						Click on the created launch configuration to open it on the
+						right-side panel. In the <span class="guilabel">Main</span> tab, give the
+						launch configuration a name. Define the <span class="guilabel">Main
+						class</span> as
+						<code class="classname">com.google.gwt.dev.GWTShell</code>.
+
+						<div class="figure"><a name="N23D8A"></a><p class="title"><b>Figure&nbsp;9.8.&nbsp;Naming Launch Configuration</b></p><div class="figure-contents">
+							
+							<div class="mediaobject" align="center"><img src="img/gwt/gwt-hostedmode-launch-2.png" align="middle" alt="Naming Launch Configuration"></div>
+						</div></div><br class="figure-break">
+					</li><li>
+						<p>
+							Switch to the <span class="guilabel">Arguments</span> tab and enter
+							arguments for the Hosted Mode Browsed Java application. 
+						</p>
+
+						<div class="orderedlist"><ol type="a"><li>
+								<p>In the <span class="guilabel">Program arguments</span> field,
+								enter:</p>
+
+								<pre class="screen">-noserver -whitelist "127.0.0.1  ^http[:][/][/]127[.]0[.]0[.]1[:]<em class="parameter"><code>8080</code></em>"
+-out WebContent/VAADIN/widgetsets http://127.0.0.1:<em class="parameter"><code>8080</code></em>/<em class="parameter"><code>myproject</code></em></pre>
+
+								<p>
+									The browser application, <code class="classname">GWTShell</code>,
+									takes as its arguments the following parameters:
+								</p>
+								
+								<div class="variablelist"><dl><dt><span class="term">-noserver</span></dt><dd>
+											<p>Prevents an embedded web server from starting, thereby
+												allowing to use an already running server.</p>
+										</dd><dt><span class="term">-whitelist</span></dt><dd>
+											<p>Adds a regular expression to the list of allowed
+												URL patterns for the web browser. Modify the port
+												number from the 8080 given above as necessary.</p>
+										</dd><dt><span class="term">-out</span></dt><dd>
+											<p>Output directory for compiling widgets with GWT
+												Compiler. The directory must be
+												<em class="parameter"><code>WebContent/VAADIN/widgetsets</code></em>.
+												You can compile the widgets either from the Hosted
+												Mode Browser or externally as explained later in this
+												chapter.</p>
+										</dd><dt><span class="term">URL</span></dt><dd>
+											<p>The URL to connect to. This must be the
+											same as the whitelist entry given above. The
+											port number must correspond to the port of the
+											running web server. The Jetty web server
+											included in Vaadin will run in port
+											8888 by default. In contrast, Apache Tomcat
+											installed under Eclipse will run in port 8080
+											by default.</p>
+										</dd></dl></div>
+							</li><li>
+								<p>
+									In the <span class="guilabel">VM arguments</span> field enter, for
+									example, <em class="parameter"><code>-Xms256M -Xmx512M</code></em> to give the
+									hosted mode browser more memory than the default amount. On
+									Mac, add also <em class="parameter"><code>-XstartOnFirstThread</code></em>.
+								</p>
+							</li></ol></div>
+
+						<div class="figure"><a name="N23E0F"></a><p class="title"><b>Figure&nbsp;9.9.&nbsp;GWTShell Arguments</b></p><div class="figure-contents">
+							
+							<div class="mediaobject" align="center"><img src="img/gwt/gwt-hostedmode-launch-3.png" align="middle" alt="GWTShell Arguments"></div>
+						</div></div><br class="figure-break">
+					</li><li>
+						In the <span class="guilabel">Classpath</span> tab, you will by default
+						have <em class="parameter"><code>vaadin-examples</code></em>, which
+						contains the default classpath entries for the project. If the
+						classpath entries for the project are sufficient, this should be enough.
+					</li><li>
+						Click <span class="guibutton">Apply</span> to save the launch configuration.
+					</li><li>
+						Click <span class="guibutton">Debug</span> to launch the Hosted Mode
+						Browser using the launch configuration.
+					</li></ol></div>
+				
+				<p>
+					 See the following section for details on debugging with the Hosted
+					 Mode Browser.
+				</p>
+			</div>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N23E44"></a>Debugging with Hosted Mode Browser</h4></div></div></div>
+				
+
+				<p>
+					The purpose of the hosted mode browser is to allow debugging
+					client-side GWT applications, or in our case, GWT widgets.
+					Below is a checklist for important requirements for launching the
+					Hosted Mode Browser:
+				</p>
+				
+				<div class="itemizedlist"><ul type="square"><li style="list-style-type: square">
+						GWT is installed under the project folder.
+					</li><li style="list-style-type: square">
+						GWT libraries are included in the project classpath.
+					</li><li style="list-style-type: square">
+						Widget sets have been compiled with GWT Compiler.
+					</li><li style="list-style-type: square">
+						<code class="filename">web.xml</code> descriptor is configured.
+					</li><li style="list-style-type: square">
+						Web server is running and listening to the correct port.
+					</li><li style="list-style-type: square">
+						Hosted Mode Browser launcher is configured.
+					</li></ul></div>
+
+				<p>
+					Once everything is ready to start debugging, just open a source file,
+					for example, the
+					<code class="classname">com.vaadin.demo.colorpicker.gwt.client.ui.GwtColorPicker</code>
+					class. Find the <code class="methodname">onClick()</code> method. At the line
+					containing the <code class="methodname">setColor()</code> call, right-click
+					on the leftmost bar in the editor and select
+					<span class="guimenuitem">Toggle Breakpoint</span>
+					from the popup menu. A small magnifying glass will appear in the bar
+					to indicate the breakpoint.
+				</p>
+
+				<div class="figure"><a name="N23E75"></a><p class="title"><b>Figure&nbsp;9.10.&nbsp;Setting a Breakpoint</b></p><div class="figure-contents">
+					
+					<div class="mediaobject" align="center"><img src="img/gwt/gwt-hostedmode-debug-2.png" align="middle" alt="Setting a Breakpoint"></div>
+				</div></div><br class="figure-break">
+
+				<p>
+					Select from menu
+					<span class="guimenu">Run</span> &rarr; <span class="guimenuitem">Debug...</span>
+					and the <span class="guilabel">Debug</span> configuration window will
+					open. Notice that it is not purposeful to run the Hosted Mode Browser
+					in the "<span class="guilabel">Run</span>" mode, because its entire purpose is
+					to allow debugging.
+				</p>
+
+				<div class="figure"><a name="N23E9E"></a><p class="title"><b>Figure&nbsp;9.11.&nbsp;Debugging with Hosted Mode Browser</b></p><div class="figure-contents">
+					
+					<div class="mediaobject" align="center"><img src="img/gwt/gwt-hostedmode-debug-1.png" align="middle" alt="Debugging with Hosted Mode Browser"></div>
+				</div></div><br class="figure-break">
+
+				<p>
+					<span class="strong"><strong>Starting demo applications under the Hosted
+					Mode Browser can take considerable time!</strong></span> This is especially
+					true for the Reservation and Color Picker applications, which require
+					compilation of custom widget sets. During this time, the Hosted Mode
+					Browser is unresponsive and does not update its window. Compiling widgets
+					can take 5-30 seconds, depending on the hardware.
+				</p>
+
+				<p>
+					Please refer to Eclipse IDE documentation for further instructions on
+					using the debugger.
+				</p>
+
+			</div>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gwt.development.oophm"></a>9.7.7.&nbsp;Out of Process Hosted Mode (OOPHM)</h3></div></div></div>
+			
+
+			<p>
+				The Out of Process Hosted Mode of GWT is an experimental new way for
+				debugging GWT applications in a regular web browser. This allows using
+				other browser debugging tools, such as Firebug, while debugging in hosted
+				mode.
+			</p>
+
+			<p>
+				<span class="emphasis"><em>The Linux Hosted Mode Browser is not compatible with Vaadin 6.0,
+				so OOPHM is the only way to debug client-side code in Linux.</em></span>
+			</p>
+
+
+			<p>
+				The OOPHM installation package of Vaadin is a
+				platform-independent package available separately from the platform
+				specific packages. Use of OOPHM requires (see more detailed notes further
+				below):
+			</p>
+
+			<div class="orderedlist"><ol type="1"><li>Installation of OOPHM plugin from <code class="filename">gwt/plugins</code>
+				into your browser</li><li>Compiling custom widget sets using the GWT Compiler provided in
+				<code class="filename">gwt-dev-oophm.jar</code> instead of the platform-dependent
+				library.</li><li>Launching Hosted Mode debugging with the
+				<code class="filename">gwt-dev-oophm.jar</code> in class path instead of the platform-dependent
+				library.</li></ol></div>
+
+			<p>
+				If you try debugging the demo applications in the Vaadin
+				installation package, just install the plugin (Step 1), launch the server
+				in Web Mode, and then launch the Hosted Mode in debug mode (Step 3) with
+				the included launch configuration.
+			</p>
+			
+			<p>
+				The OOPHM plugin is available for Mozilla Firefox, Internet Explorer, and
+				WebKit based browsers.
+			</p>
+			 
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N23EF1"></a>Installing the OOPHM plugin in Firefox and WebKit</h4></div></div></div>
+				
+				<p>The plugin for Firefox and WebKit is installed by 
+				opening the plugin file for your browser in the
+				<code class="filename">gwt/plugins</code> directory. The Firefox plugin directory
+				contains two plugins; you should normally use the
+				<code class="filename">oophm-xpcom.xpi</code> plugin. 
+				</p>
+				</div>
+			
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N23F00"></a>Installing the OOPHM plugin in Internet Explorer</h4></div></div></div>
+				
+				<p>
+				The Internet Explorer plugin 
+				is installed by running the command <span><strong class="command">regsvr32 oophm.dll</strong></span>
+				in the <code class="filename">gwt/plugins/ie</code> directory. Remember to restart
+				Internet Explorer afterwards.
+				</p>
+				</div>
+				
+			<p>
+				The installation package contains the built-in default widget set compiled
+				with the OOPHM, but if you have your own widget sets (which is usually the
+				reason why you want to use client-side debugging in the first place), you
+				need to compile them. If you have compiled them previously with a regular
+				installation of Vaadin, you need to recompile them with the GWT
+				Compiler provided in the <code class="filename">gwt-dev-oophm.jar</code>
+				library. Compiling GWT widget sets is covered in <a href="gwt.development.html#gwt.development.compiler" title="9.7.4.&nbsp;Compiling GWT Widget Sets">Section&nbsp;9.7.4, &ldquo;Compiling GWT Widget Sets&rdquo;</a>. The compilation of OOPHM widget sets
+				uses a large amount of stack memory, so if the JVM default is too small,
+				you should set it explicitly in <code class="filename">compile-widgetset.xml</code>
+				with the following parameter for the Java process (currently included in
+				the example build script):
+
+				<pre class="programlisting">    &lt;jvmarg value="-Xss1024k"/&gt;</pre>
+			</p>
+
+			<p>
+				Launching the debugging is done just as described in <a href="gwt.development.html#gwt.hosted-mode" title="9.7.6.&nbsp;Hosted Mode Browser">Section&nbsp;9.7.6, &ldquo;Hosted Mode Browser&rdquo;</a> for the regular Hosted Mode Browser,
+				except that you must include the <code class="filename">gwt-dev-oophm.jar</code>
+				library in the class path instead of the platform specific
+				library. Launching the application with the debug configuration will
+				contact the plugin in your browser and automatically opens the configured
+				page.
+			</p>
+
+			<p>
+				To enable the usage of hosted mode in the browser you need to add a 
+				<em class="parameter"><code>gwt.hosted=ip:port</code></em> parameter
+				to the URL of the application you want to debug, e.g. 
+				<code class="uri">http://localhost:8080/myapp/?gwt.hosted=127.0.0.1:9997</code>. 
+				As OOPHM support is experimental
+				you might get messages such as "No GWT plugin found" but debugging should
+				still work. In Internet Explorer you might get a warning: 
+				"The website wants to run the following add-on: 'Google Web Toolkit Out-of-Process Hosted Mode...'"
+				when using OOPHM hosted mode. You need to allow execution of the ActiveX code to
+				be able to use it.
+			</p>
+		</div>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="gwt.usage.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="gwt.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="advanced.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">9.6.&nbsp;Using a Custom Component&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Chapter&nbsp;10.&nbsp;Advanced Web Application Topics</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

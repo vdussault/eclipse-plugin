@@ -1,0 +1,93 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>6.2.&nbsp;Background for Layout</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="layout.html" title="Chapter&nbsp;6.&nbsp;Managing Layout"><link rel="prev" href="layout.html" title="Chapter&nbsp;6.&nbsp;Managing Layout"><link rel="next" href="layout.components.orderedlayout.html" title="6.3.&nbsp;VerticalLayout and HorizontalLayout"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>6.2.&nbsp;Background for Layout</h1></div><div id="itmilllogo"></div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">6.2.&nbsp;Background for Layout</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="layout.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;6.&nbsp;Managing Layout</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="layout.components.orderedlayout.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="layout.background"></a>6.2.&nbsp;Background for Layout</h2></div></div></div>
+		
+		
+		<p>
+			Ever since the ancient xeroxians invented graphical user interfaces,
+			programmers have wanted to make GUI programming ever easier for
+			themselves. Solutions started simple. When GUIs appeared on PC
+			desktops, practically all screens were of the VGA type and fixed into
+			640x480 size. Mac or X Window System on UNIX were not much
+			different. Everyone was so happy with such awesome graphics
+			resolutions that they never thought that an application would have to
+			work on a radically different screen size. At worst, screens could
+			only grow, they thought, giving more space for more windows. In the
+			80s, the idea of having a computer screen in your pocket was simply
+			not realistic. Hence, the GUI APIs allowed placing UI components
+			using screen coordinates. Visual Basic and some other systems
+			provided an easy way for the designer to drag and drop components on
+			a fixed-sized window. One would have thought that at least
+			translators would have complained about the awkwardness of such a solution,
+			but apparently they were not, as non-engineers, heard or at least
+			cared about. At best, engineers could throw at them a resource editor
+			that would allow them to resize the UI components by hand. Such was
+			the spirit back then.
+		</p>
+			
+		<p>
+			After the web was born, layout design was doomed to change for ever.
+			At first, layout didn't matter much, as everyone was happy with plain
+			headings, paragraphs, and a few hyperlinks here and there.  Designers
+			of HTML wanted the pages to run on any screen size. The screen size
+			was actually not pixels but rows and columns of characters, as the
+			baby web was really just hyper<span class="emphasis"><em>text</em></span>, not
+			graphics. That was soon to be changed. The first GUI-based browser,
+			NCSA Mosaic, launched a revolution that culminated in Netscape
+			Navigator. Suddenly, people who had previously been doing
+			advertisement brochures started writing HTML. This meant that layout
+			design had to be easy not just for programmers, but also allow the
+			graphics designer to do his or her job without having to know a thing
+			about programming. The W3C committee designing web standards came up
+			with the CSS (Cascading Style Sheet) specification, which allowed trivial separation of
+			appearance from content. Later versions of HTML followed, XHTML
+			appeared, as did countless other standards.
+		</p>
+			
+		<p>
+			Page description and markup languages are a wonderful solution for static
+			presentations, such as books and most web pages. Real applications, however,
+			need to have more control. They need to be able to change the state of user
+			interface components and even their layout on the run. This creates a need to
+			separate the presentation from content on exactly the right level. 
+
+			
+		</p>
+			
+		<p>
+			Thanks to the attack of graphics designers, desktop applications were, when it
+			comes to appearance, far behind web design. Sun Microsystems had come in 1995
+			with a new programming language, Java, for writing cross-platform desktop
+			applications. Java's original graphical user interface toolkit, AWT (Abstract
+			Windowing Toolkit), was designed to work on multiple operating systems as well
+			as embedded in web browsers. One of the special aspects of AWT was the layout
+			manager, which allowed user interface components to be flexible, growing and
+			shrinking as needed. This made it possible for the user to resize the
+			windows of an application flexibly and also served the needs of localization,
+			as text strings were not limited to some fixed size in pixels. It became even
+			possible to resize the pixel size of fonts, and the rest of the layout
+			adapted to the new size.
+		</p>
+
+		<p>
+			Layout management of Vaadin is a direct successor of the web-based
+			concept for separation of content and appearance and of the Java AWT solution
+			for binding the layout and user interface components into objects in
+			programs. Vaadin layout components allow you to position your UI
+			components on the screen in a hierarchical fashion, much like in conventional
+			Java UI toolkits such as AWT, Swing, or SWT. In addition, you can approach the
+			layout from the direction of the web with the
+			<code class="classname">CustomLayout</code> component, which you can use to write your
+			layout as a template in XHTML that provides locations of any contained
+			components.
+		</p>
+
+		<p>
+			The moral of the story is that, because Vaadin is intended
+			for web applications, appearance is of high importance. The solutions
+			have to be the best of both worlds and satisfy artists of both
+			kind: code and graphics. On the API side, the layout is controlled by UI
+			components, particularly the layout components. On the visual side, it is controlled by themes. Themes
+			can contain any HTML, CSS, and JavaScript that you or your web
+			artists create to make people feel good about your software.
+		</p>
+			
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="layout.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="layout.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="layout.components.orderedlayout.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Chapter&nbsp;6.&nbsp;Managing Layout&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;6.3.&nbsp;<code class="classname">VerticalLayout</code> and <code class="classname">HorizontalLayout</code></td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

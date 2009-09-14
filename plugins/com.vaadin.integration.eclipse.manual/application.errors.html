@@ -1,0 +1,316 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>4.7.&nbsp;Handling Errors</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="application.html" title="Chapter&nbsp;4.&nbsp;Writing a Web Application"><link rel="prev" href="application.close.html" title="4.6.&nbsp;Shutting Down an Application"><link rel="next" href="application.environment.html" title="4.8.&nbsp;Setting Up the Application Environment"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>4.7.&nbsp;Handling Errors</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">4.7.&nbsp;Handling Errors</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="application.close.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;4.&nbsp;Writing a Web Application</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="application.environment.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="application.errors"></a>4.7.&nbsp;Handling Errors</h2></div></div></div>
+		
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="application.errors.error-indicator"></a>4.7.1.&nbsp;Error Indicator and message</h3></div></div></div>
+			
+
+			<p>
+				All components have a built-in error indicator that can be set explicitly
+				with <code class="methodname">setComponentError()</code> or can be turned on
+				implicitly if validating the component fails. As with component caption,
+				the placement of the indicator is managed by the layout in which the
+				component is contained. Usually, the error indicator is placed right of
+				the caption text. Hovering the mouse pointer over the field displays the
+				error message.
+			</p>
+
+			<p>
+				The following example shows how you can set the component error
+				explicitly. The example essentially validates field value without using an
+				actual validator.
+			</p>
+
+			<pre class="programlisting">// Create a field.
+final TextField textfield = new TextField("Enter code");
+main.addComponent(textfield);
+
+// Let the component error be initially clear.
+textfield.setComponentError(null); // (actually the default)
+
+// Have a button right of the field (and align it properly).
+final Button button = new Button("Ok!");
+main.addComponent(button);
+((VerticalLayout)main.getLayout())
+        .setComponentAlignment(button, Alignment.BOTTOM_LEFT);
+
+// Handle button clicks
+button.addListener(new Button.ClickListener() {
+    public void buttonClick(ClickEvent event) {
+        // If the field value is bad, set its error.
+        // (Allow only alphanumeric characters.)
+        if (! ((String) textfield.getValue()).matches("^\\w*$")) {
+            // Put the component in error state and
+            // set the error message.
+            textfield.setComponentError(
+                new UserError("Must be letters and numbers"));
+        } else {
+            // Otherwise clear it.
+            textfield.setComponentError(null);
+        }
+    }
+});</pre>
+
+			<div class="figure"><a name="figure.error-indicator.example1"></a><p class="title"><b>Figure&nbsp;4.6.&nbsp;Error indicator active</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/application/errorindicator-example2.png" align="middle" alt="Error indicator active"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				The <code class="classname">Form</code> component handles and displays also the
+				errors of its contained fields so that it displays both the error
+				indicator and the message in a special error indicator area. See <a href="components.form.html" title="5.16.&nbsp;Form">Section&nbsp;5.16, &ldquo;<code class="classname">Form</code>&rdquo;</a> and <a href="components.form.html#components.form.validation" title="5.16.3.&nbsp;Validating Form Input">Section&nbsp;5.16.3, &ldquo;Validating Form Input&rdquo;</a> for details on the
+				<code class="classname">Form</code> component and validation of form input.
+			</p>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="application.errors.notifications"></a>4.7.2.&nbsp;Notifications</h3></div></div></div>
+			
+
+			<p>
+				Notifications are error or information boxes that appear typically at the
+				center of the screen. A notification box has a caption and optional
+				description and icon. The box stays on the screen either for a defined
+				time or until the user clicks it. The notification type defines the
+				default appearance and behaviour of a notification.
+			</p>
+
+			<p>
+				Notifications are always associated with a window object, which can be a
+				child window (the positioning is always relative to the entire browser
+				view). The <code class="classname">Window</code> class provides a
+				<code class="methodname">showNotification()</code> method for displaying
+				notifications. The method takes the caption and an optional description
+				and notification type as parameters. The method also accepts a
+				notification object of type <code class="classname">Window.Notification</code>, as
+				described further below.
+			</p>
+
+			<pre class="programlisting">mainwindow.showNotification("This is the caption",
+                            "This is the description");</pre>
+
+			<div class="figure"><a name="figure.notification.example1"></a><p class="title"><b>Figure&nbsp;4.7.&nbsp;Notification</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/application/notification-example2.png" align="middle" alt="Notification"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				The caption and description are, by default, written on the same line. If
+				you want to have a line break between them, use the XHTML line break markup
+				"<code class="literal">&lt;br/&gt;</code>". You can use any XHTML markup in the
+				caption and description of a notification.
+			</p>
+
+			<pre class="programlisting">main.showNotification("This is a warning",
+            "&lt;br/&gt;This is the &lt;i&gt;last&lt;/i&gt; warning",
+            Window.Notification.TYPE_WARNING_MESSAGE);</pre>
+
+			<div class="figure"><a name="figure.notification.example2"></a><p class="title"><b>Figure&nbsp;4.8.&nbsp;Notification with Formatting</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/application/notification-example3.png" align="middle" alt="Notification with Formatting"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				The notification type defines the overall default style and behaviour of a
+				notification. If no notification type is given, the "humanized" type is
+				used as the default. The notification types, listed below, are defined in
+				the <code class="classname">Window.Notification</code> class.
+			</p>
+
+            <div class="variablelist"><dl><dt><span class="term">
+                        <em class="parameter"><code>TYPE_HUMANIZED_MESSAGE</code></em>
+                        <span class="inlinemediaobject"><img src="img/application/notification-humanized.png" align="middle"></span>
+                    </span></dt><dd>
+                        <p>
+                            A user-friendly message that does not annoy too much: it does
+                            not require confirmation by clicking and disappears
+                            quickly. It is centered and has a neutral gray color.
+                        </p>
+                    </dd><dt><span class="term">
+                        <em class="parameter"><code>TYPE_WARNING_MESSAGE</code></em>
+                        <span class="inlinemediaobject"><img src="img/application/notification-warning.png" align="middle"></span>
+                    </span></dt><dd>
+                        <p>
+                            Warnings are messages of medium importance. They are displayed
+                            with colors that are neither neutral nor too distractive. A
+                            warning is displayed for 1.5 seconds, but the user can click
+                            the message box to dismiss it. The user can continue to
+                            interact with the application while the warning is displayed.
+                        </p>
+                    </dd><dt><span class="term">
+                        <em class="parameter"><code>TYPE_ERROR_MESSAGE</code></em>
+                        <span class="inlinemediaobject"><img src="img/application/notification-error.png" align="middle"></span>
+                    </span></dt><dd>
+                        <p>
+                            Error messages are notifications that require the highest user
+                            attention, with alert colors and by requiring the user to
+                            click the message to dismiss it. The error message box does
+                            not itself include an instruction to click the message,
+                            although the close box in the upper right corner indicates it
+                            visually. Unlike with other notifications, the user can not
+                            interact with the application while the error message is
+                            displayed.
+                        </p>
+                    </dd><dt><span class="term">
+                        <em class="parameter"><code>TYPE_TRAY_NOTIFICATION</code></em>
+                        <span class="inlinemediaobject"><img src="img/application/notification-tray.png" align="middle"></span>
+                    </span></dt><dd>
+                        <p>
+                            Tray notifications are displayed in the "system tray" area,
+                            that is, in the lower-right corner of the browser view. As
+                            they do not usually obsure any user interface, they are
+                            displayed longer than humanized or warning messages, 3 seconds
+                            by default. The user can continue to interact with the
+                            application normally while the tray notification is displayed.
+                        </p>
+                    </dd></dl></div>
+
+			<p>
+				All of the features of specific notification types can be controlled with
+				the attributes of <code class="classname">Window.Notification</code>. You can pass
+				an explicitly created notification object to the
+				<code class="methodname">showNotification()</code> method.
+			</p>
+
+			<pre class="programlisting">// Create a notification with default settings for a warning.
+Window.Notification notif = new Window.Notification(
+        "Be warned!",
+        "This message lurks in the top-left corner!",
+        Window.Notification.TYPE_WARNING_MESSAGE);
+
+// Set the position.
+notif.setPosition(Window.Notification.POSITION_TOP_LEFT);
+
+// Let it stay there until the user clicks it
+notif.setDelayMsec(-1);
+
+// Show it in the main window.
+main.showNotification(notif);</pre>
+
+			<p>
+				The <code class="methodname">setPosition()</code> method allows setting the
+				positioning of the notification. The method takes as its parameter any of
+				the constants:
+			</p>
+
+			<div class="informaltable">
+				<table border="0"><colgroup><col><col></colgroup><tbody><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>Window.Notification.POSITION_CENTERED</code></em></td><td class="auto-generated">&nbsp;</td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>Window.Notification.POSITION_CENTERED_TOP</code></em></td><td class="auto-generated">&nbsp;</td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>Window.Notification.POSITION_CENTERED_BOTTOM</code></em></td><td class="auto-generated">&nbsp;</td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>Window.Notification.POSITION_TOP_LEFT</code></em></td><td class="auto-generated">&nbsp;</td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>Window.Notification.POSITION_TOP_RIGHT</code></em></td><td class="auto-generated">&nbsp;</td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>Window.Notification.POSITION_BOTTOM_LEFT</code></em></td><td class="auto-generated">&nbsp;</td></tr><tr valign="top"><td align="left" valign="top"><em class="parameter"><code>Window.Notification.POSITION_BOTTOM_RIGHT</code></em></td><td class="auto-generated">&nbsp;</td></tr></tbody></table>
+			</div>
+
+			<p>
+				The <code class="methodname">setDelayMSec()</code> allows you to set the time in
+				milliseconds for how long the notification is displayed. Parameter value
+				<code class="literal">-1</code> means that the message is displayed until the user
+				clicks the message box. It also prevents interaction with other parts of
+				the application window, as is default behaviour for error messages. It
+				does not, however, add a close box that the error notification has.
+			</p>
+			
+		</div>
+		
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="application.errors.unchecked-exceptions"></a>4.7.3.&nbsp;Handling Uncaught Exceptions </h3></div></div></div>
+			
+
+			<p>
+				Application development with Vaadin follows the event-driven programming
+				model. Mouse and keyboard events in the client cause (usually
+				higher-level) events on the server-side, which can be handled with
+				listeners, and that is how most of the application logic works. Handling
+				the events can result in exceptions either in the application logic or in
+				the framework itself, but some of them may not be caught properly.
+            </p>
+
+            <p>
+                For example, in the following code excerpt, we throw an error in an event
+                listener but do not catch it, so it falls to the framework.
+            </p>
+
+            <pre class="programlisting">final Button button = new Button ("Fail Me");
+
+button.addListener(new Button.ClickListener() {
+    public void buttonClick(ClickEvent event) {
+        // Throw some exception.
+        throw new RuntimeException("You can't catch this.");
+    }
+});</pre>
+
+			<p>
+                Any such exceptions that occur in the call chain, but are not caught at
+                any other level, are eventually caught by the terminal adapter in
+                <code class="classname">ApplicationServlet</code>, the lowest-level component that
+                receives client requests. The terminal adapter passes all such caught
+                exceptions as events to the error listener of the
+                <code class="classname">Application</code> instance through the
+                <code class="classname">Terminal.ErrorListener</code> interface. The
+                <code class="classname">Application</code> class does not, by default, throw such
+                exceptions forward.
+			</p>
+
+            <p>
+                The reason for this error-handling logic lies in the logic that handles
+                component state synchronization between the client and the server. We want
+                to handle <span class="emphasis"><em>all</em></span> the serialized variable changes in the
+                client request, because otherwise the client-side and server-side
+                component states would become unsynchronized very easily, which could put
+                the entire application in an invalid state.
+            </p>
+			
+			<p>
+				The default implementation of the
+				<code class="classname">Terminal.ErrorListener</code> interface in the
+				<code class="classname">Application</code> class simply prints the error to
+				console. It also tries to find out a component related to the error. If
+				the exception occurred in a listener attached to a component, that
+				component is considered as the component related to the exception. If a
+				related component is found, the error handler sets the <span class="emphasis"><em>component
+				error</em></span> for it, the same attribute which you can set with
+				<code class="methodname">setComponentError()</code>.
+			</p>
+
+            <p>
+                In UI, the component error is shown with a small red "!" -sign (in the
+                default theme). If you hover the mouse pointer over it, you will see the
+                entire backtrace of the exception in a large tooltip box, as illustrated
+                in <a href="application.errors.html#figure.application.errors.unchecked-exceptions" title="Figure&nbsp;4.9.&nbsp;Uncaught Exception in Component Error Indicator">Figure&nbsp;4.9, &ldquo;Uncaught Exception in Component Error Indicator&rdquo;</a> for
+                the above code example.
+            </p>
+
+			<div class="figure"><a name="figure.application.errors.unchecked-exceptions"></a><p class="title"><b>Figure&nbsp;4.9.&nbsp;Uncaught Exception in Component Error Indicator</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/application/errorindicator-exception.png" align="middle" alt="Uncaught Exception in Component Error Indicator"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				You can change the logic of handling the terminal errors easily by
+				overriding the <code class="methodname">terminalError()</code> method in your
+				application class (the one that inherits
+				<code class="classname">Application</code>) or by setting a custom error listener
+				with the <code class="methodname">setErrorHandler</code> method. You can safely
+				discard the default handling or extend its usage with your custom error
+				handling or logging system. In the example code below, the exceptions are
+				also reported as notifications in the main window.
+			</p>
+			
+			<pre class="programlisting">@Override
+public void terminalError(Terminal.ErrorEvent event) {
+    // Call the default implementation.
+    super.terminalError(event);
+
+    // Some custom behaviour.
+    if (getMainWindow() != null) {
+        getMainWindow().showNotification(
+                "An unchecked exception occured!",
+                event.getThrowable().toString(),
+                Notification.TYPE_ERROR_MESSAGE);
+    }
+}</pre>
+			
+
+			<p>
+				Handling other exceptions works in the usual way for Java
+				Servlets. Uncaught exceptions are finally caught and handled by the
+				application server.
+			</p>
+
+		</div>
+
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="application.close.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="application.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="application.environment.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">4.6.&nbsp;Shutting Down an Application&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;4.8.&nbsp;Setting Up the Application Environment</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

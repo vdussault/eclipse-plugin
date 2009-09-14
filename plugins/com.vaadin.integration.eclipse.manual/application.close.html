@@ -1,0 +1,91 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>4.6.&nbsp;Shutting Down an Application</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="application.html" title="Chapter&nbsp;4.&nbsp;Writing a Web Application"><link rel="prev" href="application.resources.html" title="4.5.&nbsp;Referencing Resources"><link rel="next" href="application.errors.html" title="4.7.&nbsp;Handling Errors"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>4.6.&nbsp;Shutting Down an Application</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">4.6.&nbsp;Shutting Down an Application</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="application.resources.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;4.&nbsp;Writing a Web Application</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="application.errors.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="application.close"></a>4.6.&nbsp;Shutting Down an Application</h2></div></div></div>
+		
+
+		<p>
+			A user can log out or close the web page or browser, so a session and the
+			associated application instance can end. Ending an application can be
+			initiated by the application logic. Otherwise, it will be ended automatically
+			when the Servlet session times out.
+		</p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N21187"></a>4.6.1.&nbsp;Closing an Application</h3></div></div></div>
+			
+
+			<p>
+				If the user quits the application through the user interface, an event handler
+				should call the <code class="methodname">close()</code> method in the
+				<code class="classname">Application</code> class to shutdown the session.
+			</p>
+
+			<p>
+				In the following example, we have a <span class="guibutton">Logout</span> button,
+				which ends the user session.
+			</p>
+
+			<pre class="programlisting">Button closeButton = new Button("Logout");
+
+closeButton.addListener(new Button.ClickListener() {
+    @Override
+    public void buttonClick(ClickEvent event) {
+        getMainWindow().getApplication().close();
+    } 
+});
+
+main.addComponent(closeButton);</pre>
+
+			<p>
+				You will soon notice that closing the application simply reloads the
+				application with a new <code class="classname">Application</code> instance. You
+				can set the window to redirect to a different URL (that does not reload
+				the application) with <code class="methodname">setLogoutURL</code>. In your
+				application class, write:
+			</p>
+
+			<pre class="programlisting">setLogoutURL("/logout.html");</pre>
+
+			
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N211AD"></a>4.6.2.&nbsp;Handling the Closing of a Window</h3></div></div></div>
+			
+
+			<p>
+				Closing the main window (or all application-level windows) does not close
+				session and the application instance will be left hanging. You need to
+				program such behaviour by handling the close events of the windows.
+			</p>
+
+			<p>
+				If the user closes a browser window, such as the main window or any other
+				application-level window, the window will send a final AJAX request to the
+				server, which will fire a <code class="classname">Window.CloseEvent</code> for the
+				closed window. You can handle the event with a
+				<code class="classname">Window.CloseListener</code>. In case the user closes the
+				browser, the event is fired for every open window.
+			</p>
+
+			<pre class="programlisting">// Close the application if the main window is closed.
+main.addListener(new Window.CloseListener(){
+   @Override
+    public void windowClose(CloseEvent e) {
+       System.out.println("Closing the application");
+       getMainWindow().getApplication().close();
+    } 
+});</pre>
+
+			<p>
+				Notice that <span class="emphasis"><em>refreshing a window means closing and reopening
+				it</em></span>. Therefore, if you have a close handler as above, the user
+				loses the possibility to refresh the browser window.
+			</p>
+
+			<p>
+				In the likely case that the browser crashes, no close event is communicated to
+				the server. As the server has no way of knowing about the problem, and the
+				session will be left hanging until the session timeout expires. During this
+				time, the user can restart the browser, open the application URL, and the main
+				window will be rendered where the user left off. This can be desired behaviour
+				in many cases, but sometimes it is not and can create a security problem.
+			</p>
+		</div>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="application.resources.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="application.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="application.errors.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">4.5.&nbsp;Referencing Resources&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;4.7.&nbsp;Handling Errors</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

@@ -1,0 +1,246 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>4.8.&nbsp;Setting Up the Application Environment</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="application.html" title="Chapter&nbsp;4.&nbsp;Writing a Web Application"><link rel="prev" href="application.errors.html" title="4.7.&nbsp;Handling Errors"><link rel="next" href="components.html" title="Chapter&nbsp;5.&nbsp;User Interface Components"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>4.8.&nbsp;Setting Up the Application Environment</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">4.8.&nbsp;Setting Up the Application Environment</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="application.errors.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;4.&nbsp;Writing a Web Application</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="components.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="application.environment"></a>4.8.&nbsp;Setting Up the Application Environment</h2></div></div></div>
+		
+		
+		<p>
+			While more and more server based frameworks,
+			libraries, standards, and architectures for Java are
+			invented to make the programmer's life easier, software
+			deployment seems to get harder and harder. For
+			example, Java Enterprise Beans tried to make the creation
+			of persistent and networked objects easy and somewhat
+			automatic, but the number of deployment descriptions
+			got enormous. As Vaadin lives in a Java
+			Servlet container, it must follow the rules, but it
+			tries to avoid adding extra complexity.
+		</p>
+		
+		<p>
+			All Vaadin applications are deployed as Java web
+			applications, which can be packaged as WAR files. For a detailed
+			tutorial on how web applications are packaged, please refer to any Java
+			book that discusses Servlets. Sun has an excellent reference online on
+			<a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://java.sun.com/j2ee/tutorial/1_3-fcs/doc/WCC3.html" target="_top">
+				http://java.sun.com/j2ee/tutorial/1_3-fcs/doc/WCC3.html
+			</a>.
+		</p>
+		
+		
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N213DC"></a>4.8.1.&nbsp;Creating Deployable WAR in Eclipse</h3></div></div></div>
+			
+
+			<p>
+				To deploy the created application to a web server, you need to
+				create a WAR package. Here we give the instructions for Eclipse.
+			</p>
+			
+			<p>
+				Open project properties and first set the name and destination of
+				the WAR file in Tomcat <span class="guimenuitem">Export to WAR
+				settings</span> tab. Exporting to WAR is done by selecting
+				<span class="guimenuitem">Export to WAR</span> from <span class="guimenuitem">Tomcat
+				Project</span> in project context menu (just click calc
+				with the right mouse button on <span class="guimenuitem">Package contents
+				tree</span>).
+			</p>
+		</div>
+		
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="N213F4"></a>4.8.2.&nbsp;Web Application Contents</h3></div></div></div>
+			
+
+			<p>
+				The following files are required in a web application in order to
+				run it.
+			</p>
+
+			<div class="variablelist"><p class="title"><b>Web application organization</b></p><dl><dt><span class="term">
+						<code class="filename">WEB-INF/web.xml</code>
+					</span></dt><dd>
+						<p>
+							This is the standard web application
+							descriptor that defines how the
+							application is organized. You can refer
+							to any Java book about the contents of
+							this file. Also see an example in
+							<a href="application.environment.html#ex.web.xml" title="Example&nbsp;4.1.&nbsp;web.xml">Example&nbsp;4.1, &ldquo;web.xml&rdquo;</a>.
+						</p>
+					</dd><dt><span class="term">
+						<code class="filename">
+							WEB-INF/lib/vaadin-6.0.0.jar
+						</code>
+					</span></dt><dd>
+						<p>
+							This is the Vaadin library. It
+							is included in the product package in
+							<code class="filename">lib</code>
+							directory.
+						</p>
+					</dd><dt><span class="term">Your application classes</span></dt><dd>
+						<p>
+							You must include your application
+							classes either in a JAR file in
+							<code class="filename">WEB-INF/lib</code>
+							or as classes in
+							<code class="filename">WEB-INF/classes</code>
+						</p>
+					</dd><dt><span class="term">Your own theme files (OPTIONAL)</span></dt><dd>
+						<p>
+							If your application uses a special theme
+							(look and feel), you must include it in
+							<code class="filename">WEB-INF/lib/themes/themename</code>
+							directory.
+						</p>
+					</dd></dl></div>
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="section.web.web-xml"></a>4.8.3.&nbsp;Deployment Descriptor <code class="filename">web.xml</code></h3></div></div></div>
+			
+
+			<p>
+				The deployment descriptor is an XML file with the name
+				<code class="filename">web.xml</code> in the <code class="filename">WEB-INF</code> directory of
+				a web application. It is a standard component in Java EE describing
+				how a web application should be deployed. The structure of the deployment
+				descriptor is illustrated by the following example. You simply deploy
+				applications as servlets implemented by the special
+				<code class="methodname">com.vaadin.terminal.gwt.server.ApplicationServlet</code>
+				wrapper class. The class of the actual application is specified by giving
+				the <em class="parameter"><code>application</code></em> parameter with the name of the
+				specific application class to the servlet. The servlet is then connected
+				to a URL in a standard way for Java Servlets.
+			</p>
+
+			<div class="example"><a name="ex.web.xml"></a><p class="title"><b>Example&nbsp;4.1.&nbsp;web.xml</b></p><div class="example-contents">
+				
+				<pre class="programlisting">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;web-app
+  id="WebApp_ID" version="2.4"
+  xmlns="http://java.sun.com/xml/ns/j2ee" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
+     http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"&gt;
+
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;<span class="strong"><strong>myservlet</strong></span>&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;
+        com.vaadin.terminal.gwt.server.ApplicationServlet
+    &lt;/servlet-class&gt;
+    &lt;init-param&gt;
+      &lt;param-name&gt;application&lt;/param-name&gt;
+      &lt;param-value&gt;<span class="strong"><strong>MyApplicationClass</strong></span>&lt;/param-value&gt;
+    &lt;/init-param&gt;
+  &lt;/servlet&gt;
+
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;<span class="strong"><strong>myservlet</strong></span>&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;</pre>
+			</div></div><br class="example-break">
+
+			<p>
+				The descriptor defines a servlet with name
+				<code class="filename">myservlet</code>. The servlet class,
+				<code class="classname">com.vaadin.terminal.gwt.server.ApplicationServlet</code>,
+				is provided by Vaadin framework and it should be the same for all
+				Vaadin projects. The servlet takes the class name
+				<code class="classname">Calc</code> of the user application class as a parameter,
+				including the full package path to the class. If the class is in the
+				default package the package path is obviously not used.
+			</p>
+
+			<p>
+				The <code class="literal">url-pattern</code> is defined above as
+				<code class="literal">/*</code>. This matches to any URL under the project
+				context. We defined above the project context as
+				<code class="literal">myproject</code> so the application URL will be
+				<code class="uri">http://localhost:8080/myproject/</code>. If the project were to have
+				multiple applications or servlets, they would have to be given different names to distinguish them.
+				For example, <code class="literal">url-pattern</code>
+				<code class="literal">/myapp/*</code> would match a URL such as
+				<code class="uri">http://localhost:8080/myproject/myapp/</code>. Notice that the slash
+				and the asterisk <span class="emphasis"><em>must</em></span> be included at the end of the
+				pattern.
+			</p>
+
+			<p>
+				Notice also that if the URL pattern is other than root
+				<code class="literal">/*</code> (such as <code class="literal">/myapp/*</code>), you will also
+				need to make a servlet mapping to <code class="literal">/VAADIN/*</code> (unless you
+				are serving it statically as noted below). For example:
+			</p>
+
+			<pre class="programlisting">    ...
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;<span class="strong"><strong>myservlet</strong></span>&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/myurl/*&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;<span class="strong"><strong>myservlet</strong></span>&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/VAADIN/*&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;</pre>
+
+			<p>
+				You do not have to provide the above <code class="literal">/VAADIN/*</code> mapping
+				if you serve both the widget sets and (custom and default) themes
+				statically in <code class="filename">WebContent/VAADIN/</code> directory. The
+				mapping simply allows serving them dynamically from the Vaadin
+				JAR. Serving them statically is recommended for production environments as
+				it is much faster.
+			</p>
+
+			<p>
+				For a complete example on how to deploy applications, see the demos
+				included in the Vaadin installation package, especially the
+				<code class="filename">WebContent/WEB-INF</code> directory.
+			</p>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N214C3"></a>Deployment Descriptor Parameters</h4></div></div></div>
+				
+
+				<p>
+					Deployment descriptor can have many parameters and options that
+					control the execution of a servlet. You can find a complete
+					documentation of the deployment descriptor in Java Servlet
+					Specification at
+					<code class="uri">http://java.sun.com/products/servlet/</code>.
+				</p>
+
+				<p>
+					By default, Vaadin applications run in <span class="emphasis"><em>debug
+					mode</em></span>, which should be used during development. This enables
+					various debugging features. For production use, you should have put in
+					your <code class="filename">web.xml</code> the following parameter:
+				</p>
+
+				<pre class="programlisting">&lt;context-param&gt;
+  &lt;param-name&gt;productionMode&lt;/param-name&gt;
+  &lt;param-value&gt;true&lt;/param-value&gt;
+  &lt;description&gt;Vaadin production mode&lt;/description&gt;
+&lt;/context-param&gt;
+				</pre>
+				
+				<p>
+					The parameter and the debug and production modes are described in
+					detail in <a href="advanced.debug-production-modes.html" title="10.4.&nbsp;Debug and Production Mode">Section&nbsp;10.4, &ldquo;Debug and Production Mode&rdquo;</a>.
+				</p>
+
+				<p>
+					One often needed option is the session timeout. Different servlet
+					containers use varying defaults for timeouts, such as 30 minutes for
+					Apache Tomcat. You can set the timeout with:
+				</p>
+
+				<pre class="programlisting">&lt;session-config&gt;
+    &lt;session-timeout&gt;30&lt;/session-timeout&gt;
+&lt;/session-config&gt;</pre>
+
+				<p>
+					After the timeout expires, the <code class="methodname">close()</code>
+					method of the <code class="classname">Application</code> class will be
+					called. You should implement it if you wish to handle timeout
+					situations.
+				</p>
+			</div>
+		</div>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="application.errors.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="application.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="components.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">4.7.&nbsp;Handling Errors&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Chapter&nbsp;5.&nbsp;User Interface Components</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

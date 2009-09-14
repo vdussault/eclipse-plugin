@@ -1,0 +1,319 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Chapter&nbsp;2.&nbsp;Getting Started with Vaadin</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="index.html" title="Book of Vaadin"><link rel="prev" href="intro.overview.background.html" title="1.4.&nbsp;Background"><link rel="next" href="getting-started.environment.html" title="2.2.&nbsp;Setting up the Development Environment"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>Chapter&nbsp;2.&nbsp;Getting Started with Vaadin</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Chapter&nbsp;2.&nbsp;Getting Started with Vaadin</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="intro.overview.background.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="getting-started.environment.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="getting-started"></a>Chapter&nbsp;2.&nbsp;Getting Started with Vaadin</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="getting-started.html#getting-started.package">2.1. Installing Vaadin</a></span></dt><dd><dl><dt><span class="section"><a href="getting-started.html#getting-started.package.installing">2.1.1. Installing the Installation Package</a></span></dt><dt><span class="section"><a href="getting-started.html#getting-started.package.demo.start">2.1.2. Starting the Content Browser</a></span></dt><dt><span class="section"><a href="getting-started.html#getting-started.package.contents">2.1.3. Package Contents</a></span></dt><dt><span class="section"><a href="getting-started.html#getting-started.package.demo.run">2.1.4. Demo Applications</a></span></dt></dl></dd><dt><span class="section"><a href="getting-started.environment.html">2.2. Setting up the Development Environment</a></span></dt><dd><dl><dt><span class="section"><a href="getting-started.environment.html#getting-started.environment.java">2.2.1. Installing Java SDK</a></span></dt><dt><span class="section"><a href="getting-started.environment.html#getting-started.environment.eclipse">2.2.2. Installing Eclipse IDE</a></span></dt><dt><span class="section"><a href="getting-started.environment.html#getting-started.environment.tomcat">2.2.3. Installing Apache Tomcat</a></span></dt><dt><span class="section"><a href="getting-started.environment.html#getting-started.environment.firebug">2.2.4. Firefox and Firebug</a></span></dt><dt><span class="section"><a href="getting-started.environment.html#getting-started.environment.eclipse-plugin">2.2.5. Vaadin Eclipse Plugin</a></span></dt></dl></dd><dt><span class="section"><a href="getting-started.quickstart.html">2.3. QuickStart with Eclipse</a></span></dt><dd><dl><dt><span class="section"><a href="getting-started.quickstart.html#N20747">2.3.1. Starting Eclipse</a></span></dt><dt><span class="section"><a href="getting-started.quickstart.html#N20765">2.3.2. Importing Vaadin as a Project</a></span></dt><dt><span class="section"><a href="getting-started.quickstart.html#getting-started.quickstart.demo.run">2.3.3. Running the Demo Applications in Eclipse</a></span></dt><dt><span class="section"><a href="getting-started.quickstart.html#getting-started.quickstart.demo.debug">2.3.4. Debugging the Demo Applications in Eclipse</a></span></dt><dt><span class="section"><a href="getting-started.quickstart.html#getting-started.quickstart.skeleton">2.3.5. Using QuickStart as a Project Skeleton</a></span></dt></dl></dd><dt><span class="section"><a href="getting-started.first-project.html">2.4. Your First Project with Vaadin</a></span></dt><dd><dl><dt><span class="section"><a href="getting-started.first-project.html#getting-started.first-project.creation">2.4.1. Creating the Project</a></span></dt><dt><span class="section"><a href="getting-started.first-project.html#getting-started.first-project.coding">2.4.2. Exploring the Project</a></span></dt><dt><span class="section"><a href="getting-started.first-project.html#getting-started.first-project.server">2.4.3. Setting Up and Starting the Web Server</a></span></dt><dt><span class="section"><a href="getting-started.first-project.html#getting-started.first-project.run">2.4.4. Running and Debugging</a></span></dt></dl></dd></dl></div>
+	
+
+	<p>
+		This chapter gives practical instructions for installing Vaadin and the reference
+		toolchain, installing the Vaadin plugin in Eclipse, and running and debugging the
+		demo applications.
+	</p>
+
+	<div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="getting-started.package"></a>2.1.&nbsp;Installing Vaadin</h2></div></div></div>
+		
+
+		<p>
+			This section gives an overview of the Vaadin package and its installation. You
+			have two options for installing:
+		</p>
+
+        <div class="orderedlist"><ol type="1"><li>Install the installation package</li><li>If you use Eclipse, you can install the Vaadin plugin for Eclipse, as described in <a href="getting-started.environment.html#getting-started.environment.eclipse-plugin" title="2.2.5.&nbsp;Vaadin Eclipse Plugin">Section&nbsp;2.2.5, &ldquo;Vaadin Eclipse Plugin&rdquo;</a></li></ol></div>
+
+        <p>
+            Even if you use Eclipse, you can install the installation package and import
+            it under Eclipse as the QuickStart project. It allows you to run and debug the
+            demo applications.
+        </p>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="getting-started.package.installing"></a>2.1.1.&nbsp;Installing the Installation Package</h3></div></div></div>
+			
+
+			<p>
+				You can install the Vaadin installation package in a few simple steps:
+			</p>
+
+			<div class="orderedlist"><ol type="1"><li>
+					<p>
+						Download the newest Vaadin installation package from the download
+						page at <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://vaadin.com/download/" target="_top">http://vaadin.com/download/</a>. Select
+						the proper download package for your operating system: Windows,
+						Linux, or Mac OS X.
+					</p>
+				</li><li>
+					<p>
+						Unpack the installation package to a directory using an
+						decompression program appropriate for the package type (see below)
+						and your operating system.
+					</p>
+
+					<div class="itemizedlist"><ul type="disc"><li>
+							<p>
+								In Windows, use the default ZIP decompression program to unpack the package into
+								your chosen directory e.g. <code class="filename">C:\dev</code>.
+							</p>
+
+							<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3>
+								At least the Windows XP default decompression program and
+								some versions of WinRAR cannot unpack the installation
+								package properly in certain cases. Decompression can
+								result in an error such as "<span class="emphasis"><em>The system cannot
+								find the file specified.</em></span>" This happens because
+								the decompression program is unable to handle long file
+								paths where the total length exceeds 256 characters. This
+								occurs, for example, if you try to unpack the package
+								under Desktop. You should unpack the package directly into
+								<code class="filename">C:\dev</code> or some other short path or
+								use another decompression program.
+							</div>
+
+						</li><li>
+							<p>
+								In Linux, use GNU <code class="filename">tar</code> and BZIP2
+								decompression with <span><strong class="command">tar jxf
+								vaadin-linux-6.x.x.tar.bz2</strong></span> command.
+							</p>
+						</li><li>
+							<p>
+								In Mac OS X, use <code class="filename">tar</code> and Gzip
+								decompression with <span><strong class="command">tar zxf
+								vaadin-mac-6.x.x.tar.gz</strong></span> command.
+							</p>
+							
+						</li></ul></div>
+
+					<p>
+						The files will be, by default, decompressed into a directory with the name
+						<code class="filename">vaadin-<span class="emphasis"><em>&lt;operatingsystem&gt;</em></span>-6.x.x</code>.
+					</p>
+				</li></ol></div>
+			
+			
+			
+		</div>
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="getting-started.package.demo.start"></a>2.1.2.&nbsp;Starting the Content Browser</h3></div></div></div>
+			
+
+			<p>
+				The Content Browser is your best friend when using Vaadin. It
+				allows you to browse documentation and example source code, and run the
+				demo applications. The demo applications demonstrate most of the core
+				features of Vaadin.  You can find the demo applications also at
+				the vaadin website: <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://vaadin.com/demo" target="_top">http://vaadin.com/demo</a>.
+                
+			</p>
+
+			<p>
+				To start the Content Browser, run the start script in the Vaadin
+				installation directory as instructed below. The start script
+				launches a stand-alone web server running on the local host at port 8888,
+				and a web browser at address <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://localhost:8888/" target="_top">http://localhost:8888/</a>.
+			</p>
+
+			<p>
+				The Content Browser will open the default web browser configured in your
+				system. If your default browser is not compatible with Vaadin 
+				the demo applications may not work properly. In that case launch a 
+				supported browser manually and navigate to <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://localhost:8888/" target="_top">http://localhost:8888/</a>.
+			</p>
+
+			<p>
+				If the Content Browser fails to start, make sure that no other service is
+				using port 8888.
+			</p>
+
+			<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">JRE must be installed</h3>
+				
+
+				You must have Java Runtime Environment (JRE) installed or the batch
+				file will fail and close immediately. A JRE can be downloaded from 
+				<a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://java.sun.com/javase/downloads/index.jsp" target="_top">http://java.sun.com/javase/downloads/index.jsp</a>.
+			</div>
+
+			<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Firewall software</h3>
+				
+
+				Executing the Content Browser locally may cause a security
+				warning from your firewall software because of the started web server.
+				You need to allow connections to port 8888 for the Content Browser to work.
+			</div>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N2047B"></a>Windows</h4></div></div></div>
+				
+				<p>
+					Run the <code class="filename">start.bat</code> batch file by double-clicking
+					on the icon. Wait until the web server and web browser has started, it can take a while.
+				</p>
+			</div>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N20487"></a>Linux / UNIX</h4></div></div></div>
+				
+				<p>
+					Open a shell window, change to the Vaadin installation
+					directory, and run the <code class="filename">start.sh</code> shell script. You
+					have to run it with the following command:
+				</p>
+
+				<pre class="screen"><code class="prompt">$</code> <span><strong class="command">sh start.sh</strong></span>
+-------------------------------------------------
+Starting Vaadin in Desktop Mode.
+Running in http://localhost:8888
+-------------------------------------------------
+
+2007-12-04 12:44:55.657::INFO:  Logging to STDERR via org.mortbay.log.StdErrLog
+2007-12-04 12:44:55.745::INFO:  jetty-6.1.5
+2007-12-04 12:45:03.642::INFO:  NO JSP Support for , did not find org.apache.jasper.servlet.JspServlet
+2007-12-04 12:45:03.821::INFO:  Started SelectChannelConnector@0.0.0.0:8888</pre>
+
+				<p>
+					Wait until the web server and web browser has started, it can take a while.
+				</p>
+
+				<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Browser support</h3>
+					
+					
+					Vaadin supports the most commonly used web browsers, including 
+					Internet Explorer 6-8, Firefox 3, Safari 3 and Opera 9.6. In addition
+					to these, most of the modern web browsers also work event if they
+					are not supported. The definitive list of supported browsers can be
+					found on http://vaadin.com/features.
+				</div>
+			</div>
+
+			<div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="N204A8"></a>Mac OS X</h4></div></div></div>
+				
+
+				<p>
+					Double-click on the <span class="guibutton">Start Vaadin</span>
+					icon. Wait until the web server and web browser has started, it can take a while.
+				</p>
+
+				<p>
+					If the start icon fails in your environment for some reason, you can
+					start the Content Browser by following the instructions for Linux/UNIX
+					above: open a shell window, change to the installation directory, and
+					execute <span><strong class="command">sh start.sh</strong></span>.
+				</p>
+			</div>
+		</div>
+
+        <div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="getting-started.package.contents"></a>2.1.3.&nbsp;Package Contents</h3></div></div></div>
+			
+
+			<p>
+				At the root of installation directory, you can find the
+				<code class="filename">start.bat</code> (Windows) or <code class="filename">start.sh</code>
+				(Linux and Mac) script that launches the Vaadin Content Browser, which
+				allows you to run the demo applications and read the documentation
+				included in the package.
+			</p>
+
+			<div class="figure"><a name="figure.package-contents"></a><p class="title"><b>Figure&nbsp;2.1.&nbsp;Vaadin Package Contents</b></p><div class="figure-contents">
+				
+				<div class="mediaobject" align="center"><img src="img/intro/toolkit-package-lo.png" align="middle" alt="Vaadin Package Contents"></div>
+			</div></div><br class="figure-break">
+
+			<p>
+				The <code class="filename">WebContent</code> directory contains all files related
+				to Vaadin and the Content Browser. If you do not
+				wish to or can not run the Content Browser, you can open 
+				<code class="filename">index.html</code> in a web browser to view the
+				installation package contents and documentation. The demos will
+				not be usable though. The <code class="filename">release-notes.html</code> file contains
+				information about changes in the latest release and the release
+				history. The <code class="filename">license</code> subdirectory contains licensing guidelines
+				(<code class="filename">licensing-guidelines.html</code>) for Vaadin and licenses
+				for other libraries included in the installation package. The <code class="filename">COPYING</code> 
+				file in the installation root also contains license information.
+			</p>
+
+			<p>
+				 The Vaadin Library itself is located at
+				 <code class="filename">WebContent/vaadin-6.x.x.jar</code>. The JAR package
+				 contains, in addition to the compiled files, the full source code of the
+				 library.
+			</p>
+
+			<p>
+				The <code class="filename">WebContent/doc</code> directory contains full
+				documentation for Vaadin, including JavaDoc API Reference
+				Documentation (<code class="filename">api</code> subdirectory) and this manual in both 
+				HTML and printable PDF format.
+			</p>
+
+			<p>
+				The <code class="filename">WebContent/WEB-INF</code> directory contains source code
+				for the demo applications in the <code class="filename">src</code> subdirectory and
+				the required libraries in the <code class="filename">lib</code> subdirectory.
+			</p>
+
+			<p>
+				The <code class="filename">gwt</code> folder contains the full Google Web Toolkit
+				installation package, including runtime libraries for the selected
+				operating system, full documentation, and examples. You will need GWT if
+				you intend to compile custom client-side widgets for Vaadin (described in
+				<a href="gwt.html" title="Chapter&nbsp;9.&nbsp;Developing Custom Components">Chapter&nbsp;9, <i xmlns:xlink="http://www.w3.org/1999/xlink">Developing Custom Components</i></a>).
+			</p>
+
+			<p>
+				In addition, the installation directory contains project files to allow
+				importing the installation package as a project into the Eclipse IDE. 
+				See <a href="getting-started.quickstart.html" title="2.3.&nbsp;QuickStart with Eclipse">Section&nbsp;2.3, &ldquo;QuickStart with Eclipse&rdquo;</a> for details on how to
+				do this. 
+			</p>
+		</div>
+
+
+		<div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="getting-started.package.demo.run"></a>2.1.4.&nbsp;Demo Applications</h3></div></div></div>
+			
+
+			<p>
+				The Content Browser allows you to run several demo applications included
+				in the installation package. The applications demonstrate how you can use
+				Vaadin for different tasks. Below is a selection of the included
+				demos. Notice that the source code for all demos is included in the
+				installation package and you can directly modify them if you import the
+				package as a project in Eclipse, as instructed in <a href="getting-started.quickstart.html" title="2.3.&nbsp;QuickStart with Eclipse">Section&nbsp;2.3, &ldquo;QuickStart with Eclipse&rdquo;</a>.
+			</p>
+
+			<div class="variablelist"><dl><dt><span class="term">Sampler</span></dt><dd>
+						Sampler demonstrates the various standard components and features
+						of Vaadin. Clicking on one of the available sample icons will take
+						you to the sample page, where you can see a live version of the
+						sample together with a short description of feature. The Sampler
+						allows you to view the full source code of each sample and
+						provides links to the API documentation and to related
+						samples. Sampler is the best place to get an overview of what is
+						included in Vaadin.
+					</dd><dt><span class="term">Address Book Tutorial</span></dt><dd>
+						This step-by-step tutorial covers everything needed to build a
+						Vaadin application. The tutorial shows how you create
+						layouts/views, implement navigation between views, bind components
+						to a data source, use notifications, and much more. It also
+						includes a section on how to create a custom theme for your
+						application.
+					</dd><dt><span class="term">Reservation Application</span></dt><dd>
+						The Reservation Application demonstrates the use of various
+						components in a semi-real application connected to a local
+						database. It also shows how to integrate a Google Maps view inside
+						an application.
+					</dd><dt><span class="term">Coverflow</span></dt><dd>
+						A simple example on how you can integrate Vaadin with Flex.
+					</dd><dt><span class="term">VaadinTunes</span></dt><dd>
+						A non-functional application that demonstrates how you can create
+						complex layouts using Vaadin.
+					</dd></dl></div>
+
+            <p>
+                <span class="emphasis"><em>Note: starting the demo applications can take several seconds.</em></span>
+            </p>
+		</div>
+	</div>
+	
+	
+	
+
+
+	
+	
+	
+
+</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="intro.overview.background.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;<a accesskey="n" href="getting-started.environment.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">1.4.&nbsp;Background&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;2.2.&nbsp;Setting up the Development Environment</td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

@@ -1,0 +1,96 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>5.12.&nbsp;Tree</title><link href="html-style/local.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.72.0" name="generator"><link rel="start" href="index.html" title="Book of Vaadin"><link rel="up" href="components.html" title="Chapter&nbsp;5.&nbsp;User Interface Components"><link rel="prev" href="components.table.html" title="5.11.&nbsp;Table"><link rel="next" href="components.menubar.html" title="5.13.&nbsp;MenuBar"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div id="container"><div id="header"><h1>5.12.&nbsp;Tree</h1></div><div id="itmilllogo">&nbsp;</div><div id="page"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">5.12.&nbsp;<code class="classname">Tree</code></th></tr><tr><td align="left" width="20%"><a accesskey="p" href="components.table.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;5.&nbsp;User Interface Components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="components.menubar.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="components.tree"></a>5.12.&nbsp;<code class="classname">Tree</code></h2></div></div></div>
+		
+
+		<p>
+			The <code class="classname">Tree</code> component allows a natural way to represent
+			data that has hierarchical relationships, such as filesystems or message
+			threads. The <code class="classname">Tree</code> component in Vaadin works
+			much like the tree components of most modern desktop user interface toolkits,
+			for example in directory browsing.
+		</p>
+
+		<p>
+			The typical use of the <code class="classname">Tree</code> component is for displaying
+			a hierachical menu, like a menu on the left side of the screen, as in <a href="components.tree.html#figure.components.tree" title="Figure&nbsp;5.24.&nbsp;A Tree Component as a Menu">Figure&nbsp;5.24, &ldquo;A <code class="classname">Tree</code> Component as a Menu&rdquo;</a>, or for displaying filesystems or
+			other hierarchical datasets. The <em class="parameter"><code>menu</code></em> style makes the
+			appearance of the tree more suitable for this purpose.
+		</p>
+
+		<pre class="programlisting">final Object[][] planets = new Object[][]{
+        new Object[]{"Mercury"}, 
+        new Object[]{"Venus"},
+        new Object[]{"Earth", "The Moon"},    
+        new Object[]{"Mars", "Phobos", "Deimos"},
+        new Object[]{"Jupiter", "Io", "Europa", "Ganymedes",
+                                "Callisto"},
+        new Object[]{"Saturn",  "Titan", "Tethys", "Dione",
+                                "Rhea", "Iapetus"},
+        new Object[]{"Uranus",  "Miranda", "Ariel", "Umbriel",
+                                "Titania", "Oberon"},
+        new Object[]{"Neptune", "Triton", "Proteus", "Nereid",
+                                "Larissa"}};
+        
+Tree tree = new Tree("The Planets and Major Moons");
+
+/* Add planets as root items in the tree. */
+for (int i=0; i&lt;planets.length; i++) {
+    String planet = (String) (planets[i][0]);
+    tree.addItem(planet);
+    
+    if (planets[i].length == 1) {
+        // The planet has no moons so make it a leaf.
+        tree.setChildrenAllowed(planet, false);
+    } else {
+        // Add children (moons) under the planets.
+        for (int j=1; j&lt;planets[i].length; j++) {
+            String moon = (String) planets[i][j];
+            
+            // Add the item as a regular item.
+            tree.addItem(moon);
+            
+            // Set it to be a child.
+            tree.setParent(moon, planet);
+            
+            // Make the moons look like leaves.
+            tree.setChildrenAllowed(moon, false);
+        }
+
+        // Expand the subtree.
+        tree.expandItemsRecursively(planet);
+    }
+}
+
+main.addComponent(tree);</pre>
+
+		<p>
+			<a href="components.tree.html#figure.components.tree" title="Figure&nbsp;5.24.&nbsp;A Tree Component as a Menu">Figure&nbsp;5.24, &ldquo;A <code class="classname">Tree</code> Component as a Menu&rdquo;</a> below shows the tree from the code
+			example in a practical situation.
+		</p>
+
+		<div class="figure-float"><div class="figure"><a name="figure.components.tree"></a><p class="title"><b>Figure&nbsp;5.24.&nbsp;A <code class="classname">Tree</code> Component as a Menu</b></p><div class="figure-contents">
+			
+			<div class="mediaobject" align="center"><img src="img/components/tree-example1.png" align="middle" alt="A Tree Component as a Menu"></div>
+		</div></div><br class="figure-break"></div>
+
+		<p>
+			You can read or set the currently selected item by the value property of the
+			<code class="classname">Tree</code> component, that is, with
+			<code class="methodname">getValue()</code> and
+			<code class="methodname">setValue()</code>. When the user clicks an item on a tree,
+			the tree will receive an <code class="classname">ValueChangeEvent</code>, which you
+			can catch with a <code class="classname">ValueChangeListener</code>. To receive the
+			event immediately after the click, you need to set the tree as
+			<code class="classname">setImmediate(true)</code>.
+		</p>
+
+		<p>
+			The <code class="classname">Tree</code> component uses
+			<code class="classname">Container</code> data sources much like the
+			<code class="classname">Table</code> component, with the addition that it also
+			utilizes hierarchy information maintained by a
+			<code class="classname">HierarchicalContainer</code>. The contained items can be of
+			any item type supported by the container. The default container and its
+			<code class="methodname">addItem()</code> assume that the items are strings and the
+			string value is used as the item ID.
+		</p>
+	</div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="components.table.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="components.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="components.menubar.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">5.11.&nbsp;<code class="classname">Table</code>&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;5.13.&nbsp;<code class="classname">MenuBar</code></td></tr></table></div></div><div id="footer"><span>Version: 6.0.0</span>&copy; Oy IT Mill Ltd. 2000-2009</div></div></body></html>

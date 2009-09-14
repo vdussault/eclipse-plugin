@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.7.0
+Created-By: 1.5.0_17-b04 (Sun Microsystems Inc.)
+Built-By: IBM User
+Bundle-Name: Book of Vaadin
+Bundle-SymbolicName: com.vaadin.manual
+Bundle-Version: 6.0.0.v200905291138
+Bundle-Vendor: IT Mill Inc.
+
