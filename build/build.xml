@@ -1,67 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Build integration plugin" default="build-eclipse-integration-plugin">
 
-        <property name="com.vaadin.eclipse.integration.version" value="0.9.0"/>
-        <property name="archivePrefix" value="experimental"/>
-        <tstamp>
-          <format property="timestamp" pattern="yyyyMMddHHmm"/>
-        </tstamp>
+	<property name="com.vaadin.eclipse.integration.version" value="0.9.0" />
+	<property name="archivePrefix" value="experimental" />
+	<tstamp>
+		<format property="timestamp" pattern="yyyyMMddHHmm" />
+	</tstamp>
 
 
-        <fail unless="com.vaadin.eclipse.integration.version" message="com.vaadin.eclipse.integration.version must define the plugin version" />
-        <property name="com.vaadin.eclipse.integration.fullversion" value="${com.vaadin.eclipse.integration.version}.${timestamp}"/>
+	<fail unless="com.vaadin.eclipse.integration.version" message="com.vaadin.eclipse.integration.version must define the plugin version" />
+	<property name="com.vaadin.eclipse.integration.fullversion" value="${com.vaadin.eclipse.integration.version}.${timestamp}" />
 
-        <property name="target.dir" location="staging"/>
-        <property name="update-site.dir" location="${target.dir}/${archivePrefix}"/>
+	<property name="target.dir" location="staging" />
+	<property name="update-site.dir" location="${target.dir}/${archivePrefix}" />
 
-        <property name="launcher" value="org.eclipse.equinox.launcher_1.0.200.v20090520.jar" />
+	<property name="launcher" value="org.eclipse.equinox.launcher_1.0.200.v20090520.jar" />
 
-        <condition property="eclipse.home.ok">
-                <available file="${eclipse.home}/eclipse.ini" />
-        </condition>
-        <fail unless="eclipse.home.ok" message="eclipse.home must be a valid Eclipse installation" />
+	<condition property="eclipse.home.ok">
+		<available file="${eclipse.home}/eclipse.ini" />
+	</condition>
+	<fail unless="eclipse.home.ok" message="eclipse.home must be a valid Eclipse installation" />
 
-        <target name="build-eclipse-integration-plugin">
-                <delete dir="${update-site.dir}"/>
+	<target name="build-eclipse-integration-plugin">
+		<delete dir="${update-site.dir}" />
 
-                <java jar="${eclipse.home}/plugins/${launcher}" failonerror="yes" fork="yes" maxmemory="512m">
-                        <arg value="-application" />
-                        <arg value="org.eclipse.ant.core.antRunner" />
-                        <arg value="-buildfile" />
-                        <arg value="build-integration-plugin.xml" />
-                        <arg value="-Dtarget.dir=${target.dir}" />
-                        <arg value="-Dcom.vaadin.eclipse.integration.version=${com.vaadin.eclipse.integration.version}" />
-                        <arg value="-Dtimestamp=${timestamp}"/>
-                        <arg value="-DarchivePrefix=${archivePrefix}"/>
-                </java>
+		<java jar="${eclipse.home}/plugins/${launcher}" failonerror="yes" fork="yes" maxmemory="512m">
+			<arg value="-application" />
+			<arg value="org.eclipse.ant.core.antRunner" />
+			<arg value="-buildfile" />
+			<arg value="build-integration-plugin.xml" />
+			<arg value="-Dtarget.dir=${target.dir}" />
+			<arg value="-Dcom.vaadin.eclipse.integration.version=${com.vaadin.eclipse.integration.version}" />
+			<arg value="-Dtimestamp=${timestamp}" />
+			<arg value="-DarchivePrefix=${archivePrefix}" />
+		</java>
 
-        </target>
+	</target>
 
-        <target name="prepare-update-site">
-                <copy file="site.xml.tpl" tofile="${update-site.dir}/site.xml" />
-                <replace file="${update-site.dir}/site.xml" token="#com.vaadin.eclipse.integration.version#" value="${com.vaadin.eclipse.integration.fullversion}"/>
-        </target>
+	<target name="prepare-update-site">
+		<copy file="site.xml.tpl" tofile="${update-site.dir}/site.xml" />
+		<replace file="${update-site.dir}/site.xml" token="#com.vaadin.eclipse.integration.version#" value="${com.vaadin.eclipse.integration.fullversion}" />
+	</target>
 
-        <target name="publish-nightly" depends="build-eclipse-integration-plugin, prepare-update-site">
-                <fail unless="nightly.publish" message="The nightly.publish property must be defined."/>
-                 <echo>Publish target: ${nightly.publish}</echo>
-                 <!-- Publish to the update site. -->
-                 <echo>Installing ${update-site.dir}/ to ${nightly.publish}</echo>
+	<target name="publish-nightly" depends="build-eclipse-integration-plugin, prepare-update-site">
+		<fail unless="nightly.publish" message="The nightly.publish property must be defined." />
+		<echo>Publish target: ${nightly.publish}</echo>
+		<!-- Publish to the update site. -->
+		<echo>Installing ${update-site.dir}/ to ${nightly.publish}</echo>
 
-                <fileset dir="${update-site.dir}" id="update-site-contents">
+		<!--                <fileset dir="${update-site.dir}" id="update-site-contents">
                         <include name="**"/>
                 </fileset>
                 <property name="update-site.dir.files" refid="update-site-contents"/>
                 <echo>files: ${update-site.dir.files}</echo>
-                   <!-- Copy the update site -->
-<!--            <exec executable="scp" searchpath="true" resultproperty="nightly.install.scp.result">
-                     <arg value="-B"/>
-                     <arg value="-r"/>
-                     <arg value="${update-site.dir}/"/>
-                    <arg value="${nightly.publish}"/>
-                </exec>
 -->
-                <echo>Result: ${nightly.install.scp.result}</echo>
-        </target>
+		<!-- Copy the update site -->
+		<exec executable="scp" searchpath="true" resultproperty="nightly.install.scp.result">
+			<arg value="-B" />
+			<arg value="-r" />
+			<arg value="${update-site.dir}/site.xml" />
+			<arg value="${update-site.dir}/features" />
+			<arg value="${update-site.dir}/plugins" />
+			<arg value="${nightly.publish}" />
+		</exec>
+		<echo>Result: ${nightly.install.scp.result}</echo>
+	</target>
 
 </project>

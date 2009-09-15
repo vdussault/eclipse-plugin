@@ -1,53 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Build integration plugin" default="build-features">
 
-        <fail unless="timestamp" message="timestamp must be defined" />
-        <fail unless="archivePrefix" message="archivePrefix must be defined" />
+	<fail unless="timestamp" message="timestamp must be defined" />
+	<fail unless="archivePrefix" message="archivePrefix must be defined" />
 
-        <!-- Type: N == Nightly -->
-        <property name="buildType" value="N" />
-        <property name="buildId" value="eclipse-integration-plugin" />
-        <property name="buildLabel" value="${buildType}.${buildId}" />
-        <property name="archivePrefix" value="${archivePrefix}" />
-        <property name="buildDirectory" location="tmp-build-area-integration-plugin" />
-        <property name="outputUpdateJars" value="true"/>
-        <property name="forceContextQualifier" value="${timestamp}"/>
+	<!-- Type: N == Nightly -->
+	<property name="buildType" value="N" />
+	<property name="buildId" value="eclipse-integration-plugin" />
+	<property name="buildLabel" value="${buildType}.${buildId}" />
+	<property name="archivePrefix" value="${archivePrefix}" />
+	<property name="buildDirectory" location="tmp-build-area-integration-plugin" />
+	<property name="outputUpdateJars" value="true" />
+	<property name="forceContextQualifier" value="${timestamp}" />
 
-        <property name="javacSource" value="1.5" />
-        <property name="javacTarget" value="1.5" />
+	<property name="javacSource" value="1.5" />
+	<property name="javacTarget" value="1.5" />
 
-        <property name="builder" location="." />
-        <property name="topLevelElementId" value="com.vaadin.integration.eclipse" />
-        <property name="baseLocation" location="${eclipse.home}" />
-        <property name="base" location="${baseLocation}/.." />
+	<property name="builder" location="." />
+	<property name="topLevelElementId" value="com.vaadin.integration.eclipse" />
+	<property name="baseLocation" location="${eclipse.home}" />
+	<property name="base" location="${baseLocation}/.." />
 
-        <import file="${eclipse.pdebuild.scripts}/build.xml" />
+	<import file="${eclipse.pdebuild.scripts}/build.xml" />
 
-        <target name="build-features" depends="copyProjects, main, deploy" />
+	<target name="build-features" depends="copyProjects, main, deploy" />
 
-        <target name="copyProjects">
-                <fail unless="buildDirectory" message="Build directory not specified"/>
+	<target name="copyProjects">
+		<fail unless="buildDirectory" message="Build directory not specified" />
 
-                <delete dir="${buildDirectory}"/>
-                <!--  Check out plugin(s) -->
-                <exec executable="svn">
-                        <arg value="checkout" />
-                        <arg value="http://dev.vaadin.com/svn/integration/eclipse/plugins" />
-                        <arg value="${buildDirectory}/plugins" />
-                </exec>
-                <!--  Check out feature(s) -->
-                <exec executable="svn">
-                        <arg value="checkout" />
-                        <arg value="http://dev.vaadin.com/svn/integration/eclipse/features" />
-                        <arg value="${buildDirectory}/features" />
-                </exec>
-        </target>
+		<delete dir="${buildDirectory}" />
+		<!--  Check out plugin(s) -->
+		<exec executable="svn">
+			<arg value="checkout" />
+			<arg value="http://dev.vaadin.com/svn/integration/eclipse/plugins" />
+			<arg value="${buildDirectory}/plugins" />
+		</exec>
+		<!--  Check out feature(s) -->
+		<exec executable="svn">
+			<arg value="checkout" />
+			<arg value="http://dev.vaadin.com/svn/integration/eclipse/features" />
+			<arg value="${buildDirectory}/features" />
+		</exec>
+	</target>
 
-        <target name="deploy">
-                <echoproperties/>
-                <fail unless="target.dir" message="target.dir (${target.dir})must be specified"/>
-                <unzip src="${buildDirectory}/${buildLabel}/${topLevelElementId}-${buildId}.zip" dest="${target.dir}"/>
-        </target>
+	<target name="deploy">
+		<echoproperties />
+		<fail unless="target.dir" message="target.dir (${target.dir})must be specified" />
+		<unzip src="${buildDirectory}/${buildLabel}/${topLevelElementId}-${buildId}.zip" dest="${target.dir}" />
+	</target>
 
 
 </project>
