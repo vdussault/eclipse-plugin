@@ -69,6 +69,7 @@
     <target name="nightly-teamcity-publish">
         <!-- Publish as a TeamCity artifact. -->
         <echo>##teamcity[publishArtifacts '${update-site.dir}/*']</echo>
+        <echo>##teamcity[publishArtifacts '${update-site.dir}/*/*']</echo>
     </target>
 
 </project>
