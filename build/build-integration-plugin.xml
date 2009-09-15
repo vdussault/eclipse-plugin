@@ -44,7 +44,6 @@
 	</target>
 
 	<target name="deploy">
-		<echoproperties />
 		<fail unless="target.dir" message="target.dir (${target.dir})must be specified" />
 		<unzip src="${buildDirectory}/${buildLabel}/${topLevelElementId}-${buildId}.zip" dest="${target.dir}" />
 	</target>

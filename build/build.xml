@@ -42,7 +42,7 @@
 		<replace file="${update-site.dir}/site.xml" token="#com.vaadin.eclipse.integration.version#" value="${com.vaadin.eclipse.integration.fullversion}" />
 	</target>
 
-	<target name="publish-nightly" depends="build-eclipse-integration-plugin, prepare-update-site">
+	<target name="publish-nightly" depends="build-eclipse-integration-plugin, prepare-update-site, nightly-teamcity-publish">
 		<fail unless="nightly.publish" message="The nightly.publish property must be defined." />
 		<echo>Publish target: ${nightly.publish}</echo>
 		<!-- Publish to the update site. -->
@@ -65,5 +65,10 @@
 		</exec>
 		<echo>Result: ${nightly.install.scp.result}</echo>
 	</target>
+
+    <target name="nightly-teamcity-publish">
+        <!-- Publish as a TeamCity artifact. -->
+        <echo>##teamcity[publishArtifacts '${update-site.dir}/*']</echo>
+    </target>
 
 </project>
