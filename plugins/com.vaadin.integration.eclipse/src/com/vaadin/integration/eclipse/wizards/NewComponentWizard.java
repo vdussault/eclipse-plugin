@@ -8,6 +8,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -118,13 +119,13 @@ public class NewComponentWizard extends Wizard implements INewWizard {
 
     private void doFinish(IProgressMonitor monitor) throws CoreException {
         // create a sample file
-        monitor.beginTask("Creating widget", 6);
+        monitor.beginTask("Creating widget", 10);
 
         try {
 
             if (page.buildClientSideStub()) {
-                VaadinPluginUtil.ensureGWTLibraries(page.getProject());
-                monitor.worked(1);
+                VaadinPluginUtil.ensureGWTLibraries(page.getProject(),
+                        new SubProgressMonitor(monitor, 5));
 
                 buildClientSideClass(monitor);
                 monitor.worked(1);
@@ -133,14 +134,10 @@ public class NewComponentWizard extends Wizard implements INewWizard {
 
             // let TypeWizardPage do the actual widget class creation
             page.createType(monitor);
-            monitor.worked(1);
-
-            monitor.worked(1);
+            monitor.worked(2);
 
             openFiles();
-            monitor.worked(1);
-
-            monitor.worked(1);
+            monitor.worked(2);
 
         } catch (InterruptedException e) {
             VaadinPluginUtil.displayError("Failed to create widget", e,
@@ -429,7 +426,7 @@ public class NewComponentWizard extends Wizard implements INewWizard {
     /**
      * We will accept the selection in the workbench to see if we can initialize
      * from it.
-     * 
+     *
      * @see IWorkbenchWizard#init(IWorkbench, IStructuredSelection)
      */
     public void init(IWorkbench workbench, IStructuredSelection selection) {

@@ -1,9 +1,14 @@
 package com.vaadin.integration.eclipse.properties;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -45,7 +50,7 @@ public class VaadinVersionPropertyPage extends PropertyPage {
 
     @Override
     public boolean performOk() {
-        IProject project;
+        final IProject project;
         try {
             project = getVaadinProject();
         } catch (CoreException ex) {
@@ -53,10 +58,9 @@ public class VaadinVersionPropertyPage extends PropertyPage {
             return false;
         }
 
-        Version newVaadinVersion = null;
-        if (useVaadinButton.getSelection()) {
-            newVaadinVersion = vaadinVersionComposite.getSelectedVersion();
-        }
+        final Version newVaadinVersion = useVaadinButton.getSelection() ? vaadinVersionComposite
+                .getSelectedVersion()
+                : null;
 
         // replace the Vaadin JAR in the project if it has changed
         try {
@@ -86,11 +90,37 @@ public class VaadinVersionPropertyPage extends PropertyPage {
                     return false;
                 }
             }
-            VaadinPluginUtil.updateVaadinLibraries(project, newVaadinVersion);
+
+            IRunnableWithProgress op = new IRunnableWithProgress() {
+                public void run(IProgressMonitor monitor)
+                        throws InvocationTargetException {
+                    try {
+                        VaadinPluginUtil.updateVaadinLibraries(project,
+                                newVaadinVersion, monitor);
+                    } catch (CoreException e) {
+                        throw new InvocationTargetException(e);
+                    } finally {
+                        monitor.done();
+                    }
+                }
+            };
+            // does not show the progress dialog if in a modal dialog
+            // IProgressService service =
+            // PlatformUI.getWorkbench().getProgressService();
+            // service.busyCursorWhile(op);
+            new ProgressMonitorDialog(getShell()).run(true, true, op);
+
         } catch (CoreException e) {
             VaadinPluginUtil.displayError(
                     "Failed to change Vaadin version in the project", e,
                     getShell());
+            return false;
+        } catch (InterruptedException e) {
+            return false;
+        } catch (InvocationTargetException e) {
+            Throwable realException = e.getTargetException();
+            MessageDialog.openError(getShell(), "Error", realException
+                    .getMessage());
             return false;
         }
         return true;

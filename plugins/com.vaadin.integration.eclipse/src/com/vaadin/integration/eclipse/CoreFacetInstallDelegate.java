@@ -3,6 +3,7 @@ package com.vaadin.integration.eclipse;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -33,7 +34,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
         }
         IDataModel model = (IDataModel) configObject;
 
-        monitor.beginTask("Setting up Vaadin project", 5);
+        monitor.beginTask("Setting up Vaadin project", 10);
 
         /*
          * Find the latest local version. If the model has a Vaadin version
@@ -68,16 +69,16 @@ public class CoreFacetInstallDelegate implements IDelegate,
             monitor.subTask("Downloading Vaadin "
                     + vaadinVersion.getVersionString());
             DownloadUtils.fetchVaadinJar(vaadinVersion);
-            monitor.worked(1);
-        } else {
             monitor.worked(2);
+        } else {
+            monitor.worked(3);
         }
 
         try {
             monitor.subTask("Installing libraries");
             /* Copy Vaadin JAR to project's WEB-INF/lib folder */
-            VaadinPluginUtil.ensureVaadinLibraries(project, vaadinVersion);
-            monitor.worked(1);
+            VaadinPluginUtil.ensureVaadinLibraries(project, vaadinVersion,
+                    new SubProgressMonitor(monitor, 5));
 
             // do not create project artifacts if adding the facet to an
             // existing project or if the user has chosen not to create them

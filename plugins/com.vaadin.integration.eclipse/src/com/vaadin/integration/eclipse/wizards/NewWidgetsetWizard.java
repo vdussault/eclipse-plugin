@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
@@ -120,14 +121,15 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
      */
     private void doFinish(IProgressMonitor monitor) throws CoreException {
         // create a sample file
-        monitor.beginTask("Creating widgetset", 6);
+        monitor.beginTask("Creating widgetset", 10);
 
         try {
             String packageText = page.getPackageText();
             // widget set goes to sub package "client"
             packageText += ".client";
 
-            VaadinPluginUtil.ensureGWTLibraries(page.getProject());
+            VaadinPluginUtil.ensureGWTLibraries(page.getProject(),
+                    new SubProgressMonitor(monitor, 5));
 
             final IPackageFragment packageFragment = page.getPackageFragment();
 
@@ -165,13 +167,13 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
             monitor.worked(1);
 
             openFiles();
-            monitor.worked(1);
-
-            monitor.worked(1);
+            monitor.worked(2);
 
         } catch (InterruptedException e) {
             // TODO improve error handling
             VaadinPluginUtil.handleBackgroundException(e);
+        } finally {
+            monitor.done();
         }
 
     }
@@ -189,7 +191,7 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
     /**
      * Create either an external launch configuration that builds a widgetset
      * and refreshes the build target directory in the workspace
-     * 
+     *
      * @param monitor
      */
     private void createBuildScript(IProgressMonitor monitor) {
@@ -415,7 +417,7 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
     /**
      * We will accept the selection in the workbench to see if we can initialize
      * from it.
-     * 
+     *
      * @see IWorkbenchWizard#init(IWorkbench, IStructuredSelection)
      */
     public void init(IWorkbench workbench, IStructuredSelection selection) {

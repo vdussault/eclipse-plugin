@@ -23,9 +23,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -55,7 +57,7 @@ public class VaadinPluginUtil {
     /**
      * Handle an exception in a background thread or other non-UI context. The
      * handling primarily consists of tracing the exception.
-     * 
+     *
      * @param ex
      */
     public static void handleBackgroundException(Exception ex) {
@@ -66,23 +68,23 @@ public class VaadinPluginUtil {
 
     /**
      * Display an error message to the user.
-     * 
+     *
      * @param message
      * @param ex
      */
-    public static void displayError(String message, Exception ex, Shell shell) {
+    public static void displayError(String message, Throwable ex, Shell shell) {
         // TODO trace if needed and report to the user
         MessageDialog.openError(shell, "Error", message);
     }
 
     /**
      * Find a project that has the Vaadin project facet based on a selection.
-     * 
+     *
      * If the selection is an element in a suitable project, return that
      * project.
-     * 
+     *
      * Otherwise, return null.
-     * 
+     *
      * @param selection
      * @return an Vaadin project
      */
@@ -156,7 +158,7 @@ public class VaadinPluginUtil {
 
     /**
      * Find the Vaadin Application type for a project or null if none found.
-     * 
+     *
      * @param jproject
      * @return
      * @throws JavaModelException
@@ -176,7 +178,7 @@ public class VaadinPluginUtil {
      * Returns either "com.vaadin." or "com.itmill.toolkit." depending on the
      * Vaadin version in the project. Defaults to "com.vaadin." if neither
      * found.
-     * 
+     *
      * @param project
      * @return
      */
@@ -191,7 +193,7 @@ public class VaadinPluginUtil {
     /**
      * Returns either "VAADIN" or "ITMILL" depending on the Vaadin version in
      * the project, returning a default value if neither is found.
-     * 
+     *
      * @param project
      * @return
      */
@@ -206,7 +208,7 @@ public class VaadinPluginUtil {
     /**
      * Checks the Vaadin version, returns true for Vaadin 6.0+, false for IT
      * Mill Toolkit.
-     * 
+     *
      * @param project
      * @return true if a Vaadin project (or unknown), false for IT Mill Toolkit
      *         project
@@ -315,23 +317,36 @@ public class VaadinPluginUtil {
     /**
      * Ensure that an Vaadin jar file can be found in the project. If none can
      * be found, adds the specified version from the local repository.
-     * 
+     *
      * @param project
      * @param vaadinJarVersion
+     * @param monitor
      * @throws CoreException
      */
     public static void ensureVaadinLibraries(IProject project,
-            Version vaadinJarVersion) throws CoreException {
-        IJavaProject jproject = JavaCore.create(project);
+            Version vaadinJarVersion, IProgressMonitor monitor)
+            throws CoreException {
+        if (monitor == null) {
+            monitor = new NullProgressMonitor();
+        }
         try {
-            IType findType = findVaadinApplicationType(jproject);
-            if (findType == null) {
-                addVaadinLibrary(jproject, vaadinJarVersion);
+            monitor.beginTask(
+                    "Ensuring the project includes the Vaadin library", 1);
+
+            IJavaProject jproject = JavaCore.create(project);
+            try {
+                IType findType = findVaadinApplicationType(jproject);
+                if (findType == null) {
+                    addVaadinLibrary(jproject, vaadinJarVersion,
+                            new SubProgressMonitor(monitor, 1));
+                }
+            } catch (JavaModelException e) {
+                throw newCoreException(
+                        "Failed to ensure that a Vaadin jar is included in project",
+                        e);
             }
-        } catch (JavaModelException e) {
-            throw newCoreException(
-                    "Failed to ensure that a Vaadin jar is included in project",
-                    e);
+        } finally {
+            monitor.done();
         }
     }
 
@@ -340,35 +355,48 @@ public class VaadinPluginUtil {
      * correct version. If none can be found or the version does not match,
      * replaces any old Vaadin JAR with the specified version from the local
      * repository.
-     * 
+     *
      * @param project
      * @param vaadinJarVersion
      *            or null to remove current Vaadin library
      * @throws CoreException
      */
     public static void updateVaadinLibraries(IProject project,
-            Version vaadinJarVersion) throws CoreException {
-        // do nothing if correct version is already in the project
-        Version currentVersion = getVaadinLibraryVersion(project);
-        if ((vaadinJarVersion == currentVersion)
-                || (vaadinJarVersion != null && vaadinJarVersion
-                        .equals(currentVersion))) {
-            return;
+            Version vaadinJarVersion, IProgressMonitor monitor)
+            throws CoreException {
+        if (monitor == null) {
+            monitor = new NullProgressMonitor();
         }
-        IJavaProject jproject = JavaCore.create(project);
         try {
-            // replace the Vaadin JAR (currentVersion) with the new one
-            if (currentVersion != null) {
-                removeVaadinLibrary(jproject, currentVersion);
+            monitor.beginTask("Updating Vaadin libraries in the project", 10);
+
+            // do nothing if correct version is already in the project
+            Version currentVersion = getVaadinLibraryVersion(project);
+            if ((vaadinJarVersion == currentVersion)
+                    || (vaadinJarVersion != null && vaadinJarVersion
+                            .equals(currentVersion))) {
+                return;
             }
-            if (vaadinJarVersion != null) {
-                addVaadinLibrary(jproject, vaadinJarVersion);
+            IJavaProject jproject = JavaCore.create(project);
+            try {
+                // replace the Vaadin JAR (currentVersion) with the new one
+                if (currentVersion != null) {
+                    removeVaadinLibrary(jproject, currentVersion);
+                }
+                monitor.worked(1);
+                if (vaadinJarVersion != null) {
+                    addVaadinLibrary(jproject, vaadinJarVersion,
+                            new SubProgressMonitor(monitor, 9));
+                }
+                // refresh library folder to recompile parts of project
+                IFolder lib = getWebInfLibFolder(project);
+                lib.refreshLocal(IResource.DEPTH_ONE, null);
+            } catch (JavaModelException e) {
+                throw newCoreException(
+                        "Failed to update Vaadin jar in project", e);
             }
-            // refresh library folder to recompile parts of project
-            IFolder lib = getWebInfLibFolder(project);
-            lib.refreshLocal(IResource.DEPTH_ONE, null);
-        } catch (JavaModelException e) {
-            throw newCoreException("Failed to update Vaadin jar in project", e);
+        } finally {
+            monitor.done();
         }
     }
 
@@ -400,18 +428,28 @@ public class VaadinPluginUtil {
      * Adds the specified Vaadin jar version from the local store to the
      * project. The specified version must be found from the local store or an
      * exception is thrown.
-     * 
+     *
      * @param jproject
      * @param vaadinJarVersion
+     * @param monitor
      * @throws CoreException
      */
     private static void addVaadinLibrary(IJavaProject jproject,
-            Version vaadinJarVersion) throws CoreException {
+            Version vaadinJarVersion, IProgressMonitor monitor)
+            throws CoreException {
+
+        if (monitor == null) {
+            monitor = new NullProgressMonitor();
+        }
         try {
+            monitor.beginTask(
+                    "Adding Vaadin required libraries to the project", 5);
+
             IProject project = jproject.getProject();
             IFile targetFile = getWebInfLibFolder(project).getFile(
                     vaadinJarVersion.getJarFileName());
             DownloadUtils.ensureVaadinJarExists(vaadinJarVersion);
+            monitor.worked(1);
             IPath sourceFile = DownloadUtils
                     .getLocalVaadinJar(vaadinJarVersion);
 
@@ -422,15 +460,17 @@ public class VaadinPluginUtil {
 
             // make sure the GWT library versions match the Vaadin JAR
             // requirements
-            updateGWTLibraries(jproject);
+            updateGWTLibraries(jproject, new SubProgressMonitor(monitor, 4));
         } catch (Exception e) {
             throw newCoreException("Failed to add Vaadin jar to project", e);
+        } finally {
+            monitor.done();
         }
     }
 
     /**
      * Removes the specified Vaadin jar version from the project (if it exists).
-     * 
+     *
      * @param jproject
      * @param vaadinJarVersion
      * @throws CoreException
@@ -451,57 +491,86 @@ public class VaadinPluginUtil {
         }
     }
 
-    public static void ensureGWTLibraries(IProject project)
+    public static void ensureGWTLibraries(IProject project,
+            IProgressMonitor monitor)
             throws CoreException {
-        IJavaProject jproject = JavaCore.create(project);
+        if (monitor == null) {
+            monitor = new NullProgressMonitor();
+        }
         try {
-            IType findType = jproject
-                    .findType("com.google.gwt.core.client.EntryPoint");
+            monitor
+                    .beginTask(
+                            "Ensuring that the project classpath contains GWT libraries",
+                            1);
 
-            if (findType == null) {
-                updateGWTLibraries(jproject);
+            IJavaProject jproject = JavaCore.create(project);
+            try {
+                IType findType = jproject
+                        .findType("com.google.gwt.core.client.EntryPoint");
+
+                if (findType == null) {
+                    updateGWTLibraries(jproject, new SubProgressMonitor(
+                            monitor, 1));
+                }
+            } catch (JavaModelException e) {
+                throw newCoreException(
+                        "Failed to ensure GWT libraries are present in the project",
+                        e);
             }
-        } catch (JavaModelException e) {
-            throw newCoreException(
-                    "Failed to ensure GWT libraries are present in the project",
-                    e);
+        } finally {
+            monitor.done();
         }
     }
 
     // add or update GWT libraries in a project based on the Vaadin version in
     // the project (if any)
-    private static void updateGWTLibraries(IJavaProject jproject)
+    private static void updateGWTLibraries(IJavaProject jproject,
+            IProgressMonitor monitor)
             throws CoreException {
-        String gwtVersion = getRequiredGWTVersionForProject(jproject);
-
-        DownloadUtils.ensureGwtUserJarExists(gwtVersion);
-        DownloadUtils.ensureGwtDevJarExists(gwtVersion);
-
+        if (monitor == null) {
+            monitor = new NullProgressMonitor();
+        }
         try {
-            IClasspathEntry[] rawClasspath = jproject.getRawClasspath();
-            List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
-            for (IClasspathEntry entry : rawClasspath) {
-                entries.add(entry);
+            monitor.beginTask("Updating GWT libraries", 12);
+
+            String gwtVersion = getRequiredGWTVersionForProject(jproject);
+            monitor.worked(1);
+
+            DownloadUtils.ensureGwtUserJarExists(gwtVersion);
+            monitor.worked(5);
+            DownloadUtils.ensureGwtDevJarExists(gwtVersion);
+            monitor.worked(5);
+
+            try {
+                IClasspathEntry[] rawClasspath = jproject.getRawClasspath();
+                List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
+                for (IClasspathEntry entry : rawClasspath) {
+                    entries.add(entry);
+                }
+
+                IClasspathEntry gwtDev = JavaCore.newLibraryEntry(
+                        getGWTDevJarPath(jproject), null, null);
+                IClasspathEntry gwtUser = JavaCore.newLibraryEntry(
+                        getGWTUserJarPath(jproject), null, null);
+
+                // replace gwt-dev-[platform].jar if found, otherwise append new
+                // entry
+                String devJarName = "gwt-dev-" + getPlatform() + ".jar";
+                replaceClassPathEntry(entries, gwtDev, devJarName);
+
+                // replace gwt-user.jar if found, otherwise append new entry
+                replaceClassPathEntry(entries, gwtUser, "gwt-user.jar");
+
+                IClasspathEntry[] entryArray = entries
+                        .toArray(new IClasspathEntry[entries.size()]);
+                jproject.setRawClasspath(entryArray, null);
+
+                monitor.worked(1);
+            } catch (JavaModelException e) {
+                throw newCoreException("addGWTLibraries failed", e);
             }
-
-            IClasspathEntry gwtDev = JavaCore.newLibraryEntry(
-                    getGWTDevJarPath(jproject), null, null);
-            IClasspathEntry gwtUser = JavaCore.newLibraryEntry(
-                    getGWTUserJarPath(jproject), null, null);
-
-            // replace gwt-dev-[platform].jar if found, otherwise append new
-            // entry
-            String devJarName = "gwt-dev-" + getPlatform() + ".jar";
-            replaceClassPathEntry(entries, gwtDev, devJarName);
-
-            // replace gwt-user.jar if found, otherwise append new entry
-            replaceClassPathEntry(entries, gwtUser, "gwt-user.jar");
-
-            IClasspathEntry[] entryArray = entries
-                    .toArray(new IClasspathEntry[entries.size()]);
-            jproject.setRawClasspath(entryArray, null);
-        } catch (JavaModelException e) {
-            throw newCoreException("addGWTLibraries failed", e);
+        } finally {
+            monitor.done();
         }
 
     }
@@ -526,9 +595,9 @@ public class VaadinPluginUtil {
     /**
      * TODO should first check if user has defined custom version of GWT to
      * project. If not then return the newest available by plugin.
-     * 
+     *
      * ATM just return the one in plugin.
-     * 
+     *
      * @param gwtVersion
      * @throws CoreException
      */
@@ -554,9 +623,9 @@ public class VaadinPluginUtil {
     /**
      * TODO should first check if user has defined custom version of GWT to
      * project. If not then return the newest available by plugin.
-     * 
+     *
      * ATM just return the one in plugin.
-     * 
+     *
      * @param gwtVersion
      * @throws CoreException
      */
@@ -720,7 +789,7 @@ public class VaadinPluginUtil {
     /**
      * Create the folder if it does not exist. If the parent folder does not
      * exist, it is created first.
-     * 
+     *
      * @param folder
      * @param monitor
      * @throws CoreException

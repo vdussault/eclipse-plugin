@@ -1,5 +1,6 @@
 package com.vaadin.integration.eclipse.properties;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -7,6 +8,9 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -214,17 +218,34 @@ public class VaadinVersionComposite extends Composite {
             DownloadVaadinDialog dialog = new DownloadVaadinDialog(getShell());
 
             if (dialog.open() == Window.OK) {
-                Version version = dialog.getSelectedVersion();
+                final Version version = dialog.getSelectedVersion();
                 if (version != null) {
-                    DownloadUtils.fetchVaadinJar(version);
+                    IRunnableWithProgress op = new IRunnableWithProgress() {
+                        public void run(IProgressMonitor monitor)
+                                throws InvocationTargetException {
+                            try {
+                                DownloadUtils.fetchVaadinJar(version);
+                            } catch (CoreException e) {
+                                throw new InvocationTargetException(e);
+                            } finally {
+                                monitor.done();
+                            }
+                        }
+                    };
+                    // ProgressService would not show the progress dialog if in
+                    // a modal dialog
+                    new ProgressMonitorDialog(getShell()).run(true, true, op);
+
                     updateVersionCombo();
                     versionCombo.setText(version.getVersionString());
                 }
             }
-        } catch (CoreException ex) {
+        } catch (InterruptedException e) {
+            return;
+        } catch (InvocationTargetException e) {
             VaadinPluginUtil.displayError(
-                    "Failed to download selected Vaadin version", ex,
-                    getShell());
+                    "Failed to download selected Vaadin version", e
+                            .getTargetException(), getShell());
         }
     }
 
