@@ -199,6 +199,7 @@ public class PortletConfigurationUtil {
             // read and parse the original file
             DocumentBuilderFactory docFactory = DocumentBuilderFactory
                     .newInstance();
+            docFactory.setValidating(false);
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             input = portletsXmlFile.getContents();
             Document doc = docBuilder.parse(input);
@@ -209,6 +210,7 @@ public class PortletConfigurationUtil {
                 // write out the modified file
                 TransformerFactory transFactory = TransformerFactory
                         .newInstance();
+                transFactory.setURIResolver(null);
                 transFactory.setAttribute("indent-number", 4);
                 Transformer transformer = transFactory.newTransformer();
                 transformer.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -243,10 +245,11 @@ public class PortletConfigurationUtil {
                 if (output != null) {
                     output.close();
                 }
-                output = new FileOutputStream(portletsXmlFile.getLocation()
-                        .toFile());
 
                 // TODO implement
+                // output = new FileOutputStream(portletsXmlFile.getLocation()
+                // .toFile());
+
             }
 
             // tell Eclipse that the file has been modified
