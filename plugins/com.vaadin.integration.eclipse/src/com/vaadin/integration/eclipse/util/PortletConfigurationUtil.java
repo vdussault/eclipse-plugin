@@ -1,8 +1,11 @@
 package com.vaadin.integration.eclipse.util;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -10,8 +13,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -20,6 +21,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.JavaModelException;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -32,9 +34,9 @@ public class PortletConfigurationUtil {
 
     /**
      * Adds a portlet to the portlet configuration files.
-     * 
+     *
      * The corresponding servlet should already exist in web.xml .
-     * 
+     *
      * @param project
      * @param servletName
      *            servlet name (from path) in web.xml
@@ -191,31 +193,61 @@ public class PortletConfigurationUtil {
     private static void modifyXml(IFile portletsXmlFile, XmlModifier modifier)
             throws CoreException {
         // TODO should use Eclipse facilities to handle open editors better
+        InputStream input = null;
+        OutputStream output = null;
         try {
             // read and parse the original file
             DocumentBuilderFactory docFactory = DocumentBuilderFactory
                     .newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-            Document doc = docBuilder.parse(portletsXmlFile.getContents());
+            input = portletsXmlFile.getContents();
+            Document doc = docBuilder.parse(input);
 
             modifier.performModification(docBuilder, doc);
 
-            // write out the modified file
-            TransformerFactory transFactory = TransformerFactory.newInstance();
-            transFactory.setAttribute("indent-number", 4);
-            Transformer transformer = transFactory.newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            try {
+                // write out the modified file
+                TransformerFactory transFactory = TransformerFactory
+                        .newInstance();
+                transFactory.setAttribute("indent-number", 4);
+                Transformer transformer = transFactory.newTransformer();
+                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
-            // this is a trick to get the indentations to almost work;
-            // nevertheless, some tricks are needed below for first lines of
-            // added sections
-            StreamResult result = new StreamResult(
-                    new OutputStreamWriter(new FileOutputStream(portletsXmlFile
-                            .getLocation().toFile())));
-            // StreamResult result = new StreamResult(portletsXmlFile
-            // .getLocation().toFile());
-            DOMSource source = new DOMSource(doc);
-            transformer.transform(source, result);
+                // this is a trick to get the indentations to almost work;
+                // nevertheless, some tricks are needed below for first lines of
+                // added sections
+                ByteArrayOutputStream memoryOutputStream = new ByteArrayOutputStream(
+                        1024);
+                StreamResult result = new StreamResult(new OutputStreamWriter(
+                        memoryOutputStream));
+                // StreamResult result = new StreamResult(portletsXmlFile
+                // .getLocation().toFile());
+                DOMSource source = new DOMSource(doc);
+                transformer.transform(source, result);
+
+                if (input != null) {
+                    input.close();
+                    input = null;
+                }
+
+                output = new FileOutputStream(portletsXmlFile.getLocation()
+                        .toFile());
+                output.write(memoryOutputStream.toByteArray());
+                memoryOutputStream.close();
+            } catch (Exception ex) {
+                VaadinPluginUtil
+                        .handleBackgroundException(
+                                IStatus.WARNING,
+                                "Failed to transform the XML document, should retry without indentation transformation",
+                                ex);
+                if (output != null) {
+                    output.close();
+                }
+                output = new FileOutputStream(portletsXmlFile.getLocation()
+                        .toFile());
+
+                // TODO implement
+            }
 
             // tell Eclipse that the file has been modified
             portletsXmlFile.refreshLocal(IResource.DEPTH_ZERO, null);
@@ -227,16 +259,24 @@ public class PortletConfigurationUtil {
         } catch (ParserConfigurationException e) {
             throw VaadinPluginUtil.newCoreException(
                     "Failed to initialize XML parser", e);
-        } catch (TransformerConfigurationException e) {
-            throw VaadinPluginUtil.newCoreException(
-                    "Failed to initialize XML writer", e);
         } catch (SAXException e) {
             throw VaadinPluginUtil.newCoreException("Failed to parse XML file "
                     + portletsXmlFile.getName(), e);
-        } catch (TransformerException e) {
-            throw VaadinPluginUtil.newCoreException(
-                    "Failed to write modified XML file "
-                            + portletsXmlFile.getName(), e);
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+            if (output != null) {
+                try {
+                    output.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
         }
     }
 
