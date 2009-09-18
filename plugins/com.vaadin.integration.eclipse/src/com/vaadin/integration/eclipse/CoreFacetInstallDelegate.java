@@ -68,8 +68,8 @@ public class CoreFacetInstallDelegate implements IDelegate,
             monitor.worked(1);
             monitor.subTask("Downloading Vaadin "
                     + vaadinVersion.getVersionString());
-            DownloadUtils.fetchVaadinJar(vaadinVersion);
-            monitor.worked(2);
+            DownloadUtils.fetchVaadinJar(vaadinVersion, new SubProgressMonitor(
+                    monitor, 2));
         } else {
             monitor.worked(3);
         }

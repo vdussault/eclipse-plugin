@@ -448,8 +448,8 @@ public class VaadinPluginUtil {
             IProject project = jproject.getProject();
             IFile targetFile = getWebInfLibFolder(project).getFile(
                     vaadinJarVersion.getJarFileName());
-            DownloadUtils.ensureVaadinJarExists(vaadinJarVersion);
-            monitor.worked(1);
+            DownloadUtils.ensureVaadinJarExists(vaadinJarVersion,
+                    new SubProgressMonitor(monitor, 1));
             IPath sourceFile = DownloadUtils
                     .getLocalVaadinJar(vaadinJarVersion);
 
@@ -536,10 +536,10 @@ public class VaadinPluginUtil {
             String gwtVersion = getRequiredGWTVersionForProject(jproject);
             monitor.worked(1);
 
-            DownloadUtils.ensureGwtUserJarExists(gwtVersion);
-            monitor.worked(5);
-            DownloadUtils.ensureGwtDevJarExists(gwtVersion);
-            monitor.worked(5);
+            DownloadUtils.ensureGwtUserJarExists(gwtVersion,
+                    new SubProgressMonitor(monitor, 5));
+            DownloadUtils.ensureGwtDevJarExists(gwtVersion,
+                    new SubProgressMonitor(monitor, 5));
 
             try {
                 IClasspathEntry[] rawClasspath = jproject.getRawClasspath();

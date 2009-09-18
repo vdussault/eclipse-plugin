@@ -30,6 +30,9 @@ import javax.swing.text.html.HTMLEditorKit;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 public class DownloadUtils {
 
@@ -404,18 +407,29 @@ public class DownloadUtils {
         return VaadinPluginUtil.getDownloadDirectory(information.id).toFile();
     }
 
-    public static void fetchVaadinJar(Version version) throws CoreException {
-        // try to download the version from all available download sites
-        boolean success = false;
-        for (DownloadInformation dli : vaadinDownloadInformation.values()) {
-            if (fetch(dli, version)) {
-                success = true;
-                break;
-            }
+    public static void fetchVaadinJar(Version version, IProgressMonitor monitor)
+            throws CoreException {
+        if (monitor == null) {
+            monitor = new NullProgressMonitor();
         }
-        if (!success) {
-            throw VaadinPluginUtil.newCoreException(
-                    "Failed to fetch Vaadin version " + version, null);
+        try {
+            monitor.beginTask("Downloading Vaadin JAR",
+                    IProgressMonitor.UNKNOWN);
+
+            // try to download the version from all available download sites
+            boolean success = false;
+            for (DownloadInformation dli : vaadinDownloadInformation.values()) {
+                if (fetch(dli, version)) {
+                    success = true;
+                    break;
+                }
+            }
+            if (!success) {
+                throw VaadinPluginUtil.newCoreException(
+                        "Failed to fetch Vaadin version " + version, null);
+            }
+        } finally {
+            monitor.done();
         }
     }
 
@@ -661,28 +675,57 @@ public class DownloadUtils {
                 GWT_USER_JAR_DOWNLOAD));
     }
 
-    public static void ensureVaadinJarExists(Version version)
+    public static void ensureVaadinJarExists(Version version,
+            IProgressMonitor monitor)
             throws CoreException {
-        if (getLocalVaadinJar(version) == null) {
-            fetchVaadinJar(version);
+        if (monitor == null) {
+            monitor = new NullProgressMonitor();
+        }
+        try {
+            monitor.beginTask("Downloading Vaadin JAR if necessary", 1);
+            if (getLocalVaadinJar(version) == null) {
+                fetchVaadinJar(version, new SubProgressMonitor(monitor, 1));
+            }
+        } finally {
+            monitor.done();
         }
 
     }
 
-    public static void ensureGwtUserJarExists(String version)
+    public static void ensureGwtUserJarExists(String version,
+            IProgressMonitor monitor)
             throws CoreException {
-        if (!getLocalGwtUserJar(version).toFile().exists()) {
-            fetch(GWT_USER_JAR_DOWNLOAD, new Version(version,
-                    GWT_USER_JAR_DOWNLOAD));
+        if (monitor == null) {
+            monitor = new NullProgressMonitor();
+        }
+        try {
+            monitor.beginTask("Downloading GWT JARs",
+                    IProgressMonitor.UNKNOWN);
+            if (!getLocalGwtUserJar(version).toFile().exists()) {
+                fetch(GWT_USER_JAR_DOWNLOAD, new Version(version,
+                        GWT_USER_JAR_DOWNLOAD));
+            }
+        } finally {
+            monitor.done();
         }
 
     }
 
-    public static void ensureGwtDevJarExists(String version)
+    public static void ensureGwtDevJarExists(String version,
+            IProgressMonitor monitor)
             throws CoreException {
-        if (!getLocalGwtDevJar(version).toFile().exists()) {
-            fetch(GWT_DEV_JAR_DOWNLOAD, new Version(version,
-                    GWT_DEV_JAR_DOWNLOAD));
+        if (monitor == null) {
+            monitor = new NullProgressMonitor();
+        }
+        try {
+            monitor.beginTask("Downloading GWT JARs",
+                    IProgressMonitor.UNKNOWN);
+            if (!getLocalGwtDevJar(version).toFile().exists()) {
+                fetch(GWT_DEV_JAR_DOWNLOAD, new Version(version,
+                        GWT_DEV_JAR_DOWNLOAD));
+            }
+        } finally {
+            monitor.done();
         }
 
     }

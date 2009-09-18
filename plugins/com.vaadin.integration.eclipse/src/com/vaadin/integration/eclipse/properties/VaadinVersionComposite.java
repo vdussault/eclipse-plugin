@@ -224,7 +224,7 @@ public class VaadinVersionComposite extends Composite {
                         public void run(IProgressMonitor monitor)
                                 throws InvocationTargetException {
                             try {
-                                DownloadUtils.fetchVaadinJar(version);
+                                DownloadUtils.fetchVaadinJar(version, monitor);
                             } catch (CoreException e) {
                                 throw new InvocationTargetException(e);
                             } finally {
