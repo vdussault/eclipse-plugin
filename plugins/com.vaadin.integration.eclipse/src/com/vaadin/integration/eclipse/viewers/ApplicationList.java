@@ -3,6 +3,7 @@ package com.vaadin.integration.eclipse.viewers;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -84,7 +85,8 @@ public class ApplicationList extends Composite {
             // TODO should this be displayed?
             // VaadinPluginUtil.displayError(
             // "Failed to list Application classes in the project", e);
-            VaadinPluginUtil.handleBackgroundException(e);
+            VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                    "Failed to list the Application classes in the project", e);
         }
 
         return applications;

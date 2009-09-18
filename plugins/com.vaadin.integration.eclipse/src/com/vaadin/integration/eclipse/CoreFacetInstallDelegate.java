@@ -3,6 +3,7 @@ package com.vaadin.integration.eclipse;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -51,7 +52,11 @@ public class CoreFacetInstallDelegate implements IDelegate,
                         .getLocalVaadinVersion(versionString);
             } catch (CoreException ex) {
                 // default to the latest downloaded version
-                VaadinPluginUtil.handleBackgroundException(ex);
+                VaadinPluginUtil
+                        .handleBackgroundException(
+                                IStatus.WARNING,
+                                "Failed to get the requested Vaadin version, using the most recent cached version",
+                                ex);
                 vaadinVersion = DownloadUtils.getLatestLocalVaadinJarVersion();
             }
         } else {

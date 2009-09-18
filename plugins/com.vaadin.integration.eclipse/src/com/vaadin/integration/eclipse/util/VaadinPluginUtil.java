@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -61,9 +62,35 @@ public class VaadinPluginUtil {
      * @param ex
      */
     public static void handleBackgroundException(Exception ex) {
+        handleBackgroundException(ex.getMessage(), ex);
+    }
+
+    /**
+     * Handle an exception in a background thread or other non-UI context. The
+     * handling primarily consists of tracing the exception.
+     *
+     * @param message
+     * @param ex
+     */
+    public static void handleBackgroundException(String message, Exception ex) {
+        handleBackgroundException(IStatus.ERROR, message, ex);
+    }
+
+    /**
+     * Handle an exception in a background thread or other non-UI context. The
+     * handling primarily consists of tracing the exception.
+     *
+     * @param message
+     * @param ex
+     */
+    public static void handleBackgroundException(int severity, String message,
+            Exception ex) {
         // TODO trace the exception and do any other background exception
         // handling
-        ex.printStackTrace();
+        IStatus status = new Status(severity, VaadinPlugin.PLUGIN_ID,
+                message, ex);
+        VaadinPlugin.getInstance().getLog().log(status);
+        // ex.printStackTrace();
     }
 
     /**
@@ -226,7 +253,10 @@ public class VaadinPluginUtil {
                     return false;
                 }
             } catch (JavaModelException e) {
-                handleBackgroundException(e);
+                handleBackgroundException(
+                        IStatus.WARNING,
+                        "Failed to check the Vaadin version used in the project, assuming 6.0+",
+                        e);
                 return true;
             }
         }
@@ -649,7 +679,9 @@ public class VaadinPluginUtil {
             IOUtils.copy(resourceAsStream, writer);
             resourceAsStream.close();
         } catch (IOException e) {
-            handleBackgroundException(e);
+            // TODO this error message might not be ideal
+            handleBackgroundException(IStatus.ERROR,
+                    "Failed to read template file from the Vaadin plugin", e);
         }
 
         return writer.toString();
@@ -756,11 +788,13 @@ public class VaadinPluginUtil {
                 }
             }
         } catch (IOException ex) {
-            // TODO handle exception better; now silently defaulting to old GWT
-            handleBackgroundException(ex);
+            handleBackgroundException(IStatus.WARNING,
+                    "Failed to determine the GWT library version to use, defaulting to "
+                            + gwtVersion, ex);
         } catch (CoreException ex) {
-            // TODO handle exception better; now silently defaulting to old GWT
-            handleBackgroundException(ex);
+            handleBackgroundException(IStatus.WARNING,
+                    "Failed to determine the GWT library version to use, defaulting to "
+                            + gwtVersion, ex);
         }
 
         return gwtVersion;

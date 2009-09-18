@@ -8,6 +8,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -414,9 +415,11 @@ public class NewComponentWizard extends Wizard implements INewWizard {
                         IDE.openEditor(wbPage, javaFile, true);
                     }
                 } catch (PartInitException e) {
-                    VaadinPluginUtil.handleBackgroundException(e);
+                    VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                            "Failed to open created files in editor", e);
                 } catch (JavaModelException e) {
-                    VaadinPluginUtil.handleBackgroundException(e);
+                    VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                            "Failed to open created files in editor", e);
                 }
             }
         });

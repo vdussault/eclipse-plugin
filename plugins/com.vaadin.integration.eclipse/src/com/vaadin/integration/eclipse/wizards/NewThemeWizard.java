@@ -12,6 +12,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
@@ -47,7 +48,7 @@ import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 /**
  * Wizard to create new theme. If project is selected, it is created there,
  * otherwise to first web project.
- * 
+ *
  * Created with eclipse template.
  */
 
@@ -228,11 +229,15 @@ public class NewThemeWizard extends Wizard implements INewWizard {
                     try {
                         rewrite.apply(document);
                     } catch (MalformedTreeException e) {
-                        // TODO improve error handling
-                        VaadinPluginUtil.handleBackgroundException(e);
+                        VaadinPluginUtil.handleBackgroundException(
+                                IStatus.WARNING,
+                                "Failed to set the theme in the application class "
+                                        + app.getFullyQualifiedName(), e);
                     } catch (BadLocationException e) {
-                        // TODO improve error handling
-                        VaadinPluginUtil.handleBackgroundException(e);
+                        VaadinPluginUtil.handleBackgroundException(
+                                IStatus.WARNING,
+                                "Failed to set the theme in the application class "
+                                        + app.getFullyQualifiedName(), e);
                     }
                     String newSource = document.get();
                     compilationUnit.getBuffer().setContents(newSource);
@@ -270,7 +275,7 @@ public class NewThemeWizard extends Wizard implements INewWizard {
     /**
      * We will accept the selection in the workbench to see if we can initialize
      * from it.
-     * 
+     *
      * @see IWorkbenchWizard#init(IWorkbench, IStructuredSelection)
      */
     public void init(IWorkbench workbench, IStructuredSelection selection) {

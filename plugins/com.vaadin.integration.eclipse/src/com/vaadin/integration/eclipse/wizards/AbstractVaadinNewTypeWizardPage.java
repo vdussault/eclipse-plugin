@@ -27,7 +27,7 @@ public abstract class AbstractVaadinNewTypeWizardPage extends NewTypeWizardPage 
     /**
      * Set the project for the wizard page, updating the wizard internal fields
      * by calling setPackageFragmentRoot.
-     * 
+     *
      * @param project
      */
     public void setProject(IProject project) {
@@ -39,7 +39,8 @@ public abstract class AbstractVaadinNewTypeWizardPage extends NewTypeWizardPage 
             try {
                 setPackageFragmentRoot(jp.getPackageFragmentRoots()[0], true);
             } catch (JavaModelException e1) {
-                VaadinPluginUtil.handleBackgroundException(e1);
+                VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                        "Failed to select the project for the wizard", e1);
             }
         }
     }
@@ -47,7 +48,7 @@ public abstract class AbstractVaadinNewTypeWizardPage extends NewTypeWizardPage 
     /**
      * This is only called from setPackageFragmentRoot, and should be overridden
      * to update fields based on project change.
-     * 
+     *
      * The overriding method should first call super.setProjectInternal().
      */
     protected void setProjectInternal(IProject project) {
@@ -80,7 +81,7 @@ public abstract class AbstractVaadinNewTypeWizardPage extends NewTypeWizardPage 
 
     /*
      * @see WizardPage#becomesVisible
-     * 
+     *
      * @see NewElementWizardPage#setVisible
      */
     @Override

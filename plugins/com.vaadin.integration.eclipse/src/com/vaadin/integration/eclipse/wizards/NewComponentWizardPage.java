@@ -3,6 +3,7 @@ package com.vaadin.integration.eclipse.wizards;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -102,8 +103,11 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
             }
 
         } catch (CoreException e1) {
-            // TODO improve error handling
-            VaadinPluginUtil.handleBackgroundException(e1);
+            VaadinPluginUtil
+                    .handleBackgroundException(
+                            IStatus.WARNING,
+                            "Failed to select the project in the New Widget wizard",
+                            e1);
         }
     }
 

@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -39,8 +40,11 @@ public class VaadinVersionPropertyPage extends PropertyPage {
             useVaadinButton.setSelection(vaadinVersionComposite
                     .getSelectedVersion() != null);
         } catch (CoreException ex) {
-            // TODO handle exceptions better
-            VaadinPluginUtil.handleBackgroundException(ex);
+            VaadinPluginUtil
+                    .handleBackgroundException(
+                            IStatus.ERROR,
+                            "Failed reverting to the Vaadin version currently used in the project",
+                            ex);
             vaadinVersionComposite.setProject(null);
             useVaadinButton.setSelection(false);
         }
@@ -114,6 +118,8 @@ public class VaadinVersionPropertyPage extends PropertyPage {
             VaadinPluginUtil.displayError(
                     "Failed to change Vaadin version in the project", e,
                     getShell());
+            VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                    "Failed to change Vaadin version in the project", e);
             return false;
         } catch (InterruptedException e) {
             return false;
@@ -121,6 +127,8 @@ public class VaadinVersionPropertyPage extends PropertyPage {
             Throwable realException = e.getTargetException();
             MessageDialog.openError(getShell(), "Error", realException
                     .getMessage());
+            VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                    "Failed to change Vaadin version in the project", e);
             return false;
         }
         return true;

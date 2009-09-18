@@ -113,7 +113,11 @@ public class VaadinFacetInstallDataModelProvider extends
                 return (latestLocal != null) ? latestLocal.getVersionString()
                         : null;
             } catch (CoreException ex) {
-                VaadinPluginUtil.handleBackgroundException(ex);
+                VaadinPluginUtil
+                        .handleBackgroundException(
+                                IStatus.WARNING,
+                                "Checking the latest locally cached Vaadin version failed",
+                                ex);
                 return null;
             }
         } else if (propertyName.equals(FACET_ID)) {
@@ -140,7 +144,8 @@ public class VaadinFacetInstallDataModelProvider extends
             } catch (CoreException e) {
                 // no notification nor change of value list if listing local
                 // versions failed
-                VaadinPluginUtil.handleBackgroundException(e);
+                VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                        "Failed to update Vaadin version list", e);
             }
          }
         return super.propertySet(propertyName, propertyValue);
@@ -156,7 +161,11 @@ public class VaadinFacetInstallDataModelProvider extends
                 } catch (CoreException e) {
                     // no notification nor change of value list if listing local
                     // versions failed
-                    VaadinPluginUtil.handleBackgroundException(e);
+                    VaadinPluginUtil
+                            .handleBackgroundException(
+                                    IStatus.WARNING,
+                                    "Failed to list the locally cached Vaadin versions",
+                                    e);
                 }
             }
             return DataModelPropertyDescriptor.createDescriptors(vaadinVersions

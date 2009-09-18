@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
@@ -170,8 +171,8 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
             monitor.worked(2);
 
         } catch (InterruptedException e) {
-            // TODO improve error handling
-            VaadinPluginUtil.handleBackgroundException(e);
+            VaadinPluginUtil.handleBackgroundException(IStatus.INFO,
+                    "Type creation interrupted", e);
         } finally {
             monitor.done();
         }
@@ -371,9 +372,11 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
                         IDE.openEditor(wbPage, javaFile, true);
                     }
                 } catch (PartInitException e) {
-                    VaadinPluginUtil.handleBackgroundException(e);
+                    VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                            "Failed to open created files in editor", e);
                 } catch (JavaModelException e) {
-                    VaadinPluginUtil.handleBackgroundException(e);
+                    VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                            "Failed to open created files in editor", e);
                 }
             }
         });

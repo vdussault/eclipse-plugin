@@ -9,6 +9,7 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -111,7 +112,11 @@ public class VaadinVersionComposite extends Composite {
 
             } catch (CoreException ex) {
                 // TODO handle exceptions: message to user?
-                VaadinPluginUtil.handleBackgroundException(ex);
+                VaadinPluginUtil
+                        .handleBackgroundException(
+                                IStatus.WARNING,
+                                "Failed to update the list of available Vaadin versions",
+                                ex);
             }
         }
 
@@ -201,7 +206,11 @@ public class VaadinVersionComposite extends Composite {
                 }
             } catch (CoreException ce) {
                 // ignore if cannot select current version
-                VaadinPluginUtil.handleBackgroundException(ce);
+                VaadinPluginUtil
+                        .handleBackgroundException(
+                                IStatus.WARNING,
+                                "Failed to select the Vaadin version used in the project",
+                                ce);
             }
         } catch (CoreException ex) {
             // leave the combo empty and show an error message
@@ -288,7 +297,11 @@ public class VaadinVersionComposite extends Composite {
             }
         } catch (CoreException e) {
             // maybe there is no version downloaded - ignore
-            VaadinPluginUtil.handleBackgroundException(e);
+            VaadinPluginUtil
+                    .handleBackgroundException(
+                            IStatus.WARNING,
+                            "Failed to select the most recent cached Vaadin version, probably no versions in cache yet",
+                            e);
         }
     }
 }
