@@ -78,16 +78,16 @@ public class VaadinVersionPropertyPage extends PropertyPage {
                 if (currentVaadinVersion != null && newVaadinVersion == null) {
                     message = "Do you want to remove the Vaadin version "
                             + currentVaadinVersion.getVersionString()
-                            + " from the project " + project.getName();
+                            + " from the project " + project.getName() + "?";
                 } else if (currentVaadinVersion == null) {
                     message = "Do you want to add the Vaadin version "
                             + newVaadinVersion.getVersionString()
-                            + " to the project " + project.getName();
+                            + " to the project " + project.getName() + "?";
                 } else {
                     message = "Do you want to change the Vaadin version from "
                             + currentVaadinVersion.getVersionString() + " to "
                             + newVaadinVersion.getVersionString()
-                            + " in the project " + project.getName();
+                            + " in the project " + project.getName() + "?";
                 }
                 if (!MessageDialog.openConfirm(getShell(),
                         "Confirm Vaadin version change", message)) {
@@ -116,7 +116,8 @@ public class VaadinVersionPropertyPage extends PropertyPage {
 
         } catch (CoreException e) {
             VaadinPluginUtil.displayError(
-                    "Failed to change Vaadin version in the project", e,
+                            "Failed to change Vaadin version in the project. Check that the Vaadin JAR is not in use.",
+                            e,
                     getShell());
             VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
                     "Failed to change Vaadin version in the project", e);
@@ -125,8 +126,10 @@ public class VaadinVersionPropertyPage extends PropertyPage {
             return false;
         } catch (InvocationTargetException e) {
             Throwable realException = e.getTargetException();
-            MessageDialog.openError(getShell(), "Error", realException
-                    .getMessage());
+            VaadinPluginUtil
+                    .displayError(
+                            "Failed to change Vaadin version in the project. Check that the Vaadin JAR is not in use.",
+                            realException, getShell());
             VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
                     "Failed to change Vaadin version in the project", e);
             return false;
