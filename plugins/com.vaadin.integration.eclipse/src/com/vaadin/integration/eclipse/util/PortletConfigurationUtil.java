@@ -200,6 +200,9 @@ public class PortletConfigurationUtil {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory
                     .newInstance();
             docFactory.setValidating(false);
+            docFactory.setAttribute(
+                    "http://apache.org/xml/features/dom/defer-node-expansion",
+                    Boolean.FALSE);
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             input = portletsXmlFile.getContents();
             Document doc = docBuilder.parse(input);
@@ -239,17 +242,12 @@ public class PortletConfigurationUtil {
             } catch (Exception ex) {
                 VaadinPluginUtil
                         .handleBackgroundException(
-                                IStatus.WARNING,
+                                IStatus.ERROR,
                                 "Failed to transform the XML document, should retry without indentation transformation",
                                 ex);
                 if (output != null) {
                     output.close();
                 }
-
-                // TODO implement
-                // output = new FileOutputStream(portletsXmlFile.getLocation()
-                // .toFile());
-
             }
 
             // tell Eclipse that the file has been modified
