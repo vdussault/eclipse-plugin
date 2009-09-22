@@ -737,11 +737,12 @@ public class VaadinPluginUtil {
 
         // find the JAR reference (from previous separator to the next) and
         // replace it with the new path
+        // on all platforms, also need to handle &quot;
         String separators;
         if ("windows".equals(VaadinPluginUtil.getPlatform())) {
-            separators = ";\"";
+            separators = ";&\"";
         } else {
-            separators = ":\"";
+            separators = ":&;\"";
         }
 
         // look for the JAR name potentially preceded with a path etc.
