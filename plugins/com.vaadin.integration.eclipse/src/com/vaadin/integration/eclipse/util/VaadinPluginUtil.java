@@ -11,6 +11,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 
 import org.apache.commons.io.IOUtils;
@@ -29,6 +31,11 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -38,12 +45,14 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jst.j2ee.web.componentcore.util.WebArtifactEdit;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 import org.eclipse.wst.common.componentcore.ComponentCore;
 import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
 import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
@@ -345,8 +354,11 @@ public class VaadinPluginUtil {
     }
 
     /**
-     * Ensure that an Vaadin jar file can be found in the project. If none can
+     * Ensure that some Vaadin jar file can be found in the project. If none can
      * be found, adds the specified version from the local repository.
+     *
+     * No launch configurations are updated. Use updateVaadinLibraries if such
+     * updates are needed.
      *
      * @param project
      * @param vaadinJarVersion
@@ -369,6 +381,10 @@ public class VaadinPluginUtil {
                 if (findType == null) {
                     addVaadinLibrary(jproject, vaadinJarVersion,
                             new SubProgressMonitor(monitor, 1));
+
+                    // refresh library folder to recompile parts of project
+                    IFolder lib = getWebInfLibFolder(project);
+                    lib.refreshLocal(IResource.DEPTH_ONE, null);
                 }
             } catch (JavaModelException e) {
                 throw newCoreException(
@@ -386,6 +402,10 @@ public class VaadinPluginUtil {
      * replaces any old Vaadin JAR with the specified version from the local
      * repository.
      *
+     * Update widgetset compilation launch configurations in the project to
+     * refer to the new Vaadin and GWT versions (only when changing Vaadin
+     * version, not when adding the JAR).
+     *
      * @param project
      * @param vaadinJarVersion
      *            or null to remove current Vaadin library
@@ -398,7 +418,7 @@ public class VaadinPluginUtil {
             monitor = new NullProgressMonitor();
         }
         try {
-            monitor.beginTask("Updating Vaadin libraries in the project", 10);
+            monitor.beginTask("Updating Vaadin libraries in the project", 11);
 
             // do nothing if correct version is already in the project
             Version currentVersion = getVaadinLibraryVersion(project);
@@ -421,6 +441,19 @@ public class VaadinPluginUtil {
                 // refresh library folder to recompile parts of project
                 IFolder lib = getWebInfLibFolder(project);
                 lib.refreshLocal(IResource.DEPTH_ONE, null);
+
+                // TODO also handle adding Vaadin JAR to a project if the user
+                // has removed it and adds a different version?
+                if (currentVersion != null
+                        && vaadinJarVersion != null) {
+                    // update launches
+                    String oldVaadinJarName = currentVersion.getJarFileName();
+                    IPath vaadinJarPath = VaadinPluginUtil
+                            .findProjectVaadinJarPath(jproject);
+                    updateLaunchClassPath(project, oldVaadinJarName,
+                            vaadinJarPath);
+                    monitor.worked(1);
+                }
             } catch (JavaModelException e) {
                 throw newCoreException(
                         "Failed to update Vaadin jar in project", e);
@@ -521,6 +554,16 @@ public class VaadinPluginUtil {
         }
     }
 
+    /**
+     * Ensure that the project classpath contains the GWT libraries, adding them
+     * if necessary.
+     *
+     * Also update widgetset compilation launch configuration paths as needed.
+     *
+     * @param project
+     * @param monitor
+     * @throws CoreException
+     */
     public static void ensureGWTLibraries(IProject project,
             IProgressMonitor monitor)
             throws CoreException {
@@ -561,7 +604,7 @@ public class VaadinPluginUtil {
             monitor = new NullProgressMonitor();
         }
         try {
-            monitor.beginTask("Updating GWT libraries", 12);
+            monitor.beginTask("Updating GWT libraries", 14);
 
             String gwtVersion = getRequiredGWTVersionForProject(jproject);
             monitor.worked(1);
@@ -578,10 +621,12 @@ public class VaadinPluginUtil {
                     entries.add(entry);
                 }
 
-                IClasspathEntry gwtDev = JavaCore.newLibraryEntry(
-                        getGWTDevJarPath(jproject), null, null);
-                IClasspathEntry gwtUser = JavaCore.newLibraryEntry(
-                        getGWTUserJarPath(jproject), null, null);
+                IPath devJarPath = getGWTDevJarPath(jproject);
+                IClasspathEntry gwtDev = JavaCore.newLibraryEntry(devJarPath,
+                        null, null);
+                IPath userJarPath = getGWTUserJarPath(jproject);
+                IClasspathEntry gwtUser = JavaCore.newLibraryEntry(userJarPath,
+                        null, null);
 
                 // replace gwt-dev-[platform].jar if found, otherwise append new
                 // entry
@@ -595,6 +640,15 @@ public class VaadinPluginUtil {
                         .toArray(new IClasspathEntry[entries.size()]);
                 jproject.setRawClasspath(entryArray, null);
 
+                monitor.worked(1);
+
+                IProject project = jproject.getProject();
+
+                // update classpaths also in launches
+                updateLaunchClassPath(project, devJarName, devJarPath);
+                monitor.worked(1);
+
+                updateLaunchClassPath(project, "gwt-user.jar", userJarPath);
                 monitor.worked(1);
             } catch (JavaModelException e) {
                 throw newCoreException("addGWTLibraries failed", e);
@@ -621,6 +675,99 @@ public class VaadinPluginUtil {
             entries.add(newEntry);
         }
     }
+
+    /**
+     * Update the class path for program execution launch configurations
+     * referring to the given JAR file in their arguments (not the class path of
+     * the launch itself!). This is called when a JAR is replaced by a different
+     * version which may have a different name or location.
+     *
+     * The old JAR is identified by its file name without path. The JAR path is
+     * extracted by back-tracking from the JAR file name to the previous path
+     * separator and that full path is replaced with the given new path to a JAR
+     * file.
+     *
+     * This is primarily meant for updating the generated widgetset compilation
+     * launches, but will also modify certain other kinds of launches.
+     *
+     * @throws CoreException
+     */
+    private static void updateLaunchClassPath(IProject project, String jarName,
+            IPath jarPath) throws CoreException {
+        // list all launches
+        ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+        ILaunchConfigurationType type = manager
+                .getLaunchConfigurationType(IExternalToolConstants.ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE);
+        // it seems it is not possible to get the project for an external launch
+        // with the official APIs
+        // ILaunchConfiguration[] launchConfigurations = manager
+        // .getLaunchConfigurations(type);
+
+        // limit to launches that are top-level resources in the project of
+        // interest
+        for (IResource resource : project.members()) {
+            // identify the external launches referring to the JAR
+            if (resource instanceof IFile
+                    && "launch".equals(resource.getFileExtension())) {
+                ILaunchConfiguration launchConfiguration = manager
+                        .getLaunchConfiguration((IFile) resource);
+                if (launchConfiguration != null && launchConfiguration.exists()
+                        && type.equals(launchConfiguration.getType())) {
+                    String arguments = launchConfiguration.getAttribute(
+                            IExternalToolConstants.ATTR_TOOL_ARGUMENTS, "");
+                    if (arguments.contains(jarName)) {
+                        // update the classpath of a single launch
+                        updateLaunchClassPath(launchConfiguration, jarName,
+                                jarPath);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void updateLaunchClassPath(
+            ILaunchConfiguration launchConfiguration, String jarName,
+            IPath jarPath) throws CoreException {
+        // update a launch - careful about separators etc.
+        ILaunchConfigurationWorkingCopy workingCopy = launchConfiguration
+                .getWorkingCopy();
+
+        String arguments = launchConfiguration.getAttribute(
+                IExternalToolConstants.ATTR_TOOL_ARGUMENTS, "");
+
+        // find the JAR reference (from previous separator to the next) and
+        // replace it with the new path
+        String separators;
+        if ("windows".equals(VaadinPluginUtil.getPlatform())) {
+            separators = ";\"";
+        } else {
+            separators = ":\"";
+        }
+
+        // look for the JAR name potentially preceded with a path etc.
+        Pattern pattern = Pattern.compile("[" + separators + "]([^"
+                + separators + "]*"
+                + jarName + ")[" + separators + "]");
+        Matcher matcher = pattern.matcher(arguments);
+
+        String newPath = JavaRuntime.newArchiveRuntimeClasspathEntry(jarPath)
+                .getLocation();
+
+        // replace path from previous separator to the next
+        String result = arguments;
+        matcher.find();
+        for (int group = 1; group <= matcher.groupCount(); ++group) {
+            result = result.replace(matcher.group(group), newPath);
+            matcher.find();
+        }
+
+        workingCopy.setAttribute(IExternalToolConstants.ATTR_TOOL_ARGUMENTS,
+                result);
+
+        // save the launch
+        workingCopy.doSave();
+    }
+
 
     /**
      * TODO should first check if user has defined custom version of GWT to
