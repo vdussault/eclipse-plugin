@@ -1,4 +1,4 @@
-package com.vaadin.integration.eclipse;
+package com.vaadin.integration.eclipse.refactoring;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;

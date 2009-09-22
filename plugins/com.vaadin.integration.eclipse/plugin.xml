@@ -183,8 +183,8 @@
    <extension point="org.eclipse.ltk.core.refactoring.renameParticipants">
 	<renameParticipant
 		id="com.vaadin.integration.eclipse.WebContextRenameParticipant" 
-		name="Vaadin rename participant"
-		class="com.vaadin.integration.eclipse.WebContextRenameParticipant">
+		name="Vaadin web context rename participant"
+		class="com.vaadin.integration.eclipse.refactoring.WebContextRenameParticipant">
 		<enablement>
 			<with variable="affectedNatures">
 				<iterate operator="or">
@@ -197,8 +197,8 @@
    <extension point="org.eclipse.ltk.core.refactoring.moveParticipants">
 	<moveParticipant
 		id="com.vaadin.integration.eclipse.MoveParticipant" 
-		name="Vaadin move participant"
-		class="com.vaadin.integration.eclipse.WebContextMoveParticipant">
+		name="Vaadin web context move participant"
+		class="com.vaadin.integration.eclipse.refactoring.WebContextMoveParticipant">
 		<enablement>
 			<with variable="affectedNatures">
 				<iterate operator="or">
