@@ -193,12 +193,36 @@
 			</with>
 		</enablement>
 	</renameParticipant>
+	<renameParticipant
+		id="com.vaadin.integration.eclipse.LaunchRenameParticipant" 
+		name="Vaadin launch configuration rename participant"
+		class="com.vaadin.integration.eclipse.refactoring.LaunchRenameParticipant">
+		<enablement>
+			<with variable="affectedNatures">
+				<iterate operator="or">
+					<equals value="org.eclipse.jdt.core.javanature" />
+				</iterate>
+			</with>
+		</enablement>
+	</renameParticipant>
 </extension>
    <extension point="org.eclipse.ltk.core.refactoring.moveParticipants">
 	<moveParticipant
-		id="com.vaadin.integration.eclipse.MoveParticipant" 
+		id="com.vaadin.integration.eclipse.WebContextMoveParticipant" 
 		name="Vaadin web context move participant"
 		class="com.vaadin.integration.eclipse.refactoring.WebContextMoveParticipant">
+		<enablement>
+			<with variable="affectedNatures">
+				<iterate operator="or">
+					<equals value="org.eclipse.jdt.core.javanature" />
+				</iterate>
+			</with>
+		</enablement>
+	</moveParticipant>
+	<moveParticipant
+		id="com.vaadin.integration.eclipse.LaunchMoveParticipant" 
+		name="Vaadin launch configuration move participant"
+		class="com.vaadin.integration.eclipse.refactoring.LaunchMoveParticipant">
 		<enablement>
 			<with variable="affectedNatures">
 				<iterate operator="or">
