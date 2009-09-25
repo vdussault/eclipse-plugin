@@ -61,6 +61,7 @@ import org.osgi.framework.Bundle;
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
+import com.vaadin.integration.eclipse.variables.VaadinClasspathVariableInitializer;
 
 public class VaadinPluginUtil {
 
@@ -89,6 +90,8 @@ public class VaadinPluginUtil {
      * Handle an exception in a background thread or other non-UI context. The
      * handling primarily consists of tracing the exception.
      *
+     * @param severity
+     *            IStatus.OK, IStatus.INFO, IStatus.WARNING or IStatus.ERROR
      * @param message
      * @param ex
      */
@@ -621,12 +624,18 @@ public class VaadinPluginUtil {
                     entries.add(entry);
                 }
 
+                // use the VAADIN_DOWNLOAD_VARIABLE variable and variable
+                // classpath entries where feasible
+
                 IPath devJarPath = getGWTDevJarPath(jproject);
-                IClasspathEntry gwtDev = JavaCore.newLibraryEntry(devJarPath,
-                        null, null);
+                IClasspathEntry gwtDev = makeVariableClasspathEntry(
+                        VaadinClasspathVariableInitializer.VAADIN_DOWNLOAD_VARIABLE,
+                        devJarPath);
+
                 IPath userJarPath = getGWTUserJarPath(jproject);
-                IClasspathEntry gwtUser = JavaCore.newLibraryEntry(userJarPath,
-                        null, null);
+                IClasspathEntry gwtUser = makeVariableClasspathEntry(
+                        VaadinClasspathVariableInitializer.VAADIN_DOWNLOAD_VARIABLE,
+                        userJarPath);
 
                 // replace gwt-dev-[platform].jar if found, otherwise append new
                 // entry
@@ -657,6 +666,27 @@ public class VaadinPluginUtil {
             monitor.done();
         }
 
+    }
+
+    /**
+     * Create a variable-based classpath entry if the given path is under the
+     * target of the variable, an absolute one otherwise.
+     *
+     * @param variableName
+     * @param jarPath
+     * @return
+     */
+    private static IClasspathEntry makeVariableClasspathEntry(
+            String variableName, IPath jarPath) {
+        IPath variablePath = JavaCore.getClasspathVariable(variableName);
+        if (variablePath.isPrefixOf(jarPath)) {
+            // path starting with the variable name => relative to its content
+            IPath jarVariablePath = new Path(variableName).append(jarPath
+                    .makeRelativeTo(variablePath));
+            return JavaCore.newVariableEntry(jarVariablePath, null, null);
+        } else {
+            return JavaCore.newLibraryEntry(jarPath, null, null);
+        }
     }
 
     // replace an existing class path entry (identified by last segment name)
@@ -869,10 +899,22 @@ public class VaadinPluginUtil {
                 "getConfigurationPath found nowhere to store files", null);
     }
 
+    public static IPath getDownloadDirectory() throws CoreException {
+        IPath path = getConfigurationPath()
+                .append(IPath.SEPARATOR + "download");
+
+        // Create the directory if it does not exist
+        if (!path.toFile().exists()) {
+            path.toFile().mkdirs();
+        }
+
+        return path;
+    }
+
     public static IPath getDownloadDirectory(String identifier)
             throws CoreException {
-        IPath path = getConfigurationPath().append(
-                IPath.SEPARATOR + "download" + IPath.SEPARATOR + identifier);
+        IPath path = getDownloadDirectory()
+                .append(IPath.SEPARATOR + identifier);
 
         // Create the directory if it does not exist
         if (!path.toFile().exists()) {

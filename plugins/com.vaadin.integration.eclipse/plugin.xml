@@ -295,5 +295,13 @@
             </enabledWhen>
       </page>
    </extension>
+   <extension
+         point="org.eclipse.jdt.core.classpathVariableInitializer">
+      <classpathVariableInitializer
+            variable="VAADIN_DOWNLOAD"
+            class="com.vaadin.integration.eclipse.variables.VaadinClasspathVariableInitializer"
+            readOnly="true">
+      </classpathVariableInitializer>
+   </extension>
    
 </plugin>
