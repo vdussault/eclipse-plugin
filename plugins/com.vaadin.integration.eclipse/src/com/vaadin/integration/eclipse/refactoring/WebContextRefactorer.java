@@ -25,6 +25,7 @@ public class WebContextRefactorer extends VaadinTextFileRefactorer {
      * org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant#
      * createChange(org.eclipse.core.runtime.IProgressMonitor)
      */
+    @Override
     public Change createChange(IProgressMonitor pm) throws CoreException,
             OperationCanceledException {
         if (getSourceProject() == null) {
@@ -35,6 +36,9 @@ public class WebContextRefactorer extends VaadinTextFileRefactorer {
         if (webXml == null) {
             return null;
         }
+
+        // TODO could also handle widgetset XML file name change - other
+        // refactoring API?
 
         // TextChange change = getTextChange(webXml);
         // if (change == null) {

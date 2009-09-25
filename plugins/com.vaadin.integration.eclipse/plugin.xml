@@ -205,6 +205,18 @@
 			</with>
 		</enablement>
 	</renameParticipant>
+	<renameParticipant
+		id="com.vaadin.integration.eclipse.WidgetSetRenameParticipant" 
+		name="Vaadin widgetset rename participant"
+		class="com.vaadin.integration.eclipse.refactoring.WidgetSetRenameParticipant">
+		<enablement>
+			<with variable="affectedNatures">
+				<iterate operator="or">
+					<equals value="org.eclipse.jdt.core.javanature" />
+				</iterate>
+			</with>
+		</enablement>
+	</renameParticipant>
 </extension>
    <extension point="org.eclipse.ltk.core.refactoring.moveParticipants">
 	<moveParticipant
@@ -223,6 +235,18 @@
 		id="com.vaadin.integration.eclipse.LaunchMoveParticipant" 
 		name="Vaadin launch configuration move participant"
 		class="com.vaadin.integration.eclipse.refactoring.LaunchMoveParticipant">
+		<enablement>
+			<with variable="affectedNatures">
+				<iterate operator="or">
+					<equals value="org.eclipse.jdt.core.javanature" />
+				</iterate>
+			</with>
+		</enablement>
+	</moveParticipant>
+	<moveParticipant
+		id="com.vaadin.integration.eclipse.WidgetSetMoveParticipant" 
+		name="Vaadin widgetset move participant"
+		class="com.vaadin.integration.eclipse.refactoring.WidgetSetMoveParticipant">
 		<enablement>
 			<with variable="affectedNatures">
 				<iterate operator="or">
