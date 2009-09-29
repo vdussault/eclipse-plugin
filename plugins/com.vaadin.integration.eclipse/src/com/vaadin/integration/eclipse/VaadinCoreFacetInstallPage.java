@@ -76,6 +76,7 @@ public class VaadinCoreFacetInstallPage extends J2EEModuleFacetInstallPage
         applicationCreateArtifacts = new Button(applicationGroup, SWT.CHECK);
         applicationCreateArtifacts.setText("Create project template");
         applicationCreateArtifacts.setLayoutData(gdhfill());
+        // TODO handle with enablement like portlet creation
         applicationCreateArtifacts
                 .addSelectionListener(new SelectionListener() {
                     public void widgetDefaultSelected(SelectionEvent e) {
@@ -128,17 +129,6 @@ public class VaadinCoreFacetInstallPage extends J2EEModuleFacetInstallPage
         applicationCreatePortlet = new Button(portletGroup, SWT.CHECK);
         applicationCreatePortlet.setText("Create portlet configuration");
         applicationCreatePortlet.setLayoutData(gdhfill());
-        applicationCreatePortlet.addSelectionListener(new SelectionListener() {
-            public void widgetDefaultSelected(SelectionEvent e) {
-                portletTitleField.setEnabled(applicationCreatePortlet
-                        .getSelection());
-            }
-
-            public void widgetSelected(SelectionEvent e) {
-                portletTitleField.setEnabled(applicationCreatePortlet
-                        .getSelection());
-            }
-        });
         synchHelper.synchCheckbox(applicationCreatePortlet, CREATE_PORTLET,
                 null);
 

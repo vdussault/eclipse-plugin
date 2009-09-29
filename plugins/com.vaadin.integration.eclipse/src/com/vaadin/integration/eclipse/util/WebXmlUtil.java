@@ -22,12 +22,13 @@ import org.eclipse.jst.j2ee.webapplication.WebapplicationFactory;
 public class WebXmlUtil {
 
     public static final String VAADIN_SERVLET_CLASS = "terminal.gwt.server.ApplicationServlet";
+    public static final String VAADIN_GAE_SERVLET_CLASS = "terminal.gwt.server.GAEApplicationServlet";
     public static final String VAADIN_APPLICATION_CLASS_PARAMETER = "application";
     public static final String VAADIN_WIDGETSET_PARAMETER = "widgetset";
 
     /**
      * Adds a servlet and its mapping to web.xml.
-     * 
+     *
      * @param artifact
      * @param applicationName
      * @param applicationClass
@@ -35,13 +36,12 @@ public class WebXmlUtil {
      */
     @SuppressWarnings("unchecked")
     public static void addServlet(WebApp webApp, String applicationName,
-            String applicationClass, String urlPattern,
-            String vaadinPackagePrefix) {
+            String applicationClass, String urlPattern, String servletClassName) {
 
         /* Create servlet type compatible with Vaadin */
         ServletType servletType = WebapplicationFactory.eINSTANCE
                 .createServletType();
-        servletType.setClassName(vaadinPackagePrefix + VAADIN_SERVLET_CLASS);
+        servletType.setClassName(servletClassName);
 
         /* Create servlet definition */
         Servlet servlet = WebapplicationFactory.eINSTANCE.createServlet();
@@ -65,7 +65,7 @@ public class WebXmlUtil {
 
     /**
      * Adds the given context parameter to web.xml
-     * 
+     *
      * @param webApp
      * @param name
      * @param value
@@ -187,7 +187,7 @@ public class WebXmlUtil {
 
     /**
      * Updates the widgetset parameter for all Vaadin applications in web.xml
-     * 
+     *
      * @param artifact
      * @param widgetsetname
      */
@@ -217,7 +217,7 @@ public class WebXmlUtil {
     /**
      * Checks if the servlet is an Vaadin application servlet and returns its
      * class name or null if not a Vaadin application.
-     * 
+     *
      * @param webApp
      * @param servlet
      * @return

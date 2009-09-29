@@ -14,7 +14,9 @@ import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
+import com.vaadin.integration.eclipse.configuration.VaadinFacetInstallDataModelProvider;
 import com.vaadin.integration.eclipse.util.DownloadUtils;
+import com.vaadin.integration.eclipse.util.GaeConfigurationUtil;
 import com.vaadin.integration.eclipse.util.PortletConfigurationUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.util.WebXmlUtil;
@@ -132,6 +134,11 @@ public class CoreFacetInstallDelegate implements IDelegate,
                 appPackage.createCompilationUnit(applicationFileName,
                         applicationCode, false, monitor);
 
+                String projectType = model
+                        .getStringProperty(VAADIN_PROJECT_TYPE);
+                boolean gaeProject = VaadinFacetInstallDataModelProvider.PROJECT_TYPE_GAE
+                        .equals(projectType);
+
                 /* Update web.xml */
                 WebArtifactEdit artifact = WebArtifactEdit
                         .getWebArtifactEditForWrite(project);
@@ -140,10 +147,13 @@ public class CoreFacetInstallDelegate implements IDelegate,
                     if (model.getBooleanProperty(CREATE_PORTLET)) {
                         servletPath = "/" + servletName + servletPath;
                     }
+                    String servletClassName = vaadinPackagePrefix
+                            + (gaeProject ? WebXmlUtil.VAADIN_GAE_SERVLET_CLASS
+                                    : WebXmlUtil.VAADIN_SERVLET_CLASS);
                     WebXmlUtil.addServlet(artifact.getWebApp(),
                             applicationName, applicationPackage + "."
                                     + applicationClass, servletPath,
-                            vaadinPackagePrefix);
+                            servletClassName);
                     WebXmlUtil.addContextParameter(artifact.getWebApp(),
                             VAADIN_PRODUCTION_MODE, "false",
                             VAADIN_PRODUCTION_MODE_DESCRIPTION);
@@ -163,6 +173,11 @@ public class CoreFacetInstallDelegate implements IDelegate,
                             vaadinPackagePrefix
                                     + "terminal.gwt.server.ApplicationPortlet",
                             portletName, portletTitle, category);
+                }
+
+                // create appengine-web.xml
+                if (gaeProject) {
+                    GaeConfigurationUtil.createAppEngineWebXml(project);
                 }
             }
             monitor.worked(1);

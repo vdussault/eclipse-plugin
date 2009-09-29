@@ -22,7 +22,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.core.JavaModelException;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
@@ -72,50 +71,14 @@ public class PortletConfigurationUtil {
         return VaadinPluginUtil.getWebInfFolder(project).getFile(filename);
     }
 
-    /**
-     * Create a portlet configuration file from a template if it does not exist.
-     *
-     * @param project
-     * @param filename
-     * @param template
-     * @throws CoreException
-     */
-    @SuppressWarnings("unchecked")
-    private static IFile ensureFileFromTemplate(IProject project,
-            String filename, String template) throws CoreException {
-
-        try {
-            IFile file = getPortletConfigurationFile(project, filename);
-
-            if (file.exists()) {
-                return file;
-            }
-
-            String stub = VaadinPluginUtil.readTextFromTemplate(template);
-
-            ByteArrayInputStream stubstream = new ByteArrayInputStream(stub
-                    .getBytes());
-
-            file.create(stubstream, true, null);
-
-            return file;
-
-        } catch (JavaModelException e) {
-            throw VaadinPluginUtil.newCoreException("Failed to create "
-                    + filename + " file", e);
-        } catch (IOException e) {
-            throw VaadinPluginUtil.newCoreException("Failed to create "
-                    + filename + " file", e);
-        }
-    }
-
     private static void addPortletToPortletsXml(IProject project,
             String servletName, String portletClass, String portletName,
             String portletTitle) throws CoreException {
         try {
             // create the file if it does not exist
-            IFile portletsXmlFile = ensureFileFromTemplate(project,
-                    "portlet.xml", "portletsxmlstub.txt");
+            IFile portletsXmlFile = VaadinPluginUtil.ensureFileFromTemplate(
+                    getPortletConfigurationFile(project, "portlet.xml"),
+                    "portletsxmlstub.txt");
 
             // prepare the portlet section from template
             String portletstub = VaadinPluginUtil
@@ -150,8 +113,10 @@ public class PortletConfigurationUtil {
             String portletName) throws CoreException {
         try {
             // create the file if it does not exist
-            IFile portletXmlFile = ensureFileFromTemplate(project,
-                    "liferay-portlet.xml", "liferayportletxmlstub.txt");
+            IFile portletXmlFile = VaadinPluginUtil
+                    .ensureFileFromTemplate(
+                    getPortletConfigurationFile(project, "liferay-portlet.xml"),
+                    "liferayportletxmlstub.txt");
 
             // prepare the portlet section from template
             String portletstub = VaadinPluginUtil
@@ -172,8 +137,9 @@ public class PortletConfigurationUtil {
     private static void addPortletToLiferayDisplayXml(IProject project,
             String portletName, String category) throws CoreException {
         // create the file if it does not exist
-        IFile portletXmlFile = ensureFileFromTemplate(project,
-                "liferay-display.xml", "liferaydisplayxmlstub.txt");
+        IFile portletXmlFile = VaadinPluginUtil.ensureFileFromTemplate(
+                getPortletConfigurationFile(project, "liferay-display.xml"),
+                "liferaydisplayxmlstub.txt");
 
         // add the portlet section to the category
         // create the category section if does not exist

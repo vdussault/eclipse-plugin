@@ -7,10 +7,17 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jst.common.project.facet.IJavaFacetInstallDataModelProperties;
+import org.eclipse.jst.common.project.facet.JavaFacetUtils;
+import org.eclipse.jst.j2ee.internal.J2EEConstants;
 import org.eclipse.jst.j2ee.internal.common.J2EEVersionUtil;
 import org.eclipse.jst.j2ee.internal.plugin.J2EEPlugin;
 import org.eclipse.jst.j2ee.internal.plugin.J2EEPreferences;
+import org.eclipse.jst.j2ee.project.facet.IJ2EEFacetConstants;
 import org.eclipse.jst.j2ee.project.facet.J2EEModuleFacetInstallDataModelProvider;
+import org.eclipse.jst.j2ee.web.project.facet.IWebFacetInstallDataModelProperties;
+import org.eclipse.wst.common.componentcore.datamodel.properties.IFacetProjectCreationDataModelProperties;
+import org.eclipse.wst.common.componentcore.datamodel.properties.IFacetProjectCreationDataModelProperties.FacetDataModelMap;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelPropertyDescriptor;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
@@ -28,6 +35,17 @@ import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
 public class VaadinFacetInstallDataModelProvider extends
         J2EEModuleFacetInstallDataModelProvider implements
         IVaadinFacetInstallDataModelProperties {
+
+    // these project type constants also serve as the labels for the project
+    // types, and the selected value goes into the project creation data model
+    // - these are Strings to be able to use them in SWT Combo widgets
+    public static final String PROJECT_TYPE_SERVLET = "Servlet (default)";
+    public static final String PROJECT_TYPE_GAE = "Google App Engine servlet";
+    public static final String PROJECT_TYPE_PORTLET = "Generic portlet";
+
+    // allowed project types in display order, default first
+    public static final String[] PROJECT_TYPES = new String[] {
+            PROJECT_TYPE_SERVLET, PROJECT_TYPE_GAE, PROJECT_TYPE_PORTLET };
 
     private static final String BASE_PACKAGE_NAME = "com.example";
 
@@ -47,6 +65,7 @@ public class VaadinFacetInstallDataModelProvider extends
         names.add(CREATE_PORTLET);
         names.add(PORTLET_TITLE);
         names.add(VAADIN_VERSION);
+        names.add(VAADIN_PROJECT_TYPE);
         return names;
     }
 
@@ -122,6 +141,8 @@ public class VaadinFacetInstallDataModelProvider extends
             }
         } else if (propertyName.equals(FACET_ID)) {
             return VaadinFacetUtils.VAADIN_FACET_ID;
+        } else if (propertyName.equals(VAADIN_PROJECT_TYPE)) {
+            return PROJECT_TYPE_SERVLET;
         }
         return super.getDefaultProperty(propertyName);
     }
@@ -147,8 +168,60 @@ public class VaadinFacetInstallDataModelProvider extends
                 VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
                         "Failed to update Vaadin version list", e);
             }
-         }
+        } else if (CREATE_PORTLET.equals(propertyName)) {
+            // notify about a change of enablement for sub-properties
+            model.notifyPropertyChange(PORTLET_TITLE, IDataModel.ENABLE_CHG);
+        } else if (VAADIN_PROJECT_TYPE.equals(propertyName)) {
+            // set directory structure based on the selected project type
+            useGaeDirectoryStructure(PROJECT_TYPE_GAE.equals(propertyValue));
+
+            // set portlet creation flag
+            boolean createPortlet = PROJECT_TYPE_PORTLET.equals(propertyValue);
+            setProperty(CREATE_PORTLET, Boolean.valueOf(createPortlet));
+            model.notifyPropertyChange(CREATE_PORTLET, IDataModel.VALUE_CHG);
+        }
         return super.propertySet(propertyName, propertyValue);
+    }
+
+    /**
+     * Set up the directory layout (context root dir and output folder) for
+     * default or Google App Engine configuration.
+     *
+     * @param useGae
+     */
+    private void useGaeDirectoryStructure(boolean useGae) {
+        // obtain the master model which has links to other facet models
+        IDataModel masterModel = (IDataModel) model
+                .getProperty(MASTER_PROJECT_DM);
+        FacetDataModelMap map = (FacetDataModelMap) masterModel
+                .getProperty(IFacetProjectCreationDataModelProperties.FACET_DM_MAP);
+
+        IDataModel webFacet = map
+                .getFacetDataModel(IJ2EEFacetConstants.DYNAMIC_WEB);
+        IDataModel javaFacet = map.getFacetDataModel(JavaFacetUtils.JAVA_FACET
+                .getId());
+
+        // context root dir: war
+        String webRoot = useGae ? "war" : "WebContent";
+        webFacet.setStringProperty(
+                IWebFacetInstallDataModelProperties.CONFIG_FOLDER, webRoot);
+
+        // output folder: "<content folder>/WEB-INF/classes"
+        String outputDir = useGae ? webRoot + "/"
+                + J2EEConstants.WEB_INF_CLASSES : "build/classes";
+        javaFacet
+                .setProperty(
+                        IJavaFacetInstallDataModelProperties.DEFAULT_OUTPUT_FOLDER_NAME,
+                        outputDir);
+    }
+
+    @Override
+    public boolean isPropertyEnabled(String propertyName) {
+        if (PORTLET_TITLE.equals(propertyName)
+                && !getBooleanProperty(CREATE_PORTLET)) {
+            return false;
+        }
+        return super.isPropertyEnabled(propertyName);
     }
 
     @Override
