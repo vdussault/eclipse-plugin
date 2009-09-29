@@ -200,9 +200,14 @@ public class PortletConfigurationUtil {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory
                     .newInstance();
             docFactory.setValidating(false);
+            docFactory.setSchema(null);
             docFactory.setAttribute(
                     "http://apache.org/xml/features/dom/defer-node-expansion",
                     Boolean.FALSE);
+            docFactory
+                    .setAttribute(
+                            "http://apache.org/xml/features/nonvalidating/load-external-dtd",
+                            Boolean.FALSE);
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             input = portletsXmlFile.getContents();
             Document doc = docBuilder.parse(input);
