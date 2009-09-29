@@ -1,6 +1,7 @@
 package com.vaadin.integration.eclipse.util;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -291,6 +292,41 @@ public class VaadinPluginUtil {
             return null;
         } catch (JavaModelException e) {
             throw newCoreException("Unable to locate source folder", e);
+        }
+    }
+
+    /**
+     * Create a configuration file from a template if it does not exist.
+     *
+     * @param file
+     *            the file to create from template
+     * @param template
+     * @throws CoreException
+     */
+    @SuppressWarnings("unchecked")
+    public static IFile ensureFileFromTemplate(IFile file, String template)
+            throws CoreException {
+
+        try {
+            if (file.exists()) {
+                return file;
+            }
+
+            String stub = VaadinPluginUtil.readTextFromTemplate(template);
+
+            ByteArrayInputStream stubstream = new ByteArrayInputStream(stub
+                    .getBytes());
+
+            file.create(stubstream, true, null);
+
+            return file;
+
+        } catch (JavaModelException e) {
+            throw VaadinPluginUtil.newCoreException("Failed to create "
+                    + file.getName() + " file", e);
+        } catch (IOException e) {
+            throw VaadinPluginUtil.newCoreException("Failed to create "
+                    + file.getName() + " file", e);
         }
     }
 
@@ -682,7 +718,7 @@ public class VaadinPluginUtil {
         if (variablePath.isPrefixOf(jarPath)) {
             // path starting with the variable name => relative to its content
             IPath jarVariablePath = new Path(variableName).append(jarPath
-                    .makeRelativeTo(variablePath));
+                    .removeFirstSegments(variablePath.segmentCount()));
             return JavaCore.newVariableEntry(jarVariablePath, null, null);
         } else {
             return JavaCore.newLibraryEntry(jarPath, null, null);
