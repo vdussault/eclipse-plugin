@@ -489,6 +489,7 @@ public class DownloadUtils {
             listDownloadableVaadinVersions(information, versions,
                     information.branchDepth, "/");
 
+            Collections.reverse(versions);
             return versions;
         } catch (Exception e) {
             throw VaadinPluginUtil.newCoreException(

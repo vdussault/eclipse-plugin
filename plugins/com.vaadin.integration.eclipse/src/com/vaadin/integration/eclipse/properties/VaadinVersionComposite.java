@@ -2,6 +2,7 @@ package com.vaadin.integration.eclipse.properties;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,26 @@ public class VaadinVersionComposite extends Composite {
 
     private static class DownloadVaadinDialog extends
             AbstractElementListSelectionDialog {
+
+        /**
+         * This is an ugly and inefficient hack: as sorting cannot be disabled
+         * for AbstractElementListSelectionDialog, use a comparator that
+         * compares the positions of the elements in a reference list.
+         */
+        private static class VersionStringComparator implements
+                Comparator<String> {
+            private Map<String, Integer> positions = new HashMap<String, Integer>();
+
+            public VersionStringComparator(List<Version> versionList) {
+                for (int i = 0; i < versionList.size(); ++i) {
+                    positions.put(versionList.get(i).toString(), i);
+                }
+            }
+
+            public int compare(String o1, String o2) {
+                return positions.get(o1) - positions.get(o2);
+            }
+        }
 
         public DownloadVaadinDialog(Shell parent) {
             super(parent, new LabelProvider());
@@ -101,6 +122,8 @@ public class VaadinVersionComposite extends Composite {
                 available.removeAll(DownloadUtils.getLocalVaadinJarVersions());
 
                 Version[] versions = available.toArray(new Version[0]);
+                fFilteredList.setComparator(new VersionStringComparator(
+                        available));
                 setListElements(versions);
 
                 // try to preserve selection
