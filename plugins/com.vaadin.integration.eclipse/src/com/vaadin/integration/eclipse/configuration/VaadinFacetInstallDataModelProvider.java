@@ -124,7 +124,12 @@ public class VaadinFacetInstallDataModelProvider extends
         } else if (propertyName.equals(CREATE_PORTLET)) {
             return Boolean.FALSE;
         } else if (propertyName.equals(PORTLET_TITLE)) {
-            return "Portlet Title";
+            Object projectName = getProperty(FACET_PROJECT_NAME);
+            if (projectName == null) {
+                return "Portlet Title";
+            } else {
+                return projectName.toString();
+            }
         } else if (propertyName.equals(VAADIN_VERSION)) {
             try {
                 Version latestLocal = DownloadUtils
@@ -154,6 +159,7 @@ public class VaadinFacetInstallDataModelProvider extends
             resetProperty(APPLICATION_NAME, DEFAULT_APPLICATION_NAME);
             resetProperty(APPLICATION_PACKAGE, DEFAULT_APPLICATION_PACKAGE);
             resetProperty(APPLICATION_CLASS, DEFAULT_APPLICATION_CLASS);
+            resetProperty(PORTLET_TITLE, null);
         }
         // notify of valid values change
         if (VAADIN_VERSION.equals(propertyName)
