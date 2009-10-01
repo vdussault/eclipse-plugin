@@ -301,9 +301,10 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
                 compilerClass = "com.vaadin.tools.WidgetsetCompiler";
             }
 
+            String wsDirString = wsDir.getProjectRelativePath()
+                    .toPortableString();
             String arguments = vmargs + " -classpath \"" + classPath + "\" "
-                    + compilerClass + " -out WebContent/" + resourceDirectory
-                    + "/widgetsets " + moduleName;
+                    + compilerClass + " -out " + wsDirString + " " + moduleName;
 
             workingCopy.setAttribute(
                     IExternalToolConstants.ATTR_TOOL_ARGUMENTS, arguments);
