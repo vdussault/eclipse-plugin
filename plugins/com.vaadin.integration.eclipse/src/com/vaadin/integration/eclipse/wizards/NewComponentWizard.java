@@ -159,6 +159,11 @@ public class NewComponentWizard extends Wizard implements INewWizard {
         try {
             IType widgetSet = javaProject.findType(widgetSetName);
 
+            if (widgetSet == null) {
+                throw VaadinPluginUtil.newCoreException(
+                        "No widgetset selected", null);
+            }
+
             IPackageFragmentRoot packageFragmentRoot = page
                     .getPackageFragmentRoot();
 
