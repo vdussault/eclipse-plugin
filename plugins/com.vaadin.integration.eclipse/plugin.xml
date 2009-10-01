@@ -54,38 +54,6 @@
       
    </extension>
    <extension
-         point="org.eclipse.wst.common.project.facet.core.presets">
-      <static-preset
-            id="com.vaadin.integration.eclipse.preset">
-         <label>
-            Vaadin Project
-         </label>
-         <description>
-            Creates a web project which uses Vaadin
-         </description>
-         <facet
-               id="jst.java"
-               version="5.0">
-         </facet>
-         <facet
-               id="jst.web"
-               version="2.3">
-         </facet>
-         <facet
-               id="jst.web"
-               version="2.4">
-         </facet>
-         <facet
-               id="jst.web"
-               version="2.5">
-         </facet>
-         <facet
-               id="com.vaadin.integration.eclipse.core"
-               version="0.1">
-         </facet>
-      </static-preset>
-   </extension>
-   <extension
          point="org.eclipse.wst.common.project.facet.core.runtimes">
       <supported>
          <facet
