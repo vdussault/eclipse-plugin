@@ -92,7 +92,9 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
 
             if (extWidgetSetNameText != null) {
                 for (IType ws : wsSubtypes) {
-                    extWidgetSetNameText.add(ws.getFullyQualifiedName());
+                    if (project.equals(ws.getResource().getProject())) {
+                        extWidgetSetNameText.add(ws.getFullyQualifiedName());
+                    }
                 }
 
                 // check that there is a widgetset before selecting one
