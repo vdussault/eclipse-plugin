@@ -13,8 +13,10 @@ public class VaadinFacetUtils {
 
     public static final IProjectFacet VAADIN_FACET = ProjectFacetsManager
             .getProjectFacet(VAADIN_FACET_ID);
-    public static final IProjectFacetVersion VAADIN_01 = VAADIN_FACET
-            .getVersion("0.1");
+    // public static final IProjectFacetVersion VAADIN_01 = VAADIN_FACET
+    // .getVersion("0.1");
+    public static final IProjectFacetVersion VAADIN_10 = VAADIN_FACET
+            .getVersion("1.0");
 
     /**
      * Check whether a project has the Vaadin project nature.

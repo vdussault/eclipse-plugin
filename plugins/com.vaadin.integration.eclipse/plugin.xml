@@ -12,7 +12,7 @@
       </project-facet>
       <project-facet-version
             facet="com.vaadin.integration.eclipse.core"
-            version="0.1">
+            version="1.0">
          <constraint>
          <and>
             <requires
@@ -43,6 +43,14 @@
             type="uninstall">
          <delegate
                class="com.vaadin.integration.eclipse.CoreFacetUninstallDelegate">
+         </delegate>
+      </action>
+      <action
+            facet="com.vaadin.integration.eclipse.core"
+            id="com.vaadin.integration.eclipse.core-version-change"
+            type="version-change">
+         <delegate
+               class="com.vaadin.integration.eclipse.CoreFacetVersionChangeDelegate">
          </delegate>
       </action>
       <template id="template.vaadin">
