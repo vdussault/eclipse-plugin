@@ -1119,7 +1119,10 @@ public class VaadinPluginUtil {
         }
         List<IType> types = new ArrayList<IType>();
         for (IType subclass : subTypes) {
-            if (subclass.isResolved() && !subclass.isBinary()) {
+            // #3441 for some reason, getAllSubtypes fetches types that are in
+            // the project AND those open in editors => filter for project
+            if (subclass.isResolved() && !subclass.isBinary()
+                    && javaProject.equals(subclass.getJavaProject())) {
                 types.add(subclass);
             }
         }
