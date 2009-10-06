@@ -279,5 +279,85 @@
             readOnly="true">
       </classpathVariableInitializer>
    </extension>
+   <extension
+         id="widgetsetBuilder"
+         name="Widgetset Builder"
+         point="org.eclipse.core.resources.builders">
+      <builder
+            hasNature="true">
+         <run
+               class="com.vaadin.integration.eclipse.builder.WidgetsetBuilder">
+         </run>
+      </builder>
+   </extension>
+   <extension
+         id="widgetsetNature"
+         name="Widgetset Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="com.vaadin.integration.eclipse.builder.WidgetsetNature">
+         </run>
+      </runtime>
+      <builder
+            id="com.vaadin.integration.eclipse.widgetsetBuilder">
+      </builder>
+   </extension>
    
+   
+   <!-- TODO make the commands/buttons/handlers so that compile widgetset is 
+    "dropdown button" with all available compilable widgetsets.   -->
+   
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="com.vaadin.integration.eclipse.commands.category"
+            name="Vaadin Category">
+      </category>
+      <command
+            categoryId="com.vaadin.integration.eclipse.commands.category"
+            id="com.vaadin.integration.eclipse.commands.compileWidgetsetCommand"
+            name="Compile Widgetset Command">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="com.vaadin.integration.eclipse.handlers.CompileWidgetsetHandler"
+            commandId="com.vaadin.integration.eclipse.commands.compileWidgetsetCommand">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="com.vaadin.integration.eclipse.commands.compileWidgetsetCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+6">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+         <!-- TODO add this to some better place -->
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.workbench.project">
+            <command
+                  commandId="com.vaadin.integration.eclipse.commands.compileWidgetsetCommand"
+                  id="com.vaadin.integration.eclipse.menus.compileWidgetsetCommand"
+                  mnemonic="S">
+            </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="com.vaadin.integration.eclipse.toolbars.vaadinToolbar">
+            <command
+                  commandId="com.vaadin.integration.eclipse.commands.compileWidgetsetCommand"
+                  icon="icons/vaadin-icon-16.png"
+                  id="com.vaadin.integration.eclipse.toolbars.compileWidgetsetCommand"
+                  tooltip="Compile widgetset">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
 </plugin>

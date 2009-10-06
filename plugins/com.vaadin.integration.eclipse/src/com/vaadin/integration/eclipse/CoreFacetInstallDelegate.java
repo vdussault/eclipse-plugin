@@ -14,6 +14,7 @@ import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
+import com.vaadin.integration.eclipse.builder.WidgetsetNature;
 import com.vaadin.integration.eclipse.configuration.VaadinFacetInstallDataModelProvider;
 import com.vaadin.integration.eclipse.util.DownloadUtils;
 import com.vaadin.integration.eclipse.util.GaeConfigurationUtil;
@@ -178,6 +179,12 @@ public class CoreFacetInstallDelegate implements IDelegate,
                 // create appengine-web.xml
                 if (gaeProject) {
                     GaeConfigurationUtil.createAppEngineWebXml(project);
+                }
+
+                // TODO true for 6.2 and later
+                boolean isNewWidgetSetStyleProject = true;
+                if (isNewWidgetSetStyleProject) {
+                    WidgetsetNature.addWidgetsetNature(project);
                 }
             }
             monitor.worked(1);
