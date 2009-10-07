@@ -14,9 +14,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
@@ -1267,7 +1269,49 @@ public class VaadinPluginUtil {
             }
         }
         return false;
+    }
 
+    private static boolean isNeededForWidgetsetCompilation(IResource resource) {
+        URL url;
+        if (resource instanceof IFile && resource.getName().endsWith(".jar")) {
+            IFile file = (IFile) resource;
+            if (file.exists()) {
+
+                try {
+                    url = new URL(file.getLocationURI().toString());
+                    url = new URL("jar:" + url.toExternalForm() + "!/");
+                    JarURLConnection conn = (JarURLConnection) url
+                            .openConnection();
+                    JarFile jarFile = conn.getJarFile();
+                    Manifest manifest = jarFile.getManifest();
+                    Attributes mainAttributes = manifest.getMainAttributes();
+                    if (mainAttributes.getValue("Vaadin-Widgetsets") != null) {
+                        return true;
+                    } else {
+                        // not a vaadin widget package, but it still may be
+                        // needed for referenced gwt modules (cant know for
+                        // sure)
+
+                        Enumeration<JarEntry> entries = jarFile.entries();
+                        while (entries.hasMoreElements()) {
+                            JarEntry nextElement = entries.nextElement();
+                            if (nextElement.getName().endsWith(".gwt.xml")) {
+                                return true;
+                            }
+                        }
+                    }
+                } catch (MalformedURLException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            } else {
+                // detect if is jar and if in widgetset
+            }
+        }
+        return false;
     }
 
     /**
@@ -1285,13 +1329,19 @@ public class VaadinPluginUtil {
         IFolder folder = project.getProject().getFolder(
                 "WebContent/WEB-INF/lib");
         folder.accept(new IResourceVisitor() {
-            public boolean visit(IResource arg0) throws CoreException {
-                if (isWidgetsetPackage(arg0)) {
-                    vaadinpackages.add(arg0.getRawLocation());
+            public boolean visit(IResource resource) throws CoreException {
+                if (isNeededForWidgetsetCompilation(resource)) {
+                    vaadinpackages.add(resource.getRawLocation());
+                    return true;
                 }
                 return true;
             }
         });
+
+        // TODO should iterate project classpath too. Referenced gwt modules
+        // (without any server side code like google-maps.jar) should not need
+        // to be in web-inf/lib, but just manually added for project classpath
+
         return vaadinpackages;
     }
 
@@ -1353,6 +1403,7 @@ public class VaadinPluginUtil {
         IRuntimeClasspathEntry systemLibsEntry = JavaRuntime
                 .newVariableRuntimeClasspathEntry(new Path(
                         JavaRuntime.JRELIB_VARIABLE));
+
         classPath = systemLibsEntry.getLocation();
 
         IRuntimeClasspathEntry gwtdev = JavaRuntime

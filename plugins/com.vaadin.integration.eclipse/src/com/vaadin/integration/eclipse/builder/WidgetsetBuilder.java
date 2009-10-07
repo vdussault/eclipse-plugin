@@ -30,6 +30,8 @@ import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 public class WidgetsetBuilder extends IncrementalProjectBuilder {
 
+    boolean widgetsetBuildPending = false;
+
     class SampleDeltaVisitor implements IResourceDeltaVisitor {
         private IProgressMonitor monitor;
 
@@ -170,46 +172,55 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
     private void runWidgetSetBuildTool(final IProgressMonitor monitor)
             throws CoreException {
 
-        final IJavaProject p = JavaCore.create(getProject());
+        if (!widgetsetBuildPending) {
+            widgetsetBuildPending = true;
+            final IJavaProject p = JavaCore.create(getProject());
 
-        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+            PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 
-            public void run() {
-                Shell shell = PlatformUI.getWorkbench()
-                        .getActiveWorkbenchWindow().getShell();
+                public void run() {
+                    Shell shell = PlatformUI.getWorkbench()
+                            .getActiveWorkbenchWindow().getShell();
 
-                boolean openQuestion = MessageDialog
-                        .openQuestion(shell, "Compile widgetset",
-                                "Your client side code might need a recompilation. Compile widgetset now?");
-                if (openQuestion) {
+                    boolean openQuestion = MessageDialog
+                            .openQuestion(shell, "Compile widgetset",
+                                    "Your client side code might need a recompilation. Compile widgetset now?");
+                    if (openQuestion) {
 
-                    Job job = new Job("Compiling widgetset...") {
-                        @Override
-                        protected IStatus run(IProgressMonitor monitor) {
-                            monitor.beginTask("Compiling wigetset", 100);
-                            try {
-                                VaadinPluginUtil.compileWidgetset(p, monitor);
-                            } catch (CoreException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            } catch (IOException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            } catch (InterruptedException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
+                        Job job = new Job("Compiling widgetset...") {
+                            @Override
+                            protected IStatus run(IProgressMonitor monitor) {
+                                widgetsetBuildPending = false;
+                                monitor.beginTask("Compiling wigetset", 100);
+                                try {
+                                    VaadinPluginUtil.compileWidgetset(p,
+                                            monitor);
+                                } catch (CoreException e) {
+                                    // TODO Auto-generated catch block
+                                    e.printStackTrace();
+                                } catch (IOException e) {
+                                    // TODO Auto-generated catch block
+                                    e.printStackTrace();
+                                } catch (InterruptedException e) {
+                                    // TODO Auto-generated catch block
+                                    e.printStackTrace();
+                                }
+                                monitor.worked(100);
+                                monitor.done();
+                                return Status.OK_STATUS;
                             }
-                            monitor.worked(100);
-                            monitor.done();
-                            return Status.OK_STATUS;
-                        }
-                    };
+                        };
 
-                    job.setUser(false);
-                    job.schedule();
+                        job.setUser(false);
+                        // lazily run job to let possible other changes modify
+                        // project state, like dragging multiple jar files to
+                        // classpath
+                        job.schedule(500);
+                    }
                 }
-            }
-        });
+            });
+
+        }
 
     }
 
