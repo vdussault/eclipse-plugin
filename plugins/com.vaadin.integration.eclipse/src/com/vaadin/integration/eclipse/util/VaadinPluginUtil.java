@@ -1212,7 +1212,7 @@ public class VaadinPluginUtil {
         if (appWithShortestPackageName != null) {
             String fullyQualifiedName = appWithShortestPackageName
                     .getFullyQualifiedName()
-                    + "WidgetSet";
+                    + "Widgetset";
 
             System.out.println("Not widget set found, " + fullyQualifiedName
                     + " will be created...");
@@ -1326,6 +1326,8 @@ public class VaadinPluginUtil {
     public static Collection<IPath> getAvailableVaadinWidgetsetPackages(
             IJavaProject project) throws CoreException {
         final Collection<IPath> vaadinpackages = new HashSet<IPath>();
+
+        // TODO hardcoded path
         IFolder folder = project.getProject().getFolder(
                 "WebContent/WEB-INF/lib");
         folder.accept(new IResourceVisitor() {
@@ -1362,10 +1364,8 @@ public class VaadinPluginUtil {
      * @throws InterruptedException
      */
     public static void compileWidgetset(IJavaProject project,
-            final IProgressMonitor monitor) throws CoreException, IOException,
-            InterruptedException {
-        String widgetset = getWidgetSet(project, monitor);
-
+            String moduleName, final IProgressMonitor monitor)
+            throws CoreException, IOException, InterruptedException {
         ArrayList<String> args = new ArrayList<String>();
 
         IVMInstall vmInstall = JavaRuntime.getDefaultVMInstall();
@@ -1432,8 +1432,11 @@ public class VaadinPluginUtil {
 
         // construct rest of the arguments for the launch
 
-        String moduleName = widgetset;
-        moduleName = moduleName.replace(".client.", ".");
+        if (moduleName == null) {
+            String widgetset = getWidgetSet(project, monitor);
+            moduleName = widgetset;
+            moduleName = moduleName.replace(".client.", ".");
+        }
 
         args.add("-Djava.awt.headless=true");
         args.add("-Xss8M");
@@ -1485,6 +1488,33 @@ public class VaadinPluginUtil {
         }
         int waitFor = exec.waitFor();
         wsDir.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+
+    }
+
+    public static void compileWidgetset(IFile file, IProgressMonitor monitor)
+            throws CoreException, IOException, InterruptedException {
+        IProject project = file.getProject();
+        IJavaProject jproject = JavaCore.create(project);
+        IPackageFragmentRoot packageFragmentRoot = jproject
+                .getPackageFragmentRoot(file);
+
+        // FIXME
+
+        String fqname = file.getName().replace(".gwt.xml", "");
+        fqname = fqname.replaceAll("/", ".");
+        fqname = fqname.replaceAll("src", "");
+        fqname = fqname.replaceAll("..", ".");
+        // IContainer parent = file.getParent();
+        //
+        // while (!parent.getRawLocation().equals(
+        // packageFragmentRoot.getResource().getRawLocation())) {
+        // fqname = parent.getName() + "." + fqname;
+        // parent.getParent();
+        // }
+
+        compileWidgetset(jproject, fqname, monitor);
+
+        // TODO Auto-generated method stub
 
     }
 }

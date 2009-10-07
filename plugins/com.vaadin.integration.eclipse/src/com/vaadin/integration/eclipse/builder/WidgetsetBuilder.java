@@ -193,7 +193,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                                 widgetsetBuildPending = false;
                                 monitor.beginTask("Compiling wigetset", 100);
                                 try {
-                                    VaadinPluginUtil.compileWidgetset(p,
+                                    VaadinPluginUtil.compileWidgetset(p, null,
                                             monitor);
                                 } catch (CoreException e) {
                                     // TODO Auto-generated catch block
@@ -216,6 +216,8 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                         // project state, like dragging multiple jar files to
                         // classpath
                         job.schedule(500);
+                    } else {
+                        widgetsetBuildPending = false;
                     }
                 }
             });
