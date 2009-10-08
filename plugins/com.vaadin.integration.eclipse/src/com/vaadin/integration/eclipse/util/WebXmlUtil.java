@@ -36,7 +36,8 @@ public class WebXmlUtil {
      */
     @SuppressWarnings("unchecked")
     public static void addServlet(WebApp webApp, String applicationName,
-            String applicationClass, String urlPattern, String servletClassName) {
+            String applicationClass, String urlPattern,
+            String servletClassName, boolean addVaadinMapping) {
 
         /* Create servlet type compatible with Vaadin */
         ServletType servletType = WebapplicationFactory.eINSTANCE
@@ -61,6 +62,17 @@ public class WebXmlUtil {
         /* Add the servlet and mapping to webapp */
         webApp.getServlets().add(servlet);
         webApp.getServletMappings().add(servletMapping);
+
+        if (addVaadinMapping) {
+            /* Set up /VAADIN mapping if requested */
+            servletMapping = WebapplicationFactory.eINSTANCE
+                    .createServletMapping();
+            servletMapping.setUrlPattern("/VAADIN/*");
+            servletMapping.setServlet(servlet);
+
+            /* Add the mapping to webapp */
+            webApp.getServletMappings().add(servletMapping);
+        }
     }
 
     /**

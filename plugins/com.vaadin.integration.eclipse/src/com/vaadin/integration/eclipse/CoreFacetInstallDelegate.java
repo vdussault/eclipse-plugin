@@ -154,10 +154,12 @@ public class CoreFacetInstallDelegate implements IDelegate,
                     WebXmlUtil.addServlet(artifact.getWebApp(),
                             applicationName, applicationPackage + "."
                                     + applicationClass, servletPath,
-                            servletClassName);
+                            servletClassName, model
+                                    .getBooleanProperty(CREATE_PORTLET));
                     WebXmlUtil.addContextParameter(artifact.getWebApp(),
                             VAADIN_PRODUCTION_MODE, "false",
                             VAADIN_PRODUCTION_MODE_DESCRIPTION);
+
                     artifact.save(monitor);
                 } finally {
                     artifact.dispose();
