@@ -1491,30 +1491,40 @@ public class VaadinPluginUtil {
 
     }
 
+    /**
+     * Extracts fully qualified widgetset name and project from given file
+     * (expected to be ...edset.gwt.xml file) and compiles that widgetse.
+     * 
+     * @param file
+     * @param monitor
+     * @throws CoreException
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public static void compileWidgetset(IFile file, IProgressMonitor monitor)
             throws CoreException, IOException, InterruptedException {
         IProject project = file.getProject();
         IJavaProject jproject = JavaCore.create(project);
-        IPackageFragmentRoot packageFragmentRoot = jproject
-                .getPackageFragmentRoot(file);
 
-        // FIXME
+        IPackageFragmentRoot[] allPackageFragmentRoots = jproject
+                .getAllPackageFragmentRoots();
 
-        String fqname = file.getName().replace(".gwt.xml", "");
+        IPath rootPath = null;
+        IPath location = file.getFullPath();
+        for (int i = 0; rootPath == null && i < allPackageFragmentRoots.length; i++) {
+            IPackageFragmentRoot root = allPackageFragmentRoots[i];
+            IPath fullPath = root.getPath();
+            if (location.toString().startsWith(fullPath.toString())) {
+                rootPath = fullPath;
+            }
+        }
+        String name = location.toString().replace(rootPath.toString(), "");
+
+        String fqname = name.replace(".gwt.xml", "");
         fqname = fqname.replaceAll("/", ".");
-        fqname = fqname.replaceAll("src", "");
-        fqname = fqname.replaceAll("..", ".");
-        // IContainer parent = file.getParent();
-        //
-        // while (!parent.getRawLocation().equals(
-        // packageFragmentRoot.getResource().getRawLocation())) {
-        // fqname = parent.getName() + "." + fqname;
-        // parent.getParent();
-        // }
+        fqname = fqname.substring(1);
 
         compileWidgetset(jproject, fqname, monitor);
-
-        // TODO Auto-generated method stub
 
     }
 }
