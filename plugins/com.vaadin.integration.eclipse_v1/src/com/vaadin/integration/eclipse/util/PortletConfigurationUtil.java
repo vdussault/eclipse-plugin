@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.core.JavaModelException;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
@@ -64,6 +65,10 @@ public class PortletConfigurationUtil {
 
         // liferay-display.xml
         addPortletToLiferayDisplayXml(project, portletName, category);
+
+        // liferay-plugin-package.properties
+        addPortletToLiferayPluginPackageProperties(project, servletName,
+                portletTitle, category);
     }
 
     private static IFile getPortletConfigurationFile(IProject project,
@@ -145,6 +150,36 @@ public class PortletConfigurationUtil {
         // create the category section if does not exist
         modifyXml(portletXmlFile, new LiferayDisplayXmlModifier(portletXmlFile
                 .getName(), category, portletName));
+    }
+
+    private static void addPortletToLiferayPluginPackageProperties(
+            IProject project, String pluginName, String shortDescription,
+            String moduleGroup) throws CoreException {
+        IFile file = getPortletConfigurationFile(project,
+                "liferay-plugin-package.properties");
+        // create the file if it does not exist
+        try {
+            if (!file.exists()) {
+                String stub = VaadinPluginUtil
+                        .readTextFromTemplate("liferay-plugin-package.properties.txt");
+
+                stub = stub.replaceAll("STUB_PLUGINNAME", pluginName);
+                stub = stub.replaceAll("STUB_SHORTDESCRIPTION",
+                        shortDescription);
+                stub = stub.replaceAll("STUB_MODULEGROUP", moduleGroup);
+
+                ByteArrayInputStream stubstream = new ByteArrayInputStream(stub
+                        .getBytes());
+
+                file.create(stubstream, true, null);
+            }
+        } catch (JavaModelException e) {
+            throw VaadinPluginUtil.newCoreException("Failed to create file "
+                    + file.getName(), e);
+        } catch (IOException e) {
+            throw VaadinPluginUtil.newCoreException("Failed to create file "
+                    + file.getName(), e);
+        }
     }
 
     /**
