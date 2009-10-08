@@ -1,11 +1,15 @@
 package com.vaadin.integration.eclipse.wizards;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogPage;
@@ -37,9 +41,13 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
 
     private String widgetsetName;
 
+    private ICompilationUnit createdDlientSideClass;
+
+    private boolean is62Project;
+
     /**
      * Constructor for Component wizard page.
-     *
+     * 
      * @param pageName
      */
     public NewComponentWizardPage(IProject project) {
@@ -86,21 +94,38 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
             setPackageFragment(packageFragment, true);
             setTypeName("MyComponent", true);
 
-            // Detect widgetsets in this project and update the combo
-            IType[] wsSubtypes = VaadinPluginUtil.getWidgetSetClasses(project,
-                    null);
+            IPath findProjectVaadinJarPath = VaadinPluginUtil
+                    .findProjectVaadinJarPath(JavaCore.create(project));
 
-            if (extWidgetSetNameText != null) {
-                for (IType ws : wsSubtypes) {
-                    if (project.equals(ws.getResource().getProject())) {
-                        extWidgetSetNameText.add(ws.getFullyQualifiedName());
+            IFile file3 = project.getWorkspace().getRoot().getFile(
+                    findProjectVaadinJarPath);
+
+            if (file3 != null && VaadinPluginUtil.isWidgetsetPackage(file3)) {
+                is62Project = true;
+                extWidgetSetNameText.setVisible(false);
+                extWidgetSetNameLabel.setVisible(false);
+
+            } else {
+                is62Project = false;
+                extWidgetSetNameText.setVisible(true);
+                extWidgetSetNameLabel.setVisible(true);
+                // Detect widgetsets in this project and update the combo
+                IType[] wsSubtypes = VaadinPluginUtil.getWidgetSetClasses(
+                        project, null);
+
+                if (extWidgetSetNameText != null) {
+                    for (IType ws : wsSubtypes) {
+                        if (project.equals(ws.getResource().getProject())) {
+                            extWidgetSetNameText
+                                    .add(ws.getFullyQualifiedName());
+                        }
                     }
-                }
 
-                // check that there is a widgetset before selecting one
-                if (extWidgetSetNameText.getItemCount() > 0) {
-                    extWidgetSetNameText.setText(extWidgetSetNameText
-                            .getItem(0));
+                    // check that there is a widgetset before selecting one
+                    if (extWidgetSetNameText.getItemCount() > 0) {
+                        extWidgetSetNameText.setText(extWidgetSetNameText
+                                .getItem(0));
+                    }
                 }
             }
 
@@ -195,14 +220,21 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
         });
     }
 
+    boolean is62Project() {
+        return is62Project;
+    }
+
     @Override
     protected void createTypeMembers(IType type, ImportsManager imports,
             IProgressMonitor monitor) throws CoreException {
 
-        type.createMethod(
-                "@Override\n    public String getTag(){\n        return \""
-                        + type.getElementName().toLowerCase() + "\" ;\n}\n",
-                null, false, monitor);
+        if (!is62Project()) {
+            type
+                    .createMethod(
+                            "@Override\n    public String getTag(){\n        return \""
+                                    + type.getElementName().toLowerCase()
+                                    + "\" ;\n}\n", null, false, monitor);
+        }
     }
 
     public boolean buildClientSideStub() {
@@ -211,6 +243,23 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
 
     public String getWidgetSetName() {
         return widgetsetName;
+    }
+
+    @Override
+    protected String constructCUContent(ICompilationUnit cu,
+            String typeContent, String lineDelimiter) throws CoreException {
+        if (is62Project()) {
+            // TODO fixme
+            String fullyQualifiedName = createdDlientSideClass.getTypes()[0]
+                    .getFullyQualifiedName();
+            typeContent = "@com.vaadin.ui.ClientWidget(" + fullyQualifiedName
+                    + ".class)\n" + typeContent;
+        }
+        return super.constructCUContent(cu, typeContent, lineDelimiter);
+    }
+
+    public void setCreatedClientSideClass(ICompilationUnit clientSideClass) {
+        createdDlientSideClass = clientSideClass;
     }
 
 }
