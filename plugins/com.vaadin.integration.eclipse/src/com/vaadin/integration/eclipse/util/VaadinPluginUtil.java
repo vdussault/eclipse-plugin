@@ -66,6 +66,11 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jst.j2ee.web.componentcore.util.WebArtifactEdit;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleManager;
+import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 import org.eclipse.wst.common.componentcore.ComponentCore;
 import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
@@ -78,6 +83,8 @@ import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
 import com.vaadin.integration.eclipse.variables.VaadinClasspathVariableInitializer;
 
 public class VaadinPluginUtil {
+
+    private static final String WS_COMPILATION_CONSOLE_NAME = "Vaadin Widgetset Compilation";
 
     /**
      * Handle an exception in a background thread or other non-UI context. The
@@ -1478,14 +1485,36 @@ public class VaadinPluginUtil {
 
         Process exec = b.start();
 
+        ConsolePlugin plugin = ConsolePlugin.getDefault();
+        IConsoleManager conMan = plugin.getConsoleManager();
+        org.eclipse.ui.console.IConsole[] consoles = conMan.getConsoles();
+        IConsole[] existing = conMan.getConsoles();
+        MessageConsole myConsole = null;
+        for (int i = 0; i < existing.length; i++) {
+            if (WS_COMPILATION_CONSOLE_NAME.equals(existing[i].getName())) {
+                myConsole = (MessageConsole) existing[i];
+            }
+        }
+        // no console found, so create a new one
+        if (myConsole == null) {
+            myConsole = new MessageConsole(WS_COMPILATION_CONSOLE_NAME, null);
+            conMan.addConsoles(new IConsole[] { myConsole });
+        }
+
+        MessageConsoleStream newMessageStream = myConsole.newMessageStream();
+
+        myConsole.activate();
+
         InputStream inputStream = exec.getInputStream();
         BufferedReader bufferedReader2 = new BufferedReader(
                 new InputStreamReader(inputStream));
         String line = null;
         while ((line = bufferedReader2.readLine()) != null) {
-            System.out.println(line);
+            newMessageStream.println(line);
+            // increment process a bit on each log line from gwt compiler
             monitor.worked(3);
         }
+
         int waitFor = exec.waitFor();
         wsDir.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 
