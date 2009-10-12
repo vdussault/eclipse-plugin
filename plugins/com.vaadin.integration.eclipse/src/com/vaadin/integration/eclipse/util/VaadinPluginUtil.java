@@ -1421,10 +1421,34 @@ public class VaadinPluginUtil {
                 .newArchiveRuntimeClasspathEntry(getGWTUserJarPath(project));
         classPath = classPath + classpathSeparator + gwtuser.getLocation();
 
-        IFolder srcFolder = getSrcFolder(project.getProject());
-        IPath location2 = srcFolder.getLocation();
-        classPath = classPath + classpathSeparator
-                + location2.toPortableString();
+        boolean defaultOutputAdded = false;
+        IPath workspaceLocation = project.getProject().getWorkspace().getRoot()
+                .getRawLocation();
+        for (IClasspathEntry classPathEntry : project.getRawClasspath()) {
+            if (classPathEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+                IPath outputLocation = classPathEntry.getOutputLocation();
+                if (outputLocation != null) {
+                    // source entry has custom output location
+                    classPath = classPath + classpathSeparator
+                            + workspaceLocation
+                            + outputLocation.toPortableString();
+                } else if (!defaultOutputAdded) {
+                    // ensure the default output location is on classpath
+                    outputLocation = project.getOutputLocation();
+                    classPath = classPath + classpathSeparator
+                            + workspaceLocation
+                            + outputLocation.toPortableString();
+                    defaultOutputAdded = true;
+                }
+
+                // gwt compiler also needs javafiles for classpath
+
+                IPath path = classPathEntry.getPath();
+                classPath = classPath + classpathSeparator + workspaceLocation
+                        + path.toPortableString();
+
+            }
+        }
 
         IRuntimeClasspathEntry vaadinJar = JavaRuntime
                 .newArchiveRuntimeClasspathEntry(findProjectVaadinJarPath(project));
