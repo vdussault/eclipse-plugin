@@ -1255,7 +1255,7 @@ public class VaadinPluginUtil {
     }
 
     public static boolean isWidgetsetPackage(IPath resource) {
-        if (resource.toPortableString().endsWith(".jar")) {
+        if (resource != null && resource.toPortableString().endsWith(".jar")) {
             try {
                 URL url = new URL("file:" + resource.toPortableString());
                 url = new URL("jar:" + url.toExternalForm() + "!/");
