@@ -3,15 +3,14 @@
    <description url="http://vaadin.com/eclipse/">
       Update site for Vaadin.
    </description>
-   <feature url="features/com.vaadin.integration.eclipse_#com.vaadin.eclipse.integration.version#.jar" id="com.vaadin.integration.eclipse" version="#com.vaadin.eclipse.integration.version#">
+   <feature url="features/com.vaadin.integration.eclipse_@com.vaadin.integration.eclipse-version@.jar" id="com.vaadin.integration.eclipse" version="@com.vaadin.integration.eclipse-version@">
       <category name="base"/>
    </feature>
-<!--   <feature url="features/com.vaadin.integration.eclipse.manual_6.0.0.200905291201.jar" id="com.vaadin.integration.eclipse.manual" version="6.0.0.200905291201">
+   <feature url="features/com.vaadin.integration.eclipse.manual_@com.vaadin.integration.eclipse.manual-version@.jar" id="com.vaadin.integration.eclipse.manual" version="@com.vaadin.integration.eclipse.manual-version@">
       <category name="base"/>
    </feature>
-   <feature url="features/com.vaadin.wysiwyg.eclipse_0.1.0.200905211751.jar" id="com.vaadin.wysiwyg.eclipse" version="0.1.0.200905211751">
+   <feature url="features/com.vaadin.wysiwyg.eclipse_@com.vaadin.wysiwyg.eclipse-version@.jar" id="com.vaadin.wysiwyg.eclipse" version="@com.vaadin.wysiwyg.eclipse-version@">
       <category name="base"/>
    </feature>
--->
    <category-def name="base" label="Vaadin"/>
 </site>

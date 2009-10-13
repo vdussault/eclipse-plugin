@@ -4,6 +4,9 @@
 	<property name="com.vaadin.eclipse.integration.version" value="1.0.1" />
 	<property name="com.vaadin.wysiwyg.eclipse.version" value="0.1.0" />
 	<property name="archivePrefix" value="nightly" />
+	<property name="update-site-dir" value="update-site" />
+	<property name="checkout-dir" value="checkout" />
+
 	<tstamp>
 		<format timezone="EEST" property="timestamp" pattern="yyyyMMddHHmm" />
 	</tstamp>
@@ -53,40 +56,5 @@
 		</java>
 
 	</target>
-
-	<target name="prepare-update-site">
-		<copy file="site.xml.tpl" tofile="${update-site.dir}/site.xml" />
-		<replace file="${update-site.dir}/site.xml" token="#com.vaadin.eclipse.integration.version#" value="${com.vaadin.eclipse.integration.fullversion}" />
-	</target>
-
-	<target name="publish-nightly" depends="build-eclipse-integration-plugin, prepare-update-site, nightly-teamcity-publish">
-		<fail unless="nightly.publish" message="The nightly.publish property must be defined." />
-		<echo>Publish target: ${nightly.publish}</echo>
-		<!-- Publish to the update site. -->
-		<echo>Installing ${update-site.dir}/ to ${nightly.publish}</echo>
-
-		<!--                <fileset dir="${update-site.dir}" id="update-site-contents">
-                        <include name="**"/>
-                </fileset>
-                <property name="update-site.dir.files" refid="update-site-contents"/>
-                <echo>files: ${update-site.dir.files}</echo>
--->
-		<!-- Copy the update site -->
-		<exec executable="scp" searchpath="true" resultproperty="nightly.install.scp.result">
-			<arg value="-B" />
-			<arg value="-r" />
-			<arg value="${update-site.dir}/site.xml" />
-			<arg value="${update-site.dir}/features" />
-			<arg value="${update-site.dir}/plugins" />
-			<arg value="${nightly.publish}" />
-		</exec>
-		<echo>Result: ${nightly.install.scp.result}</echo>
-	</target>
-
-    <target name="nightly-teamcity-publish">
-        <!-- Publish as a TeamCity artifact. -->
-        <echo>##teamcity[publishArtifacts '${update-site.dir}/*']</echo>
-        <echo>##teamcity[publishArtifacts '${update-site.dir}/*/*']</echo>
-    </target>
 
 </project>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Build integration plugin" default="build-update-site">
+
+	<property name="update-site.dir" location="update-site" />
+	<property name="checkout.dir" location="checkout" />
+
+	<property name="launcher" value="org.eclipse.equinox.launcher_1.0.200.v20090520.jar" />
+
+	<condition property="eclipse.home.ok">
+		<available file="${eclipse.home}/eclipse.ini" />
+	</condition>
+	<condition property="checkout.dir.ok">
+		<available file="${checkout.dir}" />
+	</condition>
+	<fail unless="eclipse.home.ok" message="eclipse.home must be a valid Eclipse installation" />
+	<fail unless="checkout.dir.ok" message="Checkout dir '${checkout.dir} does not exist" />
+	
+	<target name="create-update-site">
+		 <java jar="${eclipse.home}/plugins/${launcher}" failonerror="yes" fork="yes" maxmemory="512m">
+                        <arg value="-application" />
+                        <arg value="org.eclipse.equinox.p2.publisher.FeaturesAndBundlesPublisher" />
+                        <arg value="-metadataRepository" />
+                        <arg value="${update-site.dir}" />
+                        <arg value="-artifactRepository" />
+                        <arg value="${update-site.dir}" />
+                        <arg value="-source" />
+                        <arg value="${checkout.dir}" />
+			<arg value="-publishArtifacts" />
+		</java>
+	</target>
+
+	<target name="site.xml" > <!--depends="create-update-site">-->
+		<javac source="1.5" target="1.5" destdir="." encoding="UTF-8" debug="true">
+			<src path="."/>
+			<include name="CreateSiteXml.java"/>
+		</javac>
+		<java classname="CreateSiteXml" failonerror="yes" fork="no" output="${update-site.dir}/site.xml">
+			<classpath>
+				<pathelement location="." />
+			</classpath>
+			<arg value="site.xml.tpl"/>
+			<arg value="${update-site.dir}/features"/>
+		</java>
+	</target>
+
+	<target name="publish-nightly" depends="create-update-site,site.xml, nightly-teamcity-publish">
+		<fail unless="nightly.publish" message="The nightly.publish property must be defined." />
+		<echo>Publish target: ${nightly.publish}</echo>
+		<!-- Publish to the update site. -->
+		<echo>Installing ${update-site.dir}/ to ${nightly.publish}</echo>
+
+		<!--                <fileset dir="${update-site.dir}" id="update-site-contents">
+                        <include name="**"/>
+                </fileset>
+                <property name="update-site.dir.files" refid="update-site-contents"/>
+                <echo>files: ${update-site.dir.files}</echo>
+-->
+		<!-- Copy the update site -->
+		<exec executable="scp" searchpath="true" resultproperty="nightly.install.scp.result">
+			<arg value="-B" />
+			<arg value="-r" />
+			<arg value="${update-site.dir}/site.xml" />
+			<arg value="${update-site.dir}/features" />
+			<arg value="${update-site.dir}/plugins" />
+			<arg value="${nightly.publish}" />
+		</exec>
+		<echo>Result: ${nightly.install.scp.result}</echo>
+	</target>
+
+    <target name="nightly-teamcity-publish">
+        <!-- Publish as a TeamCity artifact. -->
+        <echo>##teamcity[publishArtifacts '${update-site.dir}/*']</echo>
+        <echo>##teamcity[publishArtifacts '${update-site.dir}/*/*']</echo>
+    </target>
+
+</project>
