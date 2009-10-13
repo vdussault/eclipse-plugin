@@ -34,8 +34,12 @@
 	<target name="copyProject" depends="initBuildDir">
 		<!-- The project has already been checked out to checkout so we use
 		that copy -->
-		<copy file="checkout/plugins" todir="${buildDirectory}/plugins" />
-		<copy file="checkout/features" todir="${buildDirectory}/features" />
+                <copy todir="${buildDirectory}/plugins">
+                    <fileset dir="checkout/plugins"/>
+                </copy>
+                <copy todir="${buildDirectory}/features">
+                    <fileset dir="checkout/features"/>
+                </copy>
 
 	</target>
 	<target name="checkoutProject" depends="initBuildDir">
