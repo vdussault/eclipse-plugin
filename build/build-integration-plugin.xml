@@ -23,12 +23,23 @@
 
 	<import file="${eclipse.pdebuild.scripts}/build.xml" />
 
-	<target name="build-features" depends="main, deploy" />
+	<target name="build-features" depends="copyProject, main, deploy" />
 
-	<target name="checkoutProject">
-		<fail unless="buildDirectory" message="Build directory not specified" />
+        <target name="initBuildDir">
+                <fail unless="buildDirectory" message="Build directory not specified" />
+                <delete dir="${buildDirectory}" />
+                <mkdir dir="${buildDirectory}" />
+        </target>
 
-		<delete dir="${buildDirectory}" />
+        <target name="copyProject" depends="initBuildDir">
+                <!-- The project has already been checked out to checkout so we use
+                that copy -->
+                <copy file="checkout/plugins" todir="${buildDirectory}/plugins" />
+                <copy file="checkout/features" todir="${buildDirectory}/features" />
+
+        </target>
+
+	<target name="checkoutProject" depends="initBuildDir">
 		<!--  Check out plugin(s) -->
 		<exec executable="svn">
 			<arg value="checkout" />
