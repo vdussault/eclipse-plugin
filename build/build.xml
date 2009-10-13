@@ -3,7 +3,7 @@
 
 	<property name="com.vaadin.eclipse.integration.version" value="1.0.1" />
 	<property name="com.vaadin.wysiwyg.eclipse.version" value="0.1.0" />
-	<property name="archivePrefix" value="experimental" />
+	<property name="archivePrefix" value="nightly" />
 	<tstamp>
 		<format timezone="EEST" property="timestamp" pattern="yyyyMMddHHmm" />
 	</tstamp>
@@ -12,7 +12,7 @@
 	<fail unless="com.vaadin.eclipse.integration.version" message="com.vaadin.eclipse.integration.version must define the plugin version" />
 	<property name="com.vaadin.eclipse.integration.fullversion" value="${com.vaadin.eclipse.integration.version}.${timestamp}" />
 
-	<property name="target.dir" location="staging" />
+	<property name="target.dir" location="output" />
 	<property name="update-site.dir" location="${target.dir}/${archivePrefix}" />
 
 	<property name="launcher" value="org.eclipse.equinox.launcher_1.0.200.v20090520.jar" />
