@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Build integration plugin" default="build-eclipse-integration-plugin">
 
-	<property name="com.vaadin.eclipse.integration.version" value="0.9.0" />
+	<property name="com.vaadin.eclipse.integration.version" value="1.0.1" />
+	<property name="com.vaadin.wysiwyg.eclipse.version" value="0.1.0" />
 	<property name="archivePrefix" value="experimental" />
 	<tstamp>
-		<format property="timestamp" pattern="yyyyMMddHHmm" />
+		<format timezone="EEST" property="timestamp" pattern="yyyyMMddHHmm" />
 	</tstamp>
 
 
@@ -31,6 +32,22 @@
 			<arg value="build-integration-plugin.xml" />
 			<arg value="-Dtarget.dir=${target.dir}" />
 			<arg value="-Dcom.vaadin.eclipse.integration.version=${com.vaadin.eclipse.integration.version}" />
+			<arg value="-Dtimestamp=${timestamp}" />
+			<arg value="-DarchivePrefix=${archivePrefix}" />
+		</java>
+
+	</target>
+
+	<target name="build-eclipse-wysiwyg-plugin">
+		<delete dir="${update-site.dir}" />
+
+		<java jar="${eclipse.home}/plugins/${launcher}" failonerror="yes" fork="yes" maxmemory="512m">
+			<arg value="-application" />
+			<arg value="org.eclipse.ant.core.antRunner" />
+			<arg value="-buildfile" />
+			<arg value="build-wysiwyg-plugin.xml" />
+			<arg value="-Dtarget.dir=${target.dir}" />
+			<arg value="-Dcom.vaadin.wysiwyg.eclipse.version=${com.vaadin.wysiwyg.eclipse.version}" />
 			<arg value="-Dtimestamp=${timestamp}" />
 			<arg value="-DarchivePrefix=${archivePrefix}" />
 		</java>
