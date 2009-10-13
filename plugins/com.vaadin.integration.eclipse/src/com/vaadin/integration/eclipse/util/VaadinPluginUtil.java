@@ -1048,11 +1048,20 @@ public class VaadinPluginUtil {
         if (type == null) {
             return null;
         }
+
         while (type.getParent() != null) {
             if (type instanceof IPackageFragmentRoot) {
-                return ((IPackageFragmentRoot) type).getPath();
+                IPackageFragmentRoot jar = (IPackageFragmentRoot) type;
+                IResource resource = jar.getResource();
+                if (resource == null) {
+                    // Galileo
+                    return jar.getPath();
+                } else {
+                    // Ganimede
+                    IPath rawLocation = resource.getRawLocation();
+                    return rawLocation;
+                }
             }
-
             type = type.getParent();
         }
 
@@ -1245,78 +1254,64 @@ public class VaadinPluginUtil {
         return null;
     }
 
-    public static boolean isWidgetsetPackage(IResource resource) {
-        URL url;
-        if (resource instanceof IFile && resource.getName().endsWith(".jar")) {
-            IFile file = (IFile) resource;
-            if (file.exists()) {
-
-                try {
-                    url = new URL(file.getLocationURI().toString());
-                    url = new URL("jar:" + url.toExternalForm() + "!/");
-                    JarURLConnection conn = (JarURLConnection) url
-                            .openConnection();
-                    JarFile jarFile = conn.getJarFile();
-                    Manifest manifest = jarFile.getManifest();
-                    Attributes mainAttributes = manifest.getMainAttributes();
-                    if (mainAttributes.getValue("Vaadin-Widgetsets") != null) {
-                        System.err.println("Jar file with widgetset detected "
-                                + file.getFullPath());
-                        return true;
-                    }
-                } catch (MalformedURLException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+    public static boolean isWidgetsetPackage(IPath resource) {
+        if (resource.toPortableString().endsWith(".jar")) {
+            try {
+                URL url = new URL("file:" + resource.toPortableString());
+                url = new URL("jar:" + url.toExternalForm() + "!/");
+                JarURLConnection conn = (JarURLConnection) url.openConnection();
+                JarFile jarFile = conn.getJarFile();
+                Manifest manifest = jarFile.getManifest();
+                Attributes mainAttributes = manifest.getMainAttributes();
+                if (mainAttributes.getValue("Vaadin-Widgetsets") != null) {
+                    return true;
                 }
-            } else {
-                // detect if is jar and if in widgetset
+            } catch (MalformedURLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (Throwable t) {
+                t.printStackTrace();
             }
         }
         return false;
     }
 
     private static boolean isNeededForWidgetsetCompilation(IResource resource) {
-        URL url;
         if (resource instanceof IFile && resource.getName().endsWith(".jar")) {
-            IFile file = (IFile) resource;
-            if (file.exists()) {
+            try {
+                URL url = new URL(resource.getLocationURI().toString());
+                url = new URL("jar:" + url.toExternalForm() + "!/");
+                JarURLConnection conn = (JarURLConnection) url.openConnection();
+                JarFile jarFile = conn.getJarFile();
+                Manifest manifest = jarFile.getManifest();
+                Attributes mainAttributes = manifest.getMainAttributes();
+                if (mainAttributes.getValue("Vaadin-Widgetsets") != null) {
+                    return true;
+                } else {
+                    // not a vaadin widget package, but it still may be
+                    // needed for referenced gwt modules (cant know for
+                    // sure)
 
-                try {
-                    url = new URL(file.getLocationURI().toString());
-                    url = new URL("jar:" + url.toExternalForm() + "!/");
-                    JarURLConnection conn = (JarURLConnection) url
-                            .openConnection();
-                    JarFile jarFile = conn.getJarFile();
-                    Manifest manifest = jarFile.getManifest();
-                    Attributes mainAttributes = manifest.getMainAttributes();
-                    if (mainAttributes.getValue("Vaadin-Widgetsets") != null) {
-                        return true;
-                    } else {
-                        // not a vaadin widget package, but it still may be
-                        // needed for referenced gwt modules (cant know for
-                        // sure)
-
-                        Enumeration<JarEntry> entries = jarFile.entries();
-                        while (entries.hasMoreElements()) {
-                            JarEntry nextElement = entries.nextElement();
-                            if (nextElement.getName().endsWith(".gwt.xml")) {
-                                return true;
-                            }
+                    Enumeration<JarEntry> entries = jarFile.entries();
+                    while (entries.hasMoreElements()) {
+                        JarEntry nextElement = entries.nextElement();
+                        if (nextElement.getName().endsWith(".gwt.xml")) {
+                            return true;
                         }
                     }
-                } catch (MalformedURLException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
                 }
-            } else {
-                // detect if is jar and if in widgetset
+            } catch (MalformedURLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
+        } else {
+            // detect if is jar and if in widgetset
         }
         return false;
     }

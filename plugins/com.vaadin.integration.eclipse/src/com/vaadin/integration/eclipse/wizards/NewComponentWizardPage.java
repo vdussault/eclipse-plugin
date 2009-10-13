@@ -1,6 +1,5 @@
 package com.vaadin.integration.eclipse.wizards;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -97,10 +96,9 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
             IPath findProjectVaadinJarPath = VaadinPluginUtil
                     .findProjectVaadinJarPath(JavaCore.create(project));
 
-            IFile file3 = project.getWorkspace().getRoot().getFile(
-                    findProjectVaadinJarPath);
-
-            if (file3 != null && VaadinPluginUtil.isWidgetsetPackage(file3)) {
+            if (findProjectVaadinJarPath != null
+                    && VaadinPluginUtil
+                            .isWidgetsetPackage(findProjectVaadinJarPath)) {
                 is62Project = true;
                 extWidgetSetNameText.setVisible(false);
                 extWidgetSetNameLabel.setVisible(false);

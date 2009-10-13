@@ -55,7 +55,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                 }
             }
 
-            if (VaadinPluginUtil.isWidgetsetPackage(resource)) {
+            if (VaadinPluginUtil.isWidgetsetPackage(resource.getRawLocation())) {
                 switch (delta.getKind()) {
                 case IResourceDelta.ADDED:
                     runWidgetSetBuildTool(monitor);
