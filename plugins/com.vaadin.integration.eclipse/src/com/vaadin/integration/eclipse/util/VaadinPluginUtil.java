@@ -852,17 +852,28 @@ public class VaadinPluginUtil {
     }
 
     /**
-     * TODO should first check if user has defined custom version of GWT to
-     * project. If not then return the newest available by plugin.
-     * 
-     * ATM just return the one in plugin.
-     * 
-     * @param gwtVersion
-     * @throws CoreException
+     * Returns gwt dev jar defined in projects classpath. If not set, a gwt jar
+     * file provided by plugin is returned.
      */
     public static IPath getGWTDevJarPath(IJavaProject jproject)
             throws CoreException {
         // TODO should check if the user has changed the GWT version by hand
+        IClasspathEntry[] rawClasspath = jproject.getRawClasspath();
+        for (int i = 0; i < rawClasspath.length; i++) {
+            IClasspathEntry cp = rawClasspath[i];
+            if (cp.toString().contains("gwt-dev")) {
+                if (cp.toString().contains("VAADIN_DOWNLOAD")) {
+                    break;
+                } else {
+                    // User has explicitly defined GWT version to use
+
+                    IClasspathEntry resolvedClasspathEntry = JavaCore
+                            .getResolvedClasspathEntry(cp);
+                    return resolvedClasspathEntry.getPath();
+                }
+            }
+        }
+
         String gwtVersion = getRequiredGWTVersionForProject(jproject);
         return DownloadUtils.getLocalGwtDevJar(gwtVersion);
     }
@@ -880,17 +891,27 @@ public class VaadinPluginUtil {
     }
 
     /**
-     * TODO should first check if user has defined custom version of GWT to
-     * project. If not then return the newest available by plugin.
-     * 
-     * ATM just return the one in plugin.
-     * 
-     * @param gwtVersion
-     * @throws CoreException
+     * Returns gwt user jar defined in projects classpath. If not set, a gwt jar
+     * file provided by plugin is returned.
      */
     public static IPath getGWTUserJarPath(IJavaProject project)
             throws CoreException {
-        // TODO should check if the user has changed the GWT version by hand
+        // check first for explicitly set gwt-user jar file
+        IClasspathEntry[] rawClasspath = project.getRawClasspath();
+        for (int i = 0; i < rawClasspath.length; i++) {
+            IClasspathEntry cp = rawClasspath[i];
+            if (cp.toString().contains("gwt-user")) {
+                if (cp.toString().contains("VAADIN_DOWNLOAD")) {
+                    break;
+                } else {
+                    // User has explicitly defined GWT version to use
+                    IClasspathEntry resolvedClasspathEntry = JavaCore
+                            .getResolvedClasspathEntry(cp);
+                    return resolvedClasspathEntry.getPath();
+                }
+            }
+        }
+
         String gwtVersion = getRequiredGWTVersionForProject(project);
         return DownloadUtils.getLocalGwtUserJar(gwtVersion);
     }
