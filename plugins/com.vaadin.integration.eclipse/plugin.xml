@@ -146,7 +146,7 @@
             class="com.vaadin.integration.eclipse.wizards.NewWidgetsetWizard"
             icon="icons/vaadin-icon-16.png"
             id="com.vaadin.integration.eclipse.wizards.NewWidgetsetWizard"
-            name="Vaadin Widgetset">
+            name="Vaadin Widgetset (for Vaadin 6.1 and older)">
       </wizard>
       <wizard
             category="com.vaadin"
