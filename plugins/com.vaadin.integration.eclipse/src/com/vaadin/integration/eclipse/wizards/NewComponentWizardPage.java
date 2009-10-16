@@ -100,13 +100,17 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
                     && VaadinPluginUtil
                             .isWidgetsetPackage(findProjectVaadinJarPath)) {
                 is62Project = true;
-                extWidgetSetNameText.setVisible(false);
-                extWidgetSetNameLabel.setVisible(false);
+                if (isControlCreated()) {
+                    extWidgetSetNameText.setVisible(false);
+                    extWidgetSetNameLabel.setVisible(false);
+                }
 
             } else {
                 is62Project = false;
-                extWidgetSetNameText.setVisible(true);
-                extWidgetSetNameLabel.setVisible(true);
+                if (isControlCreated()) {
+                    extWidgetSetNameText.setVisible(true);
+                    extWidgetSetNameLabel.setVisible(true);
+                }
                 // Detect widgetsets in this project and update the combo
                 IType[] wsSubtypes = VaadinPluginUtil.getWidgetSetClasses(
                         project, null);
