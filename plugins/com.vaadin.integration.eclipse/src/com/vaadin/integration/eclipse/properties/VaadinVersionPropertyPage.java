@@ -3,6 +3,7 @@ package com.vaadin.integration.eclipse.properties;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -22,6 +23,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.dialogs.PropertyPage;
 
+import com.vaadin.integration.eclipse.builder.WidgetsetNature;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
 
@@ -70,6 +72,22 @@ public class VaadinVersionPropertyPage extends PropertyPage {
         try {
             Version currentVaadinVersion = VaadinPluginUtil
                     .getVaadinLibraryVersion(project);
+
+            try {
+                // TODO refine this code block. Trying to add nature if not
+                // there (to enable WidgetSet builder). Nice when upgrading
+                // projects.
+                if (useVaadinButton.getSelection()) {
+                    IProjectNature nature = project
+                            .getNature(WidgetsetNature.NATURE_ID);
+                    if (nature == null) {
+                        WidgetsetNature.addWidgetsetNature(project);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             if ((newVaadinVersion == null && currentVaadinVersion != null)
                     || (newVaadinVersion != null && !newVaadinVersion
                             .equals(currentVaadinVersion))) {
@@ -115,10 +133,10 @@ public class VaadinVersionPropertyPage extends PropertyPage {
             new ProgressMonitorDialog(getShell()).run(true, true, op);
 
         } catch (CoreException e) {
-            VaadinPluginUtil.displayError(
+            VaadinPluginUtil
+                    .displayError(
                             "Failed to change Vaadin version in the project. Check that the Vaadin JAR is not in use.",
-                            e,
-                    getShell());
+                            e, getShell());
             VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
                     "Failed to change Vaadin version in the project", e);
             return false;
