@@ -1308,6 +1308,9 @@ public class VaadinPluginUtil {
                 JarURLConnection conn = (JarURLConnection) url.openConnection();
                 JarFile jarFile = conn.getJarFile();
                 Manifest manifest = jarFile.getManifest();
+                if (manifest == null) {
+                    return false;
+                }
                 Attributes mainAttributes = manifest.getMainAttributes();
                 if (mainAttributes.getValue("Vaadin-Widgetsets") != null) {
                     return true;
@@ -1391,6 +1394,8 @@ public class VaadinPluginUtil {
             throws CoreException, IOException, InterruptedException {
         ArrayList<String> args = new ArrayList<String>();
 
+        // TODO this may be problematic in some cases: 1.6 project, but 1.5 java
+        // as default --> build fails
         IVMInstall vmInstall = JavaRuntime.getDefaultVMInstall();
         File vmBinDir = new File(vmInstall.getInstallLocation(), "bin");
         String vmName;
@@ -1450,18 +1455,19 @@ public class VaadinPluginUtil {
                             + outputLocation.toPortableString();
                 } else if (!defaultOutputAdded) {
                     // ensure the default output location is on classpath
+
+                    // gwt compiler also needs javafiles for classpath
+
+                    IPath path = classPathEntry.getPath();
+                    classPath = classPath + classpathSeparator
+                            + workspaceLocation + path.toPortableString();
+
                     outputLocation = project.getOutputLocation();
                     classPath = classPath + classpathSeparator
                             + workspaceLocation
                             + outputLocation.toPortableString();
                     defaultOutputAdded = true;
                 }
-
-                // gwt compiler also needs javafiles for classpath
-
-                IPath path = classPathEntry.getPath();
-                classPath = classPath + classpathSeparator + workspaceLocation
-                        + path.toPortableString();
 
             }
         }
