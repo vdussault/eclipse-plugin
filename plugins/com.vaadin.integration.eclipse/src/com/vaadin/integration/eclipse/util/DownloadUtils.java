@@ -45,7 +45,7 @@ public class DownloadUtils {
 
     // this is used to extract version number parts for sorting
     // this pattern does not filter out old versions
-    private static final String VAADIN_VERSION_PART_PATTERN = "([0-9]*)\\.([0-9])\\.([^.]+)";
+    private static final String VAADIN_VERSION_PART_PATTERN = "([0-9]*)\\.([0-9])\\.(.+)";
 
     private static final String LATEST_BASE_URL = "http://vaadin.com/download";
     private static final String LATEST_FILENAME = "LATEST";
@@ -91,7 +91,15 @@ public class DownloadUtils {
 
         // branch is the two first parts of the version string
         private String getBranch() {
-            return version.replaceAll("\\.[^.]+$", "");
+            String[] parts = version.split("\\.");
+            switch (parts.length) {
+            case 0:
+                return "";
+            case 1:
+                return parts[0];
+            default:
+                return parts[0] + "." + parts[1];
+            }
         }
 
         // the first numeric parts of the version string
