@@ -41,7 +41,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see
          * org.eclipse.core.resources.IResourceDeltaVisitor#visit(org.eclipse
          * .core.resources.IResourceDelta)
@@ -55,6 +55,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                 }
             }
 
+            // TODO never gets to the REMOVED branch as cannot open the JAR
             if (VaadinPluginUtil.isWidgetsetPackage(resource.getRawLocation())) {
                 switch (delta.getKind()) {
                 case IResourceDelta.ADDED:
@@ -133,7 +134,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.core.internal.events.InternalBuilder#build(int,
      * java.util.Map, org.eclipse.core.runtime.IProgressMonitor)
      */
