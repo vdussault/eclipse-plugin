@@ -146,7 +146,7 @@ public class VaadinPluginUtil {
      * Otherwise, return null.
      * 
      * @param selection
-     * @return an Vaadin project
+     * @return a Vaadin project
      */
     public static IProject getProject(ISelection selection) {
         IProject project = null;
@@ -165,19 +165,37 @@ public class VaadinPluginUtil {
                     return ((IJavaProject) obj).getProject();
                 }
                 if (obj instanceof IResource) {
-                    IContainer container;
-                    if (obj instanceof IContainer) {
-                        container = (IContainer) obj;
-                    } else {
-                        container = ((IResource) obj).getParent();
-                    }
-                    if (container != null
-                            && VaadinFacetUtils.isVaadinProject(container
-                                    .getProject())) {
-                        project = container.getProject();
-                    }
+                    project = getProject((IResource) obj);
+                } else if (obj instanceof IJavaProject) {
+                    project = ((IJavaProject) obj).getProject();
                 }
             }
+        }
+        return project;
+    }
+
+    /**
+     * Find a project that has the Vaadin project facet based on a resource.
+     * 
+     * If the resource is an element in a suitable project, return that project.
+     *
+     * Otherwise, return null.
+     * 
+     * @param selection
+     * @return a Vaadin project or null
+     */
+    public static IProject getProject(IResource resource) {
+        IContainer container;
+        IProject project = null;
+        if (resource instanceof IContainer) {
+            container = (IContainer) resource;
+        } else {
+            container = (resource).getParent();
+        }
+        if (container != null
+                && VaadinFacetUtils.isVaadinProject(container
+                        .getProject())) {
+            project = container.getProject();
         }
         return project;
     }
