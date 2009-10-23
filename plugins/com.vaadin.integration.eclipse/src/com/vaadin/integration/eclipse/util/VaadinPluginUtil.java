@@ -1386,7 +1386,6 @@ public class VaadinPluginUtil {
             IJavaProject project) throws CoreException {
         final Collection<IPath> vaadinpackages = new HashSet<IPath>();
 
-        // TODO hardcoded path
         IFolder webInfLibFolder = getWebInfLibFolder(project.getProject());
         webInfLibFolder.accept(new IResourceVisitor() {
             public boolean visit(IResource resource) throws CoreException {
