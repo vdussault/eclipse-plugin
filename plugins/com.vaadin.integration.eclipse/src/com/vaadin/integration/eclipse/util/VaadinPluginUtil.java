@@ -161,6 +161,9 @@ public class VaadinPluginUtil {
                 } else {
                     obj = ssel.getFirstElement();
                 }
+                if (obj instanceof IJavaProject) {
+                    return ((IJavaProject) obj).getProject();
+                }
                 if (obj instanceof IResource) {
                     IContainer container;
                     if (obj instanceof IContainer) {
@@ -1593,6 +1596,7 @@ public class VaadinPluginUtil {
         }
 
         int waitFor = exec.waitFor();
+
         wsDir.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 
     }
