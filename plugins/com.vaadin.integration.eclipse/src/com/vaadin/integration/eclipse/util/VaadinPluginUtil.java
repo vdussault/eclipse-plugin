@@ -1563,7 +1563,31 @@ public class VaadinPluginUtil {
 
         monitor.worked(10);
 
-        Process exec = b.start();
+        final Process exec = b.start();
+
+        // compilation now on
+
+        Thread t = new Thread() {
+            @Override
+            public synchronized void run() {
+                while (true) {
+                    if (monitor.isCanceled()) {
+                        exec.destroy();
+                        break;
+                    } else {
+                        try {
+                            Thread.sleep(300);
+                        } catch (InterruptedException e) {
+                            // STOP executing monitoring cancelled state,
+                            // compilation finished
+                            break;
+                        }
+                    }
+                }
+            }
+        };
+
+        t.start();
 
         ConsolePlugin plugin = ConsolePlugin.getDefault();
         IConsoleManager conMan = plugin.getConsoleManager();
@@ -1597,8 +1621,15 @@ public class VaadinPluginUtil {
 
         int waitFor = exec.waitFor();
 
-        wsDir.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+        // end thread (possibly still) polling for cancelled status
+        t.interrupt();
 
+        if (waitFor == 0) {
+            wsDir.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+        } else {
+            // TODO cancelled or somehow else failed
+
+        }
     }
 
     /**
