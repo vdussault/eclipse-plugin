@@ -1309,14 +1309,7 @@ public class VaadinPluginUtil {
             } catch (Throwable t) {
                 t.printStackTrace();
             } finally {
-                if (jarFile != null) {
-                    try {
-                        jarFile.close();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
+                closeJarFile(jarFile);
             }
         }
         return false;
@@ -1357,19 +1350,27 @@ public class VaadinPluginUtil {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             } finally {
-                if (jarFile != null) {
-                    try {
-                        jarFile.close();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
+                closeJarFile(jarFile);
             }
         } else {
             // detect if is jar and if in widgetset
         }
         return false;
+    }
+
+    private static void closeJarFile(JarFile jarFile) {
+        // TODO make better jar handling. Windows locks files without
+        // this, mac fails to rebuild widgetset with
+        if (getPlatform().equals("windows")) {
+            if (jarFile != null) {
+                try {
+                    jarFile.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     /**
