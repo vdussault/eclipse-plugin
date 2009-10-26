@@ -24,9 +24,11 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.RefreshTab;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.IVMInstall;
@@ -212,8 +214,13 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
             ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(
                     project, "Compile" + createdType.getElementName());
 
-            // get the default java VM path from Eclipse
-            IVMInstall vmInstall = JavaRuntime.getDefaultVMInstall();
+            // get the project VM or the default java VM path from Eclipse
+            IJavaProject jProject = JavaCore.create(project);
+            IVMInstall vmInstall = JavaRuntime.getVMInstall(jProject);
+            // this might be unnecessary
+            if (vmInstall == null) {
+                vmInstall = JavaRuntime.getDefaultVMInstall();
+            }
             File vmBinDir = new File(vmInstall.getInstallLocation(), "bin");
             String vmName;
             // windows hack, as Eclipse can run the JVM but does not give its

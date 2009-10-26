@@ -89,7 +89,7 @@ public class VaadinPluginUtil {
     /**
      * Handle an exception in a background thread or other non-UI context. The
      * handling primarily consists of tracing the exception.
-     * 
+     *
      * @param ex
      */
     public static void handleBackgroundException(Exception ex) {
@@ -99,7 +99,7 @@ public class VaadinPluginUtil {
     /**
      * Handle an exception in a background thread or other non-UI context. The
      * handling primarily consists of tracing the exception.
-     * 
+     *
      * @param message
      * @param ex
      */
@@ -110,7 +110,7 @@ public class VaadinPluginUtil {
     /**
      * Handle an exception in a background thread or other non-UI context. The
      * handling primarily consists of tracing the exception.
-     * 
+     *
      * @param severity
      *            IStatus.OK, IStatus.INFO, IStatus.WARNING or IStatus.ERROR
      * @param message
@@ -128,7 +128,7 @@ public class VaadinPluginUtil {
 
     /**
      * Display an error message to the user.
-     * 
+     *
      * @param message
      * @param ex
      */
@@ -139,12 +139,12 @@ public class VaadinPluginUtil {
 
     /**
      * Find a project that has the Vaadin project facet based on a selection.
-     * 
+     *
      * If the selection is an element in a suitable project, return that
      * project.
-     * 
+     *
      * Otherwise, return null.
-     * 
+     *
      * @param selection
      * @return a Vaadin project
      */
@@ -176,11 +176,11 @@ public class VaadinPluginUtil {
 
     /**
      * Find a project that has the Vaadin project facet based on a resource.
-     * 
+     *
      * If the resource is an element in a suitable project, return that project.
      *
      * Otherwise, return null.
-     * 
+     *
      * @param selection
      * @return a Vaadin project or null
      */
@@ -239,7 +239,7 @@ public class VaadinPluginUtil {
 
     /**
      * Find the Vaadin Application type for a project or null if none found.
-     * 
+     *
      * @param jproject
      * @return
      * @throws JavaModelException
@@ -259,7 +259,7 @@ public class VaadinPluginUtil {
      * Returns either "com.vaadin." or "com.itmill.toolkit." depending on the
      * Vaadin version in the project. Defaults to "com.vaadin." if neither
      * found.
-     * 
+     *
      * @param project
      * @return
      */
@@ -274,7 +274,7 @@ public class VaadinPluginUtil {
     /**
      * Returns either "VAADIN" or "ITMILL" depending on the Vaadin version in
      * the project, returning a default value if neither is found.
-     * 
+     *
      * @param project
      * @return
      */
@@ -289,7 +289,7 @@ public class VaadinPluginUtil {
     /**
      * Checks the Vaadin version, returns true for Vaadin 6.0+, false for IT
      * Mill Toolkit.
-     * 
+     *
      * @param project
      * @return true if a Vaadin project (or unknown), false for IT Mill Toolkit
      *         project
@@ -338,7 +338,7 @@ public class VaadinPluginUtil {
 
     /**
      * Create a configuration file from a template if it does not exist.
-     * 
+     *
      * @param file
      *            the file to create from template
      * @param template
@@ -436,10 +436,10 @@ public class VaadinPluginUtil {
     /**
      * Ensure that some Vaadin jar file can be found in the project. If none can
      * be found, adds the specified version from the local repository.
-     * 
+     *
      * No launch configurations are updated. Use updateVaadinLibraries if such
      * updates are needed.
-     * 
+     *
      * @param project
      * @param vaadinJarVersion
      * @param monitor
@@ -481,11 +481,11 @@ public class VaadinPluginUtil {
      * correct version. If none can be found or the version does not match,
      * replaces any old Vaadin JAR with the specified version from the local
      * repository.
-     * 
+     *
      * Update widgetset compilation launch configurations in the project to
      * refer to the new Vaadin and GWT versions (only when changing Vaadin
      * version, not when adding the JAR).
-     * 
+     *
      * @param project
      * @param vaadinJarVersion
      *            or null to remove current Vaadin library
@@ -570,7 +570,7 @@ public class VaadinPluginUtil {
      * Adds the specified Vaadin jar version from the local store to the
      * project. The specified version must be found from the local store or an
      * exception is thrown.
-     * 
+     *
      * @param jproject
      * @param vaadinJarVersion
      * @param monitor
@@ -612,7 +612,7 @@ public class VaadinPluginUtil {
 
     /**
      * Removes the specified Vaadin jar version from the project (if it exists).
-     * 
+     *
      * @param jproject
      * @param vaadinJarVersion
      * @throws CoreException
@@ -636,9 +636,9 @@ public class VaadinPluginUtil {
     /**
      * Ensure that the project classpath contains the GWT libraries, adding them
      * if necessary.
-     * 
+     *
      * Also update widgetset compilation launch configuration paths as needed.
-     * 
+     *
      * @param project
      * @param monitor
      * @throws CoreException
@@ -745,7 +745,7 @@ public class VaadinPluginUtil {
     /**
      * Create a variable-based classpath entry if the given path is under the
      * target of the variable, an absolute one otherwise.
-     * 
+     *
      * @param variableName
      * @param jarPath
      * @return
@@ -785,15 +785,15 @@ public class VaadinPluginUtil {
      * referring to the given JAR file in their arguments (not the class path of
      * the launch itself!). This is called when a JAR is replaced by a different
      * version which may have a different name or location.
-     * 
+     *
      * The old JAR is identified by its file name without path. The JAR path is
      * extracted by back-tracking from the JAR file name to the previous path
      * separator and that full path is replaced with the given new path to a JAR
      * file.
-     * 
+     *
      * This is primarily meant for updating the generated widgetset compilation
      * launches, but will also modify certain other kinds of launches.
-     * 
+     *
      * @throws CoreException
      */
     private static void updateLaunchClassPath(IProject project, String jarName,
@@ -1123,7 +1123,7 @@ public class VaadinPluginUtil {
     /**
      * Create the folder if it does not exist. If the parent folder does not
      * exist, it is created first.
-     * 
+     *
      * @param folder
      * @param monitor
      * @throws CoreException
@@ -1395,7 +1395,7 @@ public class VaadinPluginUtil {
      * Returns jar files which contain widgetset for given project.
      * <p>
      * Method will iterate files in WEB-INF/lib and check each jar file there.
-     * 
+     *
      * @param project
      * @return
      * @throws CoreException
@@ -1425,13 +1425,13 @@ public class VaadinPluginUtil {
     /**
      * Helper method to compile widgetset for given project.
      * <p>
-     * 
+     *
      * Instead the "old method" of using launch configurations (.launch) running
      * compilation via {@link ProcessBuilder}. Also notifies eclipse of possibly
      * changed files in widgetset directory.
      * <p>
      * Note, this only works for projects with vaadin 6.2 and later.
-     * 
+     *
      * @param project
      * @param monitor
      * @throws CoreException
@@ -1443,9 +1443,11 @@ public class VaadinPluginUtil {
             throws CoreException, IOException, InterruptedException {
         ArrayList<String> args = new ArrayList<String>();
 
-        // TODO this may be problematic in some cases: 1.6 project, but 1.5 java
-        // as default --> build fails
-        IVMInstall vmInstall = JavaRuntime.getDefaultVMInstall();
+        IVMInstall vmInstall = JavaRuntime.getVMInstall(project);
+        // this might be unnecessary
+        if (vmInstall == null) {
+            vmInstall = JavaRuntime.getDefaultVMInstall();
+        }
         File vmBinDir = new File(vmInstall.getInstallLocation(), "bin");
         String vmName;
         // windows hack, as Eclipse can run the JVM but does not give its
@@ -1651,7 +1653,7 @@ public class VaadinPluginUtil {
 
     /**
      * Extracts fully qualified widgetset name and project from given file
-     * (expected to be ...edset.gwt.xml file) and compiles that widgetse.
+     * (expected to be ...edset.gwt.xml file) and compiles that widgetset.
      * 
      * @param file
      * @param monitor
