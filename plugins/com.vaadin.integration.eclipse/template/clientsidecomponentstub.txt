@@ -25,7 +25,10 @@ public class STUB_CLASSNAME extends Widget implements Paintable {
 	 * then handle any initialization relevant to Vaadin.
 	 */
 	public STUB_CLASSNAME() {
+	    // TODO Example code is extending GWT Widget so it must set a root element.
+	    // Change to proper element or remove if extending another widget
 		setElement(Document.get().createDivElement());
+		
 		// This method call of the Paintable interface sets the component
 		// style name in DOM tree
 		setStyleName(CLASSNAME);
