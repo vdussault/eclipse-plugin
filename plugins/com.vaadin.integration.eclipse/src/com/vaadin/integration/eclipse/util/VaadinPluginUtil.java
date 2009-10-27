@@ -1493,7 +1493,6 @@ public class VaadinPluginUtil {
                 .newArchiveRuntimeClasspathEntry(getGWTUserJarPath(project));
         classPath = classPath + classpathSeparator + gwtuser.getLocation();
 
-        boolean defaultOutputAdded = false;
         IPath workspaceLocation = project.getProject().getWorkspace().getRoot()
                 .getRawLocation();
         for (IClasspathEntry classPathEntry : project.getRawClasspath()) {
@@ -1504,21 +1503,19 @@ public class VaadinPluginUtil {
                     classPath = classPath + classpathSeparator
                             + workspaceLocation
                             + outputLocation.toPortableString();
-                } else if (!defaultOutputAdded) {
-                    // ensure the default output location is on classpath
-
-                    // gwt compiler also needs javafiles for classpath
-
-                    IPath path = classPathEntry.getPath();
-                    classPath = classPath + classpathSeparator
-                            + workspaceLocation + path.toPortableString();
-
-                    outputLocation = project.getOutputLocation();
-                    classPath = classPath + classpathSeparator
-                            + workspaceLocation
-                            + outputLocation.toPortableString();
-                    defaultOutputAdded = true;
                 }
+
+                // ensure the default output location is on classpath
+
+                // gwt compiler also needs javafiles for classpath
+
+                IPath path = classPathEntry.getPath();
+                classPath = classPath + classpathSeparator + workspaceLocation
+                        + path.toPortableString();
+
+                outputLocation = project.getOutputLocation();
+                classPath = classPath + classpathSeparator + workspaceLocation
+                        + outputLocation.toPortableString();
 
             }
         }
@@ -1654,7 +1651,7 @@ public class VaadinPluginUtil {
     /**
      * Extracts fully qualified widgetset name and project from given file
      * (expected to be ...edset.gwt.xml file) and compiles that widgetset.
-     * 
+     *
      * @param file
      * @param monitor
      * @throws CoreException
@@ -1674,15 +1671,15 @@ public class VaadinPluginUtil {
         for (int i = 0; rootPath == null && i < allPackageFragmentRoots.length; i++) {
             IPackageFragmentRoot root = allPackageFragmentRoots[i];
             IPath fullPath = root.getPath();
-            if (location.toString().startsWith(fullPath.toString())) {
+            if (location.toString().startsWith(fullPath.toString() + "/")) {
                 rootPath = fullPath;
             }
         }
-        String name = location.toString().replace(rootPath.toString(), "");
+        String name = location.toString()
+                .replace(rootPath.toString() + "/", "");
 
         String fqname = name.replace(".gwt.xml", "");
         fqname = fqname.replaceAll("/", ".");
-        fqname = fqname.substring(1);
 
         compileWidgetset(jproject, fqname, monitor);
 
