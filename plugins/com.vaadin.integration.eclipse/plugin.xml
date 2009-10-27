@@ -257,19 +257,6 @@
                <adapt type="org.eclipse.core.resources.IProject"/> 
             </enabledWhen>
       </page>
-      <page
-            category="com.vaadin.integration.eclipse.properties.VaadinProjectPropertyPage"
-            class="com.vaadin.integration.eclipse.properties.VaadinVersionPropertyPage"
-            id="com.vaadin.integration.eclipse.properties.VaadinVersionPropertyPage"
-            name="Vaadin Version">
-            <filter
-                name="nature"
-                value="org.eclipse.wst.common.project.facet.core.nature">
-            </filter>
-            <enabledWhen>
-               <adapt type="org.eclipse.core.resources.IProject"/> 
-            </enabledWhen>
-      </page>
    </extension>
    <extension
          point="org.eclipse.jdt.core.classpathVariableInitializer">
