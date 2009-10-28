@@ -61,6 +61,10 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                         Object obj = ssel.getFirstElement();
                         if (obj instanceof IFile) {
                             IFile file = (IFile) obj;
+                            IProject project = file.getProject();
+                            VaadinFacetUtils.upgradeFacet(project,
+                                    VaadinFacetUtils.VAADIN_FACET_CURRENT);
+                            VaadinPluginUtil.ensureWidgetsetNature(project);
                             compiled = compileFile(monitor, file);
                         }
                         if (!compiled) {
@@ -68,9 +72,19 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                                     .getProject(currentSelection);
                             if (project == null) {
                                 IFile file = getFileForEditor(activeEditor);
+                                if (file != null && file.exists()) {
+                                    VaadinFacetUtils.upgradeFacet(file
+                                            .getProject(),
+                                                    VaadinFacetUtils.VAADIN_FACET_CURRENT);
+                                    VaadinPluginUtil.ensureWidgetsetNature(file
+                                            .getProject());
+                                }
                                 compiled = compileFile(monitor, file);
                             } else if (VaadinFacetUtils
                                     .isVaadinProject(project)) {
+                                VaadinFacetUtils.upgradeFacet(project,
+                                        VaadinFacetUtils.VAADIN_FACET_CURRENT);
+                                VaadinPluginUtil.ensureWidgetsetNature(project);
                                 IJavaProject jproject = JavaCore
                                         .create(project);
                                 VaadinPluginUtil.compileWidgetset(jproject,

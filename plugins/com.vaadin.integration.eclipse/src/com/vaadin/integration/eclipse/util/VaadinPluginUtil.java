@@ -30,6 +30,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
@@ -79,6 +80,7 @@ import org.osgi.framework.Bundle;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
+import com.vaadin.integration.eclipse.builder.WidgetsetNature;
 import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
 import com.vaadin.integration.eclipse.variables.VaadinClasspathVariableInitializer;
 import com.vaadin.integration.eclipse.wizards.DirectoryManifestProvider;
@@ -1422,6 +1424,30 @@ public class VaadinPluginUtil {
         // to be in web-inf/lib, but just manually added for project classpath
 
         return vaadinpackages;
+    }
+
+    /**
+     * Add widgetset nature to a project if not already there. Only modified
+     * Vaadin projects.
+     *
+     * @param project
+     */
+    public static void ensureWidgetsetNature(final IProject project) {
+        if (!VaadinFacetUtils.isVaadinProject(project)) {
+            return;
+        }
+        try {
+            // Add nature if not there (to enable WidgetSet builder).
+            // Nice when upgrading projects.
+            IProjectNature nature = project
+                    .getNature(WidgetsetNature.NATURE_ID);
+            if (nature == null) {
+                WidgetsetNature.addWidgetsetNature(project);
+            }
+        } catch (Exception e) {
+            VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                    "Adding widgetset nature to the project failed.", e);
+        }
     }
 
     /**

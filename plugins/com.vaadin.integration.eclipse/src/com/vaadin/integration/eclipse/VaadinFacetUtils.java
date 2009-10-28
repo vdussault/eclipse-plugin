@@ -3,6 +3,7 @@ package com.vaadin.integration.eclipse;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.IFacetedProjectWorkingCopy;
 import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
@@ -17,6 +18,7 @@ public class VaadinFacetUtils {
     // .getVersion("0.1");
     public static final IProjectFacetVersion VAADIN_10 = VAADIN_FACET
             .getVersion("1.0");
+    public static final IProjectFacetVersion VAADIN_FACET_CURRENT = VAADIN_10;
 
     /**
      * Check whether a project has the Vaadin project nature.
@@ -35,6 +37,36 @@ public class VaadinFacetUtils {
         } catch (CoreException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    /**
+     * Upgrade/change the Vaadin facet to the given version. If the project does
+     * not have the Vaadin facet, nothing is modified.
+     *
+     * @param project
+     *            the project to upgrade
+     * @param version
+     *            the new (exact) Vaadin facet version to use
+     */
+    public static void upgradeFacet(IProject project,
+            IProjectFacetVersion version) {
+        if (!isVaadinProject(project)) {
+            return;
+        }
+
+        try {
+            IFacetedProject fproj = ProjectFacetsManager.create(project);
+            if (fproj == null || !fproj.hasProjectFacet(VAADIN_FACET)
+                    || fproj.hasProjectFacet(version)) {
+                return;
+            }
+            // upgrade facet version
+            IFacetedProjectWorkingCopy workingCopy = fproj.createWorkingCopy();
+            workingCopy.changeProjectFacetVersion(version);
+            workingCopy.commitChanges(null);
+        } catch (CoreException e) {
+            e.printStackTrace();
         }
     }
 
