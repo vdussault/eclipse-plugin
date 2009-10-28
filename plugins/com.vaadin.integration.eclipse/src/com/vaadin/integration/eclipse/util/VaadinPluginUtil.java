@@ -81,6 +81,7 @@ import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
 import com.vaadin.integration.eclipse.variables.VaadinClasspathVariableInitializer;
+import com.vaadin.integration.eclipse.wizards.DirectoryManifestProvider;
 
 public class VaadinPluginUtil {
 
@@ -1346,7 +1347,8 @@ public class VaadinPluginUtil {
                     return false;
                 }
                 Attributes mainAttributes = manifest.getMainAttributes();
-                if (mainAttributes.getValue("Vaadin-Widgetsets") != null) {
+                if (mainAttributes
+                        .getValue(DirectoryManifestProvider.MANIFEST_VAADIN_WIDGETSETS) != null) {
                     return true;
                 } else {
                     // not a vaadin widget package, but it still may be

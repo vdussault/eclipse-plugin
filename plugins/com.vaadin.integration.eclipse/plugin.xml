@@ -156,6 +156,30 @@
             name="Vaadin Widget">
       </wizard>
    </extension>
+   <extension
+         point="org.eclipse.ui.exportWizards">
+      <category
+	     name="Vaadin"
+	     id="com.vaadin">
+	  </category>
+   </extension>
+   <extension
+         point="org.eclipse.ui.exportWizards">
+      <wizard
+            name="Vaadin Directory Package"
+            icon="icons/vaadin-icon-16.png"
+            class="com.vaadin.integration.eclipse.wizards.DirectoryPackageWizard"
+            category="com.vaadin"
+            id="com.vaadin.integration.eclipse.wizards.DirectoryPackageWizard">
+         <description>
+            Configure and export a Vaadin Directory package JAR.
+Any metadata changes made will be stored in the project manifest.
+         </description>
+         <selection
+               class="org.eclipse.core.resources.IResource">
+         </selection>
+      </wizard>
+   </extension>
    <extension point="org.eclipse.ltk.core.refactoring.renameParticipants">
 	<renameParticipant
 		id="com.vaadin.integration.eclipse.WebContextRenameParticipant" 
