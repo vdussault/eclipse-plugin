@@ -1589,7 +1589,7 @@ public class VaadinPluginUtil {
      * <p>
      * Note, this only works for projects with vaadin 6.2 and later.
      *
-     * @param project
+     * @param jproject
      * @param moduleName
      *            explicit widgetset module name - not null
      * @param monitor
@@ -1597,14 +1597,16 @@ public class VaadinPluginUtil {
      * @throws IOException
      * @throws InterruptedException
      */
-    public static void compileWidgetset(IJavaProject project,
+    public static void compileWidgetset(IJavaProject jproject,
             String moduleName, final IProgressMonitor monitor)
             throws CoreException, IOException, InterruptedException {
+        IProject project = jproject.getProject();
+
         ArrayList<String> args = new ArrayList<String>();
 
         moduleName = moduleName.replace(".client.", ".");
 
-        IVMInstall vmInstall = JavaRuntime.getVMInstall(project);
+        IVMInstall vmInstall = JavaRuntime.getVMInstall(jproject);
         // this might be unnecessary
         if (vmInstall == null) {
             vmInstall = JavaRuntime.getDefaultVMInstall();
@@ -1623,9 +1625,8 @@ public class VaadinPluginUtil {
 
         // refresh only the WebContent/VAADIN/widgetsets or
         // WebContent/ITMILL/widgetsets directory
-        String resourceDirectory = getVaadinResourceDirectory(project
-                .getProject());
-        final IFolder wsDir = getWebContentFolder(project.getProject())
+        String resourceDirectory = getVaadinResourceDirectory(project);
+        final IFolder wsDir = getWebContentFolder(project)
                 .getFolder(resourceDirectory).getFolder("widgetsets");
 
         // refresh this requires that the directory exists
@@ -1647,16 +1648,16 @@ public class VaadinPluginUtil {
         classPath = systemLibsEntry.getLocation();
 
         IRuntimeClasspathEntry gwtdev = JavaRuntime
-                .newArchiveRuntimeClasspathEntry(getGWTDevJarPath(project));
+                .newArchiveRuntimeClasspathEntry(getGWTDevJarPath(jproject));
         classPath = classPath + classpathSeparator + gwtdev.getLocation();
 
         IRuntimeClasspathEntry gwtuser = JavaRuntime
-                .newArchiveRuntimeClasspathEntry(getGWTUserJarPath(project));
+                .newArchiveRuntimeClasspathEntry(getGWTUserJarPath(jproject));
         classPath = classPath + classpathSeparator + gwtuser.getLocation();
 
-        IPath workspaceLocation = project.getProject().getWorkspace().getRoot()
+        IPath workspaceLocation = project.getWorkspace().getRoot()
                 .getRawLocation();
-        for (IClasspathEntry classPathEntry : project.getRawClasspath()) {
+        for (IClasspathEntry classPathEntry : jproject.getRawClasspath()) {
             if (classPathEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
                 IPath outputLocation = classPathEntry.getOutputLocation();
                 if (outputLocation != null) {
@@ -1671,21 +1672,23 @@ public class VaadinPluginUtil {
                 // gwt compiler also needs javafiles for classpath
 
                 IPath path = classPathEntry.getPath();
-                classPath = classPath + classpathSeparator + workspaceLocation
+                path = getRawLocation(project, path);
+                classPath = classPath + classpathSeparator
                         + path.toPortableString();
 
-                outputLocation = project.getOutputLocation();
-                classPath = classPath + classpathSeparator + workspaceLocation
+                outputLocation = jproject.getOutputLocation();
+                outputLocation = getRawLocation(project, outputLocation);
+                classPath = classPath + classpathSeparator
                         + outputLocation.toPortableString();
 
             }
         }
 
         IRuntimeClasspathEntry vaadinJar = JavaRuntime
-                .newArchiveRuntimeClasspathEntry(findProjectVaadinJarPath(project));
+                .newArchiveRuntimeClasspathEntry(findProjectVaadinJarPath(jproject));
         classPath = classPath + classpathSeparator + vaadinJar.getLocation();
 
-        Collection<IPath> widgetpackagets = getAvailableVaadinWidgetsetPackages(project);
+        Collection<IPath> widgetpackagets = getAvailableVaadinWidgetsetPackages(jproject);
         for (IPath file2 : widgetpackagets) {
             if (!vaadinJar.getLocation().toString().equals(file2.toString())) {
                 classPath = classPath + classpathSeparator + file2.toString();
@@ -1703,7 +1706,7 @@ public class VaadinPluginUtil {
         }
 
         String compilerClass = "com.google.gwt.dev.GWTCompiler";
-        if (isVaadin6(project.getProject())) {
+        if (isVaadin6(project)) {
             compilerClass = "com.vaadin.tools.WidgetsetCompiler";
         }
 
@@ -1720,7 +1723,7 @@ public class VaadinPluginUtil {
         // args.add("ALL");
         args.add(moduleName);
 
-        IPath location = project.getProject().getLocation();
+        IPath location = project.getLocation();
 
         final File file = location.toFile();
 
@@ -1814,6 +1817,19 @@ public class VaadinPluginUtil {
             // TODO cancelled or somehow else failed
 
         }
+    }
+
+    /**
+     * Convert a path to a raw filesystem location - also works when the project
+     * is outside the workspace
+     * 
+     * @param project
+     * @param path
+     * @return
+     */
+    private static IPath getRawLocation(IProject project, IPath path) {
+        return project.getWorkspace().getRoot().getFolder(
+                path).getRawLocation();
     }
 
     /**
