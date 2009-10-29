@@ -1659,6 +1659,12 @@ public class VaadinPluginUtil {
 
         myConsole.activate();
 
+        // Let the following debug messages exist until we are sure thigns work
+        // on each platform
+        newMessageStream.println();
+        newMessageStream.println("Executing compilations with parameter "
+                + args);
+
         InputStream inputStream = exec.getInputStream();
         BufferedReader bufferedReader2 = new BufferedReader(
                 new InputStreamReader(inputStream));
