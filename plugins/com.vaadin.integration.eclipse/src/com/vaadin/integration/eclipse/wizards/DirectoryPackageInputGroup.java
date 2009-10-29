@@ -150,10 +150,10 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
             }
 
             // the manifest file is likely to be updated by the export
-            IFolder metainfFolder = webContentFolder.getFolder("META-INF");
-            if (metainfFolder.exists()) {
-                result.add(metainfFolder);
-            }
+            // IFolder metainfFolder = webContentFolder.getFolder("META-INF");
+            // if (metainfFolder.exists()) {
+            // result.add(metainfFolder);
+            // }
 
             return result;
         } catch (JavaModelException e) {
@@ -211,14 +211,14 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
 
     /**
      * Return the elements which will be exported.
-     * 
+     *
      * {@see
      * org.eclipse.jdt.ui.jarpackager.JarPackageData.setElements(Object[])}
-     * 
+     *
      * Everything under the returned elements will be exported and the elements
      * should correspond to entities in the file system, so the elements should
      * be mostly leaf elements (e.g. IFile), not their parent containers.
-     * 
+     *
      * @return Object[] elements to export
      */
     // adapted from JarPackageWizardPage
@@ -298,7 +298,7 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
      * Create a list with {@link IResource} instances for the folders / projects
      * that correspond to the Java elements (Java project, package, package
      * root) in a set.
-     * 
+     *
      * The set can contain objects of different types, but only
      * {@link IJavaElement} instances are taken into account.
      */
