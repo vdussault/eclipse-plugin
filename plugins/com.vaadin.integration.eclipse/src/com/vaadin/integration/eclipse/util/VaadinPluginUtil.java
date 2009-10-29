@@ -1284,8 +1284,9 @@ public class VaadinPluginUtil {
         }
         if (appWithShortestPackageName != null) {
             String fullyQualifiedName = appWithShortestPackageName
-                    .getFullyQualifiedName()
-                    + "Widgetset";
+                    .getPackageFragment().getElementName()
+                    + ".widgetset."
+                    + appWithShortestPackageName.getElementName() + "Widgetset";
 
             System.out.println("No widget set found, " + fullyQualifiedName
                     + " will be created...");
