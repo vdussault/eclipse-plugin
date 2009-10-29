@@ -151,8 +151,11 @@ public class NewComponentWizard extends Wizard implements INewWizard {
             throws CoreException {
         String widgetSetName;
         if (page.is62Project()) {
+            // Create the widgetset if it did not exist. This way, the user can
+            // immediately move the widgetset package instead of needing to
+            // compile widgetset first
             widgetSetName = VaadinPluginUtil.getWidgetSet(
-                    page.getJavaProject(), monitor);
+                    page.getJavaProject(), true, monitor);
         } else {
             widgetSetName = page.getWidgetSetName();
         }
@@ -466,7 +469,7 @@ public class NewComponentWizard extends Wizard implements INewWizard {
     /**
      * We will accept the selection in the workbench to see if we can initialize
      * from it.
-     * 
+     *
      * @see IWorkbenchWizard#init(IWorkbench, IStructuredSelection)
      */
     public void init(IWorkbench workbench, IStructuredSelection selection) {

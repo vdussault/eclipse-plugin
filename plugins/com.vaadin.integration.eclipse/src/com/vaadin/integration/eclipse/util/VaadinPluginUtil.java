@@ -1221,7 +1221,27 @@ public class VaadinPluginUtil {
                 + "terminal.gwt.client.WidgetSet", true, monitor);
     }
 
-    public static String getWidgetSet(IJavaProject project,
+    /**
+     * Find the (first) widgetset in a project, or indicate where the widgetset
+     * should be created. If <code>create</code> is true, create the widgetset
+     * if it did not exist.
+     *
+     * The default location for a widgetset is based on the location of the
+     * Application class with the shortest package path. By default, a
+     * "widgetset" package is created under that package.
+     *
+     * A widgetset file should be named *widgetset*.gwt.xml - the ".gwt.xml" is
+     * not a part of the module name.
+     *
+     * @param project
+     * @param create
+     *            create widgetset if it does not exist
+     * @param monitor
+     * @return widgetset module name (with package path using dots), null if no
+     *         suitable location found
+     * @throws CoreException
+     */
+    public static String getWidgetSet(IJavaProject project, boolean create,
             IProgressMonitor monitor) throws CoreException {
         IPackageFragmentRoot[] packageFragmentRoots = project
                 .getPackageFragmentRoots();
@@ -1283,10 +1303,10 @@ public class VaadinPluginUtil {
             }
         }
         if (appWithShortestPackageName != null) {
+            String wsName = appWithShortestPackageName.getElementName() + "Widgetset";
             String fullyQualifiedName = appWithShortestPackageName
                     .getPackageFragment().getElementName()
-                    + ".widgetset."
-                    + appWithShortestPackageName.getElementName() + "Widgetset";
+                    + ".widgetset." + wsName;
 
             System.out.println("No widget set found, " + fullyQualifiedName
                     + " will be created...");
@@ -1306,6 +1326,19 @@ public class VaadinPluginUtil {
                     artifact.dispose();
                 }
             }
+
+            if (create) {
+                IResource pkg = appWithShortestPackageName.getPackageFragment().getResource();
+                if (pkg instanceof IFolder) {
+                    IFolder wsFolder = ((IFolder) pkg).getFolder("widgetset");
+                    if (!wsFolder.exists()) {
+                        wsFolder.create(true, false, monitor);
+                    }
+                    IFile file = wsFolder.getFile(wsName + ".gwt.xml");
+                    ensureFileFromTemplate(file, "widgetsetxmlstub2.txt");
+                }
+            }
+
             return fullyQualifiedName;
         }
 
@@ -1557,7 +1590,7 @@ public class VaadinPluginUtil {
         // create a new one)
         List<String> widgetsets = findWidgetSets(project, monitor);
         if (widgetsets.size() <= 1) {
-            String widgetset = getWidgetSet(project, monitor);
+            String widgetset = getWidgetSet(project, true, monitor);
             widgetset = widgetset.replace(".client.", ".");
             compileWidgetset(project, widgetset, monitor);
             if (widgetsets.size() == 0) {
