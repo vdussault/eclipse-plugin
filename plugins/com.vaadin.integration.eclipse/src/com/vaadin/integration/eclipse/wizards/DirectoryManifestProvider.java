@@ -22,7 +22,6 @@ public class DirectoryManifestProvider extends ManifestProvider {
     public static final String MANIFEST_IMPLEMENTATION_VENDOR = "Implementation-Vendor";
     public static final String MANIFEST_LICENSE_TITLE = "Vaadin-License-Title";
 
-    // TODO set and use this
     public static final String MANIFEST_VAADIN_WIDGETSETS = "Vaadin-Widgetsets";
 
     /**
@@ -53,6 +52,8 @@ public class DirectoryManifestProvider extends ManifestProvider {
                     directoryPackage.getImplementationVendor());
             attributes.putValue(MANIFEST_LICENSE_TITLE,
                     directoryPackage.getLicenseTitle());
+            attributes.putValue(MANIFEST_VAADIN_WIDGETSETS, directoryPackage
+                    .getWidgetsets());
         }
         return manifest;
     }
@@ -82,6 +83,8 @@ public class DirectoryManifestProvider extends ManifestProvider {
                     .getValue(MANIFEST_IMPLEMENTATION_VENDOR));
             directoryPackage.setLicenseTitle(attributes
                     .getValue(MANIFEST_LICENSE_TITLE));
+            directoryPackage.setWidgetsets(attributes
+                    .getValue(MANIFEST_VAADIN_WIDGETSETS));
         } finally {
             if (stream != null) {
                 stream.close();

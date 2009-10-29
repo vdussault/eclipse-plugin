@@ -180,7 +180,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
             PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 
                 public void run() {
-                    Shell shell = PlatformUI.getWorkbench()
+                    final Shell shell = PlatformUI.getWorkbench()
                             .getActiveWorkbenchWindow().getShell();
 
                     boolean openQuestion = MessageDialog
@@ -194,17 +194,20 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                                 widgetsetBuildPending = false;
                                 monitor.beginTask("Compiling wigetset", 100);
                                 try {
-                                    VaadinPluginUtil.compileWidgetset(p, null,
-                                            monitor);
+                                    VaadinPluginUtil.compileWidgetsets(shell,
+                                            p, monitor);
                                 } catch (CoreException e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
+                                    VaadinPluginUtil.handleBackgroundException(
+                                            IStatus.ERROR,
+                                            "Widgetset compilation failed", e);
                                 } catch (IOException e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
+                                    VaadinPluginUtil.handleBackgroundException(
+                                            IStatus.ERROR,
+                                            "Widgetset compilation failed", e);
                                 } catch (InterruptedException e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
+                                    VaadinPluginUtil.handleBackgroundException(
+                                            IStatus.ERROR,
+                                            "Widgetset compilation failed", e);
                                 }
                                 monitor.worked(100);
                                 monitor.done();

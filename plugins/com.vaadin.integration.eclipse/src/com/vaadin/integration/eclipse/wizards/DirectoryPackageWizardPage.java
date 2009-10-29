@@ -53,6 +53,7 @@ public class DirectoryPackageWizardPage extends
     private Text implementationVersionText;
     private Text implementationVendorText;
     private Text licenseTitleText;
+    private Text widgetsetsText;
 
     private IStructuredSelection initialSelection;
 
@@ -216,6 +217,12 @@ public class DirectoryPackageWizardPage extends
         licenseTitleText = new Text(manifestGroup, SWT.BORDER);
         licenseTitleText.setLayoutData(gdhfill());
         licenseTitleText.addListener(SWT.Modify, this);
+
+        label = new Label(manifestGroup, SWT.NONE);
+        label.setText("Widgetsets:");
+        widgetsetsText = new Text(manifestGroup, SWT.BORDER);
+        widgetsetsText.setLayoutData(gdhfill());
+        widgetsetsText.addListener(SWT.Modify, this);
     }
 
     /**
@@ -234,6 +241,7 @@ public class DirectoryPackageWizardPage extends
         directoryPackage.setImplementationVendor(implementationVendorText
                 .getText());
         directoryPackage.setLicenseTitle(licenseTitleText.getText());
+        directoryPackage.setWidgetsets(widgetsetsText.getText());
 
         super.updateModel();
     }
@@ -255,6 +263,7 @@ public class DirectoryPackageWizardPage extends
         implementationVendorText.setText(directoryPackage
                 .getImplementationVendor());
         licenseTitleText.setText(directoryPackage.getLicenseTitle());
+        widgetsetsText.setText(directoryPackage.getWidgetsets());
     }
 
     /**

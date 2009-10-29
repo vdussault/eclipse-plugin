@@ -22,7 +22,8 @@ public class DirectoryPackageData extends JarPackageData {
     private String implementationVendor;
     private String licenseTitle;
 
-    // TODO Vaadin widgetsets for the addon
+    // TODO Vaadin widgetsets for the addon - better typing?
+    private String widgetsets;
 
     /**
      * Constructor with default manifest provider.
@@ -86,6 +87,10 @@ public class DirectoryPackageData extends JarPackageData {
         if (getLicenseTitle() == null) {
             setLicenseTitle("proprietary");
         }
+
+        if (getWidgetsets() == null) {
+            setWidgetsets(VaadinPluginUtil.findWidgetSetsString(jproject, null));
+        }
     }
 
     public String getImplementationTitle() {
@@ -118,6 +123,14 @@ public class DirectoryPackageData extends JarPackageData {
 
     public void setLicenseTitle(String licenseTitle) {
         this.licenseTitle = licenseTitle;
+    }
+
+    public void setWidgetsets(String widgetsets) {
+        this.widgetsets = widgetsets;
+    }
+
+    public String getWidgetsets() {
+        return widgetsets;
     }
 
 }
