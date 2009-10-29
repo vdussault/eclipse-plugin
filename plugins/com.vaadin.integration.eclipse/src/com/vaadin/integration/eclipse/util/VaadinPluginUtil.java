@@ -1559,6 +1559,28 @@ public class VaadinPluginUtil {
             String widgetset = getWidgetSet(project, monitor);
             widgetset = widgetset.replace(".client.", ".");
             compileWidgetset(project, widgetset, monitor);
+            if (widgetsets.size() == 0) {
+                // refresh the created widgetset - need to find it first
+                String pathStr = widgetset.replace(".", "/") + ".gwt.xml";
+                IPackageFragmentRoot[] packageFragmentRoots = project
+                        .getPackageFragmentRoots();
+                for (IPackageFragmentRoot root : packageFragmentRoots) {
+                    if (!(root instanceof JarPackageFragmentRoot)) {
+                        IResource underlyingResource = root
+                                .getUnderlyingResource();
+
+                        if (underlyingResource instanceof IFolder) {
+                            IFolder folder = (IFolder) underlyingResource;
+                            IContainer parent = folder.getFile(pathStr)
+                                    .getParent();
+                            if (parent.exists()) {
+                                parent.refreshLocal(IResource.DEPTH_ONE,
+                                        monitor);
+                            }
+                        }
+                    }
+                }
+            }
         } else {
             // TODO ask the user, compile all the selected ones
             // TODO queue immediately as separate tasks
@@ -1822,7 +1844,7 @@ public class VaadinPluginUtil {
     /**
      * Convert a path to a raw filesystem location - also works when the project
      * is outside the workspace
-     * 
+     *
      * @param project
      * @param path
      * @return
