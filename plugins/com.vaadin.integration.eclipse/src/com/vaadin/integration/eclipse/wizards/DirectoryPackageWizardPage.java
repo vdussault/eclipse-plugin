@@ -244,6 +244,8 @@ public class DirectoryPackageWizardPage extends
         directoryPackage.setWidgetsets(widgetsetsText.getText());
 
         super.updateModel();
+
+        directoryPackage.setOverwrite(overwriteCheckbox.getSelection());
     }
 
     protected static GridData gdhfill() {
