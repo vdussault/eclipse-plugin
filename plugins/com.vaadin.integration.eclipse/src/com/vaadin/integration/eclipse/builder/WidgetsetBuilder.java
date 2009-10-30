@@ -68,8 +68,8 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                     runWidgetSetBuildTool(monitor);
                     break;
                 }
-            } else if (isComponentWithWidgetAnnotation(resource)
-                    || isClientSideJavaClass(resource)) {
+            } else if (resource.exists()
+                    && (isComponentWithWidgetAnnotation(resource) || isClientSideJavaClass(resource))) {
                 switch (delta.getKind()) {
                 case IResourceDelta.ADDED:
                 case IResourceDelta.CHANGED:

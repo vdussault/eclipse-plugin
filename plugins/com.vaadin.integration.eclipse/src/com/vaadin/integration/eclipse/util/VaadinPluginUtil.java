@@ -1147,7 +1147,7 @@ public class VaadinPluginUtil {
 
     public static boolean typeExtendsClass(IType type, String className)
             throws JavaModelException {
-        if (type.isStructureKnown() && type.isClass()) {
+        if (type.exists() && type.isStructureKnown() && type.isClass()) {
             ITypeHierarchy h = type.newSupertypeHierarchy(null);
             IType spr = h.getSuperclass(type);
             while (spr != null) {

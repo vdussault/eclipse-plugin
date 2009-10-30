@@ -6,11 +6,13 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -410,6 +412,17 @@ public class NewComponentWizard extends Wizard implements INewWizard {
                 // this also saves the file
                 compilationUnit.commitWorkingCopy(false, monitor);
 
+            }
+
+            // refresh subtree
+            if (uiPackage.getParent() != null
+                    && uiPackage.getParent().getParent() != null) {
+                IJavaElement toRefresh = uiPackage.getParent().getParent();
+                toRefresh.getResource().refreshLocal(IResource.DEPTH_INFINITE,
+                        monitor);
+            } else {
+                packageFragmentRoot.getResource().refreshLocal(
+                        IResource.DEPTH_INFINITE, monitor);
             }
 
         } catch (JavaModelException e) {
