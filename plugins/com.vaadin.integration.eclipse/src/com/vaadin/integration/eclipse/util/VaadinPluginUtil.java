@@ -17,7 +17,9 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -1711,16 +1713,17 @@ public class VaadinPluginUtil {
                 .newArchiveRuntimeClasspathEntry(getGWTUserJarPath(jproject));
         classPath = classPath + classpathSeparator + gwtuser.getLocation();
 
+        Set<IPath> outputLocations = new LinkedHashSet<IPath>();
+        outputLocations.add(jproject.getOutputLocation());
+
         IPath workspaceLocation = project.getWorkspace().getRoot()
                 .getRawLocation();
         for (IClasspathEntry classPathEntry : jproject.getRawClasspath()) {
             if (classPathEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+                // source entry has custom output location?
                 IPath outputLocation = classPathEntry.getOutputLocation();
                 if (outputLocation != null) {
-                    // source entry has custom output location
-                    classPath = classPath + classpathSeparator
-                            + workspaceLocation
-                            + outputLocation.toPortableString();
+                    outputLocations.add(outputLocation);
                 }
 
                 // ensure the default output location is on classpath
@@ -1731,13 +1734,15 @@ public class VaadinPluginUtil {
                 path = getRawLocation(project, path);
                 classPath = classPath + classpathSeparator
                         + path.toPortableString();
-
-                outputLocation = jproject.getOutputLocation();
-                outputLocation = getRawLocation(project, outputLocation);
-                classPath = classPath + classpathSeparator
-                        + outputLocation.toPortableString();
-
             }
+        }
+
+        // output locations after sources
+        for (IPath outputLocation : outputLocations) {
+            classPath = classPath
+                    + classpathSeparator
+                    + getRawLocation(project, outputLocation)
+                            .toPortableString();
         }
 
         IRuntimeClasspathEntry vaadinJar = JavaRuntime
