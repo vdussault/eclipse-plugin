@@ -51,6 +51,8 @@ public class DirectoryPackageData extends JarPackageData {
             return;
         }
 
+        setExportJavaFiles(true);
+
         // find manifest from WebContent
         // IFile rootManifest =
         // jproject.getProject().getFile("META-INF/MANIFEST.MF");
