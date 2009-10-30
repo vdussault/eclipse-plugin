@@ -21,17 +21,21 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard;
-import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
@@ -289,13 +293,36 @@ public class DirectoryPackageWizard extends JarPackageWizard {
         IFile manifestFile = directoryPackage.getManifestFile();
         if (manifestFile.isAccessible()) {
             if (directoryPackage.allowOverwrite()
-                    || JarPackagerUtil.askForOverwritePermission(getShell(),
-                            manifestFile.getFullPath(), false)) {
+                    || queryDialog(
+                            "Confirm Update",
+                            Messages
+                                    .format(
+                                            "Do you want to update the manifest file ''{0}'' and use it in the package?",
+                                            BasicElementLabels.getPathLabel(
+                                                    manifestFile.getFullPath(),
+                                                    false)))) {
                 manifestFile.setContents(fileInput, true, true, null);
             }
         } else {
             manifestFile.create(fileInput, true, null);
         }
+    }
+
+    private boolean queryDialog(final String title, final String message) {
+        final Shell shell = getShell();
+        Display display = shell.getDisplay();
+        if (display == null || display.isDisposed()) {
+            return false;
+        }
+        final boolean[] returnValue = new boolean[1];
+        Runnable runnable = new Runnable() {
+            public void run() {
+                returnValue[0] = MessageDialog.openQuestion(shell, title,
+                        message);
+            }
+        };
+        display.syncExec(runnable);
+        return returnValue[0];
     }
 
 }
