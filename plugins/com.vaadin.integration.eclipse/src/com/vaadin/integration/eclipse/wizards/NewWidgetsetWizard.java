@@ -1,7 +1,6 @@
 package com.vaadin.integration.eclipse.wizards;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -12,7 +11,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -30,9 +28,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
-import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
@@ -215,21 +210,8 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
                     project, "Compile" + createdType.getElementName());
 
             // get the project VM or the default java VM path from Eclipse
-            IJavaProject jProject = JavaCore.create(project);
-            IVMInstall vmInstall = JavaRuntime.getVMInstall(jProject);
-            // this might be unnecessary
-            if (vmInstall == null) {
-                vmInstall = JavaRuntime.getDefaultVMInstall();
-            }
-            File vmBinDir = new File(vmInstall.getInstallLocation(), "bin");
-            String vmName;
-            // windows hack, as Eclipse can run the JVM but does not give its
-            // executable name through public APIs
-            if ("windows".equals(VaadinPluginUtil.getPlatform())) {
-                vmName = new File(vmBinDir, "java.exe").getAbsolutePath();
-            } else {
-                vmName = new File(vmBinDir, "java").getAbsolutePath();
-            }
+            IJavaProject jproject = JavaCore.create(project);
+            String vmName = VaadinPluginUtil.getJvmExecutablePath(jproject);
             workingCopy.setAttribute(IExternalToolConstants.ATTR_LOCATION,
                     vmName);
 
@@ -258,40 +240,8 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
                     "${project_loc:/" + project.getName() + "}");
 
             // construct the class path, including GWT JARs and project sources
-            String classPath = "";
-            String classpathSeparator;
-            if ("windows".equals(VaadinPluginUtil.getPlatform())) {
-                classpathSeparator = ";";
-            } else {
-                classpathSeparator = ":";
-            }
-
-            IRuntimeClasspathEntry systemLibsEntry = JavaRuntime
-                    .newVariableRuntimeClasspathEntry(new Path(
-                            JavaRuntime.JRELIB_VARIABLE));
-            classPath = systemLibsEntry.getLocation();
-
-            IRuntimeClasspathEntry gwtdev = JavaRuntime
-                    .newArchiveRuntimeClasspathEntry(VaadinPluginUtil
-                            .getGWTDevJarPath(page.getJavaProject()));
-            classPath = classPath + classpathSeparator + gwtdev.getLocation();
-
-            IRuntimeClasspathEntry gwtuser = JavaRuntime
-                    .newArchiveRuntimeClasspathEntry(VaadinPluginUtil
-                            .getGWTUserJarPath(page.getJavaProject()));
-            classPath = classPath + classpathSeparator + gwtuser.getLocation();
-
-            IFolder srcFolder = VaadinPluginUtil
-                    .getSrcFolder(page.getProject());
-            IPath location2 = srcFolder.getLocation();
-            classPath = classPath + classpathSeparator
-                    + location2.toPortableString();
-
-            IRuntimeClasspathEntry vaadinJar = JavaRuntime
-                    .newArchiveRuntimeClasspathEntry(VaadinPluginUtil
-                            .findProjectVaadinJarPath(page.getJavaProject()));
-            classPath = classPath + classpathSeparator
-                    + vaadinJar.getLocation();
+            String classPath = VaadinPluginUtil.getProjectBaseClasspath(
+                    jproject, false);
 
             // construct rest of the arguments for the launch
 

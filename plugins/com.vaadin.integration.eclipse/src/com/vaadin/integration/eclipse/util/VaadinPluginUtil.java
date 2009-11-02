@@ -1113,7 +1113,7 @@ public class VaadinPluginUtil {
                     // Galileo
                     return jar.getPath();
                 } else {
-                    // Ganimede
+                    // Ganymede
                     IPath rawLocation = resource.getRawLocation();
                     return rawLocation;
                 }
@@ -1664,21 +1664,7 @@ public class VaadinPluginUtil {
 
         moduleName = moduleName.replace(".client.", ".");
 
-        IVMInstall vmInstall = JavaRuntime.getVMInstall(jproject);
-        // this might be unnecessary
-        if (vmInstall == null) {
-            vmInstall = JavaRuntime.getDefaultVMInstall();
-        }
-        File vmBinDir = new File(vmInstall.getInstallLocation(), "bin");
-        String vmName;
-        // windows hack, as Eclipse can run the JVM but does not give its
-        // executable name through public APIs
-        if ("windows".equals(getPlatform())) {
-            vmName = new File(vmBinDir, "java.exe").getAbsolutePath();
-        } else {
-            vmName = new File(vmBinDir, "java").getAbsolutePath();
-        }
-
+        String vmName = getJvmExecutablePath(jproject);
         args.add(vmName);
 
         // refresh only the WebContent/VAADIN/widgetsets or
@@ -1691,67 +1677,14 @@ public class VaadinPluginUtil {
         createFolders(wsDir, monitor);
 
         // construct the class path, including GWT JARs and project sources
-        String classPath = "";
-        String classpathSeparator;
-        if ("windows".equals(getPlatform())) {
-            classpathSeparator = ";";
-        } else {
-            classpathSeparator = ":";
-        }
+        String classPath = getProjectBaseClasspath(jproject, true);
+        String classpathSeparator = getClasspathSeparator();
 
-        IRuntimeClasspathEntry systemLibsEntry = JavaRuntime
-                .newVariableRuntimeClasspathEntry(new Path(
-                        JavaRuntime.JRELIB_VARIABLE));
-
-        classPath = systemLibsEntry.getLocation();
-
-        IRuntimeClasspathEntry gwtdev = JavaRuntime
-                .newArchiveRuntimeClasspathEntry(getGWTDevJarPath(jproject));
-        classPath = classPath + classpathSeparator + gwtdev.getLocation();
-
-        IRuntimeClasspathEntry gwtuser = JavaRuntime
-                .newArchiveRuntimeClasspathEntry(getGWTUserJarPath(jproject));
-        classPath = classPath + classpathSeparator + gwtuser.getLocation();
-
-        Set<IPath> outputLocations = new LinkedHashSet<IPath>();
-        outputLocations.add(jproject.getOutputLocation());
-
-        IPath workspaceLocation = project.getWorkspace().getRoot()
-                .getRawLocation();
-        for (IClasspathEntry classPathEntry : jproject.getRawClasspath()) {
-            if (classPathEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-                // source entry has custom output location?
-                IPath outputLocation = classPathEntry.getOutputLocation();
-                if (outputLocation != null) {
-                    outputLocations.add(outputLocation);
-                }
-
-                // ensure the default output location is on classpath
-
-                // gwt compiler also needs javafiles for classpath
-
-                IPath path = classPathEntry.getPath();
-                path = getRawLocation(project, path);
-                classPath = classPath + classpathSeparator
-                        + path.toPortableString();
-            }
-        }
-
-        // output locations after sources
-        for (IPath outputLocation : outputLocations) {
-            classPath = classPath
-                    + classpathSeparator
-                    + getRawLocation(project, outputLocation)
-                            .toPortableString();
-        }
-
-        IRuntimeClasspathEntry vaadinJar = JavaRuntime
-                .newArchiveRuntimeClasspathEntry(findProjectVaadinJarPath(jproject));
-        classPath = classPath + classpathSeparator + vaadinJar.getLocation();
-
+        // add widgetset JARs
         Collection<IPath> widgetpackagets = getAvailableVaadinWidgetsetPackages(jproject);
+        IPath vaadinJarPath = findProjectVaadinJarPath(jproject);
         for (IPath file2 : widgetpackagets) {
-            if (!vaadinJar.getLocation().toString().equals(file2.toString())) {
+            if (!file2.equals(vaadinJarPath)) {
                 classPath = classPath + classpathSeparator + file2.toString();
             }
         }
@@ -1878,6 +1811,125 @@ public class VaadinPluginUtil {
             // TODO cancelled or somehow else failed
 
         }
+    }
+
+    /**
+     * Returns the project classpath as a string, in a format that can be used
+     * when launching external programs on the same platform where Eclipse is
+     * running.
+     * 
+     * TODO #3574 include (optionally) rest of JARs on the classpath?
+     * 
+     * @param jproject
+     * @param includeOutputDirectories
+     * @return
+     * @throws CoreException
+     * @throws JavaModelException
+     */
+    public static String getProjectBaseClasspath(IJavaProject jproject,
+            boolean includeOutputDirectories)
+            throws CoreException, JavaModelException {
+        String classpathSeparator = getClasspathSeparator();
+        IProject project = jproject.getProject();
+
+        String classPath = "";
+
+        IRuntimeClasspathEntry systemLibsEntry = JavaRuntime
+                .newVariableRuntimeClasspathEntry(new Path(
+                        JavaRuntime.JRELIB_VARIABLE));
+
+        classPath = systemLibsEntry.getLocation();
+
+        IRuntimeClasspathEntry gwtdev = JavaRuntime
+                .newArchiveRuntimeClasspathEntry(getGWTDevJarPath(jproject));
+        classPath = classPath + classpathSeparator + gwtdev.getLocation();
+
+        IRuntimeClasspathEntry gwtuser = JavaRuntime
+                .newArchiveRuntimeClasspathEntry(getGWTUserJarPath(jproject));
+        classPath = classPath + classpathSeparator + gwtuser.getLocation();
+
+        Set<IPath> outputLocations = new LinkedHashSet<IPath>();
+        outputLocations.add(jproject.getOutputLocation());
+
+        IPath workspaceLocation = project.getWorkspace().getRoot()
+                .getRawLocation();
+        for (IClasspathEntry classPathEntry : jproject.getRawClasspath()) {
+            if (classPathEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+                // source entry has custom output location?
+                IPath outputLocation = classPathEntry.getOutputLocation();
+                if (outputLocation != null) {
+                    outputLocations.add(outputLocation);
+                }
+
+                // ensure the default output location is on classpath
+
+                // gwt compiler also needs javafiles for classpath
+
+                IPath path = classPathEntry.getPath();
+                path = getRawLocation(project, path);
+                classPath = classPath + classpathSeparator
+                        + path.toPortableString();
+            }
+        }
+
+        // optionally add output locations (after all source directories)
+        if (includeOutputDirectories) {
+            for (IPath outputLocation : outputLocations) {
+                classPath = classPath
+                        + classpathSeparator
+                        + getRawLocation(project, outputLocation)
+                                .toPortableString();
+            }
+        }
+
+        IRuntimeClasspathEntry vaadinJar = JavaRuntime
+                .newArchiveRuntimeClasspathEntry(findProjectVaadinJarPath(jproject));
+        classPath = classPath + classpathSeparator + vaadinJar.getLocation();
+
+        return classPath;
+    }
+
+    /**
+     * Gets the platform specific separator to use between classpath string
+     * segments.
+     *
+     * @return a colon or a semicolon to use as classpath separator
+     */
+    private static String getClasspathSeparator() {
+        String classpathSeparator;
+        if ("windows".equals(getPlatform())) {
+            classpathSeparator = ";";
+        } else {
+            classpathSeparator = ":";
+        }
+        return classpathSeparator;
+    }
+
+    /**
+     * Returns the full path to the Java executable. The project JVM is used if
+     * available, the workspace default VM if none is specified for the project.
+     *
+     * @param jproject
+     * @return JVM executable path in platform specific format
+     * @throws CoreException
+     */
+    public static String getJvmExecutablePath(IJavaProject jproject)
+            throws CoreException {
+        String vmName;
+        IVMInstall vmInstall = JavaRuntime.getVMInstall(jproject);
+        // this might be unnecessary
+        if (vmInstall == null) {
+            vmInstall = JavaRuntime.getDefaultVMInstall();
+        }
+        File vmBinDir = new File(vmInstall.getInstallLocation(), "bin");
+        // windows hack, as Eclipse can run the JVM but does not give its
+        // executable name through public APIs
+        if ("windows".equals(getPlatform())) {
+            vmName = new File(vmBinDir, "java.exe").getAbsolutePath();
+        } else {
+            vmName = new File(vmBinDir, "java").getAbsolutePath();
+        }
+        return vmName;
     }
 
     /**
