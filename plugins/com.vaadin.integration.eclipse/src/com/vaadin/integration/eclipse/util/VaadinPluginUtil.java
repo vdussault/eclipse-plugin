@@ -61,7 +61,6 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
-import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -1667,8 +1666,7 @@ public class VaadinPluginUtil {
         String vmName = getJvmExecutablePath(jproject);
         args.add(vmName);
 
-        // refresh only the WebContent/VAADIN/widgetsets or
-        // WebContent/ITMILL/widgetsets directory
+        // refresh only the WebContent/VAADIN/widgetsets
         String resourceDirectory = getVaadinResourceDirectory(project);
         final IFolder wsDir = getWebContentFolder(project)
                 .getFolder(resourceDirectory).getFolder("widgetsets");
@@ -1678,16 +1676,6 @@ public class VaadinPluginUtil {
 
         // construct the class path, including GWT JARs and project sources
         String classPath = getProjectBaseClasspath(jproject, true);
-        String classpathSeparator = getClasspathSeparator();
-
-        // add widgetset JARs
-        Collection<IPath> widgetpackagets = getAvailableVaadinWidgetsetPackages(jproject);
-        IPath vaadinJarPath = findProjectVaadinJarPath(jproject);
-        for (IPath file2 : widgetpackagets) {
-            if (!file2.equals(vaadinJarPath)) {
-                classPath = classPath + classpathSeparator + file2.toString();
-            }
-        }
 
         // construct rest of the arguments for the launch
 
@@ -1699,10 +1687,7 @@ public class VaadinPluginUtil {
             args.add("-XstartOnFirstThread");
         }
 
-        String compilerClass = "com.google.gwt.dev.GWTCompiler";
-        if (isVaadin6(project)) {
-            compilerClass = "com.vaadin.tools.WidgetsetCompiler";
-        }
+        String compilerClass = "com.vaadin.tools.WidgetsetCompiler";
 
         args.add("-classpath");
 
@@ -1717,15 +1702,13 @@ public class VaadinPluginUtil {
         // args.add("ALL");
         args.add(moduleName);
 
-        IPath location = project.getLocation();
-
-        final File file = location.toFile();
-
         final String[] argsStr = new String[args.size()];
         args.toArray(argsStr);
 
         ProcessBuilder b = new ProcessBuilder(argsStr);
-        b.directory(file);
+
+        IPath projectLocation = project.getLocation();
+        b.directory(projectLocation.toFile());
 
         b.redirectErrorStream(true);
 
@@ -1817,11 +1800,15 @@ public class VaadinPluginUtil {
      * Returns the project classpath as a string, in a format that can be used
      * when launching external programs on the same platform where Eclipse is
      * running.
-     * 
-     * TODO #3574 include (optionally) rest of JARs on the classpath?
-     * 
+     *
+     * For a Vaadin 6.2+ project, output locations should be on the classpath of
+     * the widgetset compiler (but after all source directories) to enable
+     * accessing the server side annotations.
+     *
      * @param jproject
      * @param includeOutputDirectories
+     *            true to also include output (class file) locations on the
+     *            classpath
      * @return
      * @throws CoreException
      * @throws JavaModelException
@@ -1832,59 +1819,58 @@ public class VaadinPluginUtil {
         String classpathSeparator = getClasspathSeparator();
         IProject project = jproject.getProject();
 
-        String classPath = "";
+        // use LinkedHashSet that preserves order but eliminates duplicates
 
-        IRuntimeClasspathEntry systemLibsEntry = JavaRuntime
-                .newVariableRuntimeClasspathEntry(new Path(
-                        JavaRuntime.JRELIB_VARIABLE));
-
-        classPath = systemLibsEntry.getLocation();
-
-        IRuntimeClasspathEntry gwtdev = JavaRuntime
-                .newArchiveRuntimeClasspathEntry(getGWTDevJarPath(jproject));
-        classPath = classPath + classpathSeparator + gwtdev.getLocation();
-
-        IRuntimeClasspathEntry gwtuser = JavaRuntime
-                .newArchiveRuntimeClasspathEntry(getGWTUserJarPath(jproject));
-        classPath = classPath + classpathSeparator + gwtuser.getLocation();
+        Set<IPath> sourceLocations = new LinkedHashSet<IPath>();
 
         Set<IPath> outputLocations = new LinkedHashSet<IPath>();
-        outputLocations.add(jproject.getOutputLocation());
+        // ensure the default output location is on the classpath
+        outputLocations.add(getRawLocation(project, jproject
+                .getOutputLocation()));
 
-        IPath workspaceLocation = project.getWorkspace().getRoot()
-                .getRawLocation();
-        for (IClasspathEntry classPathEntry : jproject.getRawClasspath()) {
+        Set<IPath> otherLocations = new LinkedHashSet<IPath>();
+
+        // iterate over build path and classify its components
+        for (IClasspathEntry classPathEntry : jproject.getResolvedClasspath(true)) {
             if (classPathEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+                // gwt compiler also needs javafiles for classpath
+                IPath path = classPathEntry.getPath();
+                sourceLocations.add(getRawLocation(project, path));
+
                 // source entry has custom output location?
                 IPath outputLocation = classPathEntry.getOutputLocation();
                 if (outputLocation != null) {
-                    outputLocations.add(outputLocation);
+                    outputLocations
+                            .add(getRawLocation(project, outputLocation));
                 }
-
-                // ensure the default output location is on classpath
-
-                // gwt compiler also needs javafiles for classpath
-
+            } else {
                 IPath path = classPathEntry.getPath();
-                path = getRawLocation(project, path);
+                IPath rawLocation = getRawLocation(project, path);
+                otherLocations.add(rawLocation);
+            }
+        }
+
+        // source directories must come before output locations
+        Set<IPath> locations = new LinkedHashSet<IPath>();
+        locations.addAll(sourceLocations);
+        if (includeOutputDirectories) {
+            locations.addAll(outputLocations);
+        }
+        locations.addAll(otherLocations);
+
+        // safeguard
+        locations.remove(null);
+
+        // construct classpath string
+        String classPath = "";
+        for (IPath path : locations) {
+            if ("".equals(classPath)) {
+                classPath = path.toPortableString();
+            } else {
                 classPath = classPath + classpathSeparator
                         + path.toPortableString();
             }
         }
-
-        // optionally add output locations (after all source directories)
-        if (includeOutputDirectories) {
-            for (IPath outputLocation : outputLocations) {
-                classPath = classPath
-                        + classpathSeparator
-                        + getRawLocation(project, outputLocation)
-                                .toPortableString();
-            }
-        }
-
-        IRuntimeClasspathEntry vaadinJar = JavaRuntime
-                .newArchiveRuntimeClasspathEntry(findProjectVaadinJarPath(jproject));
-        classPath = classPath + classpathSeparator + vaadinJar.getLocation();
 
         return classPath;
     }
@@ -1941,8 +1927,17 @@ public class VaadinPluginUtil {
      * @return
      */
     private static IPath getRawLocation(IProject project, IPath path) {
-        return project.getWorkspace().getRoot().getFolder(
-                path).getRawLocation();
+        // constructing the handles is inexpensive
+        IFolder folder = project.getWorkspace().getRoot().getFolder(path);
+        IFile file = project.getWorkspace().getRoot().getFile(path);
+        if (folder.exists()) {
+            return folder.getRawLocation();
+        } else if (file.exists()) {
+            return file.getRawLocation();
+        } else {
+            // assumed to be complete path if not in the workspace
+            return path;
+        }
     }
 
     /**
