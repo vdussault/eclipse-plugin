@@ -192,7 +192,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                             @Override
                             protected IStatus run(IProgressMonitor monitor) {
                                 widgetsetBuildPending = false;
-                                monitor.beginTask("Compiling wigetset", 100);
+                                monitor.beginTask("Compiling wigetset", 1);
                                 try {
                                     VaadinPluginUtil.compileWidgetsets(shell,
                                             p, monitor);
@@ -208,9 +208,9 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                                     VaadinPluginUtil.handleBackgroundException(
                                             IStatus.ERROR,
                                             "Widgetset compilation failed", e);
+                                } finally {
+                                    monitor.done();
                                 }
-                                monitor.worked(100);
-                                monitor.done();
                                 return Status.OK_STATUS;
                             }
                         };

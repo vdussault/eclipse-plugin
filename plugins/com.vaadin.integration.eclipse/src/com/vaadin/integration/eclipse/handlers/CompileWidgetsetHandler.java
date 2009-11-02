@@ -55,7 +55,8 @@ public class CompileWidgetsetHandler extends AbstractHandler {
             @Override
             protected IStatus run(IProgressMonitor monitor) {
                 try {
-                    monitor.beginTask("Compiling wigetset", 100);
+                    monitor.beginTask("Compiling wigetset", 1);
+
                     boolean compiled = false;
                     if (currentSelection instanceof IStructuredSelection
                             && ((IStructuredSelection) currentSelection).size() == 1) {
@@ -118,10 +119,8 @@ public class CompileWidgetsetHandler extends AbstractHandler {
 
                     }
                 } catch (Exception e) {
-                    // TODO: handle exception
-                    e.printStackTrace();
+                    VaadinPluginUtil.handleBackgroundException(e);
                 } finally {
-                    monitor.worked(100);
                     monitor.done();
                 }
                 return Status.OK_STATUS;
@@ -142,6 +141,7 @@ public class CompileWidgetsetHandler extends AbstractHandler {
             // compile widgetsets in the containing project
             private boolean compileFile(IProgressMonitor monitor, IFile file)
                     throws CoreException, IOException, InterruptedException {
+                // only one branch is executed so progress is tracked correctly
                 boolean compiled = false;
                 if (file != null && file.getName().endsWith(".gwt.xml")
                         && file.getName().toLowerCase().contains("widgetset")) {

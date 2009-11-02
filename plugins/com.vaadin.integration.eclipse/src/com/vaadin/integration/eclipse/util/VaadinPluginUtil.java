@@ -1589,50 +1589,59 @@ public class VaadinPluginUtil {
             InterruptedException {
         // if no more than one widgetset in the project, compile it (or
         // create a new one)
-        List<String> widgetsets = findWidgetSets(project, monitor);
-        if (widgetsets.size() <= 1) {
-            String widgetset = getWidgetSet(project, true, monitor);
-            widgetset = widgetset.replace(".client.", ".");
-            compileWidgetset(project, widgetset, monitor);
-            if (widgetsets.size() == 0) {
-                // refresh the created widgetset - need to find it first
-                String pathStr = widgetset.replace(".", "/") + ".gwt.xml";
-                IPackageFragmentRoot[] packageFragmentRoots = project
-                        .getPackageFragmentRoots();
-                for (IPackageFragmentRoot root : packageFragmentRoots) {
-                    if (!(root instanceof JarPackageFragmentRoot)) {
-                        IResource underlyingResource = root
-                                .getUnderlyingResource();
+        try {
+            monitor.beginTask("Compiling widgetset", 30);
+            List<String> widgetsets = findWidgetSets(project, monitor);
+            if (widgetsets.size() <= 1) {
+                String widgetset = getWidgetSet(project, true, monitor);
+                widgetset = widgetset.replace(".client.", ".");
+                compileWidgetset(project, widgetset, new SubProgressMonitor(
+                        monitor, 27));
+                if (widgetsets.size() == 0) {
+                    // refresh the created widgetset - need to find it first
+                    String pathStr = widgetset.replace(".", "/") + ".gwt.xml";
+                    IPackageFragmentRoot[] packageFragmentRoots = project
+                            .getPackageFragmentRoots();
+                    for (IPackageFragmentRoot root : packageFragmentRoots) {
+                        if (!(root instanceof JarPackageFragmentRoot)) {
+                            IResource underlyingResource = root
+                                    .getUnderlyingResource();
 
-                        if (underlyingResource instanceof IFolder) {
-                            IFolder folder = (IFolder) underlyingResource;
-                            IContainer parent = folder.getFile(pathStr)
-                                    .getParent();
-                            if (parent.exists()) {
-                                parent.refreshLocal(IResource.DEPTH_ONE,
-                                        monitor);
+                            if (underlyingResource instanceof IFolder) {
+                                IFolder folder = (IFolder) underlyingResource;
+                                IContainer parent = folder.getFile(pathStr)
+                                        .getParent();
+                                if (parent.exists()) {
+                                    parent.refreshLocal(IResource.DEPTH_ONE,
+                                            monitor);
+                                }
                             }
                         }
                     }
                 }
+            } else {
+                // TODO ask the user, compile all the selected ones
+                // TODO queue immediately as separate tasks
+                PlatformUI.getWorkbench().getDisplay().asyncExec(
+                        new Runnable() {
+
+                            public void run() {
+                                Shell shell = PlatformUI.getWorkbench()
+                                        .getActiveWorkbenchWindow().getShell();
+                                MessageDialog
+                                        .openError(
+                                                shell,
+                                                "Select widgetset",
+                                                "Multiple widgetsets in project. Select a widgetset file (..widgetset.gwt.xml) to compile.");
+
+                            }
+                        });
+                // for (String widgetset : widgetsets) {
+                // compileWidgetset(project, widgetset, monitor);
+                // }
             }
-        } else {
-            // TODO ask the user, compile all the selected ones
-            // TODO queue immediately as separate tasks
-            PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-
-                public void run() {
-                    Shell shell = PlatformUI.getWorkbench()
-                            .getActiveWorkbenchWindow().getShell();
-                    MessageDialog
-                            .openError(shell, "Select widgetset",
-                                    "Multiple widgetsets in project. Select a widgetset file (..widgetset.gwt.xml) to compile.");
-
-                }
-            });
-            // for (String widgetset : widgetsets) {
-            // compileWidgetset(project, widgetset, monitor);
-            // }
+        } finally {
+            monitor.done();
         }
     }
 
@@ -1657,142 +1666,151 @@ public class VaadinPluginUtil {
     public static void compileWidgetset(IJavaProject jproject,
             String moduleName, final IProgressMonitor monitor)
             throws CoreException, IOException, InterruptedException {
-        IProject project = jproject.getProject();
+        try {
+            // TODO should report progress more correctly - unknown?
+            monitor.beginTask("Compiling widgetset", 100);
 
-        ArrayList<String> args = new ArrayList<String>();
+            IProject project = jproject.getProject();
 
-        moduleName = moduleName.replace(".client.", ".");
+            ArrayList<String> args = new ArrayList<String>();
 
-        String vmName = getJvmExecutablePath(jproject);
-        args.add(vmName);
+            moduleName = moduleName.replace(".client.", ".");
 
-        // refresh only the WebContent/VAADIN/widgetsets
-        String resourceDirectory = getVaadinResourceDirectory(project);
-        final IFolder wsDir = getWebContentFolder(project)
-                .getFolder(resourceDirectory).getFolder("widgetsets");
+            String vmName = getJvmExecutablePath(jproject);
+            args.add(vmName);
 
-        // refresh this requires that the directory exists
-        createFolders(wsDir, monitor);
+            // refresh only the WebContent/VAADIN/widgetsets
+            String resourceDirectory = getVaadinResourceDirectory(project);
+            final IFolder wsDir = getWebContentFolder(project).getFolder(
+                    resourceDirectory).getFolder("widgetsets");
 
-        // construct the class path, including GWT JARs and project sources
-        String classPath = getProjectBaseClasspath(jproject, true);
+            // refresh this requires that the directory exists
+            createFolders(wsDir, monitor);
 
-        // construct rest of the arguments for the launch
+            // construct the class path, including GWT JARs and project sources
+            String classPath = getProjectBaseClasspath(jproject, true);
 
-        args.add("-Djava.awt.headless=true");
-        args.add("-Xss8M");
-        args.add("-Xmx500M");
+            // construct rest of the arguments for the launch
 
-        if (getPlatform().equals("mac")) {
-            args.add("-XstartOnFirstThread");
-        }
+            args.add("-Djava.awt.headless=true");
+            args.add("-Xss8M");
+            args.add("-Xmx500M");
 
-        String compilerClass = "com.vaadin.tools.WidgetsetCompiler";
+            if (getPlatform().equals("mac")) {
+                args.add("-XstartOnFirstThread");
+            }
 
-        args.add("-classpath");
+            String compilerClass = "com.vaadin.tools.WidgetsetCompiler";
 
-        // args.add(classPath.replaceAll(" ", "\\ "));
-        args.add(classPath);
-        args.add(compilerClass);
-        args.add("-out");
+            args.add("-classpath");
 
-        IPath projectRelativePath = wsDir.getProjectRelativePath();
-        args.add(projectRelativePath.toString());
-        // args.add("-logLevel");
-        // args.add("ALL");
-        args.add(moduleName);
+            // args.add(classPath.replaceAll(" ", "\\ "));
+            args.add(classPath);
+            args.add(compilerClass);
+            args.add("-out");
 
-        final String[] argsStr = new String[args.size()];
-        args.toArray(argsStr);
+            IPath projectRelativePath = wsDir.getProjectRelativePath();
+            args.add(projectRelativePath.toString());
+            // args.add("-logLevel");
+            // args.add("ALL");
+            args.add(moduleName);
 
-        ProcessBuilder b = new ProcessBuilder(argsStr);
+            final String[] argsStr = new String[args.size()];
+            args.toArray(argsStr);
 
-        IPath projectLocation = project.getLocation();
-        b.directory(projectLocation.toFile());
+            ProcessBuilder b = new ProcessBuilder(argsStr);
 
-        b.redirectErrorStream(true);
+            IPath projectLocation = project.getLocation();
+            b.directory(projectLocation.toFile());
 
-        monitor.worked(10);
+            b.redirectErrorStream(true);
 
-        final Process exec = b.start();
+            monitor.worked(10);
 
-        // compilation now on
+            final Process exec = b.start();
 
-        Thread t = new Thread() {
-            @Override
-            public synchronized void run() {
-                int i = 0;
-                while (true) {
-                    if (monitor.isCanceled()) {
-                        exec.destroy();
-                        break;
-                    } else {
-                        try {
-                            i++;
-                            if (i % 7 == 0) {
-                                // give user a feeling that something is
-                                // happening
-                                monitor.worked(1);
-                            }
-                            Thread.sleep(300);
-                        } catch (InterruptedException e) {
-                            // STOP executing monitoring cancelled state,
-                            // compilation finished
+            // compilation now on
+
+            Thread t = new Thread() {
+                @Override
+                public synchronized void run() {
+                    int i = 0;
+                    while (true) {
+                        if (monitor.isCanceled()) {
+                            exec.destroy();
                             break;
+                        } else {
+                            try {
+                                i++;
+                                if (i % 7 == 0) {
+                                    // give user a feeling that something is
+                                    // happening
+                                    monitor.worked(1);
+                                }
+                                Thread.sleep(300);
+                            } catch (InterruptedException e) {
+                                // STOP executing monitoring cancelled state,
+                                // compilation finished
+                                break;
+                            }
                         }
                     }
                 }
+            };
+
+            t.start();
+
+            ConsolePlugin plugin = ConsolePlugin.getDefault();
+            IConsoleManager conMan = plugin.getConsoleManager();
+            org.eclipse.ui.console.IConsole[] consoles = conMan.getConsoles();
+            IConsole[] existing = conMan.getConsoles();
+            MessageConsole myConsole = null;
+            for (int i = 0; i < existing.length; i++) {
+                if (WS_COMPILATION_CONSOLE_NAME.equals(existing[i].getName())) {
+                    myConsole = (MessageConsole) existing[i];
+                }
             }
-        };
-
-        t.start();
-
-        ConsolePlugin plugin = ConsolePlugin.getDefault();
-        IConsoleManager conMan = plugin.getConsoleManager();
-        org.eclipse.ui.console.IConsole[] consoles = conMan.getConsoles();
-        IConsole[] existing = conMan.getConsoles();
-        MessageConsole myConsole = null;
-        for (int i = 0; i < existing.length; i++) {
-            if (WS_COMPILATION_CONSOLE_NAME.equals(existing[i].getName())) {
-                myConsole = (MessageConsole) existing[i];
+            // no console found, so create a new one
+            if (myConsole == null) {
+                myConsole = new MessageConsole(WS_COMPILATION_CONSOLE_NAME,
+                        null);
+                conMan.addConsoles(new IConsole[] { myConsole });
             }
-        }
-        // no console found, so create a new one
-        if (myConsole == null) {
-            myConsole = new MessageConsole(WS_COMPILATION_CONSOLE_NAME, null);
-            conMan.addConsoles(new IConsole[] { myConsole });
-        }
 
-        MessageConsoleStream newMessageStream = myConsole.newMessageStream();
+            MessageConsoleStream newMessageStream = myConsole
+                    .newMessageStream();
 
-        myConsole.activate();
+            myConsole.activate();
 
-        // TODO Let the following debug messages exist until we are sure things
-        // work on each platform
-        newMessageStream.println();
-        newMessageStream.println("Executing compilations with parameter "
-                + args);
+            // TODO Let the following debug messages exist until we are sure
+            // things work on each platform
+            newMessageStream.println();
+            newMessageStream.println("Executing compilations with parameter "
+                    + args);
 
-        InputStream inputStream = exec.getInputStream();
-        BufferedReader bufferedReader2 = new BufferedReader(
-                new InputStreamReader(inputStream));
-        String line = null;
-        while ((line = bufferedReader2.readLine()) != null) {
-            newMessageStream.println(line);
-            // increment process a bit on each log line from gwt compiler
-            monitor.worked(2);
-        }
+            InputStream inputStream = exec.getInputStream();
+            BufferedReader bufferedReader2 = new BufferedReader(
+                    new InputStreamReader(inputStream));
+            String line = null;
+            while ((line = bufferedReader2.readLine()) != null) {
+                newMessageStream.println(line);
+                // increment process a bit on each log line from gwt compiler
+                monitor.worked(2);
+            }
 
-        int waitFor = exec.waitFor();
+            int waitFor = exec.waitFor();
 
-        // end thread (possibly still) polling for cancelled status
-        t.interrupt();
+            // end thread (possibly still) polling for cancelled status
+            t.interrupt();
 
-        if (waitFor == 0) {
-            wsDir.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-        } else {
-            // TODO cancelled or somehow else failed
+            if (waitFor == 0) {
+                wsDir.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+            } else {
+                // TODO cancelled or somehow else failed
 
+            }
+        } finally {
+            monitor.done();
         }
     }
 
