@@ -2,13 +2,11 @@ package com.vaadin.integration.eclipse.wizards;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogPage;
@@ -46,7 +44,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
 
     /**
      * Constructor for Component wizard page.
-     * 
+     *
      * @param pageName
      */
     public NewComponentWizardPage(IProject project) {
@@ -93,20 +91,14 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
             setPackageFragment(packageFragment, true);
             setTypeName("MyComponent", true);
 
-            IPath findProjectVaadinJarPath = VaadinPluginUtil
-                    .findProjectVaadinJarPath(JavaCore.create(project));
-
-            if (findProjectVaadinJarPath != null
-                    && VaadinPluginUtil
-                            .isWidgetsetPackage(findProjectVaadinJarPath)) {
-                is62Project = true;
+            is62Project = VaadinPluginUtil.isVaadin62(project);
+            if (is62Project) {
                 if (isControlCreated()) {
                     extWidgetSetNameText.setVisible(false);
                     extWidgetSetNameLabel.setVisible(false);
                 }
 
             } else {
-                is62Project = false;
                 if (isControlCreated()) {
                     extWidgetSetNameText.setVisible(true);
                     extWidgetSetNameLabel.setVisible(true);

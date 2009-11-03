@@ -1,6 +1,5 @@
 package com.vaadin.integration.eclipse.builder;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 
@@ -14,23 +13,15 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
 
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 public class WidgetsetBuilder extends IncrementalProjectBuilder {
-
-    boolean widgetsetBuildPending = false;
 
     class SampleDeltaVisitor implements IResourceDeltaVisitor {
         private IProgressMonitor monitor;
@@ -55,35 +46,37 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                 }
             }
 
-            // TODO never gets to the REMOVED branch as cannot open the JAR
             if (VaadinPluginUtil.isWidgetsetPackage(resource.getRawLocation())) {
                 switch (delta.getKind()) {
                 case IResourceDelta.ADDED:
-                    runWidgetSetBuildTool(monitor);
-                    break;
-                case IResourceDelta.REMOVED:
-                    runWidgetSetBuildTool(monitor);
-                    break;
                 case IResourceDelta.CHANGED:
-                    runWidgetSetBuildTool(monitor);
+                    // cannot reliably detect deletion of a widgetset package as
+                    // cannot look inside it one it has been removed; handled
+                    // below as any JAR removal instead
+
+                    // compile will clear the dirty flag
+                    VaadinPluginUtil.setWidgetsetDirty(getProject(), true);
+                    WidgetsetBuildManager.runWidgetSetBuildTool(getProject(),
+                            false, monitor);
+
                     break;
                 }
+            } else if (delta.getKind() == IResourceDelta.REMOVED
+                    && isJar(resource)) {
+                // when a JAR is removed, we cannot look inside it so assume it
+                // might have been a widgetset package
+                // TODO #3590 clean GWT module
+                VaadinPluginUtil.setWidgetsetDirty(getProject(), true);
+                WidgetsetBuildManager.runWidgetSetBuildTool(getProject(),
+                        false, monitor);
             } else if (resource.exists()
-                    && (isComponentWithWidgetAnnotation(resource) || isClientSideJavaClass(resource))) {
+                    && (isGwtModule(resource)
+                            || isComponentWithWidgetAnnotation(resource) || isClientSideJavaClass(resource))) {
                 switch (delta.getKind()) {
                 case IResourceDelta.ADDED:
                 case IResourceDelta.CHANGED:
-                    /*
-                     * TODO this should just turn on some sort of indicator that
-                     * widgetset compilation is pending, instead of aggressively
-                     * start compilation. "Dirty widgetset" flag to either file
-                     * or widgetsets gwt module file. Users dont want to waste
-                     * their time or cpu cycles here.
-                     */
-                    boolean weWantToGetRidOfPluginUsersTotally = false;
-                    if (weWantToGetRidOfPluginUsersTotally) {
-                        runWidgetSetBuildTool(monitor);
-                    }
+                    VaadinPluginUtil.setWidgetsetDirty(getProject(), true);
+
                     break;
                 case IResourceDelta.REMOVED:
                     break;
@@ -92,6 +85,16 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
 
             // return true to continue visiting children.
             return true;
+        }
+
+        private boolean isJar(IResource resource) {
+            return resource instanceof IFile
+                    && resource.getName().endsWith(".jar");
+        }
+
+        private boolean isGwtModule(IResource resource) {
+            return resource instanceof IFile
+                    && resource.getName().endsWith(".gwt.xml");
         }
 
         private boolean isClientSideJavaClass(IResource resource) {
@@ -119,8 +122,13 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                         }
                     }
                 } catch (JavaModelException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    VaadinPluginUtil
+                            .handleBackgroundException(
+                                    IStatus.WARNING,
+                                    "Could not check if "
+                                            + resource.getName()
+                                            + " is a server-side class for a widget",
+                                    e);
                 }
             }
             return false;
@@ -160,74 +168,13 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
     protected void fullBuild(final IProgressMonitor monitor)
             throws CoreException {
 
-        /*
-         * TODO detect if widget set is needed, then run tool the "dirty flag"
-         * must be saved to file system, so that new build is not needed on
-         * startup
-         */
-        if (false) {
-            runWidgetSetBuildTool(monitor);
+        // detect if widget set compile is needed, then run tool; the
+        // "dirty flag" must be saved to file system, so that new build is not
+        // needed on startup
+        if (VaadinPluginUtil.isWidgetsetDirty(getProject())) {
+            WidgetsetBuildManager.runWidgetSetBuildTool(getProject(), false,
+                    monitor);
         }
-    }
-
-    private void runWidgetSetBuildTool(final IProgressMonitor monitor)
-            throws CoreException {
-
-        if (!widgetsetBuildPending) {
-            widgetsetBuildPending = true;
-            final IJavaProject p = JavaCore.create(getProject());
-
-            PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-
-                public void run() {
-                    final Shell shell = PlatformUI.getWorkbench()
-                            .getActiveWorkbenchWindow().getShell();
-
-                    boolean openQuestion = MessageDialog
-                            .openQuestion(shell, "Compile widgetset",
-                                    "Your client side code might need a recompilation. Compile widgetset now?");
-                    if (openQuestion) {
-
-                        Job job = new Job("Compiling widgetset...") {
-                            @Override
-                            protected IStatus run(IProgressMonitor monitor) {
-                                widgetsetBuildPending = false;
-                                monitor.beginTask("Compiling wigetset", 1);
-                                try {
-                                    VaadinPluginUtil.compileWidgetsets(shell,
-                                            p, monitor);
-                                } catch (CoreException e) {
-                                    VaadinPluginUtil.handleBackgroundException(
-                                            IStatus.ERROR,
-                                            "Widgetset compilation failed", e);
-                                } catch (IOException e) {
-                                    VaadinPluginUtil.handleBackgroundException(
-                                            IStatus.ERROR,
-                                            "Widgetset compilation failed", e);
-                                } catch (InterruptedException e) {
-                                    VaadinPluginUtil.handleBackgroundException(
-                                            IStatus.ERROR,
-                                            "Widgetset compilation failed", e);
-                                } finally {
-                                    monitor.done();
-                                }
-                                return Status.OK_STATUS;
-                            }
-                        };
-
-                        job.setUser(false);
-                        // lazily run job to let possible other changes modify
-                        // project state, like dragging multiple jar files to
-                        // classpath
-                        job.schedule(500);
-                    } else {
-                        widgetsetBuildPending = false;
-                    }
-                }
-            });
-
-        }
-
     }
 
     protected void incrementalBuild(IResourceDelta delta,

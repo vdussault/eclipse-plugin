@@ -36,6 +36,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
@@ -69,13 +70,13 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jst.j2ee.web.componentcore.util.WebArtifactEdit;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.eclipse.wst.common.componentcore.ComponentCore;
 import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
 import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
@@ -83,6 +84,7 @@ import org.osgi.framework.Bundle;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
+import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
 import com.vaadin.integration.eclipse.builder.WidgetsetNature;
 import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
 import com.vaadin.integration.eclipse.variables.VaadinClasspathVariableInitializer;
@@ -321,6 +323,31 @@ public class VaadinPluginUtil {
         }
         // default value
         return true;
+    }
+
+    /**
+     * Check is a project uses Vaadin 6.2 or later.
+     *
+     * @param project
+     * @return
+     */
+    public static boolean isVaadin62(IProject project) {
+        if (!isVaadin6(project)) {
+            return false;
+        }
+
+        IPath findProjectVaadinJarPath;
+        try {
+            findProjectVaadinJarPath = findProjectVaadinJarPath(JavaCore
+                    .create(project));
+        } catch (CoreException e) {
+            return false;
+        }
+
+        return findProjectVaadinJarPath != null
+                && VaadinPluginUtil
+                        .isWidgetsetPackage(findProjectVaadinJarPath);
+
     }
 
     private static IPackageFragmentRoot getJavaFragmentRoot(IProject project)
@@ -1337,6 +1364,9 @@ public class VaadinPluginUtil {
                     }
                     IFile file = wsFolder.getFile(wsName + ".gwt.xml");
                     ensureFileFromTemplate(file, "widgetsetxmlstub2.txt");
+
+                    // mark the created widgetset as dirty
+                    setWidgetsetDirty(project.getProject(), true);
                 }
             }
 
@@ -1566,94 +1596,75 @@ public class VaadinPluginUtil {
     }
 
     /**
-     * Helper method to compile one or more widgetsets for given project.
+     * Checks if the widgetset in a project is marked as dirty. If the project
+     * is not a Vaadin project or does not have widgetsets, returns
+     * <code>false</code>.
      *
-     * {@see #compileWidgetset(IJavaProject, String, IProgressMonitor)}
+     * If the flag is not present in project preferences, test whether there are
+     * widgetsets and as a side effect mark dirty (if any exist) / clean (no
+     * widgetset) based on that.
      *
-     * If the project has multiple widgetsets and the user has not specified
-     * which one to compile, ask the user.
-     *
-     * Note, this only works for projects with vaadin 6.2 and later.
-     *
-     * @param shell
-     *            the shell to enable asking the user which widgetset(s) to
-     *            compile (if needed)
      * @param project
-     * @param monitor
-     * @throws CoreException
-     * @throws IOException
-     * @throws InterruptedException
+     * @return true if the project has widgetset(s) that have not been compiled
+     *         since the last relevant modification
      */
-    public static void compileWidgetsets(Shell shell, IJavaProject project,
-            final IProgressMonitor monitor) throws CoreException, IOException,
-            InterruptedException {
-        // if no more than one widgetset in the project, compile it (or
-        // create a new one)
+    public static boolean isWidgetsetDirty(IProject project) {
+        // default to clean until some widgetset found
+        boolean result = false;
         try {
-            monitor.beginTask("Compiling widgetset", 30);
-            List<String> widgetsets = findWidgetSets(project, monitor);
-            if (widgetsets.size() <= 1) {
-                String widgetset = getWidgetSet(project, true, monitor);
-                widgetset = widgetset.replace(".client.", ".");
-                compileWidgetset(project, widgetset, new SubProgressMonitor(
-                        monitor, 27));
-                if (widgetsets.size() == 0) {
-                    // refresh the created widgetset - need to find it first
-                    String pathStr = widgetset.replace(".", "/") + ".gwt.xml";
-                    IPackageFragmentRoot[] packageFragmentRoots = project
-                            .getPackageFragmentRoots();
-                    for (IPackageFragmentRoot root : packageFragmentRoots) {
-                        if (!(root instanceof JarPackageFragmentRoot)) {
-                            IResource underlyingResource = root
-                                    .getUnderlyingResource();
-
-                            if (underlyingResource instanceof IFolder) {
-                                IFolder folder = (IFolder) underlyingResource;
-                                IContainer parent = folder.getFile(pathStr)
-                                        .getParent();
-                                if (parent.exists()) {
-                                    parent.refreshLocal(IResource.DEPTH_ONE,
-                                            monitor);
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                // TODO ask the user, compile all the selected ones
-                // TODO queue immediately as separate tasks
-                PlatformUI.getWorkbench().getDisplay().asyncExec(
-                        new Runnable() {
-
-                            public void run() {
-                                Shell shell = PlatformUI.getWorkbench()
-                                        .getActiveWorkbenchWindow().getShell();
-                                MessageDialog
-                                        .openError(
-                                                shell,
-                                                "Select widgetset",
-                                                "Multiple widgetsets in project. Select a widgetset file (..widgetset.gwt.xml) to compile.");
-
-                            }
-                        });
-                // for (String widgetset : widgetsets) {
-                // compileWidgetset(project, widgetset, monitor);
-                // }
+            IProgressMonitor monitor = new NullProgressMonitor();
+            if (!isVaadin62(project)) {
+                return false;
             }
-        } finally {
-            monitor.done();
+
+            // from this point on, default to dirty
+            result = true;
+
+            ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
+                    new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
+            if (prefStore.contains(VaadinPlugin.PREFERENCES_WIDGETSET_DIRTY)) {
+                return prefStore
+                        .getBoolean(VaadinPlugin.PREFERENCES_WIDGETSET_DIRTY);
+            } else {
+                result = findWidgetSets(JavaCore.create(project), monitor)
+                        .isEmpty();
+                setWidgetsetDirty(project, result);
+                return result;
+            }
+        } catch (CoreException e) {
+            return result;
         }
     }
 
     /**
+     * Mark the widgetset(s) in a project as clean (compiled) or dirty (modified
+     * since the last compilation).
+     *
+     * TODO note: keeping track of this in preferences might be an issue with
+     * version control etc. if versioning preferences
+     *
+     * @param project
+     * @param dirty
+     */
+    public static void setWidgetsetDirty(IProject project, boolean dirty) {
+        ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
+                new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
+
+        prefStore.setValue(VaadinPlugin.PREFERENCES_WIDGETSET_DIRTY, dirty);
+    }
+
+    /**
      * Helper method to compile a single widgetset.
-     * <p>
      *
      * Instead the "old method" of using launch configurations (.launch) running
      * compilation via {@link ProcessBuilder}. Also notifies eclipse of possibly
      * changed files in widgetset directory.
-     * <p>
+     *
      * Note, this only works for projects with vaadin 6.2 and later.
+     *
+     * Normally this method should be called by {@link WidgetsetBuildManager} to
+     * ensure that multiple builds of the same widgetset are not run
+     * concurrently.
      *
      * @param jproject
      * @param moduleName
@@ -1666,11 +1677,12 @@ public class VaadinPluginUtil {
     public static void compileWidgetset(IJavaProject jproject,
             String moduleName, final IProgressMonitor monitor)
             throws CoreException, IOException, InterruptedException {
+        IProject project = jproject.getProject();
+
         try {
             // TODO should report progress more correctly - unknown?
-            monitor.beginTask("Compiling widgetset", 100);
-
-            IProject project = jproject.getProject();
+            monitor.beginTask("Compiling widgetset " + moduleName
+                    + " in project " + project.getName(), 100);
 
             ArrayList<String> args = new ArrayList<String>();
 
@@ -1805,9 +1817,10 @@ public class VaadinPluginUtil {
 
             if (waitFor == 0) {
                 wsDir.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+                setWidgetsetDirty(project, false);
             } else {
                 // TODO cancelled or somehow else failed
-
+                setWidgetsetDirty(project, true);
             }
         } finally {
             monitor.done();
@@ -1958,39 +1971,4 @@ public class VaadinPluginUtil {
         }
     }
 
-    /**
-     * Extracts fully qualified widgetset name and project from given file
-     * (expected to be *widgetset*.gwt.xml file) and compiles that widgetset.
-     *
-     * @param file
-     * @param monitor
-     * @throws CoreException
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    public static void compileWidgetset(IFile file, IProgressMonitor monitor)
-            throws CoreException, IOException, InterruptedException {
-        IProject project = file.getProject();
-        IJavaProject jproject = JavaCore.create(project);
-
-        IPackageFragmentRoot[] allPackageFragmentRoots = jproject
-                .getAllPackageFragmentRoots();
-
-        IPath rootPath = null;
-        IPath location = file.getFullPath();
-        for (int i = 0; rootPath == null && i < allPackageFragmentRoots.length; i++) {
-            IPackageFragmentRoot root = allPackageFragmentRoots[i];
-            IPath fullPath = root.getPath();
-            if (location.toString().startsWith(fullPath.toString() + "/")) {
-                rootPath = fullPath;
-            }
-        }
-        String name = location.toString()
-                .replace(rootPath.toString() + "/", "");
-
-        String fqname = name.replace(".gwt.xml", "");
-        fqname = fqname.replaceAll("/", ".");
-
-        compileWidgetset(jproject, fqname, monitor);
-    }
 }

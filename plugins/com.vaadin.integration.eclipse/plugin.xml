@@ -371,4 +371,12 @@ Any metadata changes made will be stored in the project manifest.
          </toolbar>
       </menuContribution>
    </extension>
+   <extension
+         point="org.eclipse.wst.server.core.publishTasks">
+      <publishTask
+            class="com.vaadin.integration.eclipse.server.WidgetsetPublishDelegate"
+            id="com.vaadin.integration.eclipse.server.WidgetsetPublishDelegate"
+            typeIds="*">
+      </publishTask>
+   </extension>
 </plugin>

@@ -12,6 +12,10 @@ public class VaadinPlugin extends AbstractUIPlugin {
 
     public static final String ID_COMPILE_WS_APP = "compilews";
 
+    // preference store keys
+    public static final String PREFERENCES_WIDGETSET_DIRTY = PLUGIN_ID + "."
+            + "widgetsetDirty";
+
     private static VaadinPlugin instance = null;
 
     public VaadinPlugin() {

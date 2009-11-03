@@ -24,6 +24,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
+import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 /**
@@ -90,7 +91,7 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                                 VaadinPluginUtil.ensureWidgetsetNature(project);
                                 IJavaProject jproject = JavaCore
                                         .create(project);
-                                VaadinPluginUtil.compileWidgetsets(shell,
+                                WidgetsetBuildManager.compileWidgetsets(shell,
                                         jproject, monitor);
                                 compiled = true;
                             }
@@ -145,14 +146,15 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                 boolean compiled = false;
                 if (file != null && file.getName().endsWith(".gwt.xml")
                         && file.getName().toLowerCase().contains("widgetset")) {
-                    VaadinPluginUtil.compileWidgetset(file, monitor);
+                    WidgetsetBuildManager.compileWidgetset(file, monitor);
                     compiled = true;
                 }
                 if (!compiled) {
                     IProject project = VaadinPluginUtil.getProject(file);
                     if (VaadinFacetUtils.isVaadinProject(project)) {
                         IJavaProject jproject = JavaCore.create(project);
-                        VaadinPluginUtil.compileWidgetsets(shell, jproject,
+                        WidgetsetBuildManager.compileWidgetsets(shell,
+                                jproject,
                                 monitor);
                         compiled = true;
                     }
