@@ -253,6 +253,9 @@ public class VaadinPluginUtil {
      */
     private static IType findVaadinApplicationType(IJavaProject jproject)
             throws JavaModelException {
+        if (jproject == null) {
+            return null;
+        }
         IType type = jproject.findType(VaadinPlugin.VAADIN_PACKAGE_PREFIX
                 + VaadinPlugin.APPLICATION_CLASS_NAME);
         if (type == null) {
@@ -1626,7 +1629,7 @@ public class VaadinPluginUtil {
                 return prefStore
                         .getBoolean(VaadinPlugin.PREFERENCES_WIDGETSET_DIRTY);
             } else {
-                result = findWidgetSets(JavaCore.create(project), monitor)
+                result = !findWidgetSets(JavaCore.create(project), monitor)
                         .isEmpty();
                 setWidgetsetDirty(project, result);
                 return result;
@@ -1650,7 +1653,17 @@ public class VaadinPluginUtil {
         ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
                 new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
 
-        prefStore.setValue(VaadinPlugin.PREFERENCES_WIDGETSET_DIRTY, dirty);
+        // save as string so that the value false does not result in the entry
+        // being removed - we use three states: true, false and absent
+        prefStore.setValue(VaadinPlugin.PREFERENCES_WIDGETSET_DIRTY, Boolean
+                .toString(dirty));
+        try {
+            prefStore.save();
+        } catch (IOException e) {
+            handleBackgroundException(IStatus.WARNING,
+                    "Could not save widgetset compilation state for project "
+                            + project.getName(), e);
+        }
     }
 
     /**
@@ -1957,7 +1970,7 @@ public class VaadinPluginUtil {
      * @param path
      * @return
      */
-    private static IPath getRawLocation(IProject project, IPath path) {
+    public static IPath getRawLocation(IProject project, IPath path) {
         // constructing the handles is inexpensive
         IFolder folder = project.getWorkspace().getRoot().getFolder(path);
         IFile file = project.getWorkspace().getRoot().getFile(path);

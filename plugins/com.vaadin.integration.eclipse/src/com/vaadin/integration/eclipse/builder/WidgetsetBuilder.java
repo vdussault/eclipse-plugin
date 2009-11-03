@@ -11,10 +11,12 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -49,17 +51,33 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
             if (VaadinPluginUtil.isWidgetsetPackage(resource.getRawLocation())) {
                 switch (delta.getKind()) {
                 case IResourceDelta.ADDED:
+                    // skip build when the Vaadin JAR is added at project
+                    // creation - needed for Ganymede?
+                    IProject project = resource.getProject();
+                    IJavaProject jproject = JavaCore.create(project);
+                    IPath vaadinJarPath = VaadinPluginUtil
+                            .findProjectVaadinJarPath(jproject);
+                    vaadinJarPath = VaadinPluginUtil.getRawLocation(project,
+                            vaadinJarPath);
+                    IPath resourcePath = VaadinPluginUtil.getRawLocation(
+                            project, resource.getRawLocation());
+                    if (resourcePath.equals(vaadinJarPath)) {
+                        break;
+                    }
+                    // fall-through: continue like change or JAR
                 case IResourceDelta.CHANGED:
-                    // cannot reliably detect deletion of a widgetset package as
-                    // cannot look inside it one it has been removed; handled
-                    // below as any JAR removal instead
-
+                case IResourceDelta.REPLACED:
                     // compile will clear the dirty flag
                     VaadinPluginUtil.setWidgetsetDirty(getProject(), true);
                     WidgetsetBuildManager.runWidgetSetBuildTool(getProject(),
                             false, monitor);
 
                     break;
+                case IResourceDelta.REMOVED:
+                    // we never come here:
+                    // cannot reliably detect deletion of a widgetset package as
+                    // cannot look inside it one it has been removed; handled
+                    // below as any JAR removal instead
                 }
             } else if (delta.getKind() == IResourceDelta.REMOVED
                     && isJar(resource)) {
