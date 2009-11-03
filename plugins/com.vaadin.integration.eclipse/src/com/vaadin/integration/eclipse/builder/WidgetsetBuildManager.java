@@ -33,6 +33,43 @@ import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
  */
 public class WidgetsetBuildManager {
 
+    private static final class CompileWidgetsetJob extends Job {
+        private final IProject project;
+        private final Shell shell;
+        private final IProgressMonitor monitor;
+
+        private CompileWidgetsetJob(String name, IProject project, Shell shell,
+                IProgressMonitor monitor) {
+            super(name);
+            this.project = project;
+            this.shell = shell;
+            this.monitor = monitor;
+        }
+
+        @Override
+        protected IStatus run(IProgressMonitor monitor) {
+            projectWidgetsetBuildPending.remove(project);
+            monitor.beginTask("Compiling wigetset for project "
+                    + project.getName(), 1);
+            try {
+                final IJavaProject jproject = JavaCore.create(project);
+                compileWidgetsets(shell, jproject, monitor);
+            } catch (CoreException e) {
+                VaadinPluginUtil.handleBackgroundException(IStatus.ERROR,
+                        "Widgetset compilation failed", e);
+            } catch (IOException e) {
+                VaadinPluginUtil.handleBackgroundException(IStatus.ERROR,
+                        "Widgetset compilation failed", e);
+            } catch (InterruptedException e) {
+                VaadinPluginUtil.handleBackgroundException(IStatus.ERROR,
+                        "Widgetset compilation failed", e);
+            } finally {
+                monitor.done();
+            }
+            return Status.OK_STATUS;
+        }
+    }
+
     /**
      * Which modules have a widgetset build running.
      *
@@ -67,13 +104,13 @@ public class WidgetsetBuildManager {
      * @throws CoreException
      */
     public static void runWidgetSetBuildTool(final IProject project,
-            boolean synchronous, final IProgressMonitor monitor)
+            final boolean synchronous, final IProgressMonitor monitor)
             throws CoreException {
 
-        if (!projectWidgetsetBuildPending.contains(project)) {
+        if (isBuildRunning(project)) {
+            // no message, ignore request
+        } else if (!projectWidgetsetBuildPending.contains(project)) {
             projectWidgetsetBuildPending.add(project);
-            final IJavaProject p = JavaCore.create(project);
-
             Runnable runnable = new Runnable() {
 
                 public void run() {
@@ -87,38 +124,21 @@ public class WidgetsetBuildManager {
                                             + " might need a recompilation. Compile widgetset now?");
                     if (openQuestion) {
 
-                        Job job = new Job("Compiling widgetset...") {
-                            @Override
-                            protected IStatus run(IProgressMonitor monitor) {
-                                projectWidgetsetBuildPending.remove(project);
-                                monitor.beginTask("Compiling wigetset", 1);
-                                try {
-                                    compileWidgetsets(shell,
-                                            p, monitor);
-                                } catch (CoreException e) {
-                                    VaadinPluginUtil.handleBackgroundException(
-                                            IStatus.ERROR,
-                                            "Widgetset compilation failed", e);
-                                } catch (IOException e) {
-                                    VaadinPluginUtil.handleBackgroundException(
-                                            IStatus.ERROR,
-                                            "Widgetset compilation failed", e);
-                                } catch (InterruptedException e) {
-                                    VaadinPluginUtil.handleBackgroundException(
-                                            IStatus.ERROR,
-                                            "Widgetset compilation failed", e);
-                                } finally {
-                                    monitor.done();
-                                }
-                                return Status.OK_STATUS;
-                            }
-                        };
+                        CompileWidgetsetJob job = new CompileWidgetsetJob(
+                                "Compiling wigetset for project "
+                                        + project.getName() + "...", project,
+                                shell, monitor);
 
                         job.setUser(false);
-                        // lazily run job to let possible other changes modify
-                        // project state, like dragging multiple jar files to
-                        // classpath
-                        job.schedule(500);
+                        if (synchronous) {
+                            // TODO not really synchronous
+                            job.schedule();
+                        } else {
+                            // lazily run job to let possible other changes modify
+                            // project state, like dragging multiple jar files to
+                            // classpath
+                            job.schedule(500);
+                        }
                     } else {
                         projectWidgetsetBuildPending.remove(project);
                     }
@@ -131,6 +151,15 @@ public class WidgetsetBuildManager {
                 PlatformUI.getWorkbench().getDisplay().asyncExec(runnable);
             }
         }
+    }
+
+    private static boolean isBuildRunning(IProject project) {
+        for (String running : widgetsetBuildRunning) {
+            if (running.startsWith(project.getName() + IPath.SEPARATOR)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
