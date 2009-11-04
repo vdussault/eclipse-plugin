@@ -115,8 +115,42 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                     && resource.getName().endsWith(".gwt.xml");
         }
 
+        /**
+         * Check if given resource is java file in gwt module.
+         *
+         * Only resources with "client" as a segment of their path are
+         * considered. The existence of a GWT module in the parent of that
+         * segment is then checked.
+         *
+         * @param resource
+         * @return true if the resource is a java file in a GWT module
+         */
         private boolean isClientSideJavaClass(IResource resource) {
-            // TODO Check if given resource is java file in gwt module
+            if (resource instanceof IFile
+                    && resource.getName().endsWith(".java")) {
+                IPath path = resource.getProjectRelativePath();
+
+                for (int i = 1; i < path.segmentCount(); ++i) {
+                    if ("client".equals(path.segment(i))) {
+                        // check if the parent has a GWT module
+                        IFolder parent = resource.getProject().getFolder(
+                                path.uptoSegment(i));
+                        try {
+                            for (IResource child : parent.members()) {
+                                if (child.getName().endsWith(".gwt.xml")) {
+                                    return true;
+                                }
+                            }
+                        } catch (CoreException e) {
+                            VaadinPluginUtil.handleBackgroundException(
+                                    IStatus.WARNING,
+                                    "Could not list children of folder "
+                                            + parent.getFullPath(), e);
+                            // continue search - maybe multiple .client. in path
+                        }
+                    }
+                }
+            }
             return false;
         }
 
