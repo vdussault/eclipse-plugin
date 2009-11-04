@@ -1,11 +1,14 @@
 package com.vaadin.integration.eclipse.properties;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -21,8 +24,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.dialogs.PropertyPage;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
+import com.vaadin.integration.eclipse.VaadinPlugin;
+import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
 
@@ -33,8 +39,9 @@ import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
  */
 public class VaadinProjectPropertyPage extends PropertyPage {
 
-    private VaadinVersionComposite vaadinVersionComposite;
     private Button useVaadinButton;
+    private VaadinVersionComposite vaadinVersionComposite;
+    private WidgetsetParametersComposite widgetsetComposite;
 
     @Override
     protected void performDefaults() {
@@ -42,6 +49,7 @@ public class VaadinProjectPropertyPage extends PropertyPage {
         try {
             IProject project = getVaadinProject();
             vaadinVersionComposite.setProject(project);
+            widgetsetComposite.setProject(project);
 
             useVaadinButton.setSelection(vaadinVersionComposite
                     .getSelectedVersion() != null);
@@ -65,6 +73,50 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             project = getVaadinProject();
         } catch (CoreException ex) {
             // TODO handle better?
+            return false;
+        }
+
+        boolean widgetsetDirty = false;
+
+        try {
+            ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
+                    new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
+
+            // save widgetset compilation parameters
+
+            String style = widgetsetComposite.getCompilationStyle();
+            String oldStyle = prefStore.getString(VaadinPlugin.PREFERENCES_WIDGETSET_STYLE);
+            if ("".equals(oldStyle)) {
+                oldStyle = "OBF";
+            }
+            if (!style.equals(oldStyle)) {
+                prefStore.setValue(VaadinPlugin.PREFERENCES_WIDGETSET_STYLE,
+                        style);
+                widgetsetDirty = true;
+            }
+
+            String parallelism = widgetsetComposite.getParallelism();
+            // empty string if not set
+            String oldParallelism = prefStore.getString(VaadinPlugin.PREFERENCES_WIDGETSET_PARALLELISM);
+            if (!parallelism.equals(oldParallelism)) {
+                prefStore.setValue(VaadinPlugin.PREFERENCES_WIDGETSET_PARALLELISM,
+                        parallelism);
+                widgetsetDirty = true;
+            }
+
+            // if anything changed, mark widgetset as dirty and ask about recompiling it
+            if (widgetsetDirty) {
+                prefStore.save();
+                // will also be saved later, here in case Vaadin version
+                // replacement fails
+                VaadinPluginUtil.setWidgetsetDirty(project, true);
+            }
+        } catch (IOException e) {
+            VaadinPluginUtil.displayError(
+                    "Failed to save widgetset compilation parameters.", e,
+                    getShell());
+            VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                    "Failed to save widgetset compilation parameters.", e);
             return false;
         }
 
@@ -106,6 +158,8 @@ public class VaadinProjectPropertyPage extends PropertyPage {
                         "Confirm Vaadin version change", message)) {
                     return false;
                 }
+
+                widgetsetDirty = true;
             }
 
             IRunnableWithProgress op = new IRunnableWithProgress() {
@@ -147,6 +201,19 @@ public class VaadinProjectPropertyPage extends PropertyPage {
                     "Failed to change Vaadin version in the project", e);
             return false;
         }
+
+        // if anything changed, ask about recompiling the widgetset
+        if (widgetsetDirty) {
+            VaadinPluginUtil.setWidgetsetDirty(project, true);
+            try {
+                WidgetsetBuildManager.runWidgetSetBuildTool(project, false,
+                        new NullProgressMonitor());
+            } catch (CoreException e) {
+                VaadinPluginUtil.handleBackgroundException(
+                        "Widgetset compilation failed", e);
+            }
+        }
+
         return true;
     }
 
@@ -180,6 +247,10 @@ public class VaadinProjectPropertyPage extends PropertyPage {
                         .getSelection());
             }
         });
+
+        widgetsetComposite = new WidgetsetParametersComposite(composite,
+                SWT.NULL);
+        widgetsetComposite.createContents();
 
         performDefaults();
 

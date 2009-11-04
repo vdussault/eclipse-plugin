@@ -1740,17 +1740,34 @@ public class VaadinPluginUtil {
                 args.add("-XstartOnFirstThread");
             }
 
-            String compilerClass = "com.vaadin.tools.WidgetsetCompiler";
-
             args.add("-classpath");
-
             // args.add(classPath.replaceAll(" ", "\\ "));
             args.add(classPath);
-            args.add(compilerClass);
-            args.add("-out");
 
+            String compilerClass = "com.vaadin.tools.WidgetsetCompiler";
+            args.add(compilerClass);
+
+            args.add("-out");
             IPath projectRelativePath = wsDir.getProjectRelativePath();
             args.add(projectRelativePath.toString());
+
+            ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
+                    new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
+
+            String style = prefStore
+                    .getString(VaadinPlugin.PREFERENCES_WIDGETSET_STYLE);
+            if (!"".equals(style)) {
+                args.add("-style");
+                args.add(style);
+            }
+
+            String parallelism = prefStore
+                    .getString(VaadinPlugin.PREFERENCES_WIDGETSET_PARALLELISM);
+            if (!"".equals(parallelism)) {
+                args.add("-localWorkers");
+                args.add(parallelism);
+            }
+
             // args.add("-logLevel");
             // args.add("ALL");
             args.add(moduleName);

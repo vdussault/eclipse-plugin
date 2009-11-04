@@ -13,8 +13,16 @@ public class VaadinPlugin extends AbstractUIPlugin {
     public static final String ID_COMPILE_WS_APP = "compilews";
 
     // preference store keys
+
+    // "true"/"false"/missing - if missing, check if >1 widgetset exists
     public static final String PREFERENCES_WIDGETSET_DIRTY = PLUGIN_ID + "."
             + "widgetsetDirty";
+    // "OBF"/"PRETTY"/"DETAILED" or missing (default to "OBF")
+    public static final String PREFERENCES_WIDGETSET_STYLE = PLUGIN_ID + "."
+            + "widgetsetStyle";
+    // a number of threads to use (-localWorkers) or missing
+    public static final String PREFERENCES_WIDGETSET_PARALLELISM = PLUGIN_ID
+            + "." + "widgetsetParallelism";
 
     private static VaadinPlugin instance = null;
 

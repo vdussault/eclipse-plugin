@@ -188,7 +188,7 @@ public class VaadinVersionComposite extends Composite {
         Label label = new Label(this, SWT.NULL);
         label.setText("Vaadin version:");
 
-        // project selection combo
+        // Vaadin version selection combo
         versionCombo = new Combo(this, SWT.BORDER | SWT.DROP_DOWN
                 | SWT.READ_ONLY);
         GridData gd = new GridData(GridData.FILL_HORIZONTAL);
