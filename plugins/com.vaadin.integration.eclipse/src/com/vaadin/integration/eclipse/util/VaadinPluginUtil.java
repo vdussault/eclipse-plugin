@@ -1696,6 +1696,8 @@ public class VaadinPluginUtil {
             // TODO should report progress more correctly - unknown?
             monitor.beginTask("Compiling widgetset " + moduleName
                     + " in project " + project.getName(), 100);
+            monitor.subTask("Preparing to compile widgetset " + moduleName
+                    + " in project " + project.getName());
 
             ArrayList<String> args = new ArrayList<String>();
 
@@ -1710,7 +1712,7 @@ public class VaadinPluginUtil {
                     resourceDirectory).getFolder("widgetsets");
 
             // refresh this requires that the directory exists
-            createFolders(wsDir, monitor);
+            createFolders(wsDir, new SubProgressMonitor(monitor, 1));
 
             // construct the class path, including GWT JARs and project sources
             String classPath = getProjectBaseClasspath(jproject, true);
@@ -1751,6 +1753,9 @@ public class VaadinPluginUtil {
             b.redirectErrorStream(true);
 
             monitor.worked(10);
+
+            monitor.subTask("Compiling widgetset " + moduleName
+                    + " in project " + project.getName());
 
             final Process exec = b.start();
 
@@ -1829,7 +1834,8 @@ public class VaadinPluginUtil {
             t.interrupt();
 
             if (waitFor == 0) {
-                wsDir.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+                wsDir.refreshLocal(IResource.DEPTH_INFINITE,
+                        new SubProgressMonitor(monitor, 1));
                 setWidgetsetDirty(project, false);
             } else {
                 // TODO cancelled or somehow else failed

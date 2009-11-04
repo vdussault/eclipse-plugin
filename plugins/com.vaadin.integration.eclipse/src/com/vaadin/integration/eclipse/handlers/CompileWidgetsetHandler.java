@@ -49,8 +49,6 @@ public class CompileWidgetsetHandler extends AbstractHandler {
         final ISelection currentSelection = HandlerUtil
                 .getCurrentSelection(event);
         final IEditorPart activeEditor = HandlerUtil.getActiveEditor(event);
-        final Shell shell = PlatformUI.getWorkbench()
-                .getActiveWorkbenchWindow().getShell();
 
         Job job = new Job("Compiling widgetset...") {
             @Override
@@ -91,7 +89,7 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                                 VaadinPluginUtil.ensureWidgetsetNature(project);
                                 IJavaProject jproject = JavaCore
                                         .create(project);
-                                WidgetsetBuildManager.compileWidgetsets(shell,
+                                WidgetsetBuildManager.compileWidgetsets(
                                         jproject, monitor);
                                 compiled = true;
                             }
@@ -153,8 +151,7 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                     IProject project = VaadinPluginUtil.getProject(file);
                     if (VaadinFacetUtils.isVaadinProject(project)) {
                         IJavaProject jproject = JavaCore.create(project);
-                        WidgetsetBuildManager.compileWidgetsets(shell,
-                                jproject,
+                        WidgetsetBuildManager.compileWidgetsets(jproject,
                                 monitor);
                         compiled = true;
                     }
