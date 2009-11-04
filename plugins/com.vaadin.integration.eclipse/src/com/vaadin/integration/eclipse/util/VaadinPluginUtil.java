@@ -62,6 +62,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
+import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -1717,6 +1718,18 @@ public class VaadinPluginUtil {
             // construct the class path, including GWT JARs and project sources
             String classPath = getProjectBaseClasspath(jproject, true);
 
+            String classpathSeparator = getClasspathSeparator();
+
+            // add widgetset JARs
+            Collection<IPath> widgetpackagets = getAvailableVaadinWidgetsetPackages(jproject);
+            IPath vaadinJarPath = findProjectVaadinJarPath(jproject);
+            for (IPath file2 : widgetpackagets) {
+                if (!file2.equals(vaadinJarPath)) {
+                    classPath = classPath + classpathSeparator
+                            + file2.toString();
+                }
+            }
+
             // construct rest of the arguments for the launch
 
             args.add("-Djava.awt.headless=true");
@@ -1870,17 +1883,29 @@ public class VaadinPluginUtil {
         IProject project = jproject.getProject();
 
         // use LinkedHashSet that preserves order but eliminates duplicates
-
         Set<IPath> sourceLocations = new LinkedHashSet<IPath>();
-
         Set<IPath> outputLocations = new LinkedHashSet<IPath>();
+        Set<IPath> otherLocations = new LinkedHashSet<IPath>();
+
         // ensure the default output location is on the classpath
         outputLocations.add(getRawLocation(project, jproject
                 .getOutputLocation()));
 
-        Set<IPath> otherLocations = new LinkedHashSet<IPath>();
+        // key libraries
+        IRuntimeClasspathEntry gwtdev = JavaRuntime
+                .newArchiveRuntimeClasspathEntry(getGWTDevJarPath(jproject));
+        otherLocations.add(getRawLocation(project, gwtdev.getPath()));
+
+        IRuntimeClasspathEntry gwtuser = JavaRuntime
+                .newArchiveRuntimeClasspathEntry(getGWTUserJarPath(jproject));
+        otherLocations.add(getRawLocation(project, gwtuser.getPath()));
+
+        IRuntimeClasspathEntry vaadinJar = JavaRuntime
+                .newArchiveRuntimeClasspathEntry(findProjectVaadinJarPath(jproject));
+        otherLocations.add(getRawLocation(project, vaadinJar.getPath()));
 
         // iterate over build path and classify its components
+        // only source locations and their output directories (if any) are used
         for (IClasspathEntry classPathEntry : jproject.getResolvedClasspath(true)) {
             if (classPathEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
                 // gwt compiler also needs javafiles for classpath
@@ -1893,15 +1918,16 @@ public class VaadinPluginUtil {
                     outputLocations
                             .add(getRawLocation(project, outputLocation));
                 }
-            } else {
-                IPath path = classPathEntry.getPath();
-                IPath rawLocation = getRawLocation(project, path);
-                otherLocations.add(rawLocation);
+                // } else {
+                // IPath path = classPathEntry.getPath();
+                // IPath rawLocation = getRawLocation(project, path);
+                // otherLocations.add(rawLocation);
             }
         }
 
         // source directories must come before output locations
         Set<IPath> locations = new LinkedHashSet<IPath>();
+
         locations.addAll(sourceLocations);
         if (includeOutputDirectories) {
             locations.addAll(outputLocations);
@@ -1912,7 +1938,11 @@ public class VaadinPluginUtil {
         locations.remove(null);
 
         // construct classpath string
-        String classPath = "";
+        IRuntimeClasspathEntry systemLibsEntry = JavaRuntime
+                .newVariableRuntimeClasspathEntry(new Path(
+                        JavaRuntime.JRELIB_VARIABLE));
+
+        String classPath = systemLibsEntry.getLocation();
         for (IPath path : locations) {
             if ("".equals(classPath)) {
                 classPath = path.toPortableString();
