@@ -3,6 +3,7 @@ package com.vaadin.integration.eclipse.properties;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
@@ -23,10 +24,6 @@ public class WidgetsetParametersComposite extends Composite {
 
     public WidgetsetParametersComposite(Composite parent, int style) {
         super(parent, style);
-
-        setLayout(new GridLayout(2, false));
-        GridData data = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
-        setLayoutData(data);
     }
 
     public void setProject(IProject project) {
@@ -53,12 +50,31 @@ public class WidgetsetParametersComposite extends Composite {
     }
 
     public Composite createContents() {
+        setLayout(new GridLayout(1, false));
+        setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+
+        createOptionsComposite(this);
+        createInstructionsComposite(this);
+
+        return this;
+    }
+
+    /**
+     * Configurable options
+     */
+    private void createOptionsComposite(Composite parent) {
+        Composite options = new Composite(parent, SWT.NULL);
+        options.setLayout(new GridLayout(2, false));
+        options
+                .setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
+                        false));
+
         // compilation style (obfuscated/pretty)
+        Label label = new Label(options, SWT.NULL);
+        label.setText("Javascript style:");
 
-        Label label = new Label(this, SWT.NULL);
-        label.setText("Javascript output style:");
-
-        styleCombo = new Combo(this, SWT.BORDER | SWT.DROP_DOWN | SWT.READ_ONLY);
+        styleCombo = new Combo(options, SWT.BORDER | SWT.DROP_DOWN
+                | SWT.READ_ONLY);
         GridData gd = new GridData(GridData.FILL_HORIZONTAL);
         styleCombo.setLayoutData(gd);
 
@@ -68,10 +84,10 @@ public class WidgetsetParametersComposite extends Composite {
 
         // compiler parallelism
 
-        label = new Label(this, SWT.NULL);
+        label = new Label(options, SWT.NULL);
         label.setText("Compiler threads:");
 
-        parallelismCombo = new Combo(this, SWT.BORDER | SWT.DROP_DOWN
+        parallelismCombo = new Combo(options, SWT.BORDER | SWT.DROP_DOWN
                 | SWT.READ_ONLY);
         gd = new GridData(GridData.FILL_HORIZONTAL);
         parallelismCombo.setLayoutData(gd);
@@ -80,8 +96,18 @@ public class WidgetsetParametersComposite extends Composite {
         for (int i = 1; i <= 8; ++i) {
             parallelismCombo.add("" + i);
         }
+    }
 
-        return this;
+    private void createInstructionsComposite(Composite parent) {
+        Composite instructions = new Composite(parent, SWT.NULL);
+        instructions.setLayout(new FillLayout(SWT.HORIZONTAL));
+        instructions.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
+                false));
+
+        Label label = new Label(instructions, SWT.WRAP);
+        label
+                .setText("To optimize widgetset compilation times, modify the \"user.agent\" parameter in the\n"
+                        + "widgetset module file (.gwt.xml).");
     }
 
     /**
