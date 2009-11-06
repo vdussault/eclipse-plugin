@@ -75,7 +75,16 @@ public class DownloadUtils {
         }
 
         public int compareTo(Version o) {
-            return version.compareTo(o.version);
+            // #3579 hack for 6.2 nightly build sorting
+            String v1 = version;
+            String v2 = o.version;
+            if (v1.startsWith("6.2.nightly")) {
+                v1 = v1.replaceFirst("^6\\.2\\.", "6.2.0.");
+            }
+            if (v2.startsWith("6.2.nightly")) {
+                v2 = v2.replaceFirst("^6\\.2\\.", "6.2.0.");
+            }
+            return v1.compareTo(v2);
         }
 
         @Override
@@ -545,6 +554,8 @@ public class DownloadUtils {
                 versions.add(version);
             }
         }
+        // sort versions within each subgroup
+        Collections.sort(versions);
         return versions;
     }
 
@@ -590,6 +601,11 @@ public class DownloadUtils {
                             // make sure integers are sorted before other
                             // strings
                             if (revision.matches("[0-9]+")) {
+                                Integer revInt = Integer.parseInt(revision);
+                                key += "2" + nf.valueToString(revInt);
+                            } else if (revision.matches("[0-9].*")) {
+                                // #3579 this is primarily for 6.2 nightly
+                                // builds
                                 key += "1" + revision;
                             } else {
                                 key += "0" + revision;

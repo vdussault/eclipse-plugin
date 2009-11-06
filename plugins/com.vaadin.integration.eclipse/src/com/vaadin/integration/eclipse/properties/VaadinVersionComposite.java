@@ -50,6 +50,10 @@ public class VaadinVersionComposite extends Composite {
          * This is an ugly and inefficient hack: as sorting cannot be disabled
          * for AbstractElementListSelectionDialog, use a comparator that
          * compares the positions of the elements in a reference list.
+         * 
+         * Cannot do real version comparison as no information is available
+         * about which builds are official releases, pre-releases or release
+         * candidates, nightly builds etc.
          */
         private static class VersionStringComparator implements
                 Comparator<String> {
