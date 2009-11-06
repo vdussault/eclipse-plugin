@@ -86,8 +86,12 @@ public class VaadinProjectPropertyPage extends PropertyPage {
 
             String style = widgetsetComposite.getCompilationStyle();
             String oldStyle = prefStore.getString(VaadinPlugin.PREFERENCES_WIDGETSET_STYLE);
-            if ("".equals(oldStyle)) {
-                oldStyle = "OBF";
+            // do not store the default value OBF, but handle it if stored
+            if ("OBF".equals(oldStyle)) {
+                oldStyle = "";
+            }
+            if ("OBF".equals(style)) {
+                style = "";
             }
             if (!style.equals(oldStyle)) {
                 prefStore.setValue(VaadinPlugin.PREFERENCES_WIDGETSET_STYLE,
@@ -205,13 +209,13 @@ public class VaadinProjectPropertyPage extends PropertyPage {
         // if anything changed, ask about recompiling the widgetset
         if (widgetsetDirty) {
             VaadinPluginUtil.setWidgetsetDirty(project, true);
-            try {
-                WidgetsetBuildManager.runWidgetSetBuildTool(project, false,
-                        new NullProgressMonitor());
-            } catch (CoreException e) {
-                VaadinPluginUtil.handleBackgroundException(
-                        "Widgetset compilation failed", e);
-            }
+        }
+
+        // this may also be true because of hosted mode launch creation or older
+        // changes
+        if (VaadinPluginUtil.isWidgetsetDirty(project)) {
+            WidgetsetBuildManager.runWidgetSetBuildTool(project, false,
+                    new NullProgressMonitor());
         }
 
         return true;
@@ -248,7 +252,11 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             }
         });
 
-        widgetsetComposite = new WidgetsetParametersComposite(composite,
+        group = new Group(composite, SWT.NONE);
+        group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        group.setText("Widgetsets");
+        group.setLayout(new GridLayout(1, false));
+        widgetsetComposite = new WidgetsetParametersComposite(group,
                 SWT.NULL);
         widgetsetComposite.createContents();
 

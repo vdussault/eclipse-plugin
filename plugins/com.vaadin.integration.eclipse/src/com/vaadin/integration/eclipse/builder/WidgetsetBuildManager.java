@@ -64,6 +64,12 @@ public class WidgetsetBuildManager {
     private static Set<IProject> projectWidgetsetBuildPending = new HashSet<IProject>();
 
     /**
+     * Which projects are being modified internally by the plugin and should not
+     * be considered candidates for widgetset building.
+     */
+    private static Set<IProject> projectWidgetsetBuildSuspended = new HashSet<IProject>();
+
+    /**
      * Ask the user whether he wants the widgetset(s) to be compiled and trigger
      * a build if necessary.
      *
@@ -80,13 +86,15 @@ public class WidgetsetBuildManager {
      *            if true, do not return until the widgetset has been compiled
      *            or the user has chosen not to compile it
      * @param monitor
+     *            progress monitor for synchronous execution, currently not used
+     *            for asynchronous builds that run as separate jobs
      * @throws CoreException
      */
     public static void runWidgetSetBuildTool(final IProject project,
-            final boolean synchronous, final IProgressMonitor monitor)
-            throws CoreException {
+            final boolean synchronous, final IProgressMonitor monitor) {
 
-        if (isBuildRunning(project)) {
+        if (isBuildRunning(project)
+                || projectWidgetsetBuildSuspended.contains(project)) {
             // no message, ignore request
         } else if (!projectWidgetsetBuildPending.contains(project)) {
             projectWidgetsetBuildPending.add(project);
@@ -264,6 +272,12 @@ public class WidgetsetBuildManager {
             widgetsetBuildRunning.add(key);
             try {
                 VaadinPluginUtil.compileWidgetset(jproject, widgetset, monitor);
+
+                // could create a hosted mode launch here if it does not exist -
+                // instead, do it on demand from the project properties as it
+                // requires downloading GWT etc.
+
+                // VaadinPluginUtil.createHostedModeLaunch(project);
             } finally {
                 widgetsetBuildRunning.remove(key);
             }
@@ -321,6 +335,35 @@ public class WidgetsetBuildManager {
         fqname = fqname.replaceAll("/", ".");
 
         compileWidgetsetIfNotRunning(jproject, fqname, monitor);
+    }
+
+    /**
+     * Suspend widgetset build requests for a project while internal
+     * modifications to the project are being performed by the plugin.
+     *
+     * @see #resumeWidgetsetBuilds(IProject)
+     * 
+     * @param project
+     */
+    public static void suspendWidgetsetBuilds(IProject project) {
+        projectWidgetsetBuildSuspended.add(project);
+    }
+
+    /**
+     * Resume making suspended widgetset build requests for a project.
+     *
+     * No requests are queued for the project while widgetset builds are
+     * suspended, and the caller should call {@link #runWidgetSetBuildTool()}
+     * after this call if necessary.
+     *
+     * This method must be called after
+     * {@link #suspendWidgetsetBuilds(IProject)}, a try-finally pattern is
+     * strongly recommended.
+     *
+     * @param project
+     */
+    public static void resumeWidgetsetBuilds(IProject project) {
+        projectWidgetsetBuildSuspended.remove(project);
     }
 
 }

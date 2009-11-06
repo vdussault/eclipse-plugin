@@ -477,6 +477,10 @@ public class VaadinPluginUtil {
      * No launch configurations are updated. Use updateVaadinLibraries if such
      * updates are needed.
      *
+     * Requests to the user for widgetset builds in the project are suspended
+     * for the duration of this operation and resumed after completion. At the
+     * end, the user is asked about compiling the widgetset if it is dirty.
+     *
      * @param project
      * @param vaadinJarVersion
      * @param monitor
@@ -496,12 +500,21 @@ public class VaadinPluginUtil {
             try {
                 IType findType = findVaadinApplicationType(jproject);
                 if (findType == null) {
-                    addVaadinLibrary(jproject, vaadinJarVersion,
-                            new SubProgressMonitor(monitor, 1));
+                    WidgetsetBuildManager.suspendWidgetsetBuilds(project);
+                    try {
+                        addVaadinLibrary(jproject, vaadinJarVersion,
+                                new SubProgressMonitor(monitor, 1));
 
-                    // refresh library folder to recompile parts of project
-                    IFolder lib = getWebInfLibFolder(project);
-                    lib.refreshLocal(IResource.DEPTH_ONE, null);
+                        // refresh library folder to recompile parts of project
+                        IFolder lib = getWebInfLibFolder(project);
+                        lib.refreshLocal(IResource.DEPTH_ONE, null);
+                    } finally {
+                        WidgetsetBuildManager.resumeWidgetsetBuilds(project);
+                        if (VaadinPluginUtil.isWidgetsetDirty(project)) {
+                            WidgetsetBuildManager.runWidgetSetBuildTool(
+                                    project, false, new NullProgressMonitor());
+                        }
+                    }
                 }
             } catch (JavaModelException e) {
                 throw newCoreException(
@@ -518,10 +531,14 @@ public class VaadinPluginUtil {
      * correct version. If none can be found or the version does not match,
      * replaces any old Vaadin JAR with the specified version from the local
      * repository.
-     *
+     * 
      * Update widgetset compilation launch configurations in the project to
      * refer to the new Vaadin and GWT versions (only when changing Vaadin
      * version, not when adding the JAR).
+     * 
+     * Requests to the user for widgetset builds in the project are suspended
+     * for the duration of this operation and resumed after completion. At the
+     * end, the user is asked about compiling the widgetset if it is dirty.
      *
      * @param project
      * @param vaadinJarVersion
@@ -545,6 +562,7 @@ public class VaadinPluginUtil {
                 return;
             }
             IJavaProject jproject = JavaCore.create(project);
+            WidgetsetBuildManager.suspendWidgetsetBuilds(project);
             try {
                 // replace the Vaadin JAR (currentVersion) with the new one
                 if (currentVersion != null) {
@@ -573,6 +591,12 @@ public class VaadinPluginUtil {
             } catch (JavaModelException e) {
                 throw newCoreException(
                         "Failed to update Vaadin jar in project", e);
+            } finally {
+                WidgetsetBuildManager.resumeWidgetsetBuilds(project);
+                if (VaadinPluginUtil.isWidgetsetDirty(project)) {
+                    WidgetsetBuildManager.runWidgetSetBuildTool(project, false,
+                            new NullProgressMonitor());
+                }
             }
         } finally {
             monitor.done();
@@ -673,8 +697,12 @@ public class VaadinPluginUtil {
     /**
      * Ensure that the project classpath contains the GWT libraries, adding them
      * if necessary.
-     *
+     * 
      * Also update widgetset compilation launch configuration paths as needed.
+     * 
+     * Requests to the user for widgetset builds in the project are suspended
+     * for the duration of this operation and resumed after completion. At the
+     * end, the user is asked about compiling the widgetset if it is dirty.
      *
      * @param project
      * @param monitor
@@ -697,8 +725,17 @@ public class VaadinPluginUtil {
                         .findType("com.google.gwt.core.client.EntryPoint");
 
                 if (findType == null) {
-                    updateGWTLibraries(jproject, new SubProgressMonitor(
-                            monitor, 1));
+                    WidgetsetBuildManager.suspendWidgetsetBuilds(project);
+                    try {
+                        updateGWTLibraries(jproject, new SubProgressMonitor(
+                                monitor, 1));
+                    } finally {
+                        WidgetsetBuildManager.resumeWidgetsetBuilds(project);
+                        if (VaadinPluginUtil.isWidgetsetDirty(project)) {
+                            WidgetsetBuildManager.runWidgetSetBuildTool(
+                                    project, false, new NullProgressMonitor());
+                        }
+                    }
                 }
             } catch (JavaModelException e) {
                 throw newCoreException(
@@ -710,8 +747,20 @@ public class VaadinPluginUtil {
         }
     }
 
-    // add or update GWT libraries in a project based on the Vaadin version in
-    // the project (if any)
+    /**
+     * Download and add or update GWT libraries in a project based on the Vaadin
+     * version in the project (if any).
+     *
+     * The project build path and any external launches (including the widgetset
+     * compilation launch for Vaadin 6.1 or earlier) are also updated.
+     *
+     * If the project build path contains user-defined GWT JARs, neither the
+     * build path nor the launches are modified.
+     *
+     * @param jproject
+     * @param monitor
+     * @throws CoreException
+     */
     private static void updateGWTLibraries(IJavaProject jproject,
             IProgressMonitor monitor) throws CoreException {
         if (monitor == null) {
@@ -723,12 +772,18 @@ public class VaadinPluginUtil {
             String gwtVersion = getRequiredGWTVersionForProject(jproject);
             monitor.worked(1);
 
-            DownloadUtils.ensureGwtUserJarExists(gwtVersion,
-                    new SubProgressMonitor(monitor, 5));
-            DownloadUtils.ensureGwtDevJarExists(gwtVersion,
-                    new SubProgressMonitor(monitor, 5));
+            // do not replace the GWT JARs on the build path and in launches if
+            // they are user-defined
+            if (isUsingUserDefinedGwt(jproject)) {
+                return;
+            }
 
             try {
+                DownloadUtils.ensureGwtUserJarExists(gwtVersion,
+                        new SubProgressMonitor(monitor, 5));
+                DownloadUtils.ensureGwtDevJarExists(gwtVersion,
+                        new SubProgressMonitor(monitor, 5));
+
                 IClasspathEntry[] rawClasspath = jproject.getRawClasspath();
                 List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
                 for (IClasspathEntry entry : rawClasspath) {
@@ -907,6 +962,41 @@ public class VaadinPluginUtil {
 
         // save the launch
         workingCopy.doSave();
+    }
+
+    /**
+     * Checks if the project is using a custom (user-defined) GWT version on the
+     * build path.
+     *
+     * @param jproject
+     * @return true if the classpath contains GWT JARs other than those managed
+     *         by the plugin
+     */
+    private static boolean isUsingUserDefinedGwt(IJavaProject jproject) {
+        try {
+            // make sure both kinds of paths are handled
+            String gwtDownloadPath1 = getDownloadDirectory().toPortableString();
+            String gwtDownloadPath2 = getDownloadDirectory().toOSString();
+
+            IClasspathEntry[] rawClasspath = jproject.getRawClasspath();
+            for (int i = 0; i < rawClasspath.length; i++) {
+                IClasspathEntry cp = rawClasspath[i];
+                if (cp.toString().contains("gwt-dev")
+                        || cp.toString().contains("gwt-user")) {
+                    if (!cp.toString().startsWith("VAADIN_DOWNLOAD")
+                            && !cp.toString().startsWith(gwtDownloadPath1)
+                            && !cp.toString().startsWith(gwtDownloadPath2)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (CoreException e) {
+            handleBackgroundException(
+                    IStatus.WARNING,
+                    "Could not determine whether the project uses user-defined GWT JARs. Assuming GWT JARs are managed by the plugin.",
+                    e);
+        }
+        return false;
     }
 
     /**
