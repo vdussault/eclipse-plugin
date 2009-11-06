@@ -25,6 +25,10 @@ public class WidgetsetParametersComposite extends Composite {
     private Combo parallelismCombo;
     private IProject project = null;
 
+    private String OBF_LABEL = "Obfuscated";
+    private String PRETTY_LABEL = "Pretty";
+    private String DETAILED_LABEL = "Detailed";
+
     public WidgetsetParametersComposite(Composite parent, int style) {
         super(parent, style);
     }
@@ -39,10 +43,13 @@ public class WidgetsetParametersComposite extends Composite {
 
         String style = prefStore
                 .getString(VaadinPlugin.PREFERENCES_WIDGETSET_STYLE);
-        if (style == null || "".equals(style)) {
-            style = "OBF";
+        if ("DETAILED".equals(style)) {
+            styleCombo.setText(DETAILED_LABEL);
+        } else if ("PRETTY".equals(style)) {
+            styleCombo.setText(PRETTY_LABEL);
+        } else {
+            styleCombo.setText(OBF_LABEL);
         }
-        styleCombo.setText(style);
 
         String parallelism = prefStore
                 .getString(VaadinPlugin.PREFERENCES_WIDGETSET_PARALLELISM);
@@ -82,9 +89,9 @@ public class WidgetsetParametersComposite extends Composite {
         GridData gd = new GridData(GridData.FILL_HORIZONTAL);
         styleCombo.setLayoutData(gd);
 
-        styleCombo.add("OBF");
-        styleCombo.add("PRETTY");
-        styleCombo.add("DETAILED");
+        styleCombo.add(OBF_LABEL);
+        styleCombo.add(PRETTY_LABEL);
+        styleCombo.add(DETAILED_LABEL);
 
         // compiler parallelism
 
@@ -159,7 +166,14 @@ public class WidgetsetParametersComposite extends Composite {
      * @return "OBF"/"PRETTY"/"DETAILED" - never null
      */
     public String getCompilationStyle() {
-        return styleCombo.getText();
+        String text = styleCombo.getText();
+        if (DETAILED_LABEL.equals(text)) {
+            return "DETAILED";
+        } else if (PRETTY_LABEL.equals(text)) {
+            return "PRETTY";
+        } else {
+            return "OBF";
+        }
     }
 
     /**
