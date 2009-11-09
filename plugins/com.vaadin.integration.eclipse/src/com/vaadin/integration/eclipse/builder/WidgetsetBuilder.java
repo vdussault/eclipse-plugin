@@ -25,10 +25,10 @@ import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 public class WidgetsetBuilder extends IncrementalProjectBuilder {
 
-    class SampleDeltaVisitor implements IResourceDeltaVisitor {
+    class WidgetsetResourceDeltaVisitor implements IResourceDeltaVisitor {
         private IProgressMonitor monitor;
 
-        public SampleDeltaVisitor(IProgressMonitor monitor) {
+        public WidgetsetResourceDeltaVisitor(IProgressMonitor monitor) {
             this.monitor = monitor;
         }
 
@@ -66,7 +66,6 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                     }
                     // fall-through: continue like change or JAR
                 case IResourceDelta.CHANGED:
-                case IResourceDelta.REPLACED:
                     // compile will clear the dirty flag
                     VaadinPluginUtil.setWidgetsetDirty(getProject(), true);
                     WidgetsetBuildManager.runWidgetSetBuildTool(getProject(),
@@ -88,15 +87,28 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                 WidgetsetBuildManager.runWidgetSetBuildTool(getProject(),
                         false, monitor);
             } else if (resource.exists()
-                    && (isGwtModule(resource)
-                            || isComponentWithWidgetAnnotation(resource) || isClientSideJavaClass(resource))) {
+                    && (isGwtModule(resource) || isClientSideJavaClass(resource))) {
                 switch (delta.getKind()) {
                 case IResourceDelta.ADDED:
                 case IResourceDelta.CHANGED:
+                case IResourceDelta.REMOVED:
+                    // removed might not arrive here as resource does not
+                    // exist...
                     VaadinPluginUtil.setWidgetsetDirty(getProject(), true);
 
                     break;
+                }
+            } else if (resource.exists()
+                    && isComponentWithWidgetAnnotation(resource)) {
+                switch (delta.getKind()) {
+                case IResourceDelta.ADDED:
                 case IResourceDelta.REMOVED:
+                    // removed should never arrive here as does not exist...
+                    VaadinPluginUtil.setWidgetsetDirty(getProject(), true);
+                    break;
+                case IResourceDelta.CHANGED:
+                    // TODO only if the @ClientWidget annotation changed
+                    // VaadinPluginUtil.setWidgetsetDirty(getProject(), true);
                     break;
                 }
             }
@@ -232,6 +244,6 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
     protected void incrementalBuild(IResourceDelta delta,
             IProgressMonitor monitor) throws CoreException {
         // the visitor does the work.
-        delta.accept(new SampleDeltaVisitor(monitor));
+        delta.accept(new WidgetsetResourceDeltaVisitor(monitor));
     }
 }

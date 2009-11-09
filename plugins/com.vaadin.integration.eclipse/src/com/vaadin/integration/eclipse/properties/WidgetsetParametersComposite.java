@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.vaadin.integration.eclipse.VaadinPlugin;
+import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 /**
@@ -23,6 +24,7 @@ public class WidgetsetParametersComposite extends Composite {
 
     private Combo styleCombo;
     private Combo parallelismCombo;
+    private Button suspendAutomaticBuilds;
     private IProject project = null;
 
     private String OBF_LABEL = "Obfuscated";
@@ -40,6 +42,10 @@ public class WidgetsetParametersComposite extends Composite {
                 new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
 
         // get values from project or defaults if none stored
+
+        boolean suspendBuilds = WidgetsetBuildManager
+                .isWidgetsetBuildsSuspended(project);
+        suspendAutomaticBuilds.setSelection(suspendBuilds);
 
         String style = prefStore
                 .getString(VaadinPlugin.PREFERENCES_WIDGETSET_STYLE);
@@ -80,13 +86,19 @@ public class WidgetsetParametersComposite extends Composite {
                 .setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
                         false));
 
+        suspendAutomaticBuilds = new Button(options, SWT.CHECK);
+        suspendAutomaticBuilds.setText("Suspend automatic widgetset builds");
+        GridData gd = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+        gd.horizontalSpan = 2;
+        suspendAutomaticBuilds.setLayoutData(gd);
+
         // compilation style (obfuscated/pretty)
         Label label = new Label(options, SWT.NULL);
         label.setText("Javascript style:");
 
         styleCombo = new Combo(options, SWT.BORDER | SWT.DROP_DOWN
                 | SWT.READ_ONLY);
-        GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+        gd = new GridData(GridData.FILL_HORIZONTAL);
         styleCombo.setLayoutData(gd);
 
         styleCombo.add(OBF_LABEL);
@@ -185,6 +197,16 @@ public class WidgetsetParametersComposite extends Composite {
      */
     public String getParallelism() {
         return parallelismCombo.getText();
+    }
+
+    /**
+     * Returns whether automatic widgetset build requests should be suspended.
+     *
+     * @return true to disable widgetset build requests when making changes or
+     *         e.g. publishing the project
+     */
+    public boolean areWidgetsetBuildsSuspended() {
+        return suspendAutomaticBuilds.getSelection();
     }
 
 }

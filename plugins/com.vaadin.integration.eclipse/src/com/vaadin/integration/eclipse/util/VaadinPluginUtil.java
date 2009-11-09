@@ -500,7 +500,7 @@ public class VaadinPluginUtil {
             try {
                 IType findType = findVaadinApplicationType(jproject);
                 if (findType == null) {
-                    WidgetsetBuildManager.suspendWidgetsetBuilds(project);
+                    WidgetsetBuildManager.internalSuspendWidgetsetBuilds(project);
                     try {
                         addVaadinLibrary(jproject, vaadinJarVersion,
                                 new SubProgressMonitor(monitor, 1));
@@ -509,7 +509,7 @@ public class VaadinPluginUtil {
                         IFolder lib = getWebInfLibFolder(project);
                         lib.refreshLocal(IResource.DEPTH_ONE, null);
                     } finally {
-                        WidgetsetBuildManager.resumeWidgetsetBuilds(project);
+                        WidgetsetBuildManager.internalResumeWidgetsetBuilds(project);
                         if (VaadinPluginUtil.isWidgetsetDirty(project)) {
                             WidgetsetBuildManager.runWidgetSetBuildTool(
                                     project, false, new NullProgressMonitor());
@@ -562,7 +562,7 @@ public class VaadinPluginUtil {
                 return;
             }
             IJavaProject jproject = JavaCore.create(project);
-            WidgetsetBuildManager.suspendWidgetsetBuilds(project);
+            WidgetsetBuildManager.internalSuspendWidgetsetBuilds(project);
             try {
                 // replace the Vaadin JAR (currentVersion) with the new one
                 if (currentVersion != null) {
@@ -592,7 +592,7 @@ public class VaadinPluginUtil {
                 throw newCoreException(
                         "Failed to update Vaadin jar in project", e);
             } finally {
-                WidgetsetBuildManager.resumeWidgetsetBuilds(project);
+                WidgetsetBuildManager.internalResumeWidgetsetBuilds(project);
                 if (VaadinPluginUtil.isWidgetsetDirty(project)) {
                     WidgetsetBuildManager.runWidgetSetBuildTool(project, false,
                             new NullProgressMonitor());
@@ -725,12 +725,12 @@ public class VaadinPluginUtil {
                         .findType("com.google.gwt.core.client.EntryPoint");
 
                 if (findType == null) {
-                    WidgetsetBuildManager.suspendWidgetsetBuilds(project);
+                    WidgetsetBuildManager.internalSuspendWidgetsetBuilds(project);
                     try {
                         updateGWTLibraries(jproject, new SubProgressMonitor(
                                 monitor, 1));
                     } finally {
-                        WidgetsetBuildManager.resumeWidgetsetBuilds(project);
+                        WidgetsetBuildManager.internalResumeWidgetsetBuilds(project);
                         if (VaadinPluginUtil.isWidgetsetDirty(project)) {
                             WidgetsetBuildManager.runWidgetSetBuildTool(
                                     project, false, new NullProgressMonitor());

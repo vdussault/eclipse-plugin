@@ -17,6 +17,9 @@ public class VaadinPlugin extends AbstractUIPlugin {
     // "true"/"false"/missing - if missing, check if >1 widgetset exists
     public static final String PREFERENCES_WIDGETSET_DIRTY = PLUGIN_ID + "."
             + "widgetsetDirty";
+    // true to suspend automatic widgetset build requests for the project
+    public static final String PREFERENCES_WIDGETSET_SUSPENDED = PLUGIN_ID
+            + "." + "widgetsetBuildsSuspended";
     // "OBF"/"PRETTY"/"DETAILED" or missing (default to "OBF")
     public static final String PREFERENCES_WIDGETSET_STYLE = PLUGIN_ID + "."
             + "widgetsetStyle";

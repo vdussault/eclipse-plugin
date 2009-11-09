@@ -10,6 +10,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -21,10 +22,20 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
+import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 /**
@@ -32,6 +43,67 @@ import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
  * builds for a project and ensuring multiple builds are not run concurrently.
  */
 public class WidgetsetBuildManager {
+
+    /**
+     * Confirmation dialog that offers an option to turn off automatic widgetset
+     * recompilation.
+     */
+    private static class ConfirmationDialog extends MessageDialog {
+
+        private Button checkBox;
+        private boolean suspended = false;
+
+        public ConfirmationDialog(Shell parentShell, String dialogTitle,
+                Image dialogTitleImage, String dialogMessage,
+                int dialogImageType, String[] dialogButtonLabels,
+                int defaultIndex) {
+            super(parentShell, dialogTitle, dialogTitleImage, dialogMessage,
+                    dialogImageType, dialogButtonLabels, defaultIndex);
+        }
+
+        @Override
+        protected Control createCustomArea(Composite parent) {
+            checkBox = new Button(parent, SWT.CHECK);
+            checkBox.setText("Suspend automatic recompilation");
+            checkBox.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    suspended = checkBox.getSelection();
+                }
+            });
+            return checkBox;
+        }
+
+        public static boolean openQuestion(Shell parent, String title,
+                String message, IProject project) {
+            String[] buttonLabels = new String[] { IDialogConstants.YES_LABEL,
+                    IDialogConstants.NO_LABEL };
+            ConfirmationDialog dialog = new ConfirmationDialog(parent, title,
+                    null, message, QUESTION, buttonLabels, 0);
+            boolean result = dialog.open() == 0;
+
+            // save user decision on suspending automatic builds
+            ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
+                    new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
+            prefStore.setValue(VaadinPlugin.PREFERENCES_WIDGETSET_SUSPENDED,
+                    dialog.suspended);
+
+            if (dialog.suspended) {
+                MessageDialog
+                        .openInformation(
+                                parent,
+                                "Widgetset compilation suspended",
+                                "Automatic widgetset recompilation for the project "
+                                        + project.getName()
+                                        + " is now suspended."
+                                        + "A widgetset can be recompiled with the \"Compile widgetset\" button."
+                                        + "Automatic recompilation can be re-enabled in the project properties.");
+            }
+
+            return result;
+        }
+
+    }
 
     private static final class CompileWidgetsetJob extends Job {
         private final IProject project;
@@ -93,12 +165,12 @@ public class WidgetsetBuildManager {
     public static void runWidgetSetBuildTool(final IProject project,
             final boolean synchronous, final IProgressMonitor monitor) {
 
-        if (isBuildRunning(project)
-                || projectWidgetsetBuildSuspended.contains(project)) {
+        if (isBuildRunning(project) || isWidgetsetBuildingSuspended(project)) {
             // no message, ignore request
         } else if (!projectWidgetsetBuildPending.contains(project)) {
             projectWidgetsetBuildPending.add(project);
 
+            // value modifiable by the nested anonymous class
             final boolean[] openQuestion = new boolean[] { false };
 
             Runnable runnable = new Runnable() {
@@ -107,11 +179,14 @@ public class WidgetsetBuildManager {
                     Shell shell = PlatformUI.getWorkbench()
                             .getActiveWorkbenchWindow().getShell();
 
-                    openQuestion[0] = MessageDialog
+                    // provides an option to disable further recompilation
+                    // requests for the project, and tells how to re-enable
+                    openQuestion[0] = ConfirmationDialog
                             .openQuestion(shell, "Compile widgetset",
                                     "Your client side code in the project "
                                             + project.getName()
-                                            + " might need a recompilation. Compile widgetset now?");
+                                            + " might need a recompilation. Compile widgetset now?",
+                                    project);
                     if (!synchronous) {
                         if (openQuestion[0]) {
                             CompileWidgetsetJob job = new CompileWidgetsetJob(
@@ -180,6 +255,12 @@ public class WidgetsetBuildManager {
      *
      * If the project has multiple widgetsets and the user has not specified
      * which one to compile, notify the user.
+     *
+     * Widgetset rebuild questions are not shown if a widgetset build request is
+     * pending for the project, if the requested widgetset is being built, if
+     * there is an internal operation in progress that has suspended widgetset
+     * builds or if the user has explicitly suspended automatic widgetset
+     * builds.
      *
      * Note, this only works for projects with vaadin 6.2 and later.
      *
@@ -338,14 +419,65 @@ public class WidgetsetBuildManager {
     }
 
     /**
+     * Checks whether widgetset building for a project is suspended, either
+     * because of an internal operation in progress or because the user
+     * explicitly suspended widgetset builds.
+     *
+     * @param project
+     * @return
+     */
+    private static boolean isWidgetsetBuildingSuspended(final IProject project) {
+        return projectWidgetsetBuildSuspended.contains(project)
+                || isWidgetsetBuildsSuspended(project);
+    }
+
+    /**
+     * Checks whether widgetset building for a project has been suspended
+     * explicitly by the user.
+     *
+     * @param project
+     * @return
+     */
+    public static boolean isWidgetsetBuildsSuspended(final IProject project) {
+        ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
+                new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
+
+        return prefStore
+                .getBoolean(VaadinPlugin.PREFERENCES_WIDGETSET_SUSPENDED);
+    }
+
+    /**
+     * Persistently suspend widgetset build questions on user demand for a
+     * project.
+     *
+     * As a side effect, remove the project from the pending list.
+     *
+     * @see #runWidgetSetBuildTool(IProject, boolean, IProgressMonitor)
+     *
+     * @param project
+     * @param suspend
+     */
+    public static void setWidgetsetBuildsSuspended(IProject project,
+            boolean suspend) {
+        ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
+                new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
+
+        prefStore.setValue(VaadinPlugin.PREFERENCES_WIDGETSET_SUSPENDED,
+                suspend);
+
+        // make sure we don't get stuck in an inconsistent state
+        projectWidgetsetBuildPending.remove(project);
+    }
+
+    /**
      * Suspend widgetset build requests for a project while internal
      * modifications to the project are being performed by the plugin.
      *
-     * @see #resumeWidgetsetBuilds(IProject)
-     * 
+     * @see #internalResumeWidgetsetBuilds(IProject)
+     *
      * @param project
      */
-    public static void suspendWidgetsetBuilds(IProject project) {
+    public static void internalSuspendWidgetsetBuilds(IProject project) {
         projectWidgetsetBuildSuspended.add(project);
     }
 
@@ -357,12 +489,12 @@ public class WidgetsetBuildManager {
      * after this call if necessary.
      *
      * This method must be called after
-     * {@link #suspendWidgetsetBuilds(IProject)}, a try-finally pattern is
-     * strongly recommended.
+     * {@link #internalSuspendWidgetsetBuilds(IProject)}, a try-finally pattern
+     * is strongly recommended.
      *
      * @param project
      */
-    public static void resumeWidgetsetBuilds(IProject project) {
+    public static void internalResumeWidgetsetBuilds(IProject project) {
         projectWidgetsetBuildSuspended.remove(project);
     }
 

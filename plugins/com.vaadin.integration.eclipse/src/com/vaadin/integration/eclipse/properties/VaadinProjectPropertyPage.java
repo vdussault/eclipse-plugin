@@ -84,6 +84,11 @@ public class VaadinProjectPropertyPage extends PropertyPage {
 
             // save widgetset compilation parameters
 
+            boolean suspended = widgetsetComposite
+                    .areWidgetsetBuildsSuspended();
+            WidgetsetBuildManager.setWidgetsetBuildsSuspended(project,
+                    suspended);
+
             String style = widgetsetComposite.getCompilationStyle();
             String oldStyle = prefStore.getString(VaadinPlugin.PREFERENCES_WIDGETSET_STYLE);
             // do not store the default value OBF, but handle it if stored
