@@ -3,6 +3,7 @@
 
 	<fail unless="timestamp" message="timestamp must be defined" />
 	<fail unless="archivePrefix" message="archivePrefix must be defined" />
+	<fail unless="gwt.location" message="gwt.location must be defined" />
 
 	<!-- Type: N == Nightly -->
 	<property name="buildType" value="N" />
