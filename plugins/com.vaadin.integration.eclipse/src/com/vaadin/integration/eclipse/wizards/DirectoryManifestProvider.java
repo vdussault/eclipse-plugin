@@ -17,6 +17,7 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
  */
 public class DirectoryManifestProvider extends ManifestProvider {
 
+    public static final String MANIFEST_VAADIN_PACKAGE_VERSION = "Vaadin-Package-Version";
     public static final String MANIFEST_IMPLEMENTATION_TITLE = "Implementation-Title";
     public static final String MANIFEST_IMPLEMENTATION_VERSION = "Implementation-Version";
     public static final String MANIFEST_IMPLEMENTATION_VENDOR = "Implementation-Vendor";
@@ -44,6 +45,7 @@ public class DirectoryManifestProvider extends ManifestProvider {
         if (jarPackage instanceof DirectoryPackageData) {
             DirectoryPackageData directoryPackage = (DirectoryPackageData) jarPackage;
             Attributes attributes = manifest.getMainAttributes();
+            attributes.putValue(MANIFEST_VAADIN_PACKAGE_VERSION, "1");
             attributes.putValue(MANIFEST_IMPLEMENTATION_TITLE,
                     directoryPackage.getImplementationTitle());
             attributes.putValue(MANIFEST_IMPLEMENTATION_VERSION,
