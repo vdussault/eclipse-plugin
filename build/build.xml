@@ -14,7 +14,6 @@
 
 	<fail unless="com.vaadin.eclipse.integration.version" message="com.vaadin.eclipse.integration.version must define the plugin version" />
 	<property name="com.vaadin.eclipse.integration.fullversion" value="${com.vaadin.eclipse.integration.version}.${timestamp}" />
-        <fail unless="gwt.location" message="gwt.location must be defined"/>
 	
 	<property name="target.dir" location="output" />
 	<property name="update-site.dir" location="${target.dir}/${archivePrefix}" />
@@ -43,6 +42,7 @@
 	</target>
 
 	<target name="build-eclipse-wysiwyg-plugin">
+	        <fail unless="gwt.location" message="gwt.location must be defined"/>
 		<delete dir="${update-site.dir}" />
 
 		<java jar="${eclipse.home}/plugins/${launcher}" failonerror="yes" fork="yes" maxmemory="512m">
