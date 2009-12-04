@@ -113,7 +113,10 @@ public class DownloadUtils {
 
         // the first numeric parts of the version string
         private String getNumericVersion() {
-            return version.replaceAll("[^0-9.].*$", "");
+            // remove everything after the first non-number, non-dot character
+            String ver = version.replaceAll("[^0-9.].*$", "");
+            // remove trailing dot if any
+            return ver.replaceAll("\\.$", "");
         }
 
         public String getJarFileName() {
