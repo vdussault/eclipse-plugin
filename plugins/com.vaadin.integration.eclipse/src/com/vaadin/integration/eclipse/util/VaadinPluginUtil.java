@@ -507,7 +507,10 @@ public class VaadinPluginUtil {
 
                         // refresh library folder to recompile parts of project
                         IFolder lib = getWebInfLibFolder(project);
-                        lib.refreshLocal(IResource.DEPTH_ONE, null);
+                        if (lib.exists()) {
+                            // should exist after adding the library
+                            lib.refreshLocal(IResource.DEPTH_ONE, null);
+                        }
                     } finally {
                         WidgetsetBuildManager.internalResumeWidgetsetBuilds(project);
                         if (VaadinPluginUtil.isWidgetsetDirty(project)) {
@@ -531,11 +534,11 @@ public class VaadinPluginUtil {
      * correct version. If none can be found or the version does not match,
      * replaces any old Vaadin JAR with the specified version from the local
      * repository.
-     * 
+     *
      * Update widgetset compilation launch configurations in the project to
      * refer to the new Vaadin and GWT versions (only when changing Vaadin
      * version, not when adding the JAR).
-     * 
+     *
      * Requests to the user for widgetset builds in the project are suspended
      * for the duration of this operation and resumed after completion. At the
      * end, the user is asked about compiling the widgetset if it is dirty.
@@ -575,7 +578,10 @@ public class VaadinPluginUtil {
                 }
                 // refresh library folder to recompile parts of project
                 IFolder lib = getWebInfLibFolder(project);
-                lib.refreshLocal(IResource.DEPTH_ONE, null);
+                if (lib.exists()) {
+                    // should exist at least if added to the project
+                    lib.refreshLocal(IResource.DEPTH_ONE, null);
+                }
 
                 // TODO also handle adding Vaadin JAR to a project if the user
                 // has removed it and adds a different version?
@@ -605,7 +611,11 @@ public class VaadinPluginUtil {
 
     public static Version getVaadinLibraryVersion(IProject project)
             throws CoreException {
+        // TODO should this look also elsewhere on the classpath?
         IFolder lib = getWebInfLibFolder(project);
+        if (!lib.exists()) {
+            return null;
+        }
         IResource[] files = lib.members();
 
         for (IResource resource : files) {
@@ -649,7 +659,11 @@ public class VaadinPluginUtil {
                     "Adding Vaadin required libraries to the project", 5);
 
             IProject project = jproject.getProject();
-            IFile targetFile = getWebInfLibFolder(project).getFile(
+            IFolder lib = getWebInfLibFolder(project);
+            if (!lib.exists()) {
+                createFolders(lib, monitor);
+            }
+            IFile targetFile = lib.getFile(
                     vaadinJarVersion.getJarFileName());
             DownloadUtils.ensureVaadinJarExists(vaadinJarVersion,
                     new SubProgressMonitor(monitor, 1));
@@ -659,7 +673,7 @@ public class VaadinPluginUtil {
             VaadinPluginUtil.copyPluginFileToProject(sourceFile, targetFile);
 
             // refresh project
-            getWebInfLibFolder(project).refreshLocal(IResource.DEPTH_ONE, null);
+            lib.refreshLocal(IResource.DEPTH_ONE, null);
 
             // make sure the GWT library versions match the Vaadin JAR
             // requirements
@@ -682,12 +696,17 @@ public class VaadinPluginUtil {
             Version vaadinJarVersion) throws CoreException {
         try {
             IProject project = jproject.getProject();
-            IFile targetFile = getWebInfLibFolder(project).getFile(
-                    vaadinJarVersion.getJarFileName());
-            targetFile.delete(true, null);
+            IFolder lib = getWebInfLibFolder(project);
+            // if not in WEB-INF/lib, don't try to make any changes
+            if (lib.exists()) {
+                IFile targetFile = lib.getFile(vaadinJarVersion
+                        .getJarFileName());
+                targetFile.delete(true, null);
 
-            // refresh project
-            getWebInfLibFolder(project).refreshLocal(IResource.DEPTH_ONE, null);
+                // refresh project
+                lib.refreshLocal(IResource.DEPTH_ONE,
+                        null);
+            }
         } catch (Exception e) {
             throw newCoreException("Failed to remove Vaadin jar from project",
                     e);
@@ -697,9 +716,9 @@ public class VaadinPluginUtil {
     /**
      * Ensure that the project classpath contains the GWT libraries, adding them
      * if necessary.
-     * 
+     *
      * Also update widgetset compilation launch configuration paths as needed.
-     * 
+     *
      * Requests to the user for widgetset builds in the project are suspended
      * for the duration of this operation and resumed after completion. At the
      * end, the user is asked about compiling the widgetset if it is dirty.
@@ -1005,7 +1024,7 @@ public class VaadinPluginUtil {
      */
     public static IPath getGWTDevJarPath(IJavaProject jproject)
             throws CoreException {
-        // TODO should check if the user has changed the GWT version by hand
+        // TODO also accept from WEB-INF/lib etc.
         IClasspathEntry[] rawClasspath = jproject.getRawClasspath();
         for (int i = 0; i < rawClasspath.length; i++) {
             IClasspathEntry cp = rawClasspath[i];
@@ -1044,6 +1063,7 @@ public class VaadinPluginUtil {
      */
     public static IPath getGWTUserJarPath(IJavaProject project)
             throws CoreException {
+        // TODO also accept from WEB-INF/lib etc.
         // check first for explicitly set gwt-user jar file
         IClasspathEntry[] rawClasspath = project.getRawClasspath();
         for (int i = 0; i < rawClasspath.length; i++) {
@@ -1157,7 +1177,11 @@ public class VaadinPluginUtil {
         String gwtVersion = "1.5.3";
 
         try {
+            // TODO find Vaadin JAR also elsewhere on the classpath
             IFolder lib = getWebInfLibFolder(jproject.getProject());
+            if (!lib.exists()) {
+                return gwtVersion;
+            }
             IResource[] files = lib.members();
 
             // Check gwt version from included Vaadin jar
@@ -1649,6 +1673,9 @@ public class VaadinPluginUtil {
         final Collection<IPath> vaadinpackages = new HashSet<IPath>();
 
         IFolder webInfLibFolder = getWebInfLibFolder(project.getProject());
+        if (!webInfLibFolder.exists()) {
+            return vaadinpackages;
+        }
         webInfLibFolder.accept(new IResourceVisitor() {
             public boolean visit(IResource resource) throws CoreException {
                 if (isNeededForWidgetsetCompilation(resource)) {
