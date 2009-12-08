@@ -1,0 +1,19 @@
+	/**
+	 * Receive and handle events and other variable changes from the client.
+	 * 
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void changeVariables(Object source, Map variables) {
+		super.changeVariables(source, variables);
+
+		// handle simple variable changes
+		// note that variable changes are only sent when an immediate variable
+		// change occurs on the client
+		if (variables.containsKey("click")) {
+			clicks++;
+			message += "<br/>" + variables.get("click");
+
+			requestRepaint();
+		}
+	}

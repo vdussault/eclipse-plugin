@@ -1,0 +1,11 @@
+	@Override
+	public void paintContent(PaintTarget target) throws PaintException {
+		super.paintContent(target);
+		
+		// paint any component specific content by setting attributes
+		target.addAttribute("clicks", clicks);
+		target.addAttribute("message", message);
+		
+		// could also set variables in which values can be returned
+		// but declaring variables here is not required
+	}

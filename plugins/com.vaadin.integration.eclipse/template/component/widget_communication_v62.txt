@@ -1,0 +1,75 @@
+package STUB_PACKAGE;
+
+import com.vaadin.terminal.gwt.client.ApplicationConnection;
+import com.vaadin.terminal.gwt.client.Paintable;
+import com.vaadin.terminal.gwt.client.UIDL;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.ui.Widget;
+
+/**
+ * Client side widget which communicates with the server. Messages from the
+ * server are shown as HTML and mouse clicks are sent to the server.
+ */
+public class STUB_CLASSNAME extends Widget implements Paintable, ClickHandler {
+
+	/** Set the CSS class name to allow styling. */
+	public static final String CLASSNAME = "v-mycomponent2";
+
+	public static final String CLICK_EVENT_IDENTIFIER = "click";
+
+	/** Component identifier in UIDL communications. */
+	protected String uidlId;
+
+	/** Reference to the server connection object. */
+	protected ApplicationConnection client;
+
+	/**
+	 * The constructor should first call super() to initialize the component and
+	 * then handle any initialization relevant to Vaadin.
+	 */
+	public STUB_CLASSNAME() {
+		// TODO Example code is extending GWT Widget so it must set a root element.
+		// Change to proper element or remove if extending another widget
+		setElement(Document.get().createDivElement());
+		
+		// This method call of the Paintable interface sets the component
+		// style name in DOM tree
+		setStyleName(CLASSNAME);
+		
+		sinkEvents(Event.ONCLICK);
+		// similar to FocusWidget.addClickHandler()
+		addDomHandler(this, ClickEvent.getType());
+	}
+
+	public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
+		// This call should be made first. Ensure correct implementation,
+		// and let the containing layout manage caption, etc.
+		if (client.updateComponent(this, uidl, true)) {
+			return;
+		}
+
+		// Save reference to server connection object to be able to send
+		// user interaction later
+		this.client = client;
+
+		// Save the UIDL identifier for the component
+		uidlId = uidl.getId();
+
+		// process attributes/variables from the server
+		int clicks = uidl.getIntAttribute("clicks");
+		String message = uidl.getStringAttribute("message");
+		
+		getElement().setInnerHTML("After <b>"+clicks+"</b> mouse clicks:\n" + message);
+		
+	}
+
+	public void onClick(ClickEvent event) {
+		// send variable changes to the server in response to user actions
+		String button = "left click";
+		// note that the click events from here are always immediate
+		client.updateVariable(uidlId, CLICK_EVENT_IDENTIFIER, button, true);
+	}
+}
