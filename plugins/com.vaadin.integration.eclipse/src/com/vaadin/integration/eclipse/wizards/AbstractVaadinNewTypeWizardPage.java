@@ -100,6 +100,14 @@ public abstract class AbstractVaadinNewTypeWizardPage extends NewTypeWizardPage 
 
         // highest priority for the Vaadin specific errors
         // all used component status
+        IStatus[] status = getStatus();
+
+        // the most severe status will be displayed and the OK button
+        // enabled/disabled.
+        updateStatus(status);
+    }
+
+    protected IStatus[] getStatus() {
         IStatus[] status;
         if (project == null || !VaadinFacetUtils.isVaadinProject(project)) {
             status = new Status[] { new Status(IStatus.ERROR,
@@ -108,10 +116,7 @@ public abstract class AbstractVaadinNewTypeWizardPage extends NewTypeWizardPage 
             status = new IStatus[] { fContainerStatus, fPackageStatus,
                     fTypeNameStatus };
         }
-
-        // the most severe status will be displayed and the OK button
-        // enabled/disabled.
-        updateStatus(status);
+        return status;
     }
 
 }

@@ -6,6 +6,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
@@ -24,6 +25,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
+import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 // TODO rename as NewWidgetWizardPage?
@@ -398,6 +400,22 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
     // this must be called before constructCUContent()
     public void setCreatedClientSideClass(ICompilationUnit clientSideClass) {
         createdClientSideClass = clientSideClass;
+    }
+
+    @Override
+    protected IStatus[] getStatus() {
+        IStatus[] status = super.getStatus();
+        if (currentTemplate != null && currentTemplate.hasClientWidget()
+                && !currentTemplate.isVaadin62()
+                && extWidgetSetNameText.getItemCount() == 0) {
+            // no widgetset exists
+            IStatus[] newStatus = new IStatus[status.length + 1];
+            System.arraycopy(status, 0, newStatus, 0, status.length);
+            newStatus[newStatus.length - 1] = new Status(IStatus.ERROR,
+                    VaadinPlugin.PLUGIN_ID, "No widgetset in project.");
+            return newStatus;
+        }
+        return status;
     }
 
 }
