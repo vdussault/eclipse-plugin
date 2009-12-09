@@ -792,8 +792,11 @@ public class VaadinPluginUtil {
             String gwtVersion = getRequiredGWTVersionForProject(jproject);
             monitor.worked(1);
 
-            // do not replace the GWT JARs on the build path and in launches if
-            // they are user-defined
+            // do not replace the GWT JARs directly on the build path and in
+            // launches if they are user-defined
+            // this ignores JARs in WEB-INF/lib, which could be temporary for
+            // OOPHM, and does modify the top-level classpath entries - it is up
+            // to the user to ensure the correct classpath order in such cases
             if (isUsingUserDefinedGwt(jproject)) {
                 return;
             }
@@ -985,8 +988,9 @@ public class VaadinPluginUtil {
     }
 
     /**
-     * Checks if the project is using a custom (user-defined) GWT version on the
-     * build path.
+     * Checks if the project is using a custom (user-defined) GWT version
+     * directly on the build path. Note that this does not return true if the
+     * GWT JARs are in a classpath container such as WEB-INF/lib.
      *
      * @param jproject
      * @return true if the classpath contains GWT JARs other than those managed
@@ -1021,7 +1025,7 @@ public class VaadinPluginUtil {
 
     /**
      * Returns the first gwt dev jar defined in project classpath.
-     * 
+     *
      * If not set, a gwt jar file provided by plugin is returned.
      */
     public static IPath getGWTDevJarPath(IJavaProject jproject)
@@ -1070,7 +1074,7 @@ public class VaadinPluginUtil {
 
     /**
      * Returns the first gwt user jar defined in projects classpath.
-     * 
+     *
      * If not set, a gwt jar file provided by plugin is returned.
      */
     public static IPath getGWTUserJarPath(IJavaProject jproject)
