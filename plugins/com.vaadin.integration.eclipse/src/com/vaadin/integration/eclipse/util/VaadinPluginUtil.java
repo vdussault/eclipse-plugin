@@ -52,6 +52,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -1019,24 +1020,34 @@ public class VaadinPluginUtil {
     }
 
     /**
-     * Returns gwt dev jar defined in projects classpath. If not set, a gwt jar
-     * file provided by plugin is returned.
+     * Returns the first gwt dev jar defined in project classpath.
+     * 
+     * If not set, a gwt jar file provided by plugin is returned.
      */
     public static IPath getGWTDevJarPath(IJavaProject jproject)
             throws CoreException {
-        // TODO also accept from WEB-INF/lib etc.
+        // check first for explicitly set gwt-dev jar file
         IClasspathEntry[] rawClasspath = jproject.getRawClasspath();
-        for (int i = 0; i < rawClasspath.length; i++) {
-            IClasspathEntry cp = rawClasspath[i];
+        for (IClasspathEntry cp : rawClasspath) {
             if (cp.toString().contains("gwt-dev")) {
-                if (cp.toString().contains("VAADIN_DOWNLOAD")) {
-                    break;
-                } else {
-                    // User has explicitly defined GWT version to use
-
-                    IClasspathEntry resolvedClasspathEntry = JavaCore
-                            .getResolvedClasspathEntry(cp);
-                    return resolvedClasspathEntry.getPath();
+                // User has explicitly defined GWT version to use directly on
+                // the classpath, or classpath entry created by the plugin
+                IClasspathEntry resolvedClasspathEntry = JavaCore
+                        .getResolvedClasspathEntry(cp);
+                return resolvedClasspathEntry.getPath();
+            } else if (cp.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+                // primarily WEB-INF/lib
+                IClasspathContainer container = JavaCore.getClasspathContainer(
+                        cp.getPath(), jproject);
+                IClasspathEntry[] containerEntries = container
+                        .getClasspathEntries();
+                for (IClasspathEntry ccp : containerEntries) {
+                    if (ccp.toString().contains("gwt-dev")) {
+                        // User has explicitly defined GWT version to use
+                        IClasspathEntry resolvedClasspathEntry = JavaCore
+                                .getResolvedClasspathEntry(ccp);
+                        return resolvedClasspathEntry.getPath();
+                    }
                 }
             }
         }
@@ -1058,29 +1069,39 @@ public class VaadinPluginUtil {
     }
 
     /**
-     * Returns gwt user jar defined in projects classpath. If not set, a gwt jar
-     * file provided by plugin is returned.
+     * Returns the first gwt user jar defined in projects classpath.
+     * 
+     * If not set, a gwt jar file provided by plugin is returned.
      */
-    public static IPath getGWTUserJarPath(IJavaProject project)
+    public static IPath getGWTUserJarPath(IJavaProject jproject)
             throws CoreException {
-        // TODO also accept from WEB-INF/lib etc.
         // check first for explicitly set gwt-user jar file
-        IClasspathEntry[] rawClasspath = project.getRawClasspath();
-        for (int i = 0; i < rawClasspath.length; i++) {
-            IClasspathEntry cp = rawClasspath[i];
+        IClasspathEntry[] rawClasspath = jproject.getRawClasspath();
+        for (IClasspathEntry cp : rawClasspath) {
             if (cp.toString().contains("gwt-user")) {
-                if (cp.toString().contains("VAADIN_DOWNLOAD")) {
-                    break;
-                } else {
-                    // User has explicitly defined GWT version to use
-                    IClasspathEntry resolvedClasspathEntry = JavaCore
-                            .getResolvedClasspathEntry(cp);
-                    return resolvedClasspathEntry.getPath();
+                // User has explicitly defined GWT version to use directly on
+                // the classpath, or classpath entry created by the plugin
+                IClasspathEntry resolvedClasspathEntry = JavaCore
+                        .getResolvedClasspathEntry(cp);
+                return resolvedClasspathEntry.getPath();
+            } else if (cp.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+                // primarily WEB-INF/lib
+                IClasspathContainer container = JavaCore.getClasspathContainer(
+                        cp.getPath(), jproject);
+                IClasspathEntry[] containerEntries = container
+                        .getClasspathEntries();
+                for (IClasspathEntry ccp : containerEntries) {
+                    if (ccp.toString().contains("gwt-user")) {
+                        // User has explicitly defined GWT version to use
+                        IClasspathEntry resolvedClasspathEntry = JavaCore
+                                .getResolvedClasspathEntry(ccp);
+                        return resolvedClasspathEntry.getPath();
+                    }
                 }
             }
         }
 
-        String gwtVersion = getRequiredGWTVersionForProject(project);
+        String gwtVersion = getRequiredGWTVersionForProject(jproject);
         return DownloadUtils.getLocalGwtUserJar(gwtVersion);
     }
 
