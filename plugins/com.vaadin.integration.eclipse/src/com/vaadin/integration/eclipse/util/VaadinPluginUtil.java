@@ -797,7 +797,7 @@ public class VaadinPluginUtil {
             // this ignores JARs in WEB-INF/lib, which could be temporary for
             // OOPHM, and does modify the top-level classpath entries - it is up
             // to the user to ensure the correct classpath order in such cases
-            if (isUsingUserDefinedGwt(jproject)) {
+            if (isUsingUserDefinedGwt(jproject, false)) {
                 return;
             }
 
@@ -816,12 +816,13 @@ public class VaadinPluginUtil {
                 // use the VAADIN_DOWNLOAD_VARIABLE variable and variable
                 // classpath entries where feasible
 
-                IPath devJarPath = getGWTDevJarPath(jproject);
+                IPath devJarPath = DownloadUtils.getLocalGwtDevJar(gwtVersion);
                 IClasspathEntry gwtDev = makeVariableClasspathEntry(
                         VaadinClasspathVariableInitializer.VAADIN_DOWNLOAD_VARIABLE,
                         devJarPath);
 
-                IPath userJarPath = getGWTUserJarPath(jproject);
+                IPath userJarPath = DownloadUtils
+                        .getLocalGwtUserJar(gwtVersion);
                 IClasspathEntry gwtUser = makeVariableClasspathEntry(
                         VaadinClasspathVariableInitializer.VAADIN_DOWNLOAD_VARIABLE,
                         userJarPath);
@@ -843,11 +844,15 @@ public class VaadinPluginUtil {
                 IProject project = jproject.getProject();
 
                 // update classpaths also in launches
-                updateLaunchClassPath(project, devJarName, devJarPath);
-                monitor.worked(1);
+                if (!isUsingUserDefinedGwt(jproject, true)) {
+                    updateLaunchClassPath(project, devJarName, devJarPath);
+                    monitor.worked(1);
 
-                updateLaunchClassPath(project, "gwt-user.jar", userJarPath);
-                monitor.worked(1);
+                    updateLaunchClassPath(project, "gwt-user.jar", userJarPath);
+                    monitor.worked(1);
+                } else {
+                    monitor.worked(2);
+                }
             } catch (JavaModelException e) {
                 throw newCoreException("addGWTLibraries failed", e);
             }
@@ -989,14 +994,16 @@ public class VaadinPluginUtil {
 
     /**
      * Checks if the project is using a custom (user-defined) GWT version
-     * directly on the build path. Note that this does not return true if the
-     * GWT JARs are in a classpath container such as WEB-INF/lib.
+     * directly on the build path.
      *
      * @param jproject
+     * @param useContainers
+     *            also look into classpath containers such as WEB-INF/lib
      * @return true if the classpath contains GWT JARs other than those managed
      *         by the plugin
      */
-    private static boolean isUsingUserDefinedGwt(IJavaProject jproject) {
+    private static boolean isUsingUserDefinedGwt(IJavaProject jproject,
+            boolean useContainers) {
         try {
             // make sure both kinds of paths are handled
             String gwtDownloadPath1 = getDownloadDirectory().toPortableString();
@@ -1011,6 +1018,19 @@ public class VaadinPluginUtil {
                             && !cp.toString().startsWith(gwtDownloadPath1)
                             && !cp.toString().startsWith(gwtDownloadPath2)) {
                         return true;
+                    }
+                } else if (useContainers
+                        && cp.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+                    // primarily WEB-INF/lib
+                    IClasspathContainer container = JavaCore
+                            .getClasspathContainer(cp.getPath(), jproject);
+                    IClasspathEntry[] containerEntries = container
+                            .getClasspathEntries();
+                    for (IClasspathEntry ccp : containerEntries) {
+                        if (ccp.toString().contains("gwt-dev")
+                                || ccp.toString().contains("gwt-user")) {
+                            return true;
+                        }
                     }
                 }
             }
