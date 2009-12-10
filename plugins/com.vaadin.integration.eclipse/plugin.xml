@@ -180,6 +180,17 @@ Any metadata changes made will be stored in the project manifest.
          </selection>
       </wizard>
    </extension>
+   
+   <extension
+         id="com.vaadin.integration.eclipse.wizards.WarExportCompileWidgetsetOperation"
+         name="Compile Widgetset"
+         point="org.eclipse.wst.common.frameworks.OperationExtension">
+      <operationExtension
+            preOperationClass="com.vaadin.integration.eclipse.wizards.WarExportCompileWidgetsetOperation"
+            id="org.eclipse.jst.j2ee.internal.web.archive.operations.WebComponentExportOperation">
+      </operationExtension>
+   </extension>   
+   
    <extension point="org.eclipse.ltk.core.refactoring.renameParticipants">
 	<renameParticipant
 		id="com.vaadin.integration.eclipse.WebContextRenameParticipant" 
