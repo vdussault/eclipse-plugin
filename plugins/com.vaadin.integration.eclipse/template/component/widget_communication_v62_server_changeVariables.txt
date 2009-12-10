@@ -7,10 +7,13 @@
 	public void changeVariables(Object source, Map variables) {
 		super.changeVariables(source, variables);
 
-		// handle simple variable changes
-		// note that variable changes are only sent when an immediate variable
-		// change occurs on the client
+		// Variables set by the widget are returned in the "variables" map.
+		
 		if (variables.containsKey("click")) {
+		
+			// When the user has clicked the component we increase the click count, 
+			// update the message and request a repaint so the changes are sent back 
+			// to the client. 
 			clicks++;
 			message += "<br/>" + variables.get("click");
 
