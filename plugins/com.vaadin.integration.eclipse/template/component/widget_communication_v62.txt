@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class STUB_CLASSNAME extends Widget implements Paintable, ClickHandler {
 
 	/** Set the CSS class name to allow styling. */
-	public static final String CLASSNAME = "v-mycomponent";
+	public static final String CLASSNAME = "v-STUB_TAGNAME";
 
 	public static final String CLICK_EVENT_IDENTIFIER = "click";
 
@@ -31,7 +31,7 @@ public class STUB_CLASSNAME extends Widget implements Paintable, ClickHandler {
 	 * then handle any initialization relevant to Vaadin.
 	 */
 	public STUB_CLASSNAME() {
-		// TODO Example code is extending the GWT Widget class so it must set a root element.
+		// TODO This example code is extending the GWT Widget class so it must set a root element.
 		// Change to a proper element or remove this line if extending another widget.
 		setElement(Document.get().createDivElement());
 		
@@ -64,8 +64,9 @@ public class STUB_CLASSNAME extends Widget implements Paintable, ClickHandler {
 		// Save the client side identifier (paintable id) for the widget
 		paintableId = uidl.getId();
 
-		// process attributes/variables from the server
+		// Process attributes/variables from the server
 		// The attribute names are the same as we used in 
+		// paintContent on the server-side
 		int clicks = uidl.getIntAttribute("clicks");
 		String message = uidl.getStringAttribute("message");
 		

@@ -11,8 +11,8 @@ public class STUB_CLASSNAME extends Widget implements Paintable {
 	/** Set the CSS class name to allow styling. */
 	public static final String CLASSNAME = "v-STUB_TAGNAME";
 
-	/** Component identifier in UIDL communications. */
-	String uidlId;
+	/** The client side widget identifier */
+	protected String paintableId;
 
 	/** Reference to the server connection object. */
 	ApplicationConnection client;
@@ -31,10 +31,15 @@ public class STUB_CLASSNAME extends Widget implements Paintable {
 		setStyleName(CLASSNAME);
 	}
 
+    /**
+     * Called whenever an update is received from the server 
+     */
 	public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
-		// This call should be made first. Ensure correct implementation,
-		// and let the containing layout manage caption, etc.
+		// This call should be made first. 
+		// It handles sizes, captions, tooltips, etc. automatically.
 		if (client.updateComponent(this, uidl, true)) {
+		    // If client.updateComponent returns true there has been no changes and we
+		    // do not need to update anything.
 			return;
 		}
 
@@ -42,8 +47,8 @@ public class STUB_CLASSNAME extends Widget implements Paintable {
 		// user interaction later
 		this.client = client;
 
-		// Save the UIDL identifier for the component
-		uidlId = uidl.getId();
+		// Save the client side identifier (paintable id) for the widget
+		paintableId = uidl.getId();
 
 		// TODO replace dummy code with actual component logic
 		getElement().setInnerHTML("It works!");
