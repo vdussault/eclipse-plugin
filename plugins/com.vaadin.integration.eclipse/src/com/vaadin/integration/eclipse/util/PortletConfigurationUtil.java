@@ -83,11 +83,11 @@ public class PortletConfigurationUtil {
             // create the file if it does not exist
             IFile portletsXmlFile = VaadinPluginUtil.ensureFileFromTemplate(
                     getPortletConfigurationFile(project, "portlet.xml"),
-                    "portletsxmlstub.txt");
+                    "portlet/portletxmlstub.txt");
 
             // prepare the portlet section from template
             String portletstub = VaadinPluginUtil
-                    .readTextFromTemplate("portletsxml_portletstub.txt");
+                    .readTextFromTemplate("portlet/portletxml_portletstub.txt");
 
             // generic portlet configuration
             portletstub = portletstub.replaceAll("STUB_PORTLETNAME",
@@ -121,11 +121,11 @@ public class PortletConfigurationUtil {
             IFile portletXmlFile = VaadinPluginUtil
                     .ensureFileFromTemplate(
                     getPortletConfigurationFile(project, "liferay-portlet.xml"),
-                    "liferayportletxmlstub.txt");
+                            "portlet/liferayportletxmlstub.txt");
 
             // prepare the portlet section from template
             String portletstub = VaadinPluginUtil
-                    .readTextFromTemplate("liferayportletxml_portletstub.txt");
+                    .readTextFromTemplate("portlet/liferayportletxml_portletstub.txt");
 
             portletstub = portletstub.replaceAll("STUB_PORTLETNAME",
                     portletName);
@@ -144,7 +144,7 @@ public class PortletConfigurationUtil {
         // create the file if it does not exist
         IFile portletXmlFile = VaadinPluginUtil.ensureFileFromTemplate(
                 getPortletConfigurationFile(project, "liferay-display.xml"),
-                "liferaydisplayxmlstub.txt");
+                "portlet/liferaydisplayxmlstub.txt");
 
         // add the portlet section to the category
         // create the category section if does not exist
@@ -161,7 +161,7 @@ public class PortletConfigurationUtil {
         try {
             if (!file.exists()) {
                 String stub = VaadinPluginUtil
-                        .readTextFromTemplate("liferay-plugin-package.properties.txt");
+                        .readTextFromTemplate("portlet/liferay-plugin-package.properties.txt");
 
                 stub = stub.replaceAll("STUB_PLUGINNAME", pluginName);
                 stub = stub.replaceAll("STUB_SHORTDESCRIPTION",
