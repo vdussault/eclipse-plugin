@@ -48,7 +48,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
 
     /**
      * Component template to use.
-     * 
+     *
      * The titles are shown in combo boxes and are used to identify the
      * templates (together with vaadin62). The first suitable template is
      * selected by default.
@@ -78,6 +78,9 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
         private final String clientTemplate;
         // true for Vaadin 6.2 and later, false for older versions
         private final boolean vaadin62;
+
+        // TODO add serverCuTemplate, serverMethodTemplates,
+        // serverFieldTemplates, serverImports etc.
 
         private TEMPLATE(String title, String description, String template,
                 boolean v62) {
@@ -110,7 +113,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
 
     /**
      * Constructor for Component wizard page.
-     * 
+     *
      * @param pageName
      */
     public NewComponentWizardPage(IProject project) {
@@ -247,7 +250,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
         GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 
         Label l = new Label(composite, SWT.NULL);
-        l.setText("Component type:");
+        l.setText("Template:");
         templateCombo = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
         for (TEMPLATE template : TEMPLATE.values()) {
             if (is62Project == template.isVaadin62()) {
@@ -317,12 +320,12 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
     protected void createTypeMembers(IType type, ImportsManager imports,
             IProgressMonitor monitor) throws CoreException {
 
+        String prefix = VaadinPluginUtil.getVaadinPackagePrefix(getProject());
+
         // server-side CustomComponent
         if (!currentTemplate.hasClientWidget()
                 && getSuperClass().endsWith("ui.CustomComponent")) {
             // CustomComponent must set composition root
-            String prefix = VaadinPluginUtil
-                    .getVaadinPackagePrefix(getProject());
             imports.addImport(prefix + "ui.Label");
 
             type
@@ -333,6 +336,8 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
                                     + "\t\tsetCompositionRoot(new Label(\"Custom component\"));\n"
                                     + "\t}\n", null, false, monitor);
         }
+
+        // pre-6.2 getTag()
         if (!currentTemplate.isVaadin62() && currentTemplate.hasClientWidget()) {
             type
                     .createMethod(
@@ -340,22 +345,25 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
                                     + type.getElementName().toLowerCase()
                                     + "\" ;\n}\n", null, false, monitor);
         }
-        if (TEMPLATE.COMMUNICATION_V62 == currentTemplate) {
-            try {
-                imports.addImport("java.util.Map");
-                imports.addImport("com.vaadin.terminal.PaintException");
-                imports.addImport("com.vaadin.terminal.PaintTarget");
 
+        // template prefix for server-side methods
+        String templateBase = "component/"
+                + currentTemplate.getClientTemplate();
+
+        try {
+            if (currentTemplate.hasClientWidget()) {
+                imports.addImport("java.util.Map");
+                imports.addImport(prefix + "terminal.PaintException");
+                imports.addImport(prefix + "terminal.PaintTarget");
+            }
+
+            if (TEMPLATE.COMMUNICATION_V62 == currentTemplate) {
                 // server-side fields
                 type.createField(
                         "\tprivate String message = \"Click here.\";\n", null,
                         false, monitor);
                 type.createField("\tprivate int clicks = 0;\n", null, false,
                         monitor);
-
-                // server-side methods
-                String templateBase = "component/"
-                        + currentTemplate.getClientTemplate();
 
                 String paintContentMethod = VaadinPluginUtil
                         .readTextFromTemplate(templateBase
@@ -366,12 +374,17 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
                         .readTextFromTemplate(templateBase
                                 + "_server_changeVariables.txt");
                 type.createMethod(changeVariablesMethod, null, false, monitor);
-            } catch (IOException e) {
-                // handle exception - should not happen as templates are
-                // inside the plugin
-                VaadinPluginUtil.handleBackgroundException(
-                        "Could not find method templates in plugin", e);
+            } else if (currentTemplate.hasClientWidget()) {
+                String paintContentMethod = VaadinPluginUtil
+                        .readTextFromTemplate(templateBase
+                                + "_server_paintContent.txt");
+                type.createMethod(paintContentMethod, null, false, monitor);
             }
+        } catch (IOException e) {
+            // handle exception - should not happen as templates are
+            // inside the plugin
+            VaadinPluginUtil.handleBackgroundException(
+                    "Could not find method templates in plugin", e);
         }
     }
 
