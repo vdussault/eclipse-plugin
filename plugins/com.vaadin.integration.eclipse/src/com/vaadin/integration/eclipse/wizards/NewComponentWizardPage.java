@@ -48,7 +48,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
 
     /**
      * Component template to use.
-     *
+     * 
      * The titles are shown in combo boxes and are used to identify the
      * templates (together with vaadin62). The first suitable template is
      * selected by default.
@@ -56,8 +56,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
     public enum TEMPLATE {
         // templates for pre-6.2 versions
         BASIC_TK5_V6("Clean", "Simple client-side and server-side component",
-                "widget_basic_tk5_v6",
-                false), //
+                "widget_basic_tk5_v6", false), //
         SERVER_ONLY_TK5_V6("Server-side only",
                 "Server-side component only, no client-side widget", null,
                 false), //
@@ -111,7 +110,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
 
     /**
      * Constructor for Component wizard page.
-     *
+     * 
      * @param pageName
      */
     public NewComponentWizardPage(IProject project) {
@@ -389,10 +388,15 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
             String typeContent, String lineDelimiter) throws CoreException {
         if (currentTemplate.isVaadin62() && currentTemplate.hasClientWidget()) {
             // add the ClientWidget annotation to the server side class
-            String fullyQualifiedName = createdClientSideClass.getTypes()[0]
-                    .getFullyQualifiedName();
+            IType widgetType = createdClientSideClass.getTypes()[0];
+            String fullyQualifiedName = widgetType.getFullyQualifiedName();
             typeContent = "@com.vaadin.ui.ClientWidget(" + fullyQualifiedName
                     + ".class)\n" + typeContent;
+
+            // Server side class javadoc
+            String javadoc = "/**\n" + " * Server side component for the "
+                    + widgetType.getElementName() + " widget.\n" + " */\n";
+            typeContent = javadoc + typeContent;
         }
         return super.constructCUContent(cu, typeContent, lineDelimiter);
     }

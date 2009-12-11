@@ -4,16 +4,16 @@
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void changeVariables(Object source, Map variables) {
+	public void changeVariables(Object source,  Map<String, Object> variables) {
 		super.changeVariables(source, variables);
 
 		// Variables set by the widget are returned in the "variables" map.
 		
 		if (variables.containsKey("click")) {
 		
-			// When the user has clicked the component we increase the click count, 
-			// update the message and request a repaint so the changes are sent back 
-			// to the client. 
+			// When the user has clicked the component we increase the 
+			// click count, update the message and request a repaint so 
+			// the changes are sent back to the client.
 			clicks++;
 			message += "<br/>" + variables.get("click");
 

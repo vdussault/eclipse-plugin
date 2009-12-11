@@ -123,7 +123,7 @@ public class WidgetsetBuildManager {
 
     /**
      * Which modules have a widgetset build running.
-     *
+     * 
      * This is a set of project name + {@link IPath.SEPARATOR} + module name
      */
     private static Set<String> widgetsetBuildRunning = new HashSet<String>();
@@ -144,14 +144,14 @@ public class WidgetsetBuildManager {
     /**
      * Ask the user whether he wants the widgetset(s) to be compiled and trigger
      * a build if necessary.
-     *
+     * 
      * This method can be called in a background thread, and returns immediately
      * unless <code>synchronous</code> is <code>true</code>.
-     *
+     * 
      * Multiple concurrent builds for a project are not allowed, but different
      * projects can be built concurrently. All widgetset builds for the project
      * are blocked until the user answers the question.
-     *
+     * 
      * @param project
      *            the project whose widgetset(s) to compile
      * @param synchronous
@@ -182,7 +182,9 @@ public class WidgetsetBuildManager {
                     // provides an option to disable further recompilation
                     // requests for the project, and tells how to re-enable
                     openQuestion[0] = ConfirmationDialog
-                            .openQuestion(shell, "Compile widgetset",
+                            .openQuestion(
+                                    shell,
+                                    "Compile widgetset",
                                     "Your client side code in the project "
                                             + project.getName()
                                             + " might need a recompilation. Compile widgetset now?",
@@ -250,20 +252,20 @@ public class WidgetsetBuildManager {
 
     /**
      * Helper method to compile one or more widgetsets for given project.
-     *
+     * 
      * {@see #compileWidgetset(IJavaProject, String, IProgressMonitor)}
-     *
+     * 
      * If the project has multiple widgetsets and the user has not specified
      * which one to compile, notify the user.
-     *
+     * 
      * Widgetset rebuild questions are not shown if a widgetset build request is
      * pending for the project, if the requested widgetset is being built, if
      * there is an internal operation in progress that has suspended widgetset
      * builds or if the user has explicitly suspended automatic widgetset
      * builds.
-     *
+     * 
      * Note, this only works for projects with vaadin 6.2 and later.
-     *
+     * 
      * @param shell
      *            the shell to enable asking the user which widgetset(s) to
      *            compile (if needed)
@@ -286,8 +288,12 @@ public class WidgetsetBuildManager {
                     monitor);
             if (widgetsets.size() <= 1) {
                 String widgetset = VaadinPluginUtil.getWidgetSet(jproject,
-                        true,
-                        monitor);
+                        true, monitor);
+                if (widgetset == null) {
+                    showErrorMessage("No suitable widgetset location found",
+                            "No suitable location found for the widgetset. This should not happen.");
+                    return;
+                }
                 widgetset = widgetset.replace(".client.", ".");
                 compileWidgetsetIfNotRunning(jproject, widgetset,
                         new SubProgressMonitor(monitor, 27));
@@ -332,14 +338,14 @@ public class WidgetsetBuildManager {
 
     /**
      * Compile a widgetset if it is not already being compiled.
-     *
+     * 
      * Show an error message if a build is already running.
-     *
+     * 
      * @param jproject
      * @param widgetset
      *            widgetset GWT module name
      * @param monitor
-     *
+     * 
      * @throws CoreException
      * @throws IOException
      * @throws InterruptedException
@@ -372,20 +378,19 @@ public class WidgetsetBuildManager {
 
     private static void showErrorMessage(final String title,
             final String message) {
-        PlatformUI.getWorkbench().getDisplay().asyncExec(
-                new Runnable() {
-                    public void run() {
-                        Shell shell = PlatformUI.getWorkbench()
-                                .getActiveWorkbenchWindow().getShell();
-                        MessageDialog.openError(shell, title, message);
-                    }
-                });
+        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+            public void run() {
+                Shell shell = PlatformUI.getWorkbench()
+                        .getActiveWorkbenchWindow().getShell();
+                MessageDialog.openError(shell, title, message);
+            }
+        });
     }
 
     /**
      * Extracts fully qualified widgetset name and project from given file
      * (expected to be *widgetset*.gwt.xml file) and compiles that widgetset.
-     *
+     * 
      * @param file
      * @param monitor
      * @throws CoreException
@@ -422,7 +427,7 @@ public class WidgetsetBuildManager {
      * Checks whether widgetset building for a project is suspended, either
      * because of an internal operation in progress or because the user
      * explicitly suspended widgetset builds.
-     *
+     * 
      * @param project
      * @return
      */
@@ -434,7 +439,7 @@ public class WidgetsetBuildManager {
     /**
      * Checks whether widgetset building for a project has been suspended
      * explicitly by the user.
-     *
+     * 
      * @param project
      * @return
      */
@@ -449,11 +454,11 @@ public class WidgetsetBuildManager {
     /**
      * Persistently suspend widgetset build questions on user demand for a
      * project.
-     *
+     * 
      * As a side effect, remove the project from the pending list.
-     *
+     * 
      * @see #runWidgetSetBuildTool(IProject, boolean, IProgressMonitor)
-     *
+     * 
      * @param project
      * @param suspend
      */
@@ -472,9 +477,9 @@ public class WidgetsetBuildManager {
     /**
      * Suspend widgetset build requests for a project while internal
      * modifications to the project are being performed by the plugin.
-     *
+     * 
      * @see #internalResumeWidgetsetBuilds(IProject)
-     *
+     * 
      * @param project
      */
     public static void internalSuspendWidgetsetBuilds(IProject project) {
@@ -483,15 +488,15 @@ public class WidgetsetBuildManager {
 
     /**
      * Resume making suspended widgetset build requests for a project.
-     *
+     * 
      * No requests are queued for the project while widgetset builds are
      * suspended, and the caller should call {@link #runWidgetSetBuildTool()}
      * after this call if necessary.
-     *
+     * 
      * This method must be called after
      * {@link #internalSuspendWidgetsetBuilds(IProject)}, a try-finally pattern
      * is strongly recommended.
-     *
+     * 
      * @param project
      */
     public static void internalResumeWidgetsetBuilds(IProject project) {
