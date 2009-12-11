@@ -6,8 +6,10 @@ import org.eclipse.jst.j2ee.internal.wizard.J2EEModuleFacetInstallPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
@@ -32,7 +34,7 @@ public class VaadinCoreFacetInstallPage extends J2EEModuleFacetInstallPage
     private Text applicationNameField;
     private Text applicationClassField;
     private Text applicationPackageField;
-    private Button applicationCreatePortlet;
+    private Combo applicationCreatePortletCombo;
     private Text portletTitleField;
 
     public VaadinCoreFacetInstallPage() {
@@ -123,17 +125,25 @@ public class VaadinCoreFacetInstallPage extends J2EEModuleFacetInstallPage
         final Group portletGroup = new Group(composite, SWT.NONE);
         portletGroup.setLayoutData(gdhfill());
         portletGroup.setText("Portlet");
-        portletGroup.setLayout(new GridLayout(1, false));
+        portletGroup.setLayout(new GridLayout(2, false));
 
         // portlet creation
-        applicationCreatePortlet = new Button(portletGroup, SWT.CHECK);
-        applicationCreatePortlet.setText("Create portlet configuration");
-        applicationCreatePortlet.setLayoutData(gdhfill());
-        synchHelper.synchCheckbox(applicationCreatePortlet, CREATE_PORTLET,
+        label = new Label(portletGroup, SWT.NONE);
+        label.setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING, false,
+                false));
+        label.setText("Portlet version:");
+
+        applicationCreatePortletCombo = new Combo(portletGroup, SWT.DROP_DOWN
+                | SWT.READ_ONLY);
+        applicationCreatePortletCombo.setItems(new String[] {
+                PORTLET_VERSION_NONE, PORTLET_VERSION20, PORTLET_VERSION10 });
+        applicationCreatePortletCombo.setLayoutData(gdhfill());
+        synchHelper.synchCombo(applicationCreatePortletCombo, PORTLET_VERSION,
                 null);
 
         label = new Label(portletGroup, SWT.NONE);
-        label.setLayoutData(gdhfill());
+        label.setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING, false,
+                false));
         label.setText("Portlet title:");
 
         portletTitleField = new Text(portletGroup, SWT.BORDER);
@@ -181,11 +191,7 @@ public class VaadinCoreFacetInstallPage extends J2EEModuleFacetInstallPage
         applicationPackageField.setEnabled(enabled);
         applicationClassField.setEnabled(enabled);
 
-        if (!enabled) {
-            applicationCreatePortlet.setSelection(false);
-        }
-        applicationCreatePortlet.setEnabled(enabled);
-        // when re-enabling, the create portlet checkbox is still unchecked
+        applicationCreatePortletCombo.setEnabled(enabled);
         portletTitleField.setEnabled(false);
     }
 

@@ -14,7 +14,15 @@ public interface IVaadinFacetInstallDataModelProperties extends
 
     public static final String CREATE_ARTIFACTS = "IVaadinFacetInstallDataModelProperties.CREATE_ARTIFACTS"; //$NON-NLS-1$
 
-    public static final String CREATE_PORTLET = "IVaadinFacetInstallDataModelProperties.CREATE_PORTLET"; //$NON-NLS-1$
+    /**
+     * Value is one of the PORTLET_VERSION_* constants.
+     */
+    public static final String PORTLET_VERSION = "IVaadinFacetInstallDataModelProperties.CREATE_PORTLET"; //$NON-NLS-1$
+
+    public static final String PORTLET_VERSION_NONE = "No portlet";
+    public static final String PORTLET_VERSION10 = "Portlet 1.0";
+    public static final String PORTLET_VERSION20 = "Portlet 2.0";
+
     public static final String PORTLET_TITLE = "IVaadinFacetInstallDataModelProperties.PORTLET_TITLE"; //$NON-NLS-1$
 
     public static final String VAADIN_VERSION = "IVaadinFacetInstallDataModelProperties.VAADIN_VERSION"; //$NON-NLS-1$

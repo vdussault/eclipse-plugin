@@ -41,11 +41,13 @@ public class VaadinFacetInstallDataModelProvider extends
     // - these are Strings to be able to use them in SWT Combo widgets
     public static final String PROJECT_TYPE_SERVLET = "Servlet (default)";
     public static final String PROJECT_TYPE_GAE = "Google App Engine servlet";
-    public static final String PROJECT_TYPE_PORTLET = "Generic portlet";
+    public static final String PROJECT_TYPE_PORTLET20 = "Generic portlet (Portlet 2.0)";
+    public static final String PROJECT_TYPE_PORTLET10 = "Old portlet (Portlet 1.0)";
 
     // allowed project types in display order, default first
     public static final String[] PROJECT_TYPES = new String[] {
-            PROJECT_TYPE_SERVLET, PROJECT_TYPE_GAE, PROJECT_TYPE_PORTLET };
+            PROJECT_TYPE_SERVLET, PROJECT_TYPE_GAE, PROJECT_TYPE_PORTLET20,
+            PROJECT_TYPE_PORTLET10 };
 
     private static final String BASE_PACKAGE_NAME = "com.example";
 
@@ -62,7 +64,7 @@ public class VaadinFacetInstallDataModelProvider extends
         names.add(APPLICATION_PACKAGE);
         names.add(APPLICATION_CLASS);
         names.add(CREATE_ARTIFACTS);
-        names.add(CREATE_PORTLET);
+        names.add(PORTLET_VERSION);
         names.add(PORTLET_TITLE);
         names.add(VAADIN_VERSION);
         names.add(VAADIN_PROJECT_TYPE);
@@ -121,8 +123,8 @@ public class VaadinFacetInstallDataModelProvider extends
             // not shown (e.g. when importing a project from version control or
             // adding the facet to an existing project)
             return Boolean.FALSE;
-        } else if (propertyName.equals(CREATE_PORTLET)) {
-            return Boolean.FALSE;
+        } else if (propertyName.equals(PORTLET_VERSION)) {
+            return PORTLET_VERSION_NONE;
         } else if (propertyName.equals(PORTLET_TITLE)) {
             Object projectName = getProperty(FACET_PROJECT_NAME);
             if (projectName == null) {
@@ -174,7 +176,18 @@ public class VaadinFacetInstallDataModelProvider extends
                 VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
                         "Failed to update Vaadin version list", e);
             }
-        } else if (CREATE_PORTLET.equals(propertyName)) {
+        } else if (PORTLET_VERSION.equals(propertyName)) {
+            if (PORTLET_VERSION20.equals(propertyValue)
+                    && !PROJECT_TYPE_PORTLET20
+                            .equals(getProperty(VAADIN_PROJECT_TYPE))) {
+                setProperty(VAADIN_PROJECT_TYPE, PROJECT_TYPE_PORTLET20);
+            } else if (PORTLET_VERSION10.equals(propertyValue)
+                    && !PROJECT_TYPE_PORTLET10
+                            .equals(getProperty(VAADIN_PROJECT_TYPE))) {
+                setProperty(VAADIN_PROJECT_TYPE, PROJECT_TYPE_PORTLET10);
+            }
+            // else do not change anything - multiple possible project types
+
             // notify about a change of enablement for sub-properties
             model.notifyPropertyChange(PORTLET_TITLE, IDataModel.ENABLE_CHG);
         } else if (VAADIN_PROJECT_TYPE.equals(propertyName)) {
@@ -182,9 +195,14 @@ public class VaadinFacetInstallDataModelProvider extends
             useGaeDirectoryStructure(PROJECT_TYPE_GAE.equals(propertyValue));
 
             // set portlet creation flag
-            boolean createPortlet = PROJECT_TYPE_PORTLET.equals(propertyValue);
-            setProperty(CREATE_PORTLET, Boolean.valueOf(createPortlet));
-            model.notifyPropertyChange(CREATE_PORTLET, IDataModel.VALUE_CHG);
+            if (PROJECT_TYPE_PORTLET20.equals(propertyValue)) {
+                setProperty(PORTLET_VERSION, PORTLET_VERSION20);
+            } else if (PROJECT_TYPE_PORTLET10.equals(propertyValue)) {
+                setProperty(PORTLET_VERSION, PORTLET_VERSION10);
+            } else {
+                setProperty(PORTLET_VERSION, PORTLET_VERSION_NONE);
+            }
+            model.notifyPropertyChange(PORTLET_VERSION, IDataModel.VALUE_CHG);
         }
         return super.propertySet(propertyName, propertyValue);
     }
@@ -224,7 +242,8 @@ public class VaadinFacetInstallDataModelProvider extends
     @Override
     public boolean isPropertyEnabled(String propertyName) {
         if (PORTLET_TITLE.equals(propertyName)
-                && !getBooleanProperty(CREATE_PORTLET)) {
+                && PORTLET_VERSION_NONE
+                        .equals(getStringProperty(PORTLET_VERSION))) {
             return false;
         }
         return super.isPropertyEnabled(propertyName);

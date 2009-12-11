@@ -140,12 +140,18 @@ public class CoreFacetInstallDelegate implements IDelegate,
                 boolean gaeProject = VaadinFacetInstallDataModelProvider.PROJECT_TYPE_GAE
                         .equals(projectType);
 
+                String portletVersion = model
+                        .getStringProperty(PORTLET_VERSION);
+                boolean createPortlet = !PORTLET_VERSION_NONE.equals(portletVersion);
+
                 /* Update web.xml */
                 WebArtifactEdit artifact = WebArtifactEdit
                         .getWebArtifactEditForWrite(project);
                 try {
                     String servletPath = "/*";
-                    if (model.getBooleanProperty(CREATE_PORTLET)) {
+                    // TODO check; could also skip web.xml creation for portlet
+                    // 2.0 - creating to help testing portlets as servlets
+                    if (createPortlet) {
                         servletPath = "/" + servletName + servletPath;
                     }
                     String servletClassName = vaadinPackagePrefix
@@ -154,8 +160,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
                     WebXmlUtil.addServlet(artifact.getWebApp(),
                             applicationName, applicationPackage + "."
                                     + applicationClass, servletPath,
-                            servletClassName, model
-                                    .getBooleanProperty(CREATE_PORTLET));
+                            servletClassName, createPortlet);
                     WebXmlUtil.addContextParameter(artifact.getWebApp(),
                             VAADIN_PRODUCTION_MODE, "false",
                             VAADIN_PRODUCTION_MODE_DESCRIPTION);
@@ -165,17 +170,30 @@ public class CoreFacetInstallDelegate implements IDelegate,
                     artifact.dispose();
                 }
 
-                if (model.getBooleanProperty(CREATE_PORTLET)) {
+                if (createPortlet) {
                     // update portlet.xml, liferay-portlet.xml and
                     // liferay-display.xml
                     String portletName = applicationName + " portlet";
                     String portletTitle = model
                             .getStringProperty(PORTLET_TITLE);
                     String category = "Vaadin";
-                    PortletConfigurationUtil.addPortlet(project, servletName,
-                            vaadinPackagePrefix
-                                    + "terminal.gwt.server.ApplicationPortlet",
-                            portletName, portletTitle, category);
+                    if (PORTLET_VERSION20.equals(portletVersion)) {
+                        PortletConfigurationUtil
+                                .addPortlet(
+                                        project,
+                                        applicationPackage + "."
+                                                + applicationClass,
+                                        vaadinPackagePrefix
+                                                + "terminal.gwt.server.ApplicationPortlet2",
+                                        portletName, portletTitle, category,
+                                        portletVersion);
+                    } else {
+                        PortletConfigurationUtil.addPortlet(project, servletName,
+                                vaadinPackagePrefix
+                                        + "terminal.gwt.server.ApplicationPortlet",
+                                        portletName, portletTitle, category,
+                                        portletVersion);
+                    }
                 }
 
                 // create appengine-web.xml

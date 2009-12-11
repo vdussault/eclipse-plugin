@@ -30,6 +30,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.vaadin.integration.eclipse.IVaadinFacetInstallDataModelProperties;
+
 public class PortletConfigurationUtil {
 
     /**
@@ -38,8 +40,9 @@ public class PortletConfigurationUtil {
      * The corresponding servlet should already exist in web.xml .
      *
      * @param project
-     * @param servletName
-     *            servlet name (from path) in web.xml
+     * @param applicationName
+     *            servlet name (from path) in web.xml or application classname
+     *            for portlet 2.0
      * @param portletClass
      * @param portletName
      *            must be different from servlet name
@@ -47,18 +50,22 @@ public class PortletConfigurationUtil {
      *            is used both as the full and the short title and
      * @param category
      *            the Liferay portlet category to add the portlet to
+     * @param portletVersion
+     *            {@link IVaadinFacetInstallDataModelProperties#PORTLET_VERSION10}
+     *            or
+     *            {@link IVaadinFacetInstallDataModelProperties#PORTLET_VERSION20}
      * @throws CoreException
      */
     @SuppressWarnings("unchecked")
-    public static void addPortlet(IProject project, String servletName,
+    public static void addPortlet(IProject project, String applicationName,
             String portletClass, String portletName, String portletTitle,
-            String category) throws CoreException {
+            String category, String portletVersion) throws CoreException {
 
         // TODO check indentation issues (first inserted line)
 
         // portlets.xml
-        addPortletToPortletsXml(project, servletName, portletClass,
-                portletName, portletTitle);
+        addPortletToPortletsXml(project, applicationName, portletClass,
+                portletName, portletTitle, portletVersion);
 
         // liferay-portlet.xml
         addPortletToLiferayPortletXml(project, portletName);
@@ -67,7 +74,7 @@ public class PortletConfigurationUtil {
         addPortletToLiferayDisplayXml(project, portletName, category);
 
         // liferay-plugin-package.properties
-        addPortletToLiferayPluginPackageProperties(project, servletName,
+        addPortletToLiferayPluginPackageProperties(project, portletName,
                 portletTitle, category);
     }
 
@@ -77,17 +84,24 @@ public class PortletConfigurationUtil {
     }
 
     private static void addPortletToPortletsXml(IProject project,
-            String servletName, String portletClass, String portletName,
-            String portletTitle) throws CoreException {
+            String applicationName, String portletClass, String portletName,
+            String portletTitle, String portletVersion) throws CoreException {
         try {
+            boolean portlet2 = IVaadinFacetInstallDataModelProperties.PORTLET_VERSION20
+                    .equals(portletVersion);
+
             // create the file if it does not exist
-            IFile portletsXmlFile = VaadinPluginUtil.ensureFileFromTemplate(
+            String fileTemplateName = portlet2 ? "portlet/portlet2xmlstub.txt"
+                    : "portlet/portletxmlstub.txt";
+            IFile portletXmlFile = VaadinPluginUtil.ensureFileFromTemplate(
                     getPortletConfigurationFile(project, "portlet.xml"),
-                    "portlet/portletxmlstub.txt");
+                    fileTemplateName);
 
             // prepare the portlet section from template
+            String sectionTemplateName = portlet2 ? "portlet/portlet2xml_portletstub.txt"
+                    : "portlet/portletxml_portletstub.txt";
             String portletstub = VaadinPluginUtil
-                    .readTextFromTemplate("portlet/portletxml_portletstub.txt");
+                    .readTextFromTemplate(sectionTemplateName);
 
             // generic portlet configuration
             portletstub = portletstub.replaceAll("STUB_PORTLETNAME",
@@ -96,8 +110,8 @@ public class PortletConfigurationUtil {
                     portletTitle);
             portletstub = portletstub.replaceAll("STUB_PORTLETCLASS",
                     portletClass);
-            portletstub = portletstub.replaceAll("STUB_SERVLETNAME",
-                    servletName);
+            portletstub = portletstub.replaceAll("STUB_APPLICATION",
+                    applicationName);
 
             // these are for Liferay
             portletstub = portletstub.replaceAll("STUB_PORTLETTITLE",
@@ -106,7 +120,7 @@ public class PortletConfigurationUtil {
                     portletTitle);
 
             // insert the portlet section in the <portlet-app> tag
-            modifyXml(portletsXmlFile, new AddToTagXmlModifier(portletsXmlFile
+            modifyXml(portletXmlFile, new AddToTagXmlModifier(portletXmlFile
                     .getName(), "portlet-app", portletstub));
         } catch (IOException e) {
             throw VaadinPluginUtil.newCoreException(
