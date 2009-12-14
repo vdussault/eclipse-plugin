@@ -223,8 +223,8 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
             } else {
                 incrementalBuild(delta, monitor);
             }
-            System.out.println("Vaadin WS: Incr build took: "
-                    + (new Date().getTime() - start.getTime()));
+            // System.out.println("Vaadin WS: Incr build took: "
+            // + (new Date().getTime() - start.getTime()));
         }
         return null;
     }

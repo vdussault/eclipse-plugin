@@ -366,8 +366,7 @@ public class DownloadUtils {
 
             IOUtils.copy(urlStream, new FileOutputStream(targetFile));
 
-            // TODO could improve logging
-            System.out.println("Fetched " + urlString + " to "
+            VaadinPluginUtil.logInfo("Fetched " + urlString + " to "
                     + targetFile.toString());
             return true;
         } catch (Exception e) {

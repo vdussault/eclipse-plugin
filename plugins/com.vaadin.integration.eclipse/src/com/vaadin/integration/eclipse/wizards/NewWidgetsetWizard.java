@@ -289,7 +289,7 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
         WebArtifactEdit artifact = WebArtifactEdit
                 .getWebArtifactEditForWrite(project);
         if (artifact == null) {
-            System.err.println("Couldn't open web.xml for edit.");
+            VaadinPluginUtil.logWarning("Could not open web.xml for edit.");
             return;
         }
 
