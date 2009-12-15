@@ -34,7 +34,7 @@ import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
 
 /**
  * Property page grouping Vaadin related project properties.
- *
+ * 
  * Vaadin version selection is here, future subpages may contain more settings.
  */
 public class VaadinProjectPropertyPage extends PropertyPage {
@@ -89,8 +89,18 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             WidgetsetBuildManager.setWidgetsetBuildsSuspended(project,
                     suspended);
 
+            boolean verbose = widgetsetComposite.isVerboseOutput();
+            boolean oldVerbose = prefStore
+                    .getBoolean(VaadinPlugin.PREFERENCES_WIDGETSET_VERBOSE);
+            if (verbose != oldVerbose) {
+                prefStore.setValue(VaadinPlugin.PREFERENCES_WIDGETSET_VERBOSE,
+                        verbose);
+                widgetsetDirty = true;
+            }
+
             String style = widgetsetComposite.getCompilationStyle();
-            String oldStyle = prefStore.getString(VaadinPlugin.PREFERENCES_WIDGETSET_STYLE);
+            String oldStyle = prefStore
+                    .getString(VaadinPlugin.PREFERENCES_WIDGETSET_STYLE);
             // do not store the default value OBF, but handle it if stored
             if ("OBF".equals(oldStyle)) {
                 oldStyle = "";
@@ -106,14 +116,17 @@ public class VaadinProjectPropertyPage extends PropertyPage {
 
             String parallelism = widgetsetComposite.getParallelism();
             // empty string if not set
-            String oldParallelism = prefStore.getString(VaadinPlugin.PREFERENCES_WIDGETSET_PARALLELISM);
+            String oldParallelism = prefStore
+                    .getString(VaadinPlugin.PREFERENCES_WIDGETSET_PARALLELISM);
             if (!parallelism.equals(oldParallelism)) {
-                prefStore.setValue(VaadinPlugin.PREFERENCES_WIDGETSET_PARALLELISM,
+                prefStore.setValue(
+                        VaadinPlugin.PREFERENCES_WIDGETSET_PARALLELISM,
                         parallelism);
                 widgetsetDirty = true;
             }
 
-            // if anything changed, mark widgetset as dirty and ask about recompiling it
+            // if anything changed, mark widgetset as dirty and ask about
+            // recompiling it
             if (widgetsetDirty) {
                 prefStore.save();
                 // will also be saved later, here in case Vaadin version
@@ -261,8 +274,7 @@ public class VaadinProjectPropertyPage extends PropertyPage {
         group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         group.setText("Widgetsets");
         group.setLayout(new GridLayout(1, false));
-        widgetsetComposite = new WidgetsetParametersComposite(group,
-                SWT.NULL);
+        widgetsetComposite = new WidgetsetParametersComposite(group, SWT.NULL);
         widgetsetComposite.createContents();
 
         performDefaults();

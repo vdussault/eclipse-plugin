@@ -27,6 +27,14 @@ public class VaadinPlugin extends AbstractUIPlugin {
     public static final String PREFERENCES_WIDGETSET_PARALLELISM = PLUGIN_ID
             + "." + "widgetsetParallelism";
 
+    /** the time last compilation lasted, used for estimation in progress monitor */
+    public static final String PREFERENCES_WIDGETSET_COMPILATION_ETA = PLUGIN_ID
+            + "." + "widgetsetCompilationEta";
+
+	/** wheter to output compilation messages to console */
+    public static final String PREFERENCES_WIDGETSET_VERBOSE = PLUGIN_ID + "."
+            + "widgetsetVerbose";
+
     private static VaadinPlugin instance = null;
 
     public VaadinPlugin() {

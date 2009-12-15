@@ -25,6 +25,7 @@ public class WidgetsetParametersComposite extends Composite {
     private Combo styleCombo;
     private Combo parallelismCombo;
     private Button suspendAutomaticBuilds;
+    private Button verboseCompilation;
     private IProject project = null;
 
     private String OBF_LABEL = "Obfuscated";
@@ -45,7 +46,15 @@ public class WidgetsetParametersComposite extends Composite {
 
         boolean suspendBuilds = WidgetsetBuildManager
                 .isWidgetsetBuildsSuspended(project);
+
         suspendAutomaticBuilds.setSelection(suspendBuilds);
+
+        boolean verboseOutput = prefStore
+                .contains(VaadinPlugin.PREFERENCES_WIDGETSET_VERBOSE) ? prefStore
+                .getBoolean(VaadinPlugin.PREFERENCES_WIDGETSET_VERBOSE)
+                : false;
+
+        verboseCompilation.setSelection(verboseOutput);
 
         String style = prefStore
                 .getString(VaadinPlugin.PREFERENCES_WIDGETSET_STYLE);
@@ -91,6 +100,12 @@ public class WidgetsetParametersComposite extends Composite {
         GridData gd = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
         gd.horizontalSpan = 2;
         suspendAutomaticBuilds.setLayoutData(gd);
+
+        verboseCompilation = new Button(options, SWT.CHECK);
+        verboseCompilation.setText("Verbose compilation output");
+        gd = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+        gd.horizontalSpan = 2;
+        verboseCompilation.setLayoutData(gd);
 
         // compilation style (obfuscated/pretty)
         Label label = new Label(options, SWT.NULL);
@@ -174,7 +189,7 @@ public class WidgetsetParametersComposite extends Composite {
 
     /**
      * Gets the user-selected GWT compilation style. Default is "OBF".
-     *
+     * 
      * @return "OBF"/"PRETTY"/"DETAILED" - never null
      */
     public String getCompilationStyle() {
@@ -191,7 +206,7 @@ public class WidgetsetParametersComposite extends Composite {
     /**
      * Gets the user-selected number of GWT compiler threads. Default is no
      * selection (empty string).
-     *
+     * 
      * @return String containing a positive number or empty string if none
      *         specified, not null
      */
@@ -201,7 +216,7 @@ public class WidgetsetParametersComposite extends Composite {
 
     /**
      * Returns whether automatic widgetset build requests should be suspended.
-     *
+     * 
      * @return true to disable widgetset build requests when making changes or
      *         e.g. publishing the project
      */
@@ -209,4 +224,12 @@ public class WidgetsetParametersComposite extends Composite {
         return suspendAutomaticBuilds.getSelection();
     }
 
+    /**
+     * Returns whether verbose output of widgetset compilation is used.
+     * 
+     * @return
+     */
+    public boolean isVerboseOutput() {
+        return verboseCompilation.getSelection();
+    }
 }
