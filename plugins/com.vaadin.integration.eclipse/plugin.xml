@@ -377,7 +377,7 @@ Any metadata changes made will be stored in the project manifest.
                   commandId="com.vaadin.integration.eclipse.commands.compileWidgetsetCommand"
                   icon="icons/compile-widgetset-16.png"
                   id="com.vaadin.integration.eclipse.toolbars.compileWidgetsetCommand"
-                  tooltip="Compile widgetset">
+                  tooltip="Compile Vaadin widgets">
             </command>
          </toolbar>
       </menuContribution>
