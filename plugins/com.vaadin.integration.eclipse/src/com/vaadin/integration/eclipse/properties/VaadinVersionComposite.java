@@ -50,7 +50,7 @@ public class VaadinVersionComposite extends Composite {
          * This is an ugly and inefficient hack: as sorting cannot be disabled
          * for AbstractElementListSelectionDialog, use a comparator that
          * compares the positions of the elements in a reference list.
-         * 
+         *
          * Cannot do real version comparison as no information is available
          * about which builds are official releases, pre-releases or release
          * candidates, nightly builds etc.
@@ -217,6 +217,7 @@ public class VaadinVersionComposite extends Composite {
     private void updateVersionCombo() {
         try {
             versionCombo.removeAll();
+            versionMap.clear();
             for (Version version : DownloadUtils.getLocalVaadinJarVersions()) {
                 versionMap.put(version.getVersionString(), version);
                 versionCombo.add(version.getVersionString());
@@ -227,8 +228,14 @@ public class VaadinVersionComposite extends Composite {
                     Version currentVaadinVersion = VaadinPluginUtil
                             .getVaadinLibraryVersion(project);
                     if (currentVaadinVersion != null) {
-                        versionCombo.setText(currentVaadinVersion
-                                .getVersionString());
+                        // #3863 add custom Vaadin version in project if any
+                        String versionString = currentVaadinVersion
+                                .getVersionString();
+                        if (!versionMap.containsKey(versionString)) {
+                            versionMap.put(versionString, currentVaadinVersion);
+                            versionCombo.add(versionString, 0);
+                        }
+                        versionCombo.setText(versionString);
                     }
                 }
             } catch (CoreException ce) {
