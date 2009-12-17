@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Build integration plugin" default="build-eclipse-integration-plugin">
 
-	<property name="com.vaadin.eclipse.integration.version" value="1.0.1" />
+	<property name="com.vaadin.eclipse.integration.version" value="1.1.0" />
 	<property name="com.vaadin.wysiwyg.eclipse.version" value="0.1.0" />
 	<property name="archivePrefix" value="nightly" />
 	<property name="update-site-dir" value="update-site" />
