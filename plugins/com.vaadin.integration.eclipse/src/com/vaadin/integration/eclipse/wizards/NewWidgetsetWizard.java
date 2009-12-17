@@ -64,6 +64,7 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
      */
     public NewWidgetsetWizard() {
         super();
+        setWindowTitle("New Vaadin Widgetset");
         setNeedsProgressMonitor(true);
     }
 

@@ -1,7 +1,6 @@
 package com.vaadin.integration.eclipse.wizards;
 
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jst.servlet.ui.internal.plugin.WEBUIMessages;
 import org.eclipse.jst.servlet.ui.project.facet.WebProjectWizard;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
@@ -23,12 +22,12 @@ import com.vaadin.integration.eclipse.configuration.VaadinProjectCreationDataMod
 public class VaadinProjectWizard extends WebProjectWizard {
     public VaadinProjectWizard(IDataModel model) {
         super(model);
-        setWindowTitle(WEBUIMessages.WEB_MODULE_WIZ_TITLE);
+        setWindowTitle("New Vaadin Project");
     }
 
     public VaadinProjectWizard() {
         super();
-        setWindowTitle(WEBUIMessages.WEB_MODULE_WIZ_TITLE);
+        setWindowTitle("New Vaadin Project");
     }
 
     @Override
