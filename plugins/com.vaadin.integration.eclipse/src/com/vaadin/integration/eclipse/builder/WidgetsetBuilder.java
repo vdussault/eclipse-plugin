@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import com.vaadin.integration.eclipse.util.DownloadUtils;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 public class WidgetsetBuilder extends IncrementalProjectBuilder {
@@ -62,7 +63,11 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                     IPath resourcePath = VaadinPluginUtil.getRawLocation(
                             project, resource.getRawLocation());
                     if (resourcePath.equals(vaadinJarPath)) {
-                        break;
+                        // #3869 only mark as dirty if the project has a custom
+                        // widgetset
+                        if (!VaadinPluginUtil.hasWidgetSets(jproject, monitor)) {
+                            break;
+                        }
                     }
                     // fall-through: continue like change or JAR
                 case IResourceDelta.CHANGED:
@@ -80,12 +85,18 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                 }
             } else if (delta.getKind() == IResourceDelta.REMOVED
                     && isJar(resource)) {
-                // when a JAR is removed, we cannot look inside it so assume it
-                // might have been a widgetset package
+                // When a JAR is removed, we cannot look inside it so assume it
+                // might have been a widgetset package.
+                // However, if it is a Vaadin JAR, do not mark the widgetset as
+                // dirty - that will be done when adding a new Vaadin JAR to
+                // the project (#3869).
                 // TODO #3590 clean GWT module
-                VaadinPluginUtil.setWidgetsetDirty(getProject(), true);
-                WidgetsetBuildManager.runWidgetSetBuildTool(getProject(),
-                        false, monitor);
+                if (!resource.getName()
+                        .matches(DownloadUtils.VAADIN_JAR_REGEXP)) {
+                    VaadinPluginUtil.setWidgetsetDirty(getProject(), true);
+                    WidgetsetBuildManager.runWidgetSetBuildTool(getProject(),
+                            false, monitor);
+                }
             } else if (resource.exists()
                     && (isGwtModule(resource) || isClientSideJavaClass(resource))) {
                 switch (delta.getKind()) {

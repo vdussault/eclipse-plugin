@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -72,13 +73,17 @@ public class VaadinProjectPropertyPage extends PropertyPage {
         try {
             project = getVaadinProject();
         } catch (CoreException ex) {
-            // TODO handle better?
-            return false;
+            VaadinPluginUtil.logInfo("Store preferences: not a Vaadin project");
+            return true;
         }
 
+        IJavaProject jproject = JavaCore.create(project);
+
         boolean widgetsetDirty = false;
+        Boolean hasWidgetSets = null;
 
         try {
+
             ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
                     new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
 
@@ -129,9 +134,15 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             // recompiling it
             if (widgetsetDirty) {
                 prefStore.save();
+
                 // will also be saved later, here in case Vaadin version
                 // replacement fails
-                VaadinPluginUtil.setWidgetsetDirty(project, true);
+                if (hasWidgetSets == null) {
+                    hasWidgetSets = hasWidgetSets(jproject);
+                }
+                if (hasWidgetSets) {
+                    VaadinPluginUtil.setWidgetsetDirty(project, true);
+                }
             }
         } catch (IOException e) {
             VaadinPluginUtil.displayError(
@@ -224,9 +235,16 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             return false;
         }
 
-        // if anything changed, ask about recompiling the widgetset
+        // If anything changed, ask about recompiling the widgetset.
+        // Mark the widgetset as dirty only if there is a widgetset in the
+        // project.
         if (widgetsetDirty) {
-            VaadinPluginUtil.setWidgetsetDirty(project, true);
+            if (hasWidgetSets == null) {
+                hasWidgetSets = hasWidgetSets(jproject);
+            }
+            if (hasWidgetSets) {
+                VaadinPluginUtil.setWidgetsetDirty(project, true);
+            }
         }
 
         // this may also be true because of hosted mode launch creation or older
@@ -237,6 +255,19 @@ public class VaadinProjectPropertyPage extends PropertyPage {
         }
 
         return true;
+    }
+
+    private Boolean hasWidgetSets(IJavaProject jproject) {
+        try {
+            return VaadinPluginUtil.hasWidgetSets(jproject,
+                    new NullProgressMonitor());
+        } catch (CoreException e) {
+            VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                    "Could not check whether the project "
+                            + jproject.getProject().getName()
+                            + " has a widgetset", e);
+            return false;
+        }
     }
 
     /**

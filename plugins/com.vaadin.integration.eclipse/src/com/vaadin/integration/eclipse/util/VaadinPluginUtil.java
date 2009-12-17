@@ -141,7 +141,7 @@ public class VaadinPluginUtil {
     /**
      * Logs an information level event to the Eclipse error log (or other
      * configured destination).
-     * 
+     *
      * @param message
      */
     public static void logInfo(String message) {
@@ -154,7 +154,7 @@ public class VaadinPluginUtil {
     /**
      * Logs a warning not related to an exception to the Eclipse error log (or
      * other configured destination).
-     * 
+     *
      * @param message
      */
     public static void logWarning(String message) {
@@ -1630,6 +1630,57 @@ public class VaadinPluginUtil {
     }
 
     /**
+     * Check if a project contains one or more widgetsets. This method is more
+     * efficient than {@link #findWidgetSets(IJavaProject, IProgressMonitor)} as
+     * the evaluation stops upon the first match.
+     *
+     * Only GWT modules (.gwt.xml files) with "widgetset" in the file name are
+     * taken into account.
+     *
+     * @param project
+     * @param monitor
+     * @return true if the project directly contains at least one widgetset
+     * @throws CoreException
+     */
+    public static boolean hasWidgetSets(IJavaProject project,
+            IProgressMonitor monitor) throws CoreException {
+        final boolean[] found = new boolean[] { false };
+        IResourceVisitor visitor = new IResourceVisitor() {
+            public boolean visit(IResource arg0) throws CoreException {
+                if (found[0]) {
+                    return false;
+                }
+                if (arg0 instanceof IFile) {
+                    IFile f = (IFile) arg0;
+                    String name = f.getName();
+                    if (name.endsWith(".gwt.xml")
+                            && name.toLowerCase().contains("widgetset")) {
+                        found[0] = true;
+                        return false;
+                    }
+                }
+                return true;
+            }
+        };
+
+        IPackageFragmentRoot[] packageFragmentRoots = project
+                .getPackageFragmentRoots();
+        for (int i = 0; i < packageFragmentRoots.length; i++) {
+            if (!(packageFragmentRoots[i] instanceof JarPackageFragmentRoot)) {
+                IResource underlyingResource = packageFragmentRoots[i]
+                        .getUnderlyingResource();
+                underlyingResource.accept(visitor);
+
+                if (found[0]) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Find the list of widgetsets in the project in a format suitable for a
      * Vaadin addon manifest file.
      * 
@@ -1829,8 +1880,7 @@ public class VaadinPluginUtil {
                 return prefStore
                         .getBoolean(VaadinPlugin.PREFERENCES_WIDGETSET_DIRTY);
             } else {
-                result = !findWidgetSets(JavaCore.create(project), monitor)
-                        .isEmpty();
+                result = hasWidgetSets(JavaCore.create(project), monitor);
                 setWidgetsetDirty(project, result);
                 return result;
             }

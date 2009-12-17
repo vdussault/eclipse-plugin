@@ -47,6 +47,10 @@ public class DownloadUtils {
     // this pattern does not filter out old versions
     private static final String VAADIN_VERSION_PART_PATTERN = "([0-9]*)\\.([0-9])\\.(.+)";
 
+    // for identifying Vaadin JARs - ignoring IT Mill Toolkit
+    public static final String VAADIN_JAR_REGEXP = "vaadin-"
+            + VAADIN_VERSION_PATTERN + "\\.jar";
+
     private static final String LATEST_BASE_URL = "http://vaadin.com/download";
     private static final String LATEST_FILENAME = "LATEST";
     private static final String VAADIN_DOWNLOAD_BASE_URL = "http://vaadin.com/download/";
