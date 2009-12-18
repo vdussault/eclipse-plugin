@@ -1297,7 +1297,7 @@ public class VaadinPluginUtil {
                         gwtVersion = reader.readLine();
                     } finally {
                         if (jarFile != null) {
-                            jarFile.close();
+                            closeJarFile(jarFile);
                         }
                     }
 
@@ -1725,7 +1725,8 @@ public class VaadinPluginUtil {
                 JarURLConnection conn = (JarURLConnection) url.openConnection();
                 jarFile = conn.getJarFile();
                 Manifest manifest = jarFile.getManifest();
-                jarFile.close();
+                closeJarFile(jarFile);
+                jarFile = null;
                 Attributes mainAttributes = manifest.getMainAttributes();
                 if (mainAttributes.getValue("Vaadin-Widgetsets") != null) {
                     return true;
