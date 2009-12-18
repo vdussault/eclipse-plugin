@@ -51,6 +51,8 @@ public class DownloadUtils {
     public static final String VAADIN_JAR_REGEXP = "vaadin-"
             + VAADIN_VERSION_PATTERN + "\\.jar";
 
+    public static final String GWT2_VERSION_REGEXP = "[2-9]\\.[0-9\\.]*";
+
     private static final String LATEST_BASE_URL = "http://vaadin.com/download";
     private static final String LATEST_FILENAME = "LATEST";
     private static final String VAADIN_DOWNLOAD_BASE_URL = "http://vaadin.com/download/";
@@ -306,6 +308,8 @@ public class DownloadUtils {
     private static DownloadInformation GWT_DEV_JAR_DOWNLOAD = new GwtDownloadInformation(
             "gwt-dev", GWT_DOWNLOAD_URL, "gwt-dev-"
                     + VaadinPluginUtil.getPlatform());
+    private static DownloadInformation GWT2_DEV_JAR_DOWNLOAD = new GwtDownloadInformation(
+            "gwt-dev", GWT_DOWNLOAD_URL, "gwt-dev");
 
     // (ordered) map from download site ID to the corresponding
     // DownloadInformation instance
@@ -701,8 +705,13 @@ public class DownloadUtils {
     }
 
     public static IPath getLocalGwtDevJar(String version) throws CoreException {
-        return getLocalFile(GWT_DEV_JAR_DOWNLOAD, new Version(version,
-                GWT_DEV_JAR_DOWNLOAD));
+        if (version.matches(GWT2_VERSION_REGEXP)) {
+            return getLocalFile(GWT2_DEV_JAR_DOWNLOAD, new Version(version,
+                    GWT2_DEV_JAR_DOWNLOAD));
+        } else {
+            return getLocalFile(GWT_DEV_JAR_DOWNLOAD, new Version(version,
+                    GWT_DEV_JAR_DOWNLOAD));
+        }
     }
 
     public static IPath getLocalGwtUserJar(String version) throws CoreException {
@@ -756,8 +765,13 @@ public class DownloadUtils {
             monitor.beginTask("Downloading GWT JARs",
                     IProgressMonitor.UNKNOWN);
             if (!getLocalGwtDevJar(version).toFile().exists()) {
-                fetch(GWT_DEV_JAR_DOWNLOAD, new Version(version,
-                        GWT_DEV_JAR_DOWNLOAD));
+                if (version.matches(GWT2_VERSION_REGEXP)) {
+                    fetch(GWT2_DEV_JAR_DOWNLOAD, new Version(version,
+                            GWT2_DEV_JAR_DOWNLOAD));
+                } else {
+                    fetch(GWT_DEV_JAR_DOWNLOAD, new Version(version,
+                            GWT_DEV_JAR_DOWNLOAD));
+                }
             }
         } finally {
             monitor.done();

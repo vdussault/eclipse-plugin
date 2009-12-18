@@ -856,13 +856,15 @@ public class VaadinPluginUtil {
                         VaadinClasspathVariableInitializer.VAADIN_DOWNLOAD_VARIABLE,
                         userJarPath);
 
-                // replace gwt-dev-[platform].jar if found, otherwise append new
-                // entry
+                // replace gwt-dev-[platform].jar and/or gwt-dev.jar if found,
+                // otherwise append new entry
                 String devJarName = "gwt-dev-" + getPlatform() + ".jar";
-                replaceClassPathEntry(entries, gwtDev, devJarName);
+                replaceClassPathEntry(entries, gwtDev, new String[] {
+                        "gwt-dev.jar", devJarName });
 
                 // replace gwt-user.jar if found, otherwise append new entry
-                replaceClassPathEntry(entries, gwtUser, "gwt-user.jar");
+                replaceClassPathEntry(entries, gwtUser,
+                        new String[] { "gwt-user.jar" });
 
                 IClasspathEntry[] entryArray = entries
                         .toArray(new IClasspathEntry[entries.size()]);
@@ -915,16 +917,18 @@ public class VaadinPluginUtil {
     // replace an existing class path entry (identified by last segment name)
     // with a new one or append the new entry if not found
     private static void replaceClassPathEntry(List<IClasspathEntry> entries,
-            IClasspathEntry newEntry, String entryName) {
+            IClasspathEntry newEntry, String[] entryNames) {
         boolean found = false;
         for (int i = 0; i < entries.size(); ++i) {
-            if (entryName.equals(entries.get(i).getPath().lastSegment())) {
-                entries.set(i, newEntry);
-                found = true;
-                break;
+            for (String entryName : entryNames) {
+                if (entryName.equals(entries.get(i).getPath().lastSegment())) {
+                    entries.set(i, newEntry);
+                    found = true;
+                    break;
+                }
             }
         }
-        if (!found) {
+        if (!found && !entries.contains(newEntry)) {
             entries.add(newEntry);
         }
     }
