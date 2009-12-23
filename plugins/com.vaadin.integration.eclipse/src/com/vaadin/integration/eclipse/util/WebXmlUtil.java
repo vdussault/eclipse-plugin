@@ -1,7 +1,9 @@
 package com.vaadin.integration.eclipse.util;
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.emf.common.util.EList;
@@ -224,6 +226,48 @@ public class WebXmlUtil {
                         "Application widgetset");
             }
         }
+    }
+
+    /**
+     * Returns a map from application names to the corresponding widgetset names
+     * in web.xml. If no widgetset is configured for an application, the tuple
+     * (application, null) is returned for it.
+     *
+     * @param artifact
+     * @return map from application name to its configured widgetset name or to
+     *         null if no widgetset configured
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String, String> getWidgetSets(WebArtifactEdit artifact) {
+        Map<String, String> widgetsets = new LinkedHashMap<String, String>();
+
+        final WebApp root = artifact.getWebApp();
+
+        EList servlets = root.getServlets();
+        for (Object o : servlets) {
+            Servlet servlet = (Servlet) o;
+
+            String appName = getVaadinServletClass(root, servlet);
+            if (appName != null) {
+                String widgetset = null;
+                if (root.getJ2EEVersionID() >= J2EEVersionConstants.J2EE_1_4_ID) {
+                    ParamValue param = getInitParameter_2_4(servlet,
+                            VAADIN_WIDGETSET_PARAMETER);
+                    if (param != null) {
+                        widgetset = param.getValue();
+                    }
+                } else {
+                    InitParam param = getInitParameter_2_3(servlet,
+                            VAADIN_WIDGETSET_PARAMETER);
+                    if (param != null) {
+                        widgetset = param.getParamValue();
+                    }
+                }
+                widgetsets.put(appName, widgetset);
+            }
+        }
+
+        return widgetsets;
     }
 
     /**

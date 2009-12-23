@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
@@ -95,6 +96,8 @@ import com.vaadin.integration.eclipse.variables.VaadinClasspathVariableInitializ
 import com.vaadin.integration.eclipse.wizards.DirectoryManifestProvider;
 
 public class VaadinPluginUtil {
+
+    public static final String DEFAULT_WIDGET_SET_NAME = "com.vaadin.terminal.gwt.DefaultWidgetSet";
 
     private static final String WS_COMPILATION_CONSOLE_NAME = "Vaadin Widgetset Compilation";
 
@@ -1593,6 +1596,37 @@ public class VaadinPluginUtil {
     }
 
     /**
+     * Find the (first) widgetset used in the project based on web.xml . If none
+     * is mentioned there, return {@link #DEFAULT_WIDGET_SET_NAME}.
+     * 
+     * @param project
+     * @return first widgetset GWT module name used in web.xml or default
+     *         widgetset
+     */
+    public static String getConfiguredWidgetSet(IJavaProject project) {
+        WebArtifactEdit artifact = WebArtifactEdit
+                .getWebArtifactEditForRead(project.getProject());
+        if (artifact == null) {
+            handleBackgroundException("Couldn't open web.xml for reading.",
+                    null);
+        } else {
+            try {
+                Map<String, String> widgetsets = WebXmlUtil
+                        .getWidgetSets(artifact);
+                for (String widgetset : widgetsets.values()) {
+                    if (widgetset != null) {
+                        return widgetset;
+                    }
+                }
+            } finally {
+                artifact.dispose();
+            }
+        }
+
+        return DEFAULT_WIDGET_SET_NAME;
+    }
+
+    /**
      * Find the list of widgetsets in the project.
      *
      * Only GWT modules (.gwt.xml files) with "widgetset" in the file name are
@@ -2359,7 +2393,13 @@ public class VaadinPluginUtil {
         try {
             IJavaProject jproject = JavaCore.create(project);
 
-            String launchName = "GWT hosted mode for " + project.getName();
+            // check GWT version
+            String gwtVersion = getRequiredGWTVersionForProject(jproject);
+            boolean isGwt20 = gwtVersion
+                    .matches(DownloadUtils.GWT2_VERSION_REGEXP);
+
+            String launchName = "GWT " + (isGwt20 ? "development" : "hosted")
+                    + " mode for " + project.getName();
 
             // find and return existing launch, if any
             ILaunchConfiguration[] launchConfigurations = manager
@@ -2372,6 +2412,7 @@ public class VaadinPluginUtil {
                                     IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
                                     "");
                     if (project.getName().equals(launchProject)) {
+                        logInfo("GWT development mode launch already exists for the project");
                         return launchConfiguration;
                     }
                 }
@@ -2382,9 +2423,13 @@ public class VaadinPluginUtil {
             ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(
                     project, launchName);
 
+            String mainClass = "com.google.gwt.dev.GWTShell";
+            if (isGwt20) {
+                mainClass = "com.google.gwt.dev.DevMode";
+            }
             workingCopy.setAttribute(
                     IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,
-                    "com.google.gwt.dev.GWTShell");
+                    mainClass);
 
             workingCopy.setAttribute(
                     IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
@@ -2404,7 +2449,13 @@ public class VaadinPluginUtil {
                         .toPortableString()
                         + "/", "");
             }
-            String arguments = "-noserver -out " + wsDirString;
+            String arguments;
+            if (isGwt20) {
+                arguments = "-noserver -war " + wsDirString + " "
+                        + getConfiguredWidgetSet(jproject);
+            } else {
+                arguments = "-noserver -out " + wsDirString;
+            }
 
             workingCopy.setAttribute(
                     IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
@@ -2451,7 +2502,7 @@ public class VaadinPluginUtil {
 
         } catch (CoreException e) {
             handleBackgroundException(
-                    "Failed to find or create hosted mode launch for project "
+                    "Failed to find or create development mode launch for project "
                             + project.getName(), e);
             return null;
         }
