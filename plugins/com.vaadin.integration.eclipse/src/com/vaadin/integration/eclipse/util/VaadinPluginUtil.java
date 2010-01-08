@@ -64,7 +64,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.IVMInstall;
@@ -1456,9 +1455,9 @@ public class VaadinPluginUtil {
      * should be created. If <code>create</code> is true, create the widgetset
      * if it did not exist.
      *
-     * The default location for a widgetset is based on the location of the
-     * Application class with the shortest package path. By default, a
-     * "widgetset" package is created under that package.
+     * Unless explicitly given, the default location for a new widgetset is
+     * based on the location of the Application class with the shortest package
+     * path. A "widgetset" package is created under that package.
      *
      * A widgetset file should be named *widgetset*.gwt.xml - the ".gwt.xml" is
      * not a part of the module name.
@@ -1466,20 +1465,29 @@ public class VaadinPluginUtil {
      * @param project
      * @param create
      *            create widgetset if it does not exist
+     * @param root
+     *            package fragment root under which the widgetset should be
+     *            created, null for default/automatic
+     * @param defaultPackage
+     *            package name under which to create the widgetset, null to
+     *            deduce from application locations - default (empty) package is
+     *            not allowed
      * @param monitor
      * @return widgetset module name (with package path using dots), null if no
      *         suitable location found
      * @throws CoreException
      */
     public static String getWidgetSet(IJavaProject project, boolean create,
-            IProgressMonitor monitor) throws CoreException {
+            IPackageFragmentRoot root, String defaultPackage,
+            IProgressMonitor monitor)
+            throws CoreException {
         IPackageFragmentRoot[] packageFragmentRoots = project
                 .getPackageFragmentRoots();
 
         // this duplicates some code with findWidgetSets with a few
         // modifications for efficiency - stop at first match and never continue
         // after that
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder wsPathBuilder = new StringBuilder();
         IResourceVisitor visitor = new IResourceVisitor() {
             boolean continueSearch = true;
 
@@ -1489,7 +1497,7 @@ public class VaadinPluginUtil {
                     String name = f.getName();
                     if (name.endsWith(".gwt.xml")
                             && name.toLowerCase().contains("widgetset")) {
-                        sb.append(f.getFullPath());
+                        wsPathBuilder.append(f.getFullPath());
                         continueSearch = false;
                     }
                 }
@@ -1498,17 +1506,22 @@ public class VaadinPluginUtil {
         };
 
         for (int i = 0; i < packageFragmentRoots.length; i++) {
-            if (!(packageFragmentRoots[i] instanceof JarPackageFragmentRoot)) {
+            if (!packageFragmentRoots[i].isArchive()) {
                 IResource underlyingResource = packageFragmentRoots[i]
                         .getUnderlyingResource();
                 underlyingResource.accept(visitor);
-                if (!sb.toString().equals("")) {
-                    String wspath = sb.toString();
+                if (!wsPathBuilder.toString().equals("")) {
+                    String wspath = wsPathBuilder.toString();
                     IPath fullPath = underlyingResource.getFullPath();
                     wspath = wspath.replace(fullPath.toString() + "/", "");
                     wspath = wspath.replaceAll("/", ".").replaceAll(".gwt.xml",
                             "");
                     return wspath;
+                }
+                // keep track of the first suitable package fragment root to use
+                // as the default
+                if (root == null) {
+                    root = packageFragmentRoots[i];
                 }
             }
         }
@@ -1521,18 +1534,28 @@ public class VaadinPluginUtil {
 
         IType[] applicationClasses = getApplicationClasses(
                 project.getProject(), monitor);
-        String shortestPackagename = null;
-        IType appWithShortestPackageName = null;
-        for (int i = 0; i < applicationClasses.length; i++) {
-            IType appclass = applicationClasses[i];
-            String packagename = appclass.getPackageFragment().toString();
-            if (shortestPackagename == null
-                    || packagename.length() < shortestPackagename.length()) {
-                shortestPackagename = packagename;
-                appWithShortestPackageName = appclass;
+        if (defaultPackage == null) {
+            String shortestPackagename = null;
+            IType appWithShortestPackageName = null;
+            for (int i = 0; i < applicationClasses.length; i++) {
+                IType appclass = applicationClasses[i];
+                String packagename = appclass.getPackageFragment().toString();
+                if (shortestPackagename == null
+                        || packagename.length() < shortestPackagename.length()) {
+                    shortestPackagename = packagename;
+                    appWithShortestPackageName = appclass;
+                }
+            }
+            if (appWithShortestPackageName != null) {
+                defaultPackage = appWithShortestPackageName
+                        .getPackageFragment().getElementName()
+                        + ".widgetset";
+                root = project
+                        .getPackageFragmentRoot(appWithShortestPackageName
+                                .getResource());
             }
         }
-        if (appWithShortestPackageName != null) {
+        if (defaultPackage != null) {
             // Use project name for the widgetset by default
             String wsName = project.getProject().getName();
 
@@ -1549,9 +1572,7 @@ public class VaadinPluginUtil {
             wsName = wsName.replaceAll("[^A-Za-z_0-9]", "_");
 
             wsName += "Widgetset";
-            String fullyQualifiedName = appWithShortestPackageName
-                    .getPackageFragment().getElementName()
-                    + ".widgetset." + wsName;
+            String fullyQualifiedName = defaultPackage + "." + wsName;
 
             VaadinPluginUtil.logInfo("No widget set found, "
                     + fullyQualifiedName + " will be created...");
@@ -1574,18 +1595,18 @@ public class VaadinPluginUtil {
             }
 
             if (create) {
-                IResource pkg = appWithShortestPackageName.getPackageFragment()
-                        .getResource();
-                if (pkg instanceof IFolder) {
-                    IFolder wsFolder = ((IFolder) pkg).getFolder("widgetset");
-                    if (!wsFolder.exists()) {
-                        wsFolder.create(true, false, monitor);
-                    }
-                    IFile file = wsFolder.getFile(wsName + ".gwt.xml");
-                    ensureFileFromTemplate(file, "widgetsetxmlstub2.txt");
+                if (root != null) {
+                    // TODO monitor usage; test this
+                    IPackageFragment fragment = root.createPackageFragment(
+                            defaultPackage, true, monitor);
+                    if (fragment.getResource() instanceof IFolder) {
+                        IFolder wsFolder = (IFolder) fragment.getResource();
+                        IFile file = wsFolder.getFile(wsName + ".gwt.xml");
+                        ensureFileFromTemplate(file, "widgetsetxmlstub2.txt");
 
-                    // mark the created widgetset as dirty
-                    setWidgetsetDirty(project.getProject(), true);
+                        // mark the created widgetset as dirty
+                        setWidgetsetDirty(project.getProject(), true);
+                    }
                 }
             }
 
@@ -1598,7 +1619,7 @@ public class VaadinPluginUtil {
     /**
      * Find the (first) widgetset used in the project based on web.xml . If none
      * is mentioned there, return {@link #DEFAULT_WIDGET_SET_NAME}.
-     * 
+     *
      * @param project
      * @return first widgetset GWT module name used in web.xml or default
      *         widgetset
@@ -1659,7 +1680,7 @@ public class VaadinPluginUtil {
 
         List<String> widgetsets = new ArrayList<String>();
         for (int i = 0; i < packageFragmentRoots.length; i++) {
-            if (!(packageFragmentRoots[i] instanceof JarPackageFragmentRoot)) {
+            if (!packageFragmentRoots[i].isArchive()) {
                 IResource underlyingResource = packageFragmentRoots[i]
                         .getUnderlyingResource();
                 underlyingResource.accept(visitor);
@@ -1716,7 +1737,7 @@ public class VaadinPluginUtil {
         IPackageFragmentRoot[] packageFragmentRoots = project
                 .getPackageFragmentRoots();
         for (int i = 0; i < packageFragmentRoots.length; i++) {
-            if (!(packageFragmentRoots[i] instanceof JarPackageFragmentRoot)) {
+            if (!packageFragmentRoots[i].isArchive()) {
                 IResource underlyingResource = packageFragmentRoots[i]
                         .getUnderlyingResource();
                 underlyingResource.accept(visitor);

@@ -160,9 +160,11 @@ public class NewComponentWizard extends Wizard implements INewWizard {
         if (template.isVaadin62()) {
             // Create the widgetset if it did not exist. This way, the user can
             // immediately move the widgetset package instead of needing to
-            // compile widgetset first
+            // compile widgetset first; the package is determined based on the
+            // new widget's package
             widgetSetName = VaadinPluginUtil.getWidgetSet(
-                    page.getJavaProject(), true, monitor);
+                    page.getJavaProject(), true, page.getPackageFragmentRoot(),
+                    page.getPackageText(), monitor);
         } else {
             widgetSetName = page.getWidgetSetName();
         }

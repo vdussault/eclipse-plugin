@@ -149,15 +149,15 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
             IType projectApplication = null;
             if (applications.length > 0) {
                 projectApplication = applications[0];
+                IPackageFragment packageFragment = projectApplication
+                        .getPackageFragment();
+                setPackageFragment(packageFragment, true);
             } else {
                 // if there is no application, reset the fields of the page
                 setPackageFragment(null, true);
-                return;
+                // but continue and possibly set up the rest later
             }
 
-            IPackageFragment packageFragment = projectApplication
-                    .getPackageFragment();
-            setPackageFragment(packageFragment, true);
             setTypeName("MyComponent", true);
 
             is62Project = VaadinPluginUtil.isVaadin62(project);
