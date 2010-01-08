@@ -2241,8 +2241,11 @@ public class VaadinPluginUtil {
                 // cancelled or failed
                 setWidgetsetDirty(project, true);
 
-                newMessageStream
-                        .println("Widgetset compilation canceled or failed");
+                if (monitor.isCanceled()) {
+                    newMessageStream.println("Widgetset compilation canceled");
+                } else {
+                    newMessageStream.println("Widgetset compilation failed");
+                }
             }
         } finally {
             monitor.done();
