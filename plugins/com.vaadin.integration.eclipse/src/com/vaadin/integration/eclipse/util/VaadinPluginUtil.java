@@ -2112,7 +2112,11 @@ public class VaadinPluginUtil {
             if (verbose) {
                 args.add("-logLevel");
                 args.add("INFO");
+            } else {
+                args.add("-logLevel");
+                args.add("WARN");
             }
+
             args.add(moduleName);
 
             final String[] argsStr = new String[args.size()];
@@ -2196,6 +2200,11 @@ public class VaadinPluginUtil {
                 newMessageStream
                         .println("Executing compilations with parameter "
                                 + args);
+            } else {
+                myConsole.activate();
+
+                newMessageStream.println();
+                newMessageStream.println("Compiling widgetset " + moduleName);
             }
 
             InputStream inputStream = exec.getInputStream();
@@ -2223,9 +2232,17 @@ public class VaadinPluginUtil {
                         VaadinPlugin.PREFERENCES_WIDGETSET_COMPILATION_ETA,
                         new Date().getTime() - start);
                 prefStore.save();
+
+                if (!verbose) {
+                    // if verbose, the output of the compiler is sufficient
+                    newMessageStream.println("Widgetset compilation completed");
+                }
             } else {
-                // TODO cancelled or somehow else failed
+                // cancelled or failed
                 setWidgetsetDirty(project, true);
+
+                newMessageStream
+                        .println("Widgetset compilation canceled or failed");
             }
         } finally {
             monitor.done();
