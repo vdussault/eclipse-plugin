@@ -587,7 +587,7 @@ public class VaadinPluginUtil {
             monitor = new NullProgressMonitor();
         }
         try {
-            monitor.beginTask("Updating Vaadin libraries in the project", 11);
+            monitor.beginTask("Updating Vaadin libraries in the project", 12);
 
             // do nothing if correct version is already in the project
             Version currentVersion = getVaadinLibraryVersion(project);
@@ -620,10 +620,36 @@ public class VaadinPluginUtil {
                 if (currentVersion != null && vaadinJarVersion != null) {
                     // update launches
                     String oldVaadinJarName = currentVersion.getJarFileName();
-                    IPath vaadinJarPath = VaadinPluginUtil
-                            .findProjectVaadinJarPath(jproject);
+                    String newVaadinJarName = vaadinJarVersion.getJarFileName();
+                    // this is safer than findProjectVaadinJarPath() as we may
+                    // be in the process of changing the classpath
+                    IPath vaadinJarPath = getWebInfLibFolder(project).getFile(
+                            newVaadinJarName).getFullPath();
                     updateLaunchClassPath(project, oldVaadinJarName,
                             vaadinJarPath);
+                    monitor.worked(1);
+
+                    // check if Vaadin JAR is explicitly on classpath instead of
+                    // through the "magic" classpath container for WEB-INF/lib
+                    // => update classpath reference
+                    IClasspathEntry[] rawClasspath = jproject.getRawClasspath();
+                    List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
+                    for (IClasspathEntry entry : rawClasspath) {
+                        entries.add(entry);
+                    }
+
+                    IClasspathEntry vaadinEntry = JavaCore.newLibraryEntry(
+                            vaadinJarPath, null, null);
+
+                    // replace explicit reference to the Vaadin JAR if found,
+                    // otherwise do nothing
+                    replaceClassPathEntry(entries, vaadinEntry,
+                            new String[] { oldVaadinJarName }, false);
+
+                    IClasspathEntry[] entryArray = entries
+                            .toArray(new IClasspathEntry[entries.size()]);
+                    jproject.setRawClasspath(entryArray, null);
+
                     monitor.worked(1);
                 }
             } catch (JavaModelException e) {
@@ -862,11 +888,11 @@ public class VaadinPluginUtil {
                 // otherwise append new entry
                 String devJarName = "gwt-dev-" + getPlatform() + ".jar";
                 replaceClassPathEntry(entries, gwtDev, new String[] {
-                        "gwt-dev.jar", devJarName });
+                        "gwt-dev.jar", devJarName }, true);
 
                 // replace gwt-user.jar if found, otherwise append new entry
                 replaceClassPathEntry(entries, gwtUser,
-                        new String[] { "gwt-user.jar" });
+                        new String[] { "gwt-user.jar" }, true);
 
                 IClasspathEntry[] entryArray = entries
                         .toArray(new IClasspathEntry[entries.size()]);
@@ -917,9 +943,9 @@ public class VaadinPluginUtil {
     }
 
     // replace an existing class path entry (identified by last segment name)
-    // with a new one or append the new entry if not found
+    // with a new one or optionally append the new entry if not found
     private static void replaceClassPathEntry(List<IClasspathEntry> entries,
-            IClasspathEntry newEntry, String[] entryNames) {
+            IClasspathEntry newEntry, String[] entryNames, boolean addIfMissing) {
         boolean found = false;
         for (int i = 0; i < entries.size(); ++i) {
             for (String entryName : entryNames) {
@@ -930,7 +956,7 @@ public class VaadinPluginUtil {
                 }
             }
         }
-        if (!found && !entries.contains(newEntry)) {
+        if (addIfMissing && !found && !entries.contains(newEntry)) {
             entries.add(newEntry);
         }
     }
