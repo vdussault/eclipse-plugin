@@ -37,7 +37,14 @@ public abstract class AbstractVaadinNewTypeWizardPage extends NewTypeWizardPage 
         if (jp != null && VaadinFacetUtils.isVaadinProject(project)) {
             // this will also call setProjectInternal(IProject)
             try {
-                setPackageFragmentRoot(jp.getPackageFragmentRoots()[0], true);
+                IPackageFragmentRoot[] roots = jp.getPackageFragmentRoots();
+                for (IPackageFragmentRoot root : roots) {
+                    if (!root.isArchive()
+                            && root.getKind() == IPackageFragmentRoot.K_SOURCE) {
+                        setPackageFragmentRoot(root, true);
+                        break;
+                    }
+                }
             } catch (JavaModelException e1) {
                 VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
                         "Failed to select the project for the wizard", e1);
