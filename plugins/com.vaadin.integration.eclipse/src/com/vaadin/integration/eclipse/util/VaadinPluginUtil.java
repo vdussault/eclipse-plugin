@@ -1654,9 +1654,17 @@ public class VaadinPluginUtil {
                 defaultPackage = appWithShortestPackageName
                         .getPackageFragment().getElementName()
                         + ".widgetset";
-                root = project
-                        .getPackageFragmentRoot(appWithShortestPackageName
-                                .getResource());
+                // find the package fragment root in which the application is
+                // located to create the widgetset in the same source tree
+                IPath path = appWithShortestPackageName.getPath();
+                for (IPackageFragmentRoot newRoot = null; path.segmentCount() > 0; path = path
+                        .removeLastSegments(1)) {
+                    newRoot = project.findPackageFragmentRoot(path);
+                    if (newRoot != null) {
+                        root = newRoot;
+                        break;
+                    }
+                }
             }
         }
         if (defaultPackage != null) {
@@ -2301,9 +2309,8 @@ public class VaadinPluginUtil {
                 myConsole.activate();
 
                 newMessageStream.println();
-                newMessageStream
-                        .println("Executing compilations with parameter "
-                                + args);
+                newMessageStream.println("Executing compiler with parameters "
+                        + args);
             } else {
                 myConsole.activate();
 
@@ -2316,11 +2323,7 @@ public class VaadinPluginUtil {
                     new InputStreamReader(inputStream));
             String line = null;
             while ((line = bufferedReader2.readLine()) != null) {
-                if (verbose) {
-                    newMessageStream.println(line);
-                    // increment process a bit on each log line from gwt
-                    // compiler
-                }
+                newMessageStream.println(line);
             }
 
             int waitFor = exec.waitFor();
