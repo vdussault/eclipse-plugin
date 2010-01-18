@@ -625,7 +625,8 @@ public class VaadinPluginUtil {
                     // be in the process of changing the classpath
                     IPath vaadinJarPath = getWebInfLibFolder(project).getFile(
                             newVaadinJarName).getFullPath();
-                    updateLaunchClassPath(project, oldVaadinJarName,
+                    updateLaunchClassPath(project,
+                            new String[] { oldVaadinJarName },
                             vaadinJarPath);
                     monitor.worked(1);
 
@@ -904,10 +905,12 @@ public class VaadinPluginUtil {
 
                 // update classpaths also in launches
                 if (!isUsingUserDefinedGwt(jproject, true)) {
-                    updateLaunchClassPath(project, devJarName, devJarPath);
+                    updateLaunchClassPath(project, new String[] {
+                            "gwt-dev.jar", devJarName }, devJarPath);
                     monitor.worked(1);
 
-                    updateLaunchClassPath(project, "gwt-user.jar", userJarPath);
+                    updateLaunchClassPath(project,
+                            new String[] { "gwt-user.jar" }, userJarPath);
                     monitor.worked(1);
                 } else {
                     monitor.worked(2);
@@ -942,8 +945,25 @@ public class VaadinPluginUtil {
         }
     }
 
-    // replace an existing class path entry (identified by last segment name)
-    // with a new one or optionally append the new entry if not found
+    /**
+     * Replace an existing class path entry (identified by last segment name)
+     * with a new one or optionally append the new entry if not found.
+     *
+     * The position of the replaced element on the class path is kept unchanged.
+     * If a new entry is added, it is inserted at the beginning of the class
+     * path.
+     *
+     * @param entries
+     *            list of class path entries to modify
+     * @param newEntry
+     *            new entry
+     * @param entryNames
+     *            the first entry whose last path segment matches an element on
+     *            this list is replaced
+     * @param addIfMissing
+     *            true to add the entry if no entry matching entryNames was
+     *            found
+     */
     private static void replaceClassPathEntry(List<IClasspathEntry> entries,
             IClasspathEntry newEntry, String[] entryNames, boolean addIfMissing) {
         boolean found = false;
@@ -957,32 +977,36 @@ public class VaadinPluginUtil {
             }
         }
         if (addIfMissing && !found && !entries.contains(newEntry)) {
-            entries.add(newEntry);
+            entries.add(0, newEntry);
         }
     }
 
     /**
      * Update the class path for program execution launch configurations
-     * referring to the given JAR file in their arguments (not the class path of
-     * the launch itself!). This is called when a JAR is replaced by a different
-     * version which may have a different name or location.
+     * referring to any of the the given JAR file names in their arguments (not
+     * the class path of the launch itself!) or in the class path of a Java
+     * launch. This is called when a JAR is replaced by a different version
+     * which may have a different name or location.
      *
-     * The old JAR is identified by its file name without path. The JAR path is
-     * extracted by back-tracking from the JAR file name to the previous path
-     * separator and that full path is replaced with the given new path to a JAR
-     * file.
+     * The old JAR is identified by its file name without path. For external
+     * launches, the JAR path is extracted by back-tracking from the JAR file
+     * name to the previous path separator and that full path is replaced with
+     * the given new path to a JAR file.
      *
      * This is primarily meant for updating the generated widgetset compilation
-     * launches, but will also modify certain other kinds of launches.
+     * and hosted mode launches, but will also modify certain other kinds of
+     * launches.
      *
      * @throws CoreException
      */
-    private static void updateLaunchClassPath(IProject project, String jarName,
-            IPath jarPath) throws CoreException {
+    private static void updateLaunchClassPath(IProject project,
+            String[] jarNames, IPath jarPath) throws CoreException {
         // list all launches
         ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
-        ILaunchConfigurationType type = manager
+        ILaunchConfigurationType typeExternal = manager
                 .getLaunchConfigurationType(IExternalToolConstants.ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE);
+        ILaunchConfigurationType typeJava = manager
+                .getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
         // it seems it is not possible to get the project for an external launch
         // with the official APIs
         // ILaunchConfiguration[] launchConfigurations = manager
@@ -996,14 +1020,21 @@ public class VaadinPluginUtil {
                     && "launch".equals(resource.getFileExtension())) {
                 ILaunchConfiguration launchConfiguration = manager
                         .getLaunchConfiguration((IFile) resource);
-                if (launchConfiguration != null && launchConfiguration.exists()
-                        && type.equals(launchConfiguration.getType())) {
-                    String arguments = launchConfiguration.getAttribute(
-                            IExternalToolConstants.ATTR_TOOL_ARGUMENTS, "");
-                    if (arguments.contains(jarName)) {
-                        // update the classpath of a single launch
-                        updateLaunchClassPath(launchConfiguration, jarName,
-                                jarPath);
+                if (launchConfiguration != null && launchConfiguration.exists()) {
+                    if (typeExternal.equals(launchConfiguration.getType())) {
+                        String arguments = launchConfiguration.getAttribute(
+                                IExternalToolConstants.ATTR_TOOL_ARGUMENTS, "");
+                        for (String jarName : jarNames) {
+                            if (arguments.contains(jarName)) {
+                                // update the classpath of a single launch
+                                updateLaunchClassPath(launchConfiguration, jarName,
+                                        jarPath);
+                            }
+                        }
+                    } else if (typeJava.equals(launchConfiguration.getType())) {
+                        IJavaProject jproject = JavaCore.create(project);
+                        updateJavaLaunchClassPath(jproject,
+                                launchConfiguration, jarNames, jarPath);
                     }
                 }
             }
@@ -1048,6 +1079,53 @@ public class VaadinPluginUtil {
 
         workingCopy.setAttribute(IExternalToolConstants.ATTR_TOOL_ARGUMENTS,
                 result);
+
+        // save the launch
+        workingCopy.doSave();
+    }
+
+    private static void updateJavaLaunchClassPath(IJavaProject jproject,
+            ILaunchConfiguration launchConfiguration, String[] jarNames,
+            IPath jarPath) throws CoreException {
+        // update a launch
+        ILaunchConfigurationWorkingCopy workingCopy = launchConfiguration
+                .getWorkingCopy();
+
+        boolean modified = false;
+
+        List<String> classPath = workingCopy.getAttribute(
+                IJavaLaunchConfigurationConstants.ATTR_CLASSPATH,
+                new ArrayList<String>());
+        List<String> newClassPath = new ArrayList<String>();
+
+        // any of the JAR file names
+        StringBuilder jarNamesRegexp = new StringBuilder();
+        for (String jarName : jarNames) {
+            if (jarNamesRegexp.length() > 0) {
+                jarNamesRegexp.append("|");
+            }
+            jarNamesRegexp.append(jarName);
+        }
+        Pattern pattern = Pattern.compile("externalArchive=\".*[/\\\\]("
+                + jarNamesRegexp.toString() + ")\".*");
+        Matcher matcher = pattern.matcher("");
+        for (String cpMemento : classPath) {
+            matcher.reset(cpMemento);
+            if (matcher.find()) {
+                // new memento from path
+                String newMemento = JavaRuntime
+                        .newArchiveRuntimeClasspathEntry(jarPath).getMemento();
+                newClassPath.add(newMemento);
+                modified = true;
+            } else {
+                newClassPath.add(cpMemento);
+            }
+        }
+
+        if (modified) {
+            workingCopy.setAttribute(
+                    IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, newClassPath);
+        }
 
         // save the launch
         workingCopy.doSave();
@@ -2538,10 +2616,11 @@ public class VaadinPluginUtil {
 
             List<String> classPath = new ArrayList<String>();
 
-            // GWT libraries should ideally come first, but omitted to make
-            // modifications for OOPHM easier
-            // classPath.add(JavaRuntime.newArchiveRuntimeClasspathEntry(getGWTDevJarPath(jproject)).getMemento());
-            // classPath.add(JavaRuntime.newArchiveRuntimeClasspathEntry(getGWTUserJarPath(jproject)).getMemento());
+            // GWT libraries should come first
+            classPath.add(JavaRuntime.newArchiveRuntimeClasspathEntry(
+                    getGWTDevJarPath(jproject)).getMemento());
+            classPath.add(JavaRuntime.newArchiveRuntimeClasspathEntry(
+                    getGWTUserJarPath(jproject)).getMemento());
 
             // default classpath reference, instead of "exploding"
             // JavaRuntime.computeUnresolvedRuntimeClasspath()
