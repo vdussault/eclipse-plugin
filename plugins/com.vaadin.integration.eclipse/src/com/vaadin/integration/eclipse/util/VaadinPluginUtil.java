@@ -2611,7 +2611,7 @@ public class VaadinPluginUtil {
                     IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
                     arguments);
 
-            String vmargs = "-Xmx512M";
+            String vmargs = "-Xmx512M -XX:MaxPermSize=256M";
             workingCopy
                     .setAttribute(
                             IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
