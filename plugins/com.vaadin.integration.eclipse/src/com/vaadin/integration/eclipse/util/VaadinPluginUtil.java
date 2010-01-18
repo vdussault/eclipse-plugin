@@ -2302,6 +2302,8 @@ public class VaadinPluginUtil {
                 conMan.addConsoles(new IConsole[] { myConsole });
             }
 
+            myConsole.clearConsole();
+
             MessageConsoleStream newMessageStream = myConsole
                     .newMessageStream();
 
