@@ -4,7 +4,9 @@ import java.io.IOException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.ui.jarpackager.IJarBuilder;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
@@ -24,6 +26,11 @@ public class DirectoryPackageData extends JarPackageData {
 
     // TODO Vaadin widgetsets for the addon - better typing?
     private String widgetsets;
+    /**
+     * Project relative path to the webcontent directory, to be skipped as a
+     * prefix when exporting JARs.
+     */
+    private IPath webcontentPath;
 
     /**
      * Constructor with default manifest provider.
@@ -50,6 +57,9 @@ public class DirectoryPackageData extends JarPackageData {
         if (jproject == null) {
             return;
         }
+
+        webcontentPath = VaadinPluginUtil.getWebContentFolder(
+                jproject.getProject()).getProjectRelativePath();
 
         setExportJavaFiles(true);
 
@@ -93,6 +103,12 @@ public class DirectoryPackageData extends JarPackageData {
         if (getWidgetsets() == null) {
             setWidgetsets(VaadinPluginUtil.findWidgetSetsString(jproject, null));
         }
+    }
+
+    @Override
+    public IJarBuilder getJarBuilder() {
+        IJarBuilder builder = super.getJarBuilder();
+        return new DirectoryJarBuilder(builder, webcontentPath);
     }
 
     public String getImplementationTitle() {
