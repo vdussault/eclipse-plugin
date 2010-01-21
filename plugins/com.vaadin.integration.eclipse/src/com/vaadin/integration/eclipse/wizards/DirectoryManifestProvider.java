@@ -54,8 +54,14 @@ public class DirectoryManifestProvider extends ManifestProvider {
                     directoryPackage.getImplementationVendor());
             attributes.putValue(MANIFEST_LICENSE_TITLE,
                     directoryPackage.getLicenseTitle());
-            attributes.putValue(MANIFEST_VAADIN_WIDGETSETS, directoryPackage
-                    .getWidgetsets());
+            if (directoryPackage.getWidgetsets() != null
+                    && !"".equals(directoryPackage.getWidgetsets().trim())) {
+                attributes.putValue(MANIFEST_VAADIN_WIDGETSETS, directoryPackage
+                        .getWidgetsets());
+            } else {
+                attributes.remove(new Attributes.Name(
+                        MANIFEST_VAADIN_WIDGETSETS));
+            }
         }
         return manifest;
     }
