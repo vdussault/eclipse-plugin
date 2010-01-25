@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -93,9 +94,23 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                 // TODO #3590 clean GWT module
                 if (!resource.getName()
                         .matches(DownloadUtils.VAADIN_JAR_REGEXP)) {
-                    VaadinPluginUtil.setWidgetsetDirty(getProject(), true);
-                    WidgetsetBuildManager.runWidgetSetBuildTool(getProject(),
-                            false, monitor);
+                    boolean hasWidgetset = false;
+                    try {
+                        hasWidgetset = VaadinPluginUtil.hasWidgetSets(JavaCore
+                                .create(getProject()),
+                                new NullProgressMonitor());
+                    } catch (CoreException e) {
+                        VaadinPluginUtil
+                                .handleBackgroundException(
+                                        IStatus.WARNING,
+                                        "Could not check if project has widgetsets, not marking as dirty",
+                                        e);
+                    }
+                    if (hasWidgetset) {
+                        VaadinPluginUtil.setWidgetsetDirty(getProject(), true);
+                        WidgetsetBuildManager.runWidgetSetBuildTool(
+                                getProject(), false, monitor);
+                    }
                 }
             } else if (resource.exists()
                     && (isGwtModule(resource) || isClientSideJavaClass(resource))) {

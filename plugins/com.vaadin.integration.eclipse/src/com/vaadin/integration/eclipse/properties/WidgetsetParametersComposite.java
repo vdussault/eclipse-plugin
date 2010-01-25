@@ -182,6 +182,8 @@ public class WidgetsetParametersComposite extends Composite {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 VaadinPluginUtil.createHostedModeLaunch(project);
+                // need to set as dirty for Vaadin 6.2 and earlier (need to
+                // recompile with OOPHM)
                 VaadinPluginUtil.setWidgetsetDirty(project, true);
             }
         });
