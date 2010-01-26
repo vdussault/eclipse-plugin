@@ -31,6 +31,7 @@ public class WidgetsetParametersComposite extends Composite {
     private String OBF_LABEL = "Obfuscated";
     private String PRETTY_LABEL = "Pretty";
     private String DETAILED_LABEL = "Detailed";
+    private String DRAFT_LABEL = "Pretty + draft compile (Vaadin 6.3+)";
 
     public WidgetsetParametersComposite(Composite parent, int style) {
         super(parent, style);
@@ -62,6 +63,8 @@ public class WidgetsetParametersComposite extends Composite {
             styleCombo.setText(DETAILED_LABEL);
         } else if ("PRETTY".equals(style)) {
             styleCombo.setText(PRETTY_LABEL);
+        } else if ("DRAFT".equals(style)) {
+            styleCombo.setText(DRAFT_LABEL);
         } else {
             styleCombo.setText(OBF_LABEL);
         }
@@ -119,6 +122,7 @@ public class WidgetsetParametersComposite extends Composite {
         styleCombo.add(OBF_LABEL);
         styleCombo.add(PRETTY_LABEL);
         styleCombo.add(DETAILED_LABEL);
+        styleCombo.add(DRAFT_LABEL);
 
         // compiler parallelism
 
@@ -200,6 +204,8 @@ public class WidgetsetParametersComposite extends Composite {
             return "DETAILED";
         } else if (PRETTY_LABEL.equals(text)) {
             return "PRETTY";
+        } else if (DRAFT_LABEL.equals(text)) {
+            return "DRAFT";
         } else {
             return "OBF";
         }

@@ -2209,7 +2209,11 @@ public class VaadinPluginUtil {
 
             String style = prefStore
                     .getString(VaadinPlugin.PREFERENCES_WIDGETSET_STYLE);
-            if (!"".equals(style)) {
+            if ("DRAFT".equals(style)) {
+                args.add("-style");
+                args.add("PRETTY");
+                args.add("-draftCompile");
+            } else if (!"".equals(style)) {
                 args.add("-style");
                 args.add(style);
             }
