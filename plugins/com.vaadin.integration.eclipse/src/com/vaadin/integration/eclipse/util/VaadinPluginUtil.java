@@ -2616,6 +2616,9 @@ public class VaadinPluginUtil {
                     arguments);
 
             String vmargs = "-Xmx512M -XX:MaxPermSize=256M";
+            if (getPlatform().equals("mac")) {
+                vmargs = vmargs + " -XstartOnFirstThread";
+            }
             workingCopy
                     .setAttribute(
                             IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
