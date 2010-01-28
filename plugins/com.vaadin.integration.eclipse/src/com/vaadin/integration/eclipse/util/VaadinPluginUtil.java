@@ -2220,7 +2220,10 @@ public class VaadinPluginUtil {
 
             String parallelism = prefStore
                     .getString(VaadinPlugin.PREFERENCES_WIDGETSET_PARALLELISM);
-            if (!"".equals(parallelism)) {
+            if ("".equals(parallelism)) {
+                args.add("-localWorkers");
+                args.add("" + Runtime.getRuntime().availableProcessors());
+            } else {
                 args.add("-localWorkers");
                 args.add(parallelism);
             }
