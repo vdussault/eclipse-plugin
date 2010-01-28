@@ -287,14 +287,15 @@ public class WidgetsetBuildManager {
     /**
      * Ask the user whether he wants the widgetset(s) to be compiled and trigger
      * a build if necessary.
-     *
+     * 
      * This method can be called in a background thread, and returns immediately
      * unless <code>synchronous</code> is <code>true</code>.
-     *
+     * 
      * Multiple concurrent builds for a project are not allowed, but different
      * projects can be built concurrently. All widgetset builds for the project
-     * are blocked until the user answers the question.
-     *
+     * are blocked until the user answers the question. Requests to compile
+     * widgetsets in closed projects are silently ignored.
+     * 
      * @param project
      *            the project whose widgetset(s) to compile
      * @param synchronous
@@ -424,6 +425,12 @@ public class WidgetsetBuildManager {
         // if no more than one widgetset in the project, compile it (or
         // create a new one)
         IProject project = jproject.getProject();
+        if (!project.isOpen()) {
+            VaadinPluginUtil
+                    .logInfo("Skipped widgetset compilation for the closed project "
+                            + project.getName());
+            return;
+        }
         try {
             monitor.beginTask("Compiling widgetsets in project "
                     + project.getName(), 30);
@@ -598,6 +605,12 @@ public class WidgetsetBuildManager {
     public static void compileWidgetset(IFile file, IProgressMonitor monitor)
             throws CoreException, IOException, InterruptedException {
         IProject project = file.getProject();
+        if (!project.isOpen()) {
+            VaadinPluginUtil
+                    .logInfo("Skipped widgetset compilation for the closed project "
+                            + project.getName());
+            return;
+        }
         IJavaProject jproject = JavaCore.create(project);
 
         IPackageFragmentRoot[] allPackageFragmentRoots = jproject
@@ -630,7 +643,8 @@ public class WidgetsetBuildManager {
      * @return
      */
     private static boolean isWidgetsetBuildingSuspended(final IProject project) {
-        return projectWidgetsetBuildSuspended.contains(project)
+        return project == null || !project.isOpen()
+                || projectWidgetsetBuildSuspended.contains(project)
                 || isWidgetsetBuildsSuspended(project);
     }
 
