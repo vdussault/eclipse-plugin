@@ -2190,7 +2190,8 @@ public class VaadinPluginUtil {
 
             args.add("-Djava.awt.headless=true");
             args.add("-Xss8M");
-            args.add("-Xmx500M");
+            args.add("-Xmx512M");
+            args.add("-XX:MaxPermSize=512M");
 
             if (getPlatform().equals("mac")) {
                 args.add("-XstartOnFirstThread");
