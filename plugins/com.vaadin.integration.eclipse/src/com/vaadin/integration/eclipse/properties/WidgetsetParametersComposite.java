@@ -178,7 +178,7 @@ public class WidgetsetParametersComposite extends Composite {
 
         // hosted mode launch creation button on the right
         Button button = new Button(hosted, SWT.NULL);
-        button.setText("Create hosted mode launch");
+        button.setText("Create development mode launch");
         button
                 .setLayoutData(new GridData(SWT.RIGHT, SWT.BEGINNING, true,
                         false));
