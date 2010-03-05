@@ -385,6 +385,24 @@ public class VaadinPluginUtil {
 
     }
 
+    public static boolean isGwt20(IProject project) {
+        IJavaProject jproject = JavaCore.create(project);
+        if (jproject != null) {
+            try {
+                if (jproject.findType("com.google.gwt.dev.DevMode") != null) {
+                    return true;
+                }
+            } catch (JavaModelException e) {
+                handleBackgroundException(
+                        IStatus.WARNING,
+                        "Failed to check the GWT version used in the project, assuming 1.x",
+                        e);
+            }
+        }
+        // default value
+        return false;
+    }
+
     private static IPackageFragmentRoot getJavaFragmentRoot(IProject project)
             throws CoreException {
         try {
@@ -2552,9 +2570,7 @@ public class VaadinPluginUtil {
             IJavaProject jproject = JavaCore.create(project);
 
             // check GWT version
-            String gwtVersion = getRequiredGWTVersionForProject(jproject);
-            boolean isGwt20 = gwtVersion
-                    .matches(DownloadUtils.GWT2_VERSION_REGEXP);
+            boolean isGwt20 = isGwt20(project);
 
             String launchName = "GWT " + (isGwt20 ? "development" : "hosted")
                     + " mode for " + project.getName();
@@ -2620,7 +2636,7 @@ public class VaadinPluginUtil {
                     arguments);
 
             String vmargs = "-Xmx512M -XX:MaxPermSize=256M";
-            if (getPlatform().equals("mac")) {
+            if (getPlatform().equals("mac") && !isGwt20) {
                 vmargs = vmargs + " -XstartOnFirstThread";
             }
             workingCopy
