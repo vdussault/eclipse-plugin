@@ -166,13 +166,13 @@
    <extension
          point="org.eclipse.ui.exportWizards">
       <wizard
-            name="Vaadin Directory Package"
+            name="Vaadin Add-on Package"
             icon="icons/vaadin-icon-16.png"
             class="com.vaadin.integration.eclipse.wizards.DirectoryPackageWizard"
             category="com.vaadin"
             id="com.vaadin.integration.eclipse.wizards.DirectoryPackageWizard">
          <description>
-            Configure and export a Vaadin Directory package JAR.
+            Configure and export a Vaadin add-on package JAR.
 Any metadata changes made will be stored in the project manifest.
          </description>
          <selection

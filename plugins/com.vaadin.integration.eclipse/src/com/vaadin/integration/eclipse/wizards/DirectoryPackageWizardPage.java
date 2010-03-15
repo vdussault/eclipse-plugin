@@ -70,7 +70,7 @@ public class DirectoryPackageWizardPage extends
         this.directoryPackage = directoryPackage;
 
         setTitle(DirectoryPackageWizard.WIZARD_TITLE);
-        setDescription("Define which resources should be exported into the Vaadin directory package.");
+        setDescription("Define which resources should be exported into the Vaadin add-on package.");
 
         initialSelection = selection;
     }

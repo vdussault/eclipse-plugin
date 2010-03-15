@@ -41,19 +41,19 @@ import org.eclipse.ui.IWorkbench;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 /**
- * A wizard to edit the metadata of a directory package, store it to the project
- * manifest and export a directory package (internally a JAR).
- *
+ * A wizard to edit the metadata of a Vaadin add-on package, store it to the
+ * project manifest and export a directory package (internally a JAR).
+ * 
  * This is a simplified and customized variant of the standard JAR export
  * wizard. Cannot inherit {@link JarPackageWizard} as it is not designed to be
  * extended.
- *
+ * 
  * Some code is duplicated from Eclipse JDT jarpackager as it has limited
  * visibility or is not designed to be extended.
  */
 public class DirectoryPackageWizard extends JarPackageWizard {
 
-    public static final String WIZARD_TITLE = "Directory Package Export";
+    public static final String WIZARD_TITLE = "Vaadin Add-on Package Export";
 
     // standard pattern for saving dialog settings
     private static String DIALOG_SETTINGS_KEY = "VaadinDirectoryPackageWizard"; //$NON-NLS-1$
@@ -226,7 +226,7 @@ public class DirectoryPackageWizard extends JarPackageWizard {
             if (ex.getTargetException() != null) {
                 ExceptionHandler
                         .handle(ex, getShell(), WIZARD_TITLE,
-                                "Directory package creation failed. See details for additional information.");
+                                "Add-on package creation failed. See details for additional information.");
                 return false;
             }
         }
