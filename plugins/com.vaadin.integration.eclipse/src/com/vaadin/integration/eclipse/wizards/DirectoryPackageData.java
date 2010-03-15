@@ -21,8 +21,6 @@ public class DirectoryPackageData extends JarPackageData {
 
     private String implementationTitle;
     private String implementationVersion;
-    private String implementationVendor;
-    private String licenseTitle;
 
     // TODO Vaadin widgetsets for the addon - better typing?
     private String widgetsets;
@@ -86,18 +84,11 @@ public class DirectoryPackageData extends JarPackageData {
             DirectoryManifestProvider.loadDirectoryAttributesFromManifest(this);
         }
         // if nothing loaded, set default values
-        // TODO defaults?
         if (getImplementationTitle() == null) {
             setImplementationTitle(jproject.getProject().getName());
         }
         if (getImplementationVersion() == null) {
-            setImplementationVersion("1.0");
-        }
-        if (getImplementationVendor() == null) {
-            setImplementationVendor("-");
-        }
-        if (getLicenseTitle() == null) {
-            setLicenseTitle("proprietary");
+            setImplementationVersion("1.0.0");
         }
 
         if (getWidgetsets() == null) {
@@ -125,22 +116,6 @@ public class DirectoryPackageData extends JarPackageData {
 
     public void setImplementationVersion(String implementationVersion) {
         this.implementationVersion = implementationVersion;
-    }
-
-    public String getImplementationVendor() {
-        return implementationVendor;
-    }
-
-    public void setImplementationVendor(String implementationVendor) {
-        this.implementationVendor = implementationVendor;
-    }
-
-    public String getLicenseTitle() {
-        return licenseTitle;
-    }
-
-    public void setLicenseTitle(String licenseTitle) {
-        this.licenseTitle = licenseTitle;
     }
 
     public void setWidgetsets(String widgetsets) {

@@ -20,8 +20,6 @@ public class DirectoryManifestProvider extends ManifestProvider {
     public static final String MANIFEST_VAADIN_PACKAGE_VERSION = "Vaadin-Package-Version";
     public static final String MANIFEST_IMPLEMENTATION_TITLE = "Implementation-Title";
     public static final String MANIFEST_IMPLEMENTATION_VERSION = "Implementation-Version";
-    public static final String MANIFEST_IMPLEMENTATION_VENDOR = "Implementation-Vendor";
-    public static final String MANIFEST_LICENSE_TITLE = "Vaadin-License-Title";
 
     public static final String MANIFEST_VAADIN_WIDGETSETS = "Vaadin-Widgetsets";
 
@@ -50,10 +48,6 @@ public class DirectoryManifestProvider extends ManifestProvider {
                     directoryPackage.getImplementationTitle());
             attributes.putValue(MANIFEST_IMPLEMENTATION_VERSION,
                     directoryPackage.getImplementationVersion());
-            attributes.putValue(MANIFEST_IMPLEMENTATION_VENDOR,
-                    directoryPackage.getImplementationVendor());
-            attributes.putValue(MANIFEST_LICENSE_TITLE,
-                    directoryPackage.getLicenseTitle());
             if (directoryPackage.getWidgetsets() != null
                     && !"".equals(directoryPackage.getWidgetsets().trim())) {
                 attributes.putValue(MANIFEST_VAADIN_WIDGETSETS, directoryPackage
@@ -87,10 +81,6 @@ public class DirectoryManifestProvider extends ManifestProvider {
                     .getValue(MANIFEST_IMPLEMENTATION_TITLE));
             directoryPackage.setImplementationVersion(attributes
                     .getValue(MANIFEST_IMPLEMENTATION_VERSION));
-            directoryPackage.setImplementationVendor(attributes
-                    .getValue(MANIFEST_IMPLEMENTATION_VENDOR));
-            directoryPackage.setLicenseTitle(attributes
-                    .getValue(MANIFEST_LICENSE_TITLE));
             directoryPackage.setWidgetsets(attributes
                     .getValue(MANIFEST_VAADIN_WIDGETSETS));
         } finally {

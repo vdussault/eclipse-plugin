@@ -51,8 +51,6 @@ public class DirectoryPackageWizardPage extends
     private DirectoryPackageInputGroup inputGroup;
     private Text implementationTitleText;
     private Text implementationVersionText;
-    private Text implementationVendorText;
-    private Text licenseTitleText;
     private Text widgetsetsText;
 
     private IStructuredSelection initialSelection;
@@ -201,28 +199,36 @@ public class DirectoryPackageWizardPage extends
         implementationTitleText.addListener(SWT.Modify, this);
 
         label = new Label(manifestGroup, SWT.NONE);
+        label.setText("    Name of the add-on. Used in Vaadin Directory.");
+        GridData gd = new GridData(SWT.LEFT, SWT.TOP, true, false);
+        gd.horizontalSpan = 2;
+        label.setLayoutData(gd);
+
+        label = new Label(manifestGroup, SWT.NONE);
         label.setText("Implementation version:");
         implementationVersionText = new Text(manifestGroup, SWT.BORDER);
         implementationVersionText.setLayoutData(gdhfill());
         implementationVersionText.addListener(SWT.Modify, this);
 
         label = new Label(manifestGroup, SWT.NONE);
-        label.setText("Implementation vendor:");
-        implementationVendorText = new Text(manifestGroup, SWT.BORDER);
-        implementationVendorText.setLayoutData(gdhfill());
-        implementationVendorText.addListener(SWT.Modify, this);
-
-        label = new Label(manifestGroup, SWT.NONE);
-        label.setText("License title:");
-        licenseTitleText = new Text(manifestGroup, SWT.BORDER);
-        licenseTitleText.setLayoutData(gdhfill());
-        licenseTitleText.addListener(SWT.Modify, this);
+        label
+                .setText("    Version of the addon. A \"major.minor.revision\" format is suggested.");
+        gd = new GridData(SWT.LEFT, SWT.TOP, true, false);
+        gd.horizontalSpan = 2;
+        label.setLayoutData(gd);
 
         label = new Label(manifestGroup, SWT.NONE);
         label.setText("Widgetsets:");
         widgetsetsText = new Text(manifestGroup, SWT.BORDER);
         widgetsetsText.setLayoutData(gdhfill());
         widgetsetsText.addListener(SWT.Modify, this);
+
+        label = new Label(manifestGroup, SWT.NONE);
+        label
+                .setText("    Comma separated list of widgetsets included in the add-on. Refers to the GWT xml files (.gwt.xml).");
+        gd = new GridData(SWT.LEFT, SWT.TOP, true, false);
+        gd.horizontalSpan = 2;
+        label.setLayoutData(gd);
     }
 
     /**
@@ -238,9 +244,6 @@ public class DirectoryPackageWizardPage extends
                 .getText());
         directoryPackage.setImplementationVersion(implementationVersionText
                 .getText());
-        directoryPackage.setImplementationVendor(implementationVendorText
-                .getText());
-        directoryPackage.setLicenseTitle(licenseTitleText.getText());
         directoryPackage.setWidgetsets(widgetsetsText.getText());
 
         super.updateModel();
@@ -262,9 +265,6 @@ public class DirectoryPackageWizardPage extends
                 .getImplementationTitle());
         implementationVersionText.setText(directoryPackage
                 .getImplementationVersion());
-        implementationVendorText.setText(directoryPackage
-                .getImplementationVendor());
-        licenseTitleText.setText(directoryPackage.getLicenseTitle());
         widgetsetsText.setText(directoryPackage.getWidgetsets());
     }
 
