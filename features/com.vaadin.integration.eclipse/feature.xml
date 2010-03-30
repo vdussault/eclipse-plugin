@@ -2,7 +2,7 @@
 <feature
       id="com.vaadin.integration.eclipse"
       label="Vaadin Eclipse Integration"
-      version="1.2.0.qualifier"
+      version="1.2.1.qualifier"
       provider-name="IT Mill Ltd"
       plugin="com.vaadin.integration.eclipse">
 
