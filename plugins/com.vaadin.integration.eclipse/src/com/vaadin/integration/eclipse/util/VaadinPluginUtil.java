@@ -1813,17 +1813,20 @@ public class VaadinPluginUtil {
             if (!packageFragmentRoots[i].isArchive()) {
                 IResource underlyingResource = packageFragmentRoots[i]
                         .getUnderlyingResource();
-                underlyingResource.accept(visitor);
+                if (underlyingResource != null) {
+                    underlyingResource.accept(visitor);
 
-                for (IPath path : paths) {
-                    String wspath = path.toString();
-                    IPath fullPath = underlyingResource.getFullPath();
-                    wspath = wspath.replace(fullPath.toString() + "/", "");
-                    wspath = wspath.replaceAll("/", ".").replaceAll(".gwt.xml",
-                            "");
-                    widgetsets.add(wspath);
+                    for (IPath path : paths) {
+                        String wspath = path.toString();
+                        IPath fullPath = underlyingResource.getFullPath();
+                        wspath = wspath.replace(fullPath.toString() + "/", "");
+                        wspath = wspath.replaceAll("/", ".").replaceAll(
+                                ".gwt.xml", "");
+                        widgetsets.add(wspath);
+                    }
+
+                    paths.clear();
                 }
-                paths.clear();
             }
         }
 
