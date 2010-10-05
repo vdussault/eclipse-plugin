@@ -59,7 +59,29 @@
          <fixed facet="jst.web"/>
          <fixed facet="com.vaadin.integration.eclipse.core"/>
       </template>
-      
+   </extension>
+   <extension point="org.eclipse.wst.common.project.facet.core.presets">
+      <static-preset id="com.vaadin.integration.eclipse.preset15" extends="default.configuration">
+         <label>Vaadin, Java 5, Servlet 2.4</label>
+         <description>Vaadin project running on Java 5.0, Servlet 2.4.</description>
+         <facet id="jst.java" version="5.0"/>
+         <facet id="jst.web" version="2.4"/>
+         <facet id="com.vaadin.integration.eclipse.core" version="1.0"/>
+      </static-preset>
+      <static-preset id="com.vaadin.integration.eclipse.preset16s24" extends="default.configuration">
+         <label>Vaadin, Java 6, Servlet 2.4</label>
+         <description>Vaadin project running on Java 6.0, Servlet 2.4 .</description>
+         <facet id="jst.java" version="6.0"/>
+         <facet id="jst.web" version="2.4"/>
+         <facet id="com.vaadin.integration.eclipse.core" version="1.0"/>
+      </static-preset>
+      <static-preset id="com.vaadin.integration.eclipse.preset16s30" extends="default.configuration">
+         <label>Vaadin, Java 6, Servlet 3.0</label>
+         <description>Vaadin project running on Java 6.0, Servlet 3.0 .</description>
+         <facet id="jst.java" version="6.0"/>
+         <facet id="jst.web" version="3.0"/>
+         <facet id="com.vaadin.integration.eclipse.core" version="1.0"/>
+      </static-preset>
    </extension>
    <extension
          point="org.eclipse.wst.common.project.facet.core.runtimes">

@@ -5,8 +5,11 @@ import org.eclipse.jst.servlet.ui.project.facet.WebProjectWizard;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IFacetedProjectTemplate;
+import org.eclipse.wst.common.project.facet.core.IFacetedProjectWorkingCopy;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
+import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
 
+import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.configuration.VaadinProjectCreationDataModelProvider;
 
 /**
@@ -49,6 +52,15 @@ public class VaadinProjectWizard extends WebProjectWizard {
     @Override
     protected IWizardPage createFirstPage() {
         return new VaadinProjectFirstPage(model, "first.page"); //$NON-NLS-1$
+    }
+
+    @Override
+    protected void setRuntimeAndDefaultFacets(IRuntime runtime) {
+        super.setRuntimeAndDefaultFacets(runtime);
+
+        // select the Vaadin preset configuration by default
+        final IFacetedProjectWorkingCopy dm = getFacetedProjectWorkingCopy();
+        dm.setSelectedPreset(VaadinFacetUtils.VAADIN_PROJECT_DEFAULT_PRESET_ID);
     }
 
 }

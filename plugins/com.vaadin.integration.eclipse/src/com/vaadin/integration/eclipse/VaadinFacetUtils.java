@@ -10,7 +10,7 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 public class VaadinFacetUtils {
     public static final String VAADIN_FACET_ID = "com.vaadin.integration.eclipse.core";
-    public static final String VAADIN_PROJECT_PRESET_ID = "com.vaadin.integration.eclipse.preset";
+    public static final String VAADIN_PROJECT_DEFAULT_PRESET_ID = "com.vaadin.integration.eclipse.preset15";
 
     public static final IProjectFacet VAADIN_FACET = ProjectFacetsManager
             .getProjectFacet(VAADIN_FACET_ID);
