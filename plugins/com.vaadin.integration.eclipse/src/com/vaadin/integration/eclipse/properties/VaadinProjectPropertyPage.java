@@ -30,8 +30,8 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
+import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 /**
  * Property page grouping Vaadin related project properties.
@@ -51,9 +51,11 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             IProject project = getVaadinProject();
             vaadinVersionComposite.setProject(project);
             widgetsetComposite.setProject(project);
+            useVaadinButton.setEnabled(VaadinPluginUtil
+                    .isVaadinJarManagedByPlugin(project));
 
-            useVaadinButton.setSelection(vaadinVersionComposite
-                    .getSelectedVersion() != null);
+            useVaadinButton.setSelection(useVaadinButton.isEnabled()
+                    && vaadinVersionComposite.getSelectedVersion() != null);
         } catch (CoreException ex) {
             VaadinPluginUtil
                     .handleBackgroundException(
@@ -64,7 +66,9 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             useVaadinButton.setSelection(false);
         }
 
-        vaadinVersionComposite.enableVaadin(useVaadinButton.getSelection());
+        vaadinVersionComposite.enablePluginManagedVaadin(useVaadinButton.getSelection());
+
+        // TODO validate liferay path on the fly
     }
 
     @Override
@@ -86,6 +90,12 @@ public class VaadinProjectPropertyPage extends PropertyPage {
 
             ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
                     new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
+
+            // save Liferay path (if a liferay project)
+            if (VaadinPluginUtil.isLiferayProject(project)) {
+                VaadinPluginUtil.setLiferayPath(project, vaadinVersionComposite
+                        .getLiferayPathField().getText());
+            }
 
             // save widgetset compilation parameters
 
@@ -151,88 +161,104 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
                     "Failed to save widgetset compilation parameters.", e);
             return false;
+        } catch (CoreException e) {
+            VaadinPluginUtil.displayError("Failed to save Liferay path.", e,
+                    getShell());
+            VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                    "Failed to save Liferay path.", e);
+            return false;
         }
 
-        final Version newVaadinVersion = useVaadinButton.getSelection() ? vaadinVersionComposite
-                .getSelectedVersion()
-                : null;
+        if (VaadinPluginUtil.isVaadinJarManagedByPlugin(project)) {
+            final Version newVaadinVersion = useVaadinButton.getSelection() ? vaadinVersionComposite
+                    .getSelectedVersion() : null;
 
-        // replace the Vaadin JAR in the project if it has changed
-        try {
-            Version currentVaadinVersion = VaadinPluginUtil
-                    .getVaadinLibraryVersion(project);
+            // replace the Vaadin JAR in the project if it has changed
+            // - add new JAR in WEB-INF/lib without modifying the reference to
+            // the old one if there is already a Vaadin JAR with a different
+            // version elsewhere on the classpath, and do nothing if there is a
+            // Vaadin JAR with the correct version on the classpath
+            try {
+                Version currentVaadinVersion = VaadinPluginUtil
+                        .getVaadinLibraryVersion(project, true);
 
-            if (useVaadinButton.getSelection()) {
-                VaadinFacetUtils.upgradeFacet(project,
-                        VaadinFacetUtils.VAADIN_FACET_CURRENT);
-                VaadinPluginUtil.ensureWidgetsetNature(project);
-            }
-
-            if ((newVaadinVersion == null && currentVaadinVersion != null)
-                    || (newVaadinVersion != null && !newVaadinVersion
-                            .equals(currentVaadinVersion))) {
-                // confirm replacement, return false if not confirmed
-                String message;
-                if (currentVaadinVersion != null && newVaadinVersion == null) {
-                    message = "Do you want to remove the Vaadin version "
-                            + currentVaadinVersion.getVersionString()
-                            + " from the project " + project.getName() + "?";
-                } else if (currentVaadinVersion == null) {
-                    message = "Do you want to add the Vaadin version "
-                            + newVaadinVersion.getVersionString()
-                            + " to the project " + project.getName() + "?";
-                } else {
-                    message = "Do you want to change the Vaadin version from "
-                            + currentVaadinVersion.getVersionString() + " to "
-                            + newVaadinVersion.getVersionString()
-                            + " in the project " + project.getName() + "?";
-                }
-                if (!MessageDialog.openConfirm(getShell(),
-                        "Confirm Vaadin version change", message)) {
-                    return false;
-                }
-
-                widgetsetDirty = true;
-            }
-
-            IRunnableWithProgress op = new IRunnableWithProgress() {
-                public void run(IProgressMonitor monitor)
-                        throws InvocationTargetException {
-                    try {
-                        VaadinPluginUtil.updateVaadinLibraries(project,
-                                newVaadinVersion, monitor);
-                    } catch (CoreException e) {
-                        throw new InvocationTargetException(e);
-                    } finally {
-                        monitor.done();
+                if (useVaadinButton.getSelection()) {
+                    VaadinFacetUtils.upgradeFacet(project,
+                            VaadinFacetUtils.VAADIN_FACET_CURRENT);
+                    if (VaadinPluginUtil.isWidgetsetManagedByPlugin(project)) {
+                        VaadinPluginUtil.ensureWidgetsetNature(project);
                     }
                 }
-            };
-            // does not show the progress dialog if in a modal dialog
-            // IProgressService service =
-            // PlatformUI.getWorkbench().getProgressService();
-            // service.busyCursorWhile(op);
-            new ProgressMonitorDialog(getShell()).run(true, true, op);
 
-        } catch (CoreException e) {
-            VaadinPluginUtil
-                    .displayError(
-                            "Failed to change Vaadin version in the project. Check that the Vaadin JAR is not in use.",
-                            e, getShell());
-            VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
-                    "Failed to change Vaadin version in the project", e);
-            return false;
-        } catch (InterruptedException e) {
-            return false;
-        } catch (InvocationTargetException e) {
-            Throwable realException = e.getTargetException();
-            VaadinPluginUtil
-                    .displayError(
-                            "Failed to change Vaadin version in the project. Check that the Vaadin JAR is not in use.",
-                            realException, getShell());
-            VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
-                    "Failed to change Vaadin version in the project", e);
-            return false;
+                if ((newVaadinVersion == null && currentVaadinVersion != null)
+                        || (newVaadinVersion != null && !newVaadinVersion
+                                .equals(currentVaadinVersion))) {
+                    // confirm replacement, return false if not confirmed
+                    String message;
+                    if (currentVaadinVersion != null
+                            && newVaadinVersion == null) {
+                        message = "Do you want to remove the Vaadin version "
+                                + currentVaadinVersion.getVersionString()
+                                + " from the project " + project.getName()
+                                + "?";
+                    } else if (currentVaadinVersion == null) {
+                        message = "Do you want to add the Vaadin version "
+                                + newVaadinVersion.getVersionString()
+                                + " to the project " + project.getName() + "?";
+                    } else {
+                        message = "Do you want to change the Vaadin version from "
+                                + currentVaadinVersion.getVersionString()
+                                + " to "
+                                + newVaadinVersion.getVersionString()
+                                + " in the project " + project.getName() + "?";
+                    }
+                    if (!MessageDialog.openConfirm(getShell(),
+                            "Confirm Vaadin version change", message)) {
+                        return false;
+                    }
+
+                    widgetsetDirty = true;
+                }
+
+                IRunnableWithProgress op = new IRunnableWithProgress() {
+                    public void run(IProgressMonitor monitor)
+                            throws InvocationTargetException {
+                        try {
+                            VaadinPluginUtil.updateVaadinLibraries(project,
+                                    newVaadinVersion, monitor);
+                        } catch (CoreException e) {
+                            throw new InvocationTargetException(e);
+                        } finally {
+                            monitor.done();
+                        }
+                    }
+                };
+                // does not show the progress dialog if in a modal dialog
+                // IProgressService service =
+                // PlatformUI.getWorkbench().getProgressService();
+                // service.busyCursorWhile(op);
+                new ProgressMonitorDialog(getShell()).run(true, true, op);
+
+            } catch (CoreException e) {
+                VaadinPluginUtil
+                        .displayError(
+                                "Failed to change Vaadin version in the project. Check that the Vaadin JAR is not in use.",
+                                e, getShell());
+                VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                        "Failed to change Vaadin version in the project", e);
+                return false;
+            } catch (InterruptedException e) {
+                return false;
+            } catch (InvocationTargetException e) {
+                Throwable realException = e.getTargetException();
+                VaadinPluginUtil
+                        .displayError(
+                                "Failed to change Vaadin version in the project. Check that the Vaadin JAR is not in use.",
+                                realException, getShell());
+                VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                        "Failed to change Vaadin version in the project", e);
+                return false;
+            }
         }
 
         // If anything changed, ask about recompiling the widgetset.
@@ -296,7 +322,7 @@ public class VaadinProjectPropertyPage extends PropertyPage {
         useVaadinButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                vaadinVersionComposite.enableVaadin(useVaadinButton
+                vaadinVersionComposite.enablePluginManagedVaadin(useVaadinButton
                         .getSelection());
             }
         });

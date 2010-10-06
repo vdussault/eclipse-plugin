@@ -27,13 +27,23 @@ public class VaadinPlugin extends AbstractUIPlugin {
     public static final String PREFERENCES_WIDGETSET_PARALLELISM = PLUGIN_ID
             + "." + "widgetsetParallelism";
 
-    /** the time last compilation lasted, used for estimation in progress monitor */
+    // the time last compilation lasted, used for estimation in progress monitor
     public static final String PREFERENCES_WIDGETSET_COMPILATION_ETA = PLUGIN_ID
             + "." + "widgetsetCompilationEta";
 
-	/** wheter to output compilation messages to console */
+    // to output compilation messages to console or not
     public static final String PREFERENCES_WIDGETSET_VERBOSE = PLUGIN_ID + "."
             + "widgetsetVerbose";
+
+    // project type flags - note that in the future, there could be multiple
+    // flags set at the same time
+    public static final String PREFERENCES_PROJECT_TYPE_GAE = PLUGIN_ID + "."
+            + "projectTypeGae";
+    public static final String PREFERENCES_PROJECT_TYPE_LIFERAY = PLUGIN_ID
+            + "." + "projectTypeLiferay";
+
+    public static final String PREFERENCES_LIFERAY_PATH = PLUGIN_ID
+            + "." + "liferayWebInfPath";
 
     private static VaadinPlugin instance = null;
 

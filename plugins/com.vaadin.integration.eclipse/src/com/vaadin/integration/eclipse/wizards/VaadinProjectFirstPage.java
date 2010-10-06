@@ -13,10 +13,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.wst.common.frameworks.datamodel.DataModelEvent;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
+import org.eclipse.wst.common.frameworks.datamodel.IDataModelListener;
 import org.eclipse.wst.common.frameworks.internal.datamodel.ui.DataModelSynchHelper;
 
 import com.vaadin.integration.eclipse.IVaadinFacetInstallDataModelProperties;
@@ -37,10 +39,6 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
         IVaadinFacetInstallDataModelProperties {
 
     private Combo projectTypeCombo;
-
-    // private Text applicationNameField;
-    // private Text applicationClassField;
-    // private Text applicationPackageField;
 
     public VaadinProjectFirstPage(IDataModel model, String pageName) {
         super(model, pageName);
@@ -105,44 +103,45 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
         vaadinFacetSynchHelper.synchCombo(projectTypeCombo,
                 VAADIN_PROJECT_TYPE, new Control[] { label });
 
-        // Label label = new Label(group, SWT.NONE);
-        // label.setLayoutData(gdhfill());
-        // label.setText("Application name:");
-        //
-        // applicationNameField = new Text(group, SWT.BORDER);
-        // applicationNameField.setLayoutData(gdhfill());
-        // vaadinFacetSynchHelper.synchText(applicationNameField,
-        // APPLICATION_NAME, new Control[] { label });
-        //
-        // label = new Label(group, SWT.NONE);
-        // label.setLayoutData(gdhfill());
-        // label.setText("Base package name:");
-        //
-        // applicationPackageField = new Text(group, SWT.BORDER);
-        // applicationPackageField.setLayoutData(gdhfill());
-        // vaadinFacetSynchHelper.synchText(applicationPackageField,
-        // APPLICATION_PACKAGE, new Control[] { label });
-        //
-        // label = new Label(group, SWT.NONE);
-        // label.setLayoutData(gdhfill());
-        // label.setText("Application class name:");
-        //
-        // applicationClassField = new Text(group, SWT.BORDER);
-        // applicationClassField.setLayoutData(gdhfill());
-        // vaadinFacetSynchHelper.synchText(applicationClassField,
-        // APPLICATION_CLASS, new Control[] { label });
-
         // Vaadin version selection
-        VaadinVersionComposite versionComposite = new VaadinVersionComposite(
+        final VaadinVersionComposite versionComposite = new VaadinVersionComposite(
                 group, SWT.NULL);
         versionComposite.createContents();
 
-        versionComposite.setProject(null);
-        versionComposite.selectLatestLocalVersion();
+        versionComposite.setNewProject();
 
         // synch version string to model
         synchHelper.synchCombo(versionComposite.getVersionCombo(),
                 VAADIN_VERSION, new Control[] {});
+
+        synchHelper.synchText(versionComposite.getLiferayPathField(),
+                LIFERAY_PATH, new Control[] {});
+
+        // select Liferay mode or normal mode based on project type
+        vaadinFacetDataModel.addListener(new IDataModelListener() {
+            public void propertyChanged(DataModelEvent event) {
+                String propertyName = event.getPropertyName();
+                if (VAADIN_PROJECT_TYPE.equals(propertyName)) {
+                    boolean liferayMode = VaadinFacetInstallDataModelProvider.PROJECT_TYPE_LIFERAY_PORTLET
+                            .equals(event.getProperty());
+                    synchUIWithModel(liferayMode);
+                }
+            }
+
+            public void synchUIWithModel(final boolean liferayMode) {
+                if (Thread.currentThread() == Display.getDefault().getThread()) {
+                    // run in UI thread
+                    versionComposite.setLiferayMode(liferayMode);
+                } else {
+                    Display.getDefault().asyncExec(new Runnable() {
+                        public void run() {
+                            // run in UI thread
+                            versionComposite.setLiferayMode(liferayMode);
+                        }
+                    });
+                }
+            }
+        });
 
         return group;
     }
@@ -150,20 +149,22 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
     @Override
     protected String[] getValidationPropertyNames() {
         String[] superProperties = super.getValidationPropertyNames();
-        ArrayList arrayList = new ArrayList();
+        ArrayList<String> arrayList = new ArrayList<String>();
         arrayList.addAll(Arrays.asList(superProperties));
         // validation of these relies on nested models in the project level
         // model - see VaadinProjectCreationDataModelProvider
         arrayList.add(APPLICATION_NAME);
         arrayList.add(APPLICATION_PACKAGE);
         arrayList.add(APPLICATION_CLASS);
+        arrayList.add(LIFERAY_PATH);
         arrayList.add(IWebFacetInstallDataModelProperties.CONTEXT_ROOT);
         // validating this leads to strange behavior for Finish button
         // enabling/disabling when changing the value
         // arrayList.add(IWebFacetInstallDataModelProperties.CONFIG_FOLDER);
-        return (String[]) arrayList.toArray(new String[0]);
+        return arrayList.toArray(new String[0]);
     }
 
+    @SuppressWarnings("unused")
     private static final class WebFacetResources extends NLS {
         public static String pageTitle;
         // public static String pageDescription;

@@ -1,6 +1,9 @@
 package com.vaadin.integration.eclipse;
 
+import java.io.IOException;
+
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -10,6 +13,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.j2ee.web.componentcore.util.WebArtifactEdit;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
@@ -17,11 +21,11 @@ import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import com.vaadin.integration.eclipse.builder.WidgetsetNature;
 import com.vaadin.integration.eclipse.configuration.VaadinFacetInstallDataModelProvider;
 import com.vaadin.integration.eclipse.util.DownloadUtils;
+import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
 import com.vaadin.integration.eclipse.util.GaeConfigurationUtil;
 import com.vaadin.integration.eclipse.util.PortletConfigurationUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.util.WebXmlUtil;
-import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
 
 public class CoreFacetInstallDelegate implements IDelegate,
         IVaadinFacetInstallDataModelProperties {
@@ -38,55 +42,105 @@ public class CoreFacetInstallDelegate implements IDelegate,
         }
         IDataModel model = (IDataModel) configObject;
 
-        monitor.beginTask("Setting up Vaadin project", 10);
+        monitor.beginTask("Setting up Vaadin project", 11);
 
-        /*
-         * Find the latest local version. If the model has a Vaadin version
-         * specified, use it instead.
-         */
-        monitor.subTask("Checking for locally cached Vaadin");
-        Version vaadinVersion;
-        if (model.isPropertySet(VAADIN_VERSION)
-                && model.getProperty(VAADIN_VERSION) != null) {
-            // get the version specified on the configuration page
-            String versionString = model.getStringProperty(VAADIN_VERSION);
-            try {
-                vaadinVersion = DownloadUtils
-                        .getLocalVaadinVersion(versionString);
-            } catch (CoreException ex) {
-                // default to the latest downloaded version
-                VaadinPluginUtil
-                        .handleBackgroundException(
-                                IStatus.WARNING,
-                                "Failed to get the requested Vaadin version, using the most recent cached version",
-                                ex);
+        String projectType = model.getStringProperty(VAADIN_PROJECT_TYPE);
+        boolean gaeProject = VaadinFacetInstallDataModelProvider.PROJECT_TYPE_GAE
+                .equals(projectType);
+        boolean liferayProject = VaadinFacetInstallDataModelProvider.PROJECT_TYPE_LIFERAY_PORTLET
+                .equals(projectType);
+        String liferayPath = model.getStringProperty(LIFERAY_PATH);
+        String portletVersion = model.getStringProperty(PORTLET_VERSION);
+        boolean createPortlet = !PORTLET_VERSION_NONE.equals(portletVersion);
+
+        Version vaadinVersion = null;
+
+        if (!liferayProject) {
+            /*
+             * Find the latest local version. If the model has a Vaadin version
+             * specified, use it instead.
+             */
+            monitor.subTask("Checking for locally cached Vaadin");
+            if (model.isPropertySet(VAADIN_VERSION)
+                    && model.getProperty(VAADIN_VERSION) != null) {
+                // get the version specified on the configuration page
+                String versionString = model.getStringProperty(VAADIN_VERSION);
+                try {
+                    vaadinVersion = DownloadUtils
+                            .getLocalVaadinVersion(versionString);
+                } catch (CoreException ex) {
+                    // default to the latest downloaded version
+                    VaadinPluginUtil
+                            .handleBackgroundException(
+                                    IStatus.WARNING,
+                                    "Failed to get the requested Vaadin version, using the most recent cached version",
+                                    ex);
+                    vaadinVersion = DownloadUtils
+                            .getLatestLocalVaadinJarVersion();
+                }
+            } else {
                 vaadinVersion = DownloadUtils.getLatestLocalVaadinJarVersion();
             }
-        } else {
-            vaadinVersion = DownloadUtils.getLatestLocalVaadinJarVersion();
-        }
-        monitor.worked(1);
-        if (vaadinVersion == null) {
-            /*
-             * No Vaadin jar has been fetched - we must fetch one before
-             * continuing.
-             */
-            monitor.subTask("Checking for latest Vaadin version available");
-            vaadinVersion = DownloadUtils.getLatestVaadinVersion();
             monitor.worked(1);
-            monitor.subTask("Downloading Vaadin "
-                    + vaadinVersion.getVersionString());
-            DownloadUtils.fetchVaadinJar(vaadinVersion, new SubProgressMonitor(
-                    monitor, 2));
+            if (vaadinVersion == null) {
+                /*
+                 * No Vaadin jar has been fetched - we must fetch one before
+                 * continuing.
+                 */
+                monitor.subTask("Checking for latest Vaadin version available");
+                vaadinVersion = DownloadUtils.getLatestVaadinVersion();
+                monitor.worked(1);
+                monitor.subTask("Downloading Vaadin "
+                        + vaadinVersion.getVersionString());
+                DownloadUtils.fetchVaadinJar(vaadinVersion,
+                        new SubProgressMonitor(monitor, 2));
+            } else {
+                monitor.worked(3);
+            }
         } else {
-            monitor.worked(3);
+            monitor.worked(4);
+        }
+
+        try {
+            monitor.subTask("Setting up project preferences");
+
+            /*
+             * Save the information about project type to the project settings
+             */
+            ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
+                    new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
+            prefStore.setValue(VaadinPlugin.PREFERENCES_PROJECT_TYPE_GAE,
+                    gaeProject);
+            prefStore.setValue(VaadinPlugin.PREFERENCES_PROJECT_TYPE_LIFERAY,
+                    liferayProject);
+
+            try {
+                prefStore.save();
+            } catch (IOException e) {
+                throw VaadinPluginUtil.newCoreException(
+                        "Failed to save project preferences", e);
+            }
+
+            VaadinPluginUtil.setLiferayPath(project, liferayPath);
+
+            monitor.worked(1);
+        } catch (Exception e) {
+            monitor.done();
+            throw VaadinPluginUtil.newCoreException(
+                    "Setting up Vaadin project preferences failed", e);
         }
 
         try {
             monitor.subTask("Installing libraries");
+
             /* Copy Vaadin JAR to project's WEB-INF/lib folder */
-            VaadinPluginUtil.ensureVaadinLibraries(project, vaadinVersion,
-                    new SubProgressMonitor(monitor, 5));
+            if (!liferayProject) {
+                VaadinPluginUtil.ensureVaadinLibraries(project, vaadinVersion,
+                        new SubProgressMonitor(monitor, 5));
+            } else {
+                // Liferay project classpath is set by setLiferayPath() above
+                monitor.worked(5);
+            }
 
             // do not create project artifacts if adding the facet to an
             // existing project or if the user has chosen not to create them
@@ -120,7 +174,8 @@ public class CoreFacetInstallDelegate implements IDelegate,
 
                 // special case as the Vaadin JAR is not yet in the classpath
                 String vaadinPackagePrefix;
-                if (vaadinVersion.getVersionString().startsWith("5")) {
+                if (vaadinVersion != null
+                        && vaadinVersion.getVersionString().startsWith("5")) {
                     vaadinPackagePrefix = VaadinPlugin.TOOLKIT_PACKAGE_PREFIX;
                 } else {
                     vaadinPackagePrefix = VaadinPlugin.VAADIN_PACKAGE_PREFIX;
@@ -134,15 +189,6 @@ public class CoreFacetInstallDelegate implements IDelegate,
                 /* Create the application class if it does not exist */
                 appPackage.createCompilationUnit(applicationFileName,
                         applicationCode, false, monitor);
-
-                String projectType = model
-                        .getStringProperty(VAADIN_PROJECT_TYPE);
-                boolean gaeProject = VaadinFacetInstallDataModelProvider.PROJECT_TYPE_GAE
-                        .equals(projectType);
-
-                String portletVersion = model
-                        .getStringProperty(PORTLET_VERSION);
-                boolean createPortlet = !PORTLET_VERSION_NONE.equals(portletVersion);
 
                 /* Update web.xml */
                 WebArtifactEdit artifact = WebArtifactEdit
@@ -203,7 +249,8 @@ public class CoreFacetInstallDelegate implements IDelegate,
 
                 // TODO true for 6.2 and later
                 boolean isNewWidgetSetStyleProject = true;
-                if (isNewWidgetSetStyleProject) {
+                if (isNewWidgetSetStyleProject
+                        && VaadinPluginUtil.isWidgetsetManagedByPlugin(project)) {
                     WidgetsetNature.addWidgetsetNature(project);
                 }
             }

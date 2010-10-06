@@ -26,6 +26,8 @@ public class WidgetsetParametersComposite extends Composite {
     private Combo parallelismCombo;
     private Button suspendAutomaticBuilds;
     private Button verboseCompilation;
+    private Button createHostedModeLaunchButton;
+
     private IProject project = null;
 
     private String OBF_LABEL = "Obfuscated";
@@ -42,9 +44,12 @@ public class WidgetsetParametersComposite extends Composite {
 
         ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
                 new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
-
+        
         // get values from project or defaults if none stored
 
+        boolean enabled = VaadinPluginUtil.isWidgetsetManagedByPlugin(project);
+        setWidgetsetManagedByPlugin(enabled);
+        
         boolean suspendBuilds = WidgetsetBuildManager
                 .isWidgetsetBuildsSuspended(project);
 
@@ -75,6 +80,17 @@ public class WidgetsetParametersComposite extends Composite {
             parallelism = "";
         }
         parallelismCombo.setText(parallelism);
+    }
+
+    private void setWidgetsetManagedByPlugin(boolean enabled) {
+        // this makes sure no events get through
+        setEnabled(enabled);
+        // these are needed for visual presentation of the disabled status
+        styleCombo.setEnabled(enabled);
+        parallelismCombo.setEnabled(enabled);
+        suspendAutomaticBuilds.setEnabled(enabled);
+        verboseCompilation.setEnabled(enabled);
+        createHostedModeLaunchButton.setEnabled(false);
     }
 
     public Composite createContents() {
@@ -177,12 +193,13 @@ public class WidgetsetParametersComposite extends Composite {
                         false));
 
         // hosted mode launch creation button on the right
-        Button button = new Button(hosted, SWT.NULL);
-        button.setText("Create development mode launch");
-        button
+        createHostedModeLaunchButton = new Button(hosted, SWT.NULL);
+        createHostedModeLaunchButton.setText("Create development mode launch");
+        createHostedModeLaunchButton
                 .setLayoutData(new GridData(SWT.RIGHT, SWT.BEGINNING, true,
                         false));
-        button.addSelectionListener(new SelectionAdapter() {
+        createHostedModeLaunchButton
+                .addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 VaadinPluginUtil.createHostedModeLaunch(project);

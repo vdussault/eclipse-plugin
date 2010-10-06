@@ -25,8 +25,8 @@ import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import com.vaadin.integration.eclipse.IVaadinFacetInstallDataModelProperties;
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.util.DownloadUtils;
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
+import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 /**
  * This data model provider is used whenever installing the Vaadin facet to a
@@ -41,12 +41,14 @@ public class VaadinFacetInstallDataModelProvider extends
     // - these are Strings to be able to use them in SWT Combo widgets
     public static final String PROJECT_TYPE_SERVLET = "Servlet (default)";
     public static final String PROJECT_TYPE_GAE = "Google App Engine servlet";
+    public static final String PROJECT_TYPE_LIFERAY_PORTLET = "Liferay portlet (Portlet 2.0)";
     public static final String PROJECT_TYPE_PORTLET20 = "Generic portlet (Portlet 2.0)";
     public static final String PROJECT_TYPE_PORTLET10 = "Old portlet (Portlet 1.0)";
 
     // allowed project types in display order, default first
     public static final String[] PROJECT_TYPES = new String[] {
-            PROJECT_TYPE_SERVLET, PROJECT_TYPE_GAE, PROJECT_TYPE_PORTLET20,
+            PROJECT_TYPE_SERVLET, PROJECT_TYPE_GAE,
+            PROJECT_TYPE_LIFERAY_PORTLET, PROJECT_TYPE_PORTLET20,
             PROJECT_TYPE_PORTLET10 };
 
     private static final String BASE_PACKAGE_NAME = "com.example";
@@ -64,6 +66,7 @@ public class VaadinFacetInstallDataModelProvider extends
         names.add(APPLICATION_PACKAGE);
         names.add(APPLICATION_CLASS);
         names.add(CREATE_ARTIFACTS);
+        names.add(LIFERAY_PATH);
         names.add(PORTLET_VERSION);
         names.add(PORTLET_TITLE);
         names.add(VAADIN_VERSION);
@@ -150,6 +153,8 @@ public class VaadinFacetInstallDataModelProvider extends
             return VaadinFacetUtils.VAADIN_FACET_ID;
         } else if (propertyName.equals(VAADIN_PROJECT_TYPE)) {
             return PROJECT_TYPE_SERVLET;
+        } else if (propertyName.equals(LIFERAY_PATH)) {
+            return "";
         }
         return super.getDefaultProperty(propertyName);
     }
@@ -179,6 +184,8 @@ public class VaadinFacetInstallDataModelProvider extends
         } else if (PORTLET_VERSION.equals(propertyName)) {
             if (PORTLET_VERSION20.equals(propertyValue)
                     && !PROJECT_TYPE_PORTLET20
+                            .equals(getProperty(VAADIN_PROJECT_TYPE))
+                    && !PROJECT_TYPE_LIFERAY_PORTLET
                             .equals(getProperty(VAADIN_PROJECT_TYPE))) {
                 setProperty(VAADIN_PROJECT_TYPE, PROJECT_TYPE_PORTLET20);
             } else if (PORTLET_VERSION10.equals(propertyValue)
@@ -194,8 +201,10 @@ public class VaadinFacetInstallDataModelProvider extends
             // set directory structure based on the selected project type
             useGaeDirectoryStructure(PROJECT_TYPE_GAE.equals(propertyValue));
 
+            boolean liferayProject = PROJECT_TYPE_LIFERAY_PORTLET
+                    .equals(propertyValue);
             // set portlet creation flag
-            if (PROJECT_TYPE_PORTLET20.equals(propertyValue)) {
+            if (PROJECT_TYPE_PORTLET20.equals(propertyValue) || liferayProject) {
                 setProperty(PORTLET_VERSION, PORTLET_VERSION20);
             } else if (PROJECT_TYPE_PORTLET10.equals(propertyValue)) {
                 setProperty(PORTLET_VERSION, PORTLET_VERSION10);
@@ -203,6 +212,20 @@ public class VaadinFacetInstallDataModelProvider extends
                 setProperty(PORTLET_VERSION, PORTLET_VERSION_NONE);
             }
             model.notifyPropertyChange(PORTLET_VERSION, IDataModel.VALUE_CHG);
+
+            if (!liferayProject) {
+                setProperty(LIFERAY_PATH, "");
+                model.notifyPropertyChange(LIFERAY_PATH, IDataModel.VALUE_CHG);
+            }
+        } else if (LIFERAY_PATH.equals(propertyName)) {
+            // set project type if not Liferay project and setting path
+            if (propertyValue != null && !"".equals(propertyValue)
+                    && !PROJECT_TYPE_LIFERAY_PORTLET
+                            .equals(getProperty(VAADIN_PROJECT_TYPE))) {
+                setProperty(VAADIN_PROJECT_TYPE, PROJECT_TYPE_LIFERAY_PORTLET);
+                model.notifyPropertyChange(VAADIN_PROJECT_TYPE,
+                        IDataModel.VALUE_CHG);
+            }
         }
         return super.propertySet(propertyName, propertyValue);
     }
@@ -302,6 +325,8 @@ public class VaadinFacetInstallDataModelProvider extends
             return validatePackageName(getStringProperty(APPLICATION_PACKAGE));
         } else if (name.equals(APPLICATION_CLASS)) {
             return validateTypeName(getStringProperty(APPLICATION_CLASS));
+        } else if (name.equals(LIFERAY_PATH)) {
+            return validateLiferayPath(getStringProperty(LIFERAY_PATH));
         }
         return super.validate(name);
     }
@@ -350,6 +375,20 @@ public class VaadinFacetInstallDataModelProvider extends
         } else {
             return J2EEPlugin.newErrorStatus("Invalid application class name",
                     null);
+        }
+    }
+
+    private IStatus validateLiferayPath(String pathString) {
+        if ((pathString == null || "".equals(pathString))
+                && PROJECT_TYPE_LIFERAY_PORTLET
+                        .equals(getProperty(VAADIN_PROJECT_TYPE))) {
+            return J2EEPlugin.newErrorStatus("Liferay path must be set", null);
+        }
+        if (VaadinPluginUtil.validateLiferayPath(pathString)) {
+            return OK_STATUS;
+        } else {
+            return J2EEPlugin.newErrorStatus(
+                    "Not a valid Liferay web applications directory", null);
         }
     }
 

@@ -608,7 +608,7 @@ public class VaadinPluginUtil {
             monitor.beginTask("Updating Vaadin libraries in the project", 12);
 
             // do nothing if correct version is already in the project
-            Version currentVersion = getVaadinLibraryVersion(project);
+            Version currentVersion = getVaadinLibraryVersion(project, true);
             if ((vaadinJarVersion == currentVersion)
                     || (vaadinJarVersion != null && vaadinJarVersion
                             .equals(currentVersion))) {
@@ -686,27 +686,176 @@ public class VaadinPluginUtil {
         }
     }
 
-    public static Version getVaadinLibraryVersion(IProject project)
-            throws CoreException {
-        // TODO should this look also elsewhere on the classpath?
-        IFolder lib = getWebInfLibFolder(project);
-        if (!lib.exists()) {
+    /**
+     * Is the project type Vaadin Liferay project, i.e. does the plugin use
+     * Vaadin from a Liferay directory instead of managing it itself.
+     * 
+     * @param project
+     * @return
+     */
+    public static boolean isLiferayProject(IProject project) {
+        if (project == null) {
+            return false;
+        }
+        ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
+                new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
+
+        return prefStore
+                .getBoolean(VaadinPlugin.PREFERENCES_PROJECT_TYPE_LIFERAY);
+    }
+
+    /**
+     * Returns the Liferay WEB-INF path of a Liferay project, or null if not a
+     * Liferay project.
+     * 
+     * @param project
+     * @return
+     */
+    public static String getLiferayWebInfPath(IProject project) {
+        if (project == null) {
             return null;
         }
-        IResource[] files = lib.members();
+        ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
+                new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
 
-        for (IResource resource : files) {
-            // is it a Vaadin JAR?
-            if (resource instanceof IFile) {
-                Version version = DownloadUtils.getVaadinJarVersion(resource
-                        .getName());
-                if (version != null) {
-                    return version;
+        boolean liferayProject = prefStore
+                .getBoolean(VaadinPlugin.PREFERENCES_PROJECT_TYPE_LIFERAY);
+        return liferayProject ? prefStore
+                .getString(VaadinPlugin.PREFERENCES_LIFERAY_PATH) : null;
+    }
+
+    /**
+     * Returns true if the widgetset should be managed (created, compiled etc.)
+     * by the plugin.
+     * 
+     * @param project
+     * @return true if the widgetset should be automatically managed
+     */
+    public static boolean isWidgetsetManagedByPlugin(IProject project) {
+        // TODO allow widgetset compilation in a Liferay project?
+        return project != null && !isLiferayProject(project);
+    }
+
+    /**
+     * Returns true if the Vaadin JAR should be managed (upgraded etc.) by the
+     * plugin. If the project has a Vaadin JAR on the classpath outside of the
+     * standard location (WEB-INF/lib), or if the project is a Liferay project,
+     * the Vaadin JAR is not be managed by the plugin.
+     * 
+     * @param project
+     * @return true if the plugin should upgrade Vaadin in the project etc.
+     */
+    public static boolean isVaadinJarManagedByPlugin(IProject project) {
+        if (project == null) {
+            return false;
+        }
+        IFolder lib = getWebInfLibFolder(project);
+        if (!lib.exists()) {
+            return false;
+        }
+
+        if (isLiferayProject(project)) {
+            return false;
+        }
+
+        // TODO check if there is a Vaadin JAR on the classpath outside of the
+        // WEB-INF/lib folder => return false
+
+        return true;
+
+    }
+
+    /**
+     * Checks which Vaadin version is in use in the project. This optionally
+     * also checks the classpath for Vaadin JARs and deduces the version from
+     * the meta-data inside the JAR if no official Vaadin JAR is found in
+     * WEB-INF/lib.
+     * 
+     * @param project
+     * @param useClasspath
+     *            true to also search elsewhere on the classpath if no Vaadin
+     *            JAR is found in WEB-INF/lib
+     * @return
+     * @throws CoreException
+     */
+    public static Version getVaadinLibraryVersion(IProject project,
+            boolean useClasspath)
+            throws CoreException {
+        IFolder lib = getWebInfLibFolder(project);
+        if (lib.exists()) {
+            IResource[] files = lib.members();
+            for (IResource resource : files) {
+                // is it a Vaadin JAR?
+                if (resource instanceof IFile) {
+                    Version version = DownloadUtils
+                            .getVaadinJarVersion(resource.getName());
+                    if (version != null) {
+                        return version;
+                    }
                 }
             }
         }
 
+        if (useClasspath) {
+            IJavaProject jproject = JavaCore.create(project);
+            IPath resource = findProjectVaadinJarPath(jproject);
+            return getVaadinVersionFromJar(resource);
+        }
+
         return null;
+    }
+
+    private static Version getVaadinVersionFromJar(IPath resource) {
+        if (resource == null || !resource.toPortableString().endsWith(".jar")
+                || !resource.toFile().exists()) {
+            return null;
+        }
+        JarFile jarFile = null;
+        try {
+            URL url = new URL("file:" + resource.toPortableString());
+            url = new URL("jar:" + url.toExternalForm() + "!/");
+            JarURLConnection conn = (JarURLConnection) url.openConnection();
+            jarFile = conn.getJarFile();
+            String versionString = null;
+            ZipEntry entry = jarFile.getEntry("META-INF/VERSION");
+            if (entry != null) {
+                InputStream inputStream = jarFile.getInputStream(entry);
+                versionString = new BufferedReader(new InputStreamReader(
+                        inputStream)).readLine();
+                inputStream.close();
+            }
+            closeJarFile(jarFile);
+            jarFile = null;
+            if (versionString != null) {
+                // TODO assuming official version
+                return DownloadUtils.getVaadinJarVersion("vaadin-"
+                        + versionString + ".jar");
+            }
+        } catch (Throwable t) {
+            handleBackgroundException(IStatus.INFO,
+                    "Could not access JAR when checking for Vaadin version", t);
+        } finally {
+            closeJarFile(jarFile);
+        }
+        return null;
+    }
+
+    /**
+     * Checks which Vaadin version is present in a Liferay installation.
+     * 
+     * @param project
+     * @return Vaadin version in Liferay, or null if none
+     * @throws CoreException
+     */
+    public static Version getVaadinLibraryVersionInLiferay(String liferayPath)
+            throws CoreException {
+        if (liferayPath == null || "".equals(liferayPath)) {
+            return null;
+        }
+
+        // get version from META-INF/VERSION in lib/vaadin.jar
+        IPath resource = getLiferayVaadinJarPath(liferayPath);
+        return getVaadinVersionFromJar(resource);
     }
 
     public static CoreException newCoreException(String message, Throwable e) {
@@ -2031,9 +2180,9 @@ public class VaadinPluginUtil {
     }
 
     /**
-     * Add widgetset nature to a project if not already there. Only modified
+     * Add widgetset nature to a project if not already there. Only modifies
      * Vaadin projects.
-     *
+     * 
      * @param project
      */
     public static void ensureWidgetsetNature(final IProject project) {
@@ -2145,9 +2294,14 @@ public class VaadinPluginUtil {
     public static void compileWidgetset(IJavaProject jproject,
             String moduleName, final IProgressMonitor monitor)
             throws CoreException, IOException, InterruptedException {
-        final long start = new Date().getTime();
 
         IProject project = jproject.getProject();
+
+        if (!isWidgetsetManagedByPlugin(project)) {
+            return;
+        }
+
+        final long start = new Date().getTime();
 
         try {
             ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
@@ -2687,5 +2841,66 @@ public class VaadinPluginUtil {
                             + project.getName(), e);
             return null;
         }
+    }
+
+    /**
+     * Check that a liferay WEB-INF path is valid: directory exists and contains
+     * lib/vaadin.jar .
+     * 
+     * @param liferayPath
+     *            path to validate as a string
+     * @return true if the Liferay WEB-INF directory exists and has
+     *         lib/vaadin.jar
+     */
+    public static boolean validateLiferayPath(String liferayPath) {
+        IPath jarPath = getLiferayVaadinJarPath(liferayPath);
+        return jarPath.toFile().exists();
+    }
+
+    public static void setLiferayPath(IProject project, String liferayPath)
+            throws CoreException {
+
+        // assuming the path has already been validated
+
+        // save path
+
+        ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
+                new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
+
+        prefStore.setValue(VaadinPlugin.PREFERENCES_LIFERAY_PATH, liferayPath);
+        
+        try {
+            prefStore.save();
+        } catch (IOException e) {
+            throw VaadinPluginUtil.newCoreException(
+                    "Failed to save project preferences", e);
+        }
+        
+        // update classpath
+        
+        IJavaProject jproject = JavaCore.create(project);
+
+        IClasspathEntry[] rawClasspath = jproject.getRawClasspath();
+        List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
+        for (IClasspathEntry entry : rawClasspath) {
+            entries.add(entry);
+        }
+
+        IPath vaadinJarPath = getLiferayVaadinJarPath(liferayPath);
+        IClasspathEntry vaadinClasspathEntry = JavaCore.newLibraryEntry(
+                vaadinJarPath, null, null);
+
+        // replace vaadin.jar if found, otherwise append new entry
+        replaceClassPathEntry(entries, vaadinClasspathEntry,
+                new String[] { "vaadin.jar" }, true);
+
+        IClasspathEntry[] entryArray = entries
+                .toArray(new IClasspathEntry[entries.size()]);
+        jproject.setRawClasspath(entryArray, null);
+    }
+
+    public static IPath getLiferayVaadinJarPath(String liferayPath) {
+        return new Path(liferayPath).append(IPath.SEPARATOR + "lib"
+                + IPath.SEPARATOR + "vaadin.jar");
     }
 }

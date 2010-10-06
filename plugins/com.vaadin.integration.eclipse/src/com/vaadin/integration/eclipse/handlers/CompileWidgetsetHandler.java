@@ -66,8 +66,11 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                             IProject project = file.getProject();
                             VaadinFacetUtils.upgradeFacet(project,
                                     VaadinFacetUtils.VAADIN_FACET_CURRENT);
-                            VaadinPluginUtil.ensureWidgetsetNature(project);
-                            compiled = compileFile(monitor, file);
+                            if (VaadinPluginUtil
+                                    .isWidgetsetManagedByPlugin(project)) {
+                                VaadinPluginUtil.ensureWidgetsetNature(project);
+                                compiled = compileFile(monitor, file);
+                            }
                         }
                         if (!compiled) {
                             IProject project = VaadinPluginUtil
@@ -78,25 +81,41 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                                     VaadinFacetUtils.upgradeFacet(file
                                             .getProject(),
                                                     VaadinFacetUtils.VAADIN_FACET_CURRENT);
-                                    VaadinPluginUtil.ensureWidgetsetNature(file
-                                            .getProject());
+                                    if (VaadinPluginUtil
+                                            .isWidgetsetManagedByPlugin(file
+                                                    .getProject())) {
+                                        VaadinPluginUtil
+                                                .ensureWidgetsetNature(file
+                                                        .getProject());
+                                    }
                                 }
-                                compiled = compileFile(monitor, file);
+                                if (VaadinPluginUtil
+                                        .isWidgetsetManagedByPlugin(file
+                                                .getProject())) {
+                                    compiled = compileFile(monitor, file);
+                                }
                             } else if (VaadinFacetUtils
                                     .isVaadinProject(project)) {
                                 VaadinFacetUtils.upgradeFacet(project,
                                         VaadinFacetUtils.VAADIN_FACET_CURRENT);
-                                VaadinPluginUtil.ensureWidgetsetNature(project);
-                                IJavaProject jproject = JavaCore
-                                        .create(project);
-                                WidgetsetBuildManager.compileWidgetsets(
-                                        jproject, monitor);
-                                compiled = true;
+                                if (VaadinPluginUtil
+                                        .isWidgetsetManagedByPlugin(project)) {
+                                    VaadinPluginUtil
+                                            .ensureWidgetsetNature(project);
+                                    IJavaProject jproject = JavaCore
+                                            .create(project);
+                                    WidgetsetBuildManager.compileWidgetsets(
+                                            jproject, monitor);
+                                    compiled = true;
+                                }
                             }
                         }
                     } else {
                         IFile file = getFileForEditor(activeEditor);
-                        compiled = compileFile(monitor, file);
+                        if (VaadinPluginUtil.isWidgetsetManagedByPlugin(file
+                                .getProject())) {
+                            compiled = compileFile(monitor, file);
+                        }
                     }
 
                     if (!compiled) {
@@ -140,9 +159,14 @@ public class CompileWidgetsetHandler extends AbstractHandler {
             // compile widgetsets in the containing project
             private boolean compileFile(IProgressMonitor monitor, IFile file)
                     throws CoreException, IOException, InterruptedException {
+                if (!VaadinPluginUtil.isWidgetsetManagedByPlugin(file
+                        .getProject())) {
+                    return false;
+                }
                 // only one branch is executed so progress is tracked correctly
                 boolean compiled = false;
-                if (file != null && file.getName().endsWith(".gwt.xml")
+                if (file != null
+                        && file.getName().endsWith(".gwt.xml")
                         && file.getName().toLowerCase().contains("widgetset")) {
                     WidgetsetBuildManager.compileWidgetset(file, monitor);
                     compiled = true;

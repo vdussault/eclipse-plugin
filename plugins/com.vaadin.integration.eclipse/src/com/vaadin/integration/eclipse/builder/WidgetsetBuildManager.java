@@ -309,7 +309,9 @@ public class WidgetsetBuildManager {
     public static void runWidgetSetBuildTool(final IProject project,
             final boolean synchronous, final IProgressMonitor monitor) {
 
-        if (isBuildRunning(project) || isWidgetsetBuildingSuspended(project)) {
+        if (!VaadinPluginUtil.isWidgetsetManagedByPlugin(project)
+                || isBuildRunning(project)
+                || isWidgetsetBuildingSuspended(project)) {
             // no message, ignore request
         } else if (!projectWidgetsetBuildPending.contains(project)) {
             projectWidgetsetBuildPending.add(project);
@@ -429,6 +431,9 @@ public class WidgetsetBuildManager {
             VaadinPluginUtil
                     .logInfo("Skipped widgetset compilation for the closed project "
                             + project.getName());
+            return;
+        }
+        if (!VaadinPluginUtil.isWidgetsetManagedByPlugin(project)) {
             return;
         }
         try {

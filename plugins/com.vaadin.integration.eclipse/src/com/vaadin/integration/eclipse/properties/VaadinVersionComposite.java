@@ -16,6 +16,8 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -26,11 +28,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.AbstractElementListSelectionDialog;
 
 import com.vaadin.integration.eclipse.util.DownloadUtils;
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
+import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 /**
  * Project property page for selecting an Vaadin version and updating the JAR in
@@ -38,6 +41,8 @@ import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
  */
 public class VaadinVersionComposite extends Composite {
 
+    private Label liferayPathLabel;
+    private Text liferayPathField;
     private Combo versionCombo;
     private Map<String, Version> versionMap = new HashMap<String, Version>();
     private Button downloadButton;
@@ -209,9 +214,14 @@ public class VaadinVersionComposite extends Composite {
         });
     }
 
-    public void enableVaadin(boolean useVaadin) {
-        versionCombo.setEnabled(useVaadin);
-        downloadButton.setEnabled(useVaadin);
+    private void addLiferayPathSection() {
+        // TODO implement
+        liferayPathLabel = new Label(this, SWT.NULL);
+        liferayPathLabel.setText("Liferay WEB-INF path:");
+
+        liferayPathField = new Text(this, SWT.BORDER);
+        GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+        liferayPathField.setLayoutData(gd);
     }
 
     private void updateVersionCombo() {
@@ -226,7 +236,7 @@ public class VaadinVersionComposite extends Composite {
                 // select current version (if any)
                 if (project != null) {
                     Version currentVaadinVersion = VaadinPluginUtil
-                            .getVaadinLibraryVersion(project);
+                            .getVaadinLibraryVersion(project, true);
                     if (currentVaadinVersion != null) {
                         // #3863 add custom Vaadin version in project if any
                         String versionString = currentVaadinVersion
@@ -302,8 +312,22 @@ public class VaadinVersionComposite extends Composite {
         return versionCombo;
     }
 
+    public Text getLiferayPathField() {
+        return liferayPathField;
+    }
+
     public Composite createContents() {
         addVersionSelectionSection();
+        addLiferayPathSection();
+
+        liferayPathField.addModifyListener(new ModifyListener() {
+            public void modifyText(ModifyEvent e) {
+                // update shown version number
+                setLiferayPath(liferayPathField.getText());
+
+                // TODO link to validation?
+            }
+        });
 
         return this;
     }
@@ -319,10 +343,70 @@ public class VaadinVersionComposite extends Composite {
     public void setProject(IProject project) {
         this.project = project;
 
-        updateVersionCombo();
+        // checks if a Liferay project or not
+        updateView(VaadinPluginUtil.isLiferayProject(project),
+                VaadinPluginUtil.getLiferayWebInfPath(project));
     }
 
-    public void selectLatestLocalVersion() {
+    public void setNewProject() {
+        project = null;
+
+        setLiferayMode(false);
+
+        selectLatestLocalVersion();
+    }
+
+    public void setLiferayMode(boolean liferayMode) {
+        // keep path value if already set
+        updateView(liferayMode, null);
+    }
+
+    public void enablePluginManagedVaadin(boolean useVaadin) {
+        versionCombo.setEnabled(useVaadin);
+        downloadButton.setEnabled(useVaadin);
+    }
+
+    protected void updateView(boolean liferayProject, String liferayPath) {
+        // TODO what to do/show in a Liferay project?
+        liferayPathField.setVisible(liferayProject);
+        liferayPathLabel.setVisible(liferayProject);
+
+        if (liferayProject) {
+            setLiferayPath(liferayPath);
+        } else {
+            updateVersionCombo();
+        }
+
+        enablePluginManagedVaadin(!liferayProject);
+    }
+
+    // should only be called for a liferay project
+    protected void setLiferayPath(String liferayPath) {
+        // just show current version (if any), from the JAR in Liferay
+        versionCombo.removeAll();
+        versionMap.clear();
+        if (liferayPath != null
+                && !liferayPath.equals(liferayPathField.getText())) {
+            liferayPathField.setText(liferayPath);
+        }
+        try {
+            Version currentVaadinVersion = VaadinPluginUtil
+                    .getVaadinLibraryVersionInLiferay(liferayPathField
+                            .getText());
+            if (currentVaadinVersion != null) {
+                String versionString = currentVaadinVersion
+                        .getVersionString();
+                versionMap.put(versionString, currentVaadinVersion);
+                versionCombo.add(versionString, 0);
+                versionCombo.setText(versionString);
+            }
+        } catch (CoreException e) {
+            // ignore:
+            // failed to obtain information about current Vaadin version
+        }
+    }
+
+    protected void selectLatestLocalVersion() {
         try {
             Version latestVaadinVersion = DownloadUtils
                     .getLatestLocalVaadinJarVersion();
