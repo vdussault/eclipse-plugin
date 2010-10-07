@@ -388,7 +388,7 @@ public class VaadinFacetInstallDataModelProvider extends
             return OK_STATUS;
         } else {
             return J2EEPlugin.newErrorStatus(
-                    "Not a valid Liferay web applications directory", null);
+                    "Not a valid Liferay base or WEB-INF directory", null);
         }
     }
 

@@ -1,5 +1,6 @@
 package com.vaadin.integration.eclipse.properties;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -26,6 +27,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -43,6 +45,7 @@ public class VaadinVersionComposite extends Composite {
 
     private Label liferayPathLabel;
     private Text liferayPathField;
+    private Button liferayPathButton;
     private Combo versionCombo;
     private Map<String, Version> versionMap = new HashMap<String, Version>();
     private Button downloadButton;
@@ -206,6 +209,8 @@ public class VaadinVersionComposite extends Composite {
         // list available versions not yet downloaded
         downloadButton = new Button(this, SWT.NULL);
         downloadButton.setText("Download...");
+        gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+        downloadButton.setLayoutData(gd);
         downloadButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -215,13 +220,55 @@ public class VaadinVersionComposite extends Composite {
     }
 
     private void addLiferayPathSection() {
-        // TODO implement
         liferayPathLabel = new Label(this, SWT.NULL);
-        liferayPathLabel.setText("Liferay WEB-INF path:");
+        liferayPathLabel.setText("Liferay path:");
 
         liferayPathField = new Text(this, SWT.BORDER);
         GridData gd = new GridData(GridData.FILL_HORIZONTAL);
         liferayPathField.setLayoutData(gd);
+
+        liferayPathButton = new Button(this, SWT.NULL);
+        liferayPathButton.setText("Browse...");
+        gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+        liferayPathButton.setLayoutData(gd);
+        liferayPathButton.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                File f = new File(liferayPathField.getText());
+                if (!f.exists()) {
+                    f = null;
+                }
+                File d = getDirectory(f);
+                if (d != null) {
+                    liferayPathField.setText(d.getAbsolutePath());
+                }
+            }
+        });
+    }
+
+    /**
+     * Helper that opens the directory chooser dialog.
+     * 
+     * @param startingDirectory
+     *            The directory the dialog will open in.
+     * @return File File or <code>null</code>.
+     */
+    private File getDirectory(File startingDirectory) {
+
+        DirectoryDialog fileDialog = new DirectoryDialog(getShell(), SWT.OPEN
+                | SWT.SHEET);
+        if (startingDirectory != null) {
+            fileDialog.setFilterPath(startingDirectory.getPath());
+        }
+        String dir = fileDialog.open();
+        if (dir != null) {
+            dir = dir.trim();
+            if (dir.length() > 0) {
+                return new File(dir);
+            }
+        }
+
+        return null;
     }
 
     private void updateVersionCombo() {
@@ -368,8 +415,9 @@ public class VaadinVersionComposite extends Composite {
 
     protected void updateView(boolean liferayProject, String liferayPath) {
         // TODO what to do/show in a Liferay project?
-        liferayPathField.setVisible(liferayProject);
         liferayPathLabel.setVisible(liferayProject);
+        liferayPathField.setVisible(liferayProject);
+        liferayPathButton.setVisible(liferayProject);
 
         if (liferayProject) {
             setLiferayPath(liferayPath);
@@ -380,7 +428,7 @@ public class VaadinVersionComposite extends Composite {
         enablePluginManagedVaadin(!liferayProject);
     }
 
-    // should only be called for a liferay project
+    // should only be called for a Liferay project
     protected void setLiferayPath(String liferayPath) {
         // just show current version (if any), from the JAR in Liferay
         versionCombo.removeAll();

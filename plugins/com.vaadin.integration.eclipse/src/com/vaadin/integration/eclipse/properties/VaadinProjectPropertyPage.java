@@ -91,7 +91,7 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
                     new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
 
-            // save Liferay path (if a liferay project)
+            // save Liferay path (if a Liferay project)
             if (VaadinPluginUtil.isLiferayProject(project)) {
                 VaadinPluginUtil.setLiferayPath(project, vaadinVersionComposite
                         .getLiferayPathField().getText());

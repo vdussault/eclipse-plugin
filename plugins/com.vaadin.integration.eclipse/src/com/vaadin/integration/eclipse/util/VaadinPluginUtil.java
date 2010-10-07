@@ -2844,7 +2844,7 @@ public class VaadinPluginUtil {
     }
 
     /**
-     * Check that a liferay WEB-INF path is valid: directory exists and contains
+     * Check that a Liferay path is valid: WEB-INF directory exists and contains
      * lib/vaadin.jar .
      * 
      * @param liferayPath
@@ -2899,8 +2899,19 @@ public class VaadinPluginUtil {
         jproject.setRawClasspath(entryArray, null);
     }
 
+    public static IPath getLiferayWebInfPath(String liferayPath) {
+        // TODO make this work with other application servers
+        if (!liferayPath.contains("WEB-INF")
+                && !(new File(liferayPath + "/lib/vaadin.jar").exists())) {
+            // assuming Tomcat with default Liferay directory structure 
+            liferayPath = liferayPath + "/webapps/ROOT/WEB-INF";
+        }
+        return new Path(liferayPath);
+    }
+
     public static IPath getLiferayVaadinJarPath(String liferayPath) {
-        return new Path(liferayPath).append(IPath.SEPARATOR + "lib"
+        return getLiferayWebInfPath(liferayPath).append(
+                IPath.SEPARATOR + "lib"
                 + IPath.SEPARATOR + "vaadin.jar");
     }
 }
