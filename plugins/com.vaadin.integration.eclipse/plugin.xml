@@ -394,7 +394,8 @@ Any metadata changes made will be stored in the project manifest.
       <menuContribution
             locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
          <toolbar
-               id="com.vaadin.integration.eclipse.toolbars.vaadinToolbar">
+               id="com.vaadin.integration.eclipse.toolbars.vaadinToolbar"
+               label="Vaadin">
             <command
                   commandId="com.vaadin.integration.eclipse.commands.compileWidgetsetCommand"
                   icon="icons/compile-widgetset-16.png"
