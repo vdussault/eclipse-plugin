@@ -325,6 +325,8 @@ public class VaadinFacetInstallDataModelProvider extends
             return validatePackageName(getStringProperty(APPLICATION_PACKAGE));
         } else if (name.equals(APPLICATION_CLASS)) {
             return validateTypeName(getStringProperty(APPLICATION_CLASS));
+        } else if (name.equals(VAADIN_PROJECT_TYPE)) {
+            return validateLiferayPath(getStringProperty(LIFERAY_PATH));
         } else if (name.equals(LIFERAY_PATH)) {
             return validateLiferayPath(getStringProperty(LIFERAY_PATH));
         }
@@ -384,7 +386,9 @@ public class VaadinFacetInstallDataModelProvider extends
                         .equals(getProperty(VAADIN_PROJECT_TYPE))) {
             return J2EEPlugin.newErrorStatus("Liferay path must be set", null);
         }
-        if (VaadinPluginUtil.validateLiferayPath(pathString)) {
+        if (!PROJECT_TYPE_LIFERAY_PORTLET
+                .equals(getProperty(VAADIN_PROJECT_TYPE))
+                || VaadinPluginUtil.validateLiferayPath(pathString)) {
             return OK_STATUS;
         } else {
             return J2EEPlugin.newErrorStatus(

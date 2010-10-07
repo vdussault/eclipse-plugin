@@ -221,7 +221,7 @@ public class VaadinVersionComposite extends Composite {
 
     private void addLiferayPathSection() {
         liferayPathLabel = new Label(this, SWT.NULL);
-        liferayPathLabel.setText("Liferay path:");
+        liferayPathLabel.setText("Liferay server path:");
 
         liferayPathField = new Text(this, SWT.BORDER);
         GridData gd = new GridData(GridData.FILL_HORIZONTAL);
