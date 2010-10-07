@@ -121,7 +121,9 @@ public class CoreFacetInstallDelegate implements IDelegate,
                         "Failed to save project preferences", e);
             }
 
-            VaadinPluginUtil.setLiferayPath(project, liferayPath);
+            if (liferayProject) {
+                VaadinPluginUtil.setLiferayPath(project, liferayPath);
+            }
 
             monitor.worked(1);
         } catch (Exception e) {
