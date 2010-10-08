@@ -112,7 +112,9 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                         }
                     } else {
                         IFile file = getFileForEditor(activeEditor);
-                        if (VaadinPluginUtil.isWidgetsetManagedByPlugin(file
+                        if (file != null
+                                && VaadinPluginUtil
+                                        .isWidgetsetManagedByPlugin(file
                                 .getProject())) {
                             compiled = compileFile(monitor, file);
                         }

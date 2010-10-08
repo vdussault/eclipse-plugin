@@ -26,7 +26,7 @@ public class WidgetsetParametersComposite extends Composite {
     private Combo parallelismCombo;
     private Button suspendAutomaticBuilds;
     private Button verboseCompilation;
-    private Button createHostedModeLaunchButton;
+    private Button createDevelopmentModeLaunchButton;
 
     private IProject project = null;
 
@@ -83,15 +83,29 @@ public class WidgetsetParametersComposite extends Composite {
     }
 
     private void setWidgetsetManagedByPlugin(boolean enabled) {
-        // this makes sure no events get through
         setEnabled(enabled);
-        // these are needed for visual presentation of the disabled status
-        styleCombo.setEnabled(enabled);
-        parallelismCombo.setEnabled(enabled);
-        suspendAutomaticBuilds.setEnabled(enabled);
-        verboseCompilation.setEnabled(enabled);
-        createHostedModeLaunchButton.setEnabled(false);
     }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        if (styleCombo != null) {
+            styleCombo.setEnabled(enabled);
+        }
+        if (parallelismCombo != null) {
+            parallelismCombo.setEnabled(enabled);
+        }
+        if (suspendAutomaticBuilds != null) {
+            suspendAutomaticBuilds.setEnabled(enabled);
+        }
+        if (verboseCompilation != null) {
+            verboseCompilation.setEnabled(enabled);
+        }
+        if (createDevelopmentModeLaunchButton != null) {
+            createDevelopmentModeLaunchButton.setEnabled(enabled);
+        }
+    }
+
 
     public Composite createContents() {
         setLayout(new GridLayout(1, false));
@@ -193,12 +207,13 @@ public class WidgetsetParametersComposite extends Composite {
                         false));
 
         // hosted mode launch creation button on the right
-        createHostedModeLaunchButton = new Button(hosted, SWT.NULL);
-        createHostedModeLaunchButton.setText("Create development mode launch");
-        createHostedModeLaunchButton
+        createDevelopmentModeLaunchButton = new Button(hosted, SWT.NULL);
+        createDevelopmentModeLaunchButton
+                .setText("Create development mode launch");
+        createDevelopmentModeLaunchButton
                 .setLayoutData(new GridData(SWT.RIGHT, SWT.BEGINNING, true,
                         false));
-        createHostedModeLaunchButton
+        createDevelopmentModeLaunchButton
                 .addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
