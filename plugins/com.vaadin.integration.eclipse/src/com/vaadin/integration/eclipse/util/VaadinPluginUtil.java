@@ -1526,8 +1526,8 @@ public class VaadinPluginUtil {
     }
 
     public static String getRequiredGWTVersionForProject(IJavaProject jproject) {
-        // if no information exists, default to 1.5.3
-        String gwtVersion = "1.5.3";
+        // if no information exists, default to 2.0.4
+        String gwtVersion = "2.0.4";
 
         try {
             // find Vaadin JAR on the classpath
