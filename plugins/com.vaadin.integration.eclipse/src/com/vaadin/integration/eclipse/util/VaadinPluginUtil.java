@@ -1579,11 +1579,8 @@ public class VaadinPluginUtil {
             throws CoreException {
         IJavaElement type;
         type = findVaadinApplicationType(javaProject);
-        if (type == null) {
-            return null;
-        }
 
-        while (type.getParent() != null) {
+        while (type != null && type.getParent() != null) {
             if (type instanceof IPackageFragmentRoot) {
                 IPackageFragmentRoot jar = (IPackageFragmentRoot) type;
                 IResource resource = jar.getResource();
@@ -1599,8 +1596,53 @@ public class VaadinPluginUtil {
             type = type.getParent();
         }
 
-        // For some reason we were not able to locate the jar which contains
-        // Vaadin jar
+        // at project creation, maybe not yet compiled => search for JARs on
+        // the classpath
+        IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
+        for (IClasspathEntry cp : rawClasspath) {
+            if (cp.toString().contains(".jar")) {
+                // User has explicitly defined GWT version to use directly on
+                // the classpath, or classpath entry created by the plugin
+                IClasspathEntry resolvedClasspathEntry = JavaCore
+                        .getResolvedClasspathEntry(cp);
+                IPath path = resolvedClasspathEntry.getPath();
+                if (isVaadinJar(path)) {
+                    return path;
+                }
+            } else if (cp.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+                // primarily WEB-INF/lib, but possibly also Liferay etc.
+                IClasspathContainer container = JavaCore.getClasspathContainer(
+                        cp.getPath(), javaProject);
+                IClasspathEntry[] containerEntries = container
+                        .getClasspathEntries();
+                for (IClasspathEntry ccp : containerEntries) {
+                    if (ccp.toString().contains(".jar")) {
+                        // User has explicitly defined GWT version to use
+                        IClasspathEntry resolvedClasspathEntry = JavaCore
+                                .getResolvedClasspathEntry(ccp);
+                        IPath path = resolvedClasspathEntry.getPath();
+                        if (isVaadinJar(path)) {
+                            return path;
+                        }
+                    }
+                }
+            }
+        }
+
+        // still no luck? check WEB-INF/lib
+        IFolder lib = getWebInfLibFolder(javaProject.getProject());
+        if (!lib.exists()) {
+            return null;
+        }
+        for (IResource resource : lib.members()) {
+            // is it a Vaadin JAR?
+            if (resource instanceof IFile
+                    && isVaadinJar(resource.getLocation())) {
+                return resource.getLocation();
+            }
+        }
+
+        // For some reason we were not able to locate the Vaadin JAR
         return null;
     }
 
@@ -2110,6 +2152,40 @@ public class VaadinPluginUtil {
         return false;
     }
 
+    public static boolean isVaadinJar(IPath path) {
+        if ("jar".equals(path.getFileExtension())
+                && path.lastSegment().contains("vaadin")) {
+            JarFile jarFile = null;
+            try {
+                URL url = path.toFile().toURL();
+                url = new URL("jar:" + url.toExternalForm() + "!/");
+                JarURLConnection conn = (JarURLConnection) url.openConnection();
+                jarFile = conn.getJarFile();
+                Manifest manifest = jarFile.getManifest();
+                if (manifest == null) {
+                    return false;
+                }
+                Attributes mainAttributes = manifest.getMainAttributes();
+                if ("Vaadin".equals(mainAttributes.getValue("Bundle-Name"))
+                        && "com.vaadin".equals(mainAttributes
+                                .getValue("Bundle-SymbolicName"))) {
+                    return true;
+                }
+            } catch (MalformedURLException e) {
+                String message = (jarFile == null) ? "Could not access JAR"
+                        : "Could not access JAR " + jarFile.getName();
+                handleBackgroundException(IStatus.WARNING, message, e);
+            } catch (IOException e) {
+                String message = (jarFile == null) ? "Could not access JAR"
+                        : "Could not access JAR " + jarFile.getName();
+                handleBackgroundException(IStatus.WARNING, message, e);
+            } finally {
+                closeJarFile(jarFile);
+            }
+        }
+        return false;
+    }
+
     private static void closeJarFile(JarFile jarFile) {
         // TODO make better jar handling. Windows locks files without
         // this, mac fails to rebuild widgetset with
@@ -2186,7 +2262,6 @@ public class VaadinPluginUtil {
                 }
             }
         }
-
 
         return vaadinpackages;
     }
