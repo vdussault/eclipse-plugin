@@ -12,23 +12,10 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 
 public class VersionUtil {
-    /**
-     * Extracts a Vaadin version from a filename, returns null if not a valid
-     * Vaadin JAR file name.
-     * 
-     * @param filename
-     *            JAR file name
-     * @return Version or null if not a Vaadin JAR
-     */
-    public static String getVaadinJarVersionFromFilename(String filename) {
-        // Vaadin JAR filename is always "vaadin-<version>.jar"
 
-        if (filename.startsWith("vaadin-") && filename.endsWith(".jar")) {
-            return filename.replaceAll("^vaadin-", "").replaceAll(".jar$", "");
-        } else {
-            return null;
-        }
-    }
+    private static final String VAADIN_VERSION_PATTERN = "([0-9]*)\\.([0-9])\\.(.+)";
+    public static final String VAADIN_JAR_REGEXP = "^vaadin-"
+            + VAADIN_VERSION_PATTERN + "\\.jar$";
 
     /**
      * Returns the standard filename of the vaadin jar with the given version.
@@ -92,6 +79,11 @@ public class VersionUtil {
      * @return
      */
     public static boolean couldBeVaadinJar(String name) {
-        return name.matches("vaadin-([^.]*)\\.jar");
+        // Official Vaadin jars are named vaadin-<version>.jar
+        // <version> should always start with a number. Failing to check this
+        // will return true for e.g. vaadin-treetable-1.0.0.jar
+
+        return name.matches(VAADIN_JAR_REGEXP);
     }
+
 }

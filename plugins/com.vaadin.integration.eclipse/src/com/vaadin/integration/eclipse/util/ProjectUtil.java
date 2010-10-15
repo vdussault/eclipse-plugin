@@ -285,10 +285,16 @@ public class ProjectUtil {
             for (IResource resource : files) {
                 // is it a Vaadin JAR?
                 if (resource instanceof IFile) {
-                    String version = VersionUtil
-                            .getVaadinJarVersionFromFilename(resource.getName());
-                    if (version != null) {
-                        return version;
+                    if (VersionUtil.couldBeVaadinJar(resource.getName())) {
+                        // Name matches vaadin jar, still check for version from
+                        // the jar itself
+
+                        String version = VersionUtil
+                                .getVaadinVersionFromJar(resource.getFullPath());
+
+                        if (version != null) {
+                            return version;
+                        }
                     }
                 }
             }
