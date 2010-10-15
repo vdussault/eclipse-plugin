@@ -47,7 +47,7 @@ public class ApplicationDecorator implements ILightweightLabelDecorator {
         // }
         // }
         // } catch (JavaModelException e) {
-        // VaadinPluginUtil.handleBackgroundException(e);
+        // ErrorUtil.handleBackgroundException(e);
         // }
         // } else
         if (element instanceof IType) {

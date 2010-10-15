@@ -22,6 +22,8 @@ import org.eclipse.swt.widgets.Label;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
+import com.vaadin.integration.eclipse.util.ErrorUtil;
+import com.vaadin.integration.eclipse.util.LegacyUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.viewers.ApplicationList;
 
@@ -42,7 +44,7 @@ public class NewWidgetsetWizardPage extends AbstractVaadinNewTypeWizardPage {
         setTitle("Vaadin widgetset");
         setDescription("This wizard creates appropriate stub files for a widgetset.");
 
-        setSuperClass(VaadinPluginUtil.getVaadinPackagePrefix(project)
+        setSuperClass(LegacyUtil.getVaadinPackagePrefix(project)
                 + DEFAULT_EXTENDED_WIDGETSET, true);
     }
 
@@ -158,7 +160,7 @@ public class NewWidgetsetWizardPage extends AbstractVaadinNewTypeWizardPage {
     @Override
     protected void createTypeMembers(IType type, ImportsManager imports,
             IProgressMonitor monitor) throws CoreException {
-        String prefix = VaadinPluginUtil.getVaadinPackagePrefix(project);
+        String prefix = LegacyUtil.getVaadinPackagePrefix(project);
 
         imports.addImport(prefix + "terminal.gwt.client.UIDL");
         imports.addImport(prefix + "terminal.gwt.client.Paintable");
@@ -167,8 +169,7 @@ public class NewWidgetsetWizardPage extends AbstractVaadinNewTypeWizardPage {
                     VaadinPluginUtil.readTextFromTemplate("widgetsetstub.txt"),
                     null, false, null);
         } catch (IOException e) {
-            throw VaadinPluginUtil.newCoreException("createTypeMembers failed",
-                    e);
+            throw ErrorUtil.newCoreException("createTypeMembers failed", e);
         }
     }
 

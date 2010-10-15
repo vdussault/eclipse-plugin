@@ -46,6 +46,7 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.vaadin.integration.eclipse.VaadinPlugin;
+import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 /**
@@ -228,11 +229,11 @@ public class WidgetsetBuildManager {
                 PlatformUI.getWorkbench().getProgressService()
                         .busyCursorWhile(r);
             } catch (InvocationTargetException e) {
-                VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                ErrorUtil.handleBackgroundException(IStatus.WARNING,
                         "Could not list packages in the project "
                                 + jproject.getProject().getName(), e);
             } catch (InterruptedException e) {
-                VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                ErrorUtil.handleBackgroundException(IStatus.WARNING,
                         "Could not list packages in the project "
                                 + jproject.getProject().getName(), e);
             }
@@ -385,13 +386,13 @@ public class WidgetsetBuildManager {
             final IJavaProject jproject = JavaCore.create(project);
             compileWidgetsets(jproject, monitor);
         } catch (CoreException e) {
-            VaadinPluginUtil.handleBackgroundException(IStatus.ERROR,
+            ErrorUtil.handleBackgroundException(IStatus.ERROR,
                     "Widgetset compilation failed", e);
         } catch (IOException e) {
-            VaadinPluginUtil.handleBackgroundException(IStatus.ERROR,
+            ErrorUtil.handleBackgroundException(IStatus.ERROR,
                     "Widgetset compilation failed", e);
         } catch (InterruptedException e) {
-            VaadinPluginUtil.handleBackgroundException(IStatus.ERROR,
+            ErrorUtil.handleBackgroundException(IStatus.ERROR,
                     "Widgetset compilation failed", e);
         }
     }
@@ -428,7 +429,7 @@ public class WidgetsetBuildManager {
         // create a new one)
         IProject project = jproject.getProject();
         if (!project.isOpen()) {
-            VaadinPluginUtil
+            ErrorUtil
                     .logInfo("Skipped widgetset compilation for the closed project "
                             + project.getName());
             return;
@@ -536,11 +537,9 @@ public class WidgetsetBuildManager {
                         wsPackage, monitor);
             }
         } catch (JavaModelException e) {
-            VaadinPluginUtil.handleBackgroundException(
-                    "Widgetset creation failed", e);
+            ErrorUtil.handleBackgroundException("Widgetset creation failed", e);
         } catch (CoreException e) {
-            VaadinPluginUtil.handleBackgroundException(
-                    "Widgetset creation failed", e);
+            ErrorUtil.handleBackgroundException("Widgetset creation failed", e);
         }
         // return null if widgetset creation canceled or failed
         return null;
@@ -611,7 +610,7 @@ public class WidgetsetBuildManager {
             throws CoreException, IOException, InterruptedException {
         IProject project = file.getProject();
         if (!project.isOpen()) {
-            VaadinPluginUtil
+            ErrorUtil
                     .logInfo("Skipped widgetset compilation for the closed project "
                             + project.getName());
             return;

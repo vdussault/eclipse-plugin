@@ -26,6 +26,8 @@ import com.vaadin.integration.eclipse.IVaadinFacetInstallDataModelProperties;
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.util.DownloadUtils;
 import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
+import com.vaadin.integration.eclipse.util.ErrorUtil;
+import com.vaadin.integration.eclipse.util.LiferayUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 /**
@@ -142,7 +144,7 @@ public class VaadinFacetInstallDataModelProvider extends
                 return (latestLocal != null) ? latestLocal.getVersionString()
                         : null;
             } catch (CoreException ex) {
-                VaadinPluginUtil
+                ErrorUtil
                         .handleBackgroundException(
                                 IStatus.WARNING,
                                 "Checking the latest locally cached Vaadin version failed",
@@ -178,7 +180,7 @@ public class VaadinFacetInstallDataModelProvider extends
             } catch (CoreException e) {
                 // no notification nor change of value list if listing local
                 // versions failed
-                VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                ErrorUtil.handleBackgroundException(IStatus.WARNING,
                         "Failed to update Vaadin version list", e);
             }
         } else if (PORTLET_VERSION.equals(propertyName)) {
@@ -283,7 +285,7 @@ public class VaadinFacetInstallDataModelProvider extends
                 } catch (CoreException e) {
                     // no notification nor change of value list if listing local
                     // versions failed
-                    VaadinPluginUtil
+                    ErrorUtil
                             .handleBackgroundException(
                                     IStatus.WARNING,
                                     "Failed to list the locally cached Vaadin versions",
@@ -388,7 +390,7 @@ public class VaadinFacetInstallDataModelProvider extends
         }
         if (!PROJECT_TYPE_LIFERAY_PORTLET
                 .equals(getProperty(VAADIN_PROJECT_TYPE))
-                || VaadinPluginUtil.validateLiferayPath(pathString)) {
+                || LiferayUtil.validateLiferayPath(pathString)) {
             return OK_STATUS;
         } else {
             return J2EEPlugin.newErrorStatus(

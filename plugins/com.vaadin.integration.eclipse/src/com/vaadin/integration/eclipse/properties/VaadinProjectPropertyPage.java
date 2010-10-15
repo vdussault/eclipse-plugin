@@ -31,6 +31,10 @@ import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
 import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
+import com.vaadin.integration.eclipse.util.ErrorUtil;
+import com.vaadin.integration.eclipse.util.LiferayUtil;
+import com.vaadin.integration.eclipse.util.ProjectDependencyManager;
+import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 /**
@@ -57,7 +61,7 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             useVaadinButton.setSelection(useVaadinButton.isEnabled()
                     && vaadinVersionComposite.getSelectedVersion() != null);
         } catch (CoreException ex) {
-            VaadinPluginUtil
+            ErrorUtil
                     .handleBackgroundException(
                             IStatus.ERROR,
                             "Failed reverting to the Vaadin version currently used in the project",
@@ -78,7 +82,7 @@ public class VaadinProjectPropertyPage extends PropertyPage {
         try {
             project = getVaadinProject();
         } catch (CoreException ex) {
-            VaadinPluginUtil.logInfo("Store preferences: not a Vaadin project");
+            ErrorUtil.logInfo("Store preferences: not a Vaadin project");
             return true;
         }
 
@@ -93,8 +97,8 @@ public class VaadinProjectPropertyPage extends PropertyPage {
                     new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
 
             // save Liferay path (if a Liferay project)
-            if (VaadinPluginUtil.isLiferayProject(project)) {
-                VaadinPluginUtil.setLiferayPath(project, vaadinVersionComposite
+            if (LiferayUtil.isLiferayProject(project)) {
+                LiferayUtil.setLiferayPath(project, vaadinVersionComposite
                         .getLiferayPathField().getText());
             }
 
@@ -156,16 +160,16 @@ public class VaadinProjectPropertyPage extends PropertyPage {
                 }
             }
         } catch (IOException e) {
-            VaadinPluginUtil.displayError(
+            ErrorUtil.displayError(
                     "Failed to save widgetset compilation parameters.", e,
                     getShell());
-            VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+            ErrorUtil.handleBackgroundException(IStatus.WARNING,
                     "Failed to save widgetset compilation parameters.", e);
             return false;
         } catch (CoreException e) {
-            VaadinPluginUtil.displayError("Failed to save Liferay path.", e,
+            ErrorUtil.displayError("Failed to save Liferay path.", e,
                     getShell());
-            VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+            ErrorUtil.handleBackgroundException(IStatus.WARNING,
                     "Failed to save Liferay path.", e);
             return false;
         }
@@ -180,7 +184,7 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             // version elsewhere on the classpath, and do nothing if there is a
             // Vaadin JAR with the correct version on the classpath
             try {
-                Version currentVaadinVersion = VaadinPluginUtil
+                Version currentVaadinVersion = ProjectUtil
                         .getVaadinLibraryVersion(project, true);
 
                 if (useVaadinButton.getSelection()) {
@@ -225,8 +229,8 @@ public class VaadinProjectPropertyPage extends PropertyPage {
                     public void run(IProgressMonitor monitor)
                             throws InvocationTargetException {
                         try {
-                            VaadinPluginUtil.updateVaadinLibraries(project,
-                                    newVaadinVersion, monitor);
+                            ProjectDependencyManager.updateVaadinLibraries(
+                                    project, newVaadinVersion, monitor);
                         } catch (CoreException e) {
                             throw new InvocationTargetException(e);
                         } finally {
@@ -241,22 +245,22 @@ public class VaadinProjectPropertyPage extends PropertyPage {
                 new ProgressMonitorDialog(getShell()).run(true, true, op);
 
             } catch (CoreException e) {
-                VaadinPluginUtil
+                ErrorUtil
                         .displayError(
                                 "Failed to change Vaadin version in the project. Check that the Vaadin JAR is not in use.",
                                 e, getShell());
-                VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                ErrorUtil.handleBackgroundException(IStatus.WARNING,
                         "Failed to change Vaadin version in the project", e);
                 return false;
             } catch (InterruptedException e) {
                 return false;
             } catch (InvocationTargetException e) {
                 Throwable realException = e.getTargetException();
-                VaadinPluginUtil
+                ErrorUtil
                         .displayError(
                                 "Failed to change Vaadin version in the project. Check that the Vaadin JAR is not in use.",
                                 realException, getShell());
-                VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                ErrorUtil.handleBackgroundException(IStatus.WARNING,
                         "Failed to change Vaadin version in the project", e);
                 return false;
             }
@@ -289,7 +293,7 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             return VaadinPluginUtil.hasWidgetSets(jproject,
                     new NullProgressMonitor());
         } catch (CoreException e) {
-            VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+            ErrorUtil.handleBackgroundException(IStatus.WARNING,
                     "Could not check whether the project "
                             + jproject.getProject().getName()
                             + " has a widgetset", e);
@@ -348,8 +352,7 @@ public class VaadinProjectPropertyPage extends PropertyPage {
         } else if (getElement() instanceof IProject) {
             project = (IProject) getElement();
         } else {
-            throw VaadinPluginUtil.newCoreException("Not a Vaadin project",
-                    null);
+            throw ErrorUtil.newCoreException("Not a Vaadin project", null);
         }
         return project;
     }

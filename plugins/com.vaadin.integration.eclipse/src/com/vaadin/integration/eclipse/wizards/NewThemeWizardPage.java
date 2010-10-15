@@ -18,7 +18,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.LegacyUtil;
+import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.viewers.ApplicationList;
 
 /**
@@ -40,8 +41,8 @@ public class NewThemeWizardPage extends WizardPage {
         setTitle("Create a new Vaadin theme");
         this.selection = selection;
 
-        IProject project = VaadinPluginUtil.getProject(selection);
-        String directory = VaadinPluginUtil.getVaadinResourceDirectory(project);
+        IProject project = ProjectUtil.getProject(selection);
+        String directory = LegacyUtil.getVaadinResourceDirectory(project);
         setDescription("This wizard creates a theme folder and styles.css file to WebContent/"
                 + directory + " directory.");
     }
@@ -109,7 +110,7 @@ public class NewThemeWizardPage extends WizardPage {
         applicationList.setLayoutData(gd);
 
         // initialize project based on the current selection
-        setProject(VaadinPluginUtil.getProject(selection));
+        setProject(ProjectUtil.getProject(selection));
         dialogChanged();
         setControl(container);
     }
@@ -164,7 +165,7 @@ public class NewThemeWizardPage extends WizardPage {
             return;
         }
 
-        IResource container = VaadinPluginUtil.getWebContentFolder(project);
+        IResource container = ProjectUtil.getWebContentFolder(project);
         String themeName = getThemeName();
 
         if (container == null

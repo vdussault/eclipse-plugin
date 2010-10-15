@@ -31,7 +31,8 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.widgets.Composite;
 
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.ErrorUtil;
+import com.vaadin.integration.eclipse.util.ProjectUtil;
 
 /**
  * Input group view: tree and list side by side.
@@ -136,7 +137,7 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
                 }
             }
 
-            IFolder webContentFolder = VaadinPluginUtil
+            IFolder webContentFolder = ProjectUtil
                     .getWebContentFolder(javaProject.getProject());
 
             IFolder themesFolder = webContentFolder.getFolder("VAADIN")
@@ -153,7 +154,7 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
 
             return result;
         } catch (JavaModelException e) {
-            VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+            ErrorUtil.handleBackgroundException(IStatus.WARNING,
                     "Could not select contents of project "
                             + javaProject.getProject().getName(), e);
             return Collections.EMPTY_LIST;

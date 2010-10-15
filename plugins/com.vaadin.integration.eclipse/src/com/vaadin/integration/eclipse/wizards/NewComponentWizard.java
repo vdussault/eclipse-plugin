@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -36,7 +37,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -56,6 +56,10 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
 import com.vaadin.integration.eclipse.VaadinPlugin;
+import com.vaadin.integration.eclipse.util.ErrorUtil;
+import com.vaadin.integration.eclipse.util.LegacyUtil;
+import com.vaadin.integration.eclipse.util.ProjectDependencyManager;
+import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.wizards.NewComponentWizardPage.TEMPLATE;
 
@@ -80,7 +84,7 @@ public class NewComponentWizard extends Wizard implements INewWizard {
 
     @Override
     public void addPages() {
-        IProject project = VaadinPluginUtil.getProject(selection);
+        IProject project = ProjectUtil.getProject(selection);
         page = new NewComponentWizardPage(project);
         addPage(page);
     }
@@ -130,7 +134,7 @@ public class NewComponentWizard extends Wizard implements INewWizard {
 
             TEMPLATE template = page.getTemplate();
             if (template.hasClientWidget()) {
-                VaadinPluginUtil.ensureGWTLibraries(page.getProject(),
+                ProjectDependencyManager.ensureGWTLibraries(page.getProject(),
                         new SubProgressMonitor(monitor, 5));
 
                 buildClientSideClass(template, monitor);
@@ -146,8 +150,7 @@ public class NewComponentWizard extends Wizard implements INewWizard {
             monitor.worked(2);
 
         } catch (InterruptedException e) {
-            VaadinPluginUtil.displayError("Failed to create widget", e,
-                    getShell());
+            ErrorUtil.displayError("Failed to create widget", e, getShell());
         }
 
     }
@@ -183,8 +186,8 @@ public class NewComponentWizard extends Wizard implements INewWizard {
                 widgetSet = javaProject.findType(widgetSetName);
 
                 if (widgetSet == null) {
-                    throw VaadinPluginUtil.newCoreException(
-                            "No widgetset selected", null);
+                    throw ErrorUtil.newCoreException("No widgetset selected",
+                            null);
                 }
 
                 IPackageFragment packageFragment = widgetSet
@@ -196,7 +199,7 @@ public class NewComponentWizard extends Wizard implements INewWizard {
             IPackageFragment uiPackage = packageFragmentRoot
                     .createPackageFragment(packageName, true, null);
 
-            String vaadinPackagePrefix = VaadinPluginUtil
+            String vaadinPackagePrefix = LegacyUtil
                     .getVaadinPackagePrefix(javaProject.getProject());
 
             String iComponentStub = VaadinPluginUtil
@@ -257,10 +260,10 @@ public class NewComponentWizard extends Wizard implements INewWizard {
             }
 
         } catch (JavaModelException e) {
-            throw VaadinPluginUtil.newCoreException(
+            throw ErrorUtil.newCoreException(
                     "Failed to create client side class", e);
         } catch (IOException e) {
-            throw VaadinPluginUtil.newCoreException(
+            throw ErrorUtil.newCoreException(
                     "Failed to create client side class", e);
         }
 
@@ -427,10 +430,10 @@ public class NewComponentWizard extends Wizard implements INewWizard {
                 rewriteImports.apply(document);
 
             } catch (MalformedTreeException e) {
-                throw VaadinPluginUtil.newCoreException(
+                throw ErrorUtil.newCoreException(
                         "Failed to create client side class", e);
             } catch (BadLocationException e) {
-                throw VaadinPluginUtil.newCoreException(
+                throw ErrorUtil.newCoreException(
                         "Failed to create client side class", e);
             }
             String newSource = document.get();
@@ -475,10 +478,10 @@ public class NewComponentWizard extends Wizard implements INewWizard {
                         IDE.openEditor(wbPage, javaFile, true);
                     }
                 } catch (PartInitException e) {
-                    VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                    ErrorUtil.handleBackgroundException(IStatus.WARNING,
                             "Failed to open created files in editor", e);
                 } catch (JavaModelException e) {
-                    VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                    ErrorUtil.handleBackgroundException(IStatus.WARNING,
                             "Failed to open created files in editor", e);
                 }
             }

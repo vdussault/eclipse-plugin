@@ -22,8 +22,12 @@ import com.vaadin.integration.eclipse.builder.WidgetsetNature;
 import com.vaadin.integration.eclipse.configuration.VaadinFacetInstallDataModelProvider;
 import com.vaadin.integration.eclipse.util.DownloadUtils;
 import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
+import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.GaeConfigurationUtil;
+import com.vaadin.integration.eclipse.util.LiferayUtil;
 import com.vaadin.integration.eclipse.util.PortletConfigurationUtil;
+import com.vaadin.integration.eclipse.util.ProjectDependencyManager;
+import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.util.WebXmlUtil;
 
@@ -37,7 +41,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
             Object configObject, IProgressMonitor monitor) throws CoreException {
 
         if (!(configObject instanceof IDataModel)) {
-            throw VaadinPluginUtil.newCoreException(
+            throw ErrorUtil.newCoreException(
                     "Config object is of invalid type", null);
         }
         IDataModel model = (IDataModel) configObject;
@@ -70,7 +74,8 @@ public class CoreFacetInstallDelegate implements IDelegate,
                             .getLocalVaadinVersion(versionString);
                 } catch (CoreException ex) {
                     // default to the latest downloaded version
-                    VaadinPluginUtil
+
+                    ErrorUtil
                             .handleBackgroundException(
                                     IStatus.WARNING,
                                     "Failed to get the requested Vaadin version, using the most recent cached version",
@@ -117,18 +122,18 @@ public class CoreFacetInstallDelegate implements IDelegate,
             try {
                 prefStore.save();
             } catch (IOException e) {
-                throw VaadinPluginUtil.newCoreException(
+                throw ErrorUtil.newCoreException(
                         "Failed to save project preferences", e);
             }
 
             if (liferayProject) {
-                VaadinPluginUtil.setLiferayPath(project, liferayPath);
+                LiferayUtil.setLiferayPath(project, liferayPath);
             }
 
             monitor.worked(1);
         } catch (Exception e) {
             monitor.done();
-            throw VaadinPluginUtil.newCoreException(
+            throw ErrorUtil.newCoreException(
                     "Setting up Vaadin project preferences failed", e);
         }
 
@@ -137,8 +142,8 @@ public class CoreFacetInstallDelegate implements IDelegate,
 
             /* Copy Vaadin JAR to project's WEB-INF/lib folder */
             if (!liferayProject) {
-                VaadinPluginUtil.ensureVaadinLibraries(project, vaadinVersion,
-                        new SubProgressMonitor(monitor, 5));
+                ProjectDependencyManager.ensureVaadinLibraries(project,
+                        vaadinVersion, new SubProgressMonitor(monitor, 5));
             } else {
                 // Liferay project classpath is set by setLiferayPath() above
                 monitor.worked(5);
@@ -166,7 +171,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
                 /* Create the application class */
                 IJavaProject jProject = JavaCore.create(project);
                 IPackageFragmentRoot rootPackage = jProject
-                        .getPackageFragmentRoot(VaadinPluginUtil
+                        .getPackageFragmentRoot(ProjectUtil
                                 .getSrcFolder(project));
 
                 /* Create the package if it does not exist */
@@ -261,7 +266,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
             }
             monitor.worked(1);
         } catch (Exception e) {
-            throw VaadinPluginUtil.newCoreException(
+            throw ErrorUtil.newCoreException(
                     "Vaadin libraries installation failed", e);
         } finally {
             monitor.done();

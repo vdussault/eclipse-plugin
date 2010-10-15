@@ -13,7 +13,7 @@ import org.eclipse.search.core.text.TextSearchEngine;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.WebXmlUtil;
 
 public class WebContextRefactorer extends VaadinTextFileRefactorer {
@@ -31,8 +31,8 @@ public class WebContextRefactorer extends VaadinTextFileRefactorer {
         if (getSourceProject() == null) {
             return null;
         }
-        IFile webXml = VaadinPluginUtil.getWebInfFolder(getSourceProject())
-                .getFile("web.xml");
+        IFile webXml = ProjectUtil.getWebInfFolder(getSourceProject()).getFile(
+                "web.xml");
         if (webXml == null) {
             return null;
         }

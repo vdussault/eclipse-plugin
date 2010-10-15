@@ -25,6 +25,8 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
+import com.vaadin.integration.eclipse.util.ErrorUtil;
+import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 /**
@@ -73,7 +75,7 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                             }
                         }
                         if (!compiled) {
-                            IProject project = VaadinPluginUtil
+                            IProject project = ProjectUtil
                                     .getProject(currentSelection);
                             if (project == null) {
                                 IFile file = getFileForEditor(activeEditor);
@@ -140,7 +142,7 @@ public class CompileWidgetsetHandler extends AbstractHandler {
 
                     }
                 } catch (Exception e) {
-                    VaadinPluginUtil.handleBackgroundException(e);
+                    ErrorUtil.handleBackgroundException(e);
                 } finally {
                     monitor.done();
                 }
@@ -174,7 +176,7 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                     compiled = true;
                 }
                 if (!compiled) {
-                    IProject project = VaadinPluginUtil.getProject(file);
+                    IProject project = ProjectUtil.getProject(file);
                     if (VaadinFacetUtils.isVaadinProject(project)) {
                         IJavaProject jproject = JavaCore.create(project);
                         WidgetsetBuildManager.compileWidgetsets(jproject,

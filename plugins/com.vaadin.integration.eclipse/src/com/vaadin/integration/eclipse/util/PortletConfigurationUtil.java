@@ -80,7 +80,7 @@ public class PortletConfigurationUtil {
 
     private static IFile getPortletConfigurationFile(IProject project,
             String filename) {
-        return VaadinPluginUtil.getWebInfFolder(project).getFile(filename);
+        return ProjectUtil.getWebInfFolder(project).getFile(filename);
     }
 
     private static void addPortletToPortletsXml(IProject project,
@@ -124,7 +124,7 @@ public class PortletConfigurationUtil {
                     new AddToTagXmlModifier(portletXmlFile.getName(),
                             "portlet-app", portletstub));
         } catch (IOException e) {
-            throw VaadinPluginUtil.newCoreException(
+            throw ErrorUtil.newCoreException(
                     "Failed to add a portlet to portlets.xml", e);
         }
     }
@@ -151,7 +151,7 @@ public class PortletConfigurationUtil {
                     new AddToTagXmlModifier(portletXmlFile.getName(),
                             "liferay-portlet-app", portletstub));
         } catch (IOException e) {
-            throw VaadinPluginUtil.newCoreException(
+            throw ErrorUtil.newCoreException(
                     "Failed to add a portlet to liferay-portlet.xml", e);
         }
     }
@@ -192,11 +192,11 @@ public class PortletConfigurationUtil {
                 file.create(stubstream, true, null);
             }
         } catch (JavaModelException e) {
-            throw VaadinPluginUtil.newCoreException("Failed to create file "
-                    + file.getName(), e);
+            throw ErrorUtil.newCoreException(
+                    "Failed to create file " + file.getName(), e);
         } catch (IOException e) {
-            throw VaadinPluginUtil.newCoreException("Failed to create file "
-                    + file.getName(), e);
+            throw ErrorUtil.newCoreException(
+                    "Failed to create file " + file.getName(), e);
         }
     }
 
@@ -264,7 +264,7 @@ public class PortletConfigurationUtil {
                 output.write(memoryOutputStream.toByteArray());
                 memoryOutputStream.close();
             } catch (Exception ex) {
-                VaadinPluginUtil
+                ErrorUtil
                         .handleBackgroundException(
                                 IStatus.ERROR,
                                 "Failed to transform the XML document, should retry without indentation transformation",
@@ -278,14 +278,13 @@ public class PortletConfigurationUtil {
             portletsXmlFile.refreshLocal(IResource.DEPTH_ZERO, null);
 
         } catch (IOException e) {
-            throw VaadinPluginUtil
-                    .newCoreException("Failed to modify XML file "
-                            + portletsXmlFile.getName(), e);
+            throw ErrorUtil.newCoreException("Failed to modify XML file "
+                    + portletsXmlFile.getName(), e);
         } catch (ParserConfigurationException e) {
-            throw VaadinPluginUtil.newCoreException(
-                    "Failed to initialize XML parser", e);
+            throw ErrorUtil.newCoreException("Failed to initialize XML parser",
+                    e);
         } catch (SAXException e) {
-            throw VaadinPluginUtil.newCoreException("Failed to parse XML file "
+            throw ErrorUtil.newCoreException("Failed to parse XML file "
                     + portletsXmlFile.getName(), e);
         } finally {
             if (input != null) {
@@ -347,8 +346,8 @@ public class PortletConfigurationUtil {
                     nodeList.item(0).appendChild(doc.adoptNode(newChild));
                 }
             } else {
-                throw VaadinPluginUtil.newCoreException("The XML file "
-                        + filename + " is missing the tag " + tagname, null);
+                throw ErrorUtil.newCoreException("The XML file " + filename
+                        + " is missing the tag " + tagname, null);
             }
         }
     }
@@ -386,8 +385,8 @@ public class PortletConfigurationUtil {
             if (categoryNode == null) {
                 NodeList topNodes = doc.getElementsByTagName("display");
                 if (topNodes.getLength() < 1) {
-                    throw VaadinPluginUtil.newCoreException("The XML file "
-                            + filename + " is missing the display tag", null);
+                    throw ErrorUtil.newCoreException("The XML file " + filename
+                            + " is missing the display tag", null);
                 }
                 categoryNode = doc.createElement("category");
 

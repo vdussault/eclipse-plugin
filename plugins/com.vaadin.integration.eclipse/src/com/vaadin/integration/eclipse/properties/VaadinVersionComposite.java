@@ -35,7 +35,9 @@ import org.eclipse.ui.dialogs.AbstractElementListSelectionDialog;
 
 import com.vaadin.integration.eclipse.util.DownloadUtils;
 import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.ErrorUtil;
+import com.vaadin.integration.eclipse.util.LiferayUtil;
+import com.vaadin.integration.eclipse.util.ProjectUtil;
 
 /**
  * Project property page for selecting an Vaadin version and updating the JAR in
@@ -147,7 +149,7 @@ public class VaadinVersionComposite extends Composite {
 
             } catch (CoreException ex) {
                 // TODO handle exceptions: message to user?
-                VaadinPluginUtil
+                ErrorUtil
                         .handleBackgroundException(
                                 IStatus.WARNING,
                                 "Failed to update the list of available Vaadin versions",
@@ -282,7 +284,7 @@ public class VaadinVersionComposite extends Composite {
             try {
                 // select current version (if any)
                 if (project != null) {
-                    Version currentVaadinVersion = VaadinPluginUtil
+                    Version currentVaadinVersion = ProjectUtil
                             .getVaadinLibraryVersion(project, true);
                     if (currentVaadinVersion != null) {
                         // #3863 add custom Vaadin version in project if any
@@ -297,7 +299,7 @@ public class VaadinVersionComposite extends Composite {
                 }
             } catch (CoreException ce) {
                 // ignore if cannot select current version
-                VaadinPluginUtil
+                ErrorUtil
                         .handleBackgroundException(
                                 IStatus.WARNING,
                                 "Failed to select the Vaadin version used in the project",
@@ -305,9 +307,8 @@ public class VaadinVersionComposite extends Composite {
             }
         } catch (CoreException ex) {
             // leave the combo empty and show an error message
-            VaadinPluginUtil
-                    .displayError("Failed to list downloaded Vaadin versions",
-                            ex, getShell());
+            ErrorUtil.displayError("Failed to list downloaded Vaadin versions",
+                    ex, getShell());
         }
     }
 
@@ -343,7 +344,7 @@ public class VaadinVersionComposite extends Composite {
         } catch (InterruptedException e) {
             return;
         } catch (InvocationTargetException e) {
-            VaadinPluginUtil.displayError(
+            ErrorUtil.displayError(
                     "Failed to download selected Vaadin version",
                     e.getTargetException(), getShell());
         }
@@ -391,8 +392,8 @@ public class VaadinVersionComposite extends Composite {
         this.project = project;
 
         // checks if a Liferay project or not
-        updateView(VaadinPluginUtil.isLiferayProject(project),
-                VaadinPluginUtil.getLiferayWebInfPath(project));
+        updateView(LiferayUtil.isLiferayProject(project),
+                LiferayUtil.getLiferayWebInfPath(project));
     }
 
     public void setNewProject() {
@@ -438,7 +439,7 @@ public class VaadinVersionComposite extends Composite {
             liferayPathField.setText(liferayPath);
         }
         try {
-            Version currentVaadinVersion = VaadinPluginUtil
+            Version currentVaadinVersion = LiferayUtil
                     .getVaadinLibraryVersionInLiferay(liferayPathField
                             .getText());
             if (currentVaadinVersion != null) {
@@ -462,7 +463,7 @@ public class VaadinVersionComposite extends Composite {
             }
         } catch (CoreException e) {
             // maybe there is no version downloaded - ignore
-            VaadinPluginUtil
+            ErrorUtil
                     .handleBackgroundException(
                             IStatus.WARNING,
                             "Failed to select the most recent cached Vaadin version, probably no versions in cache yet",

@@ -374,7 +374,7 @@ public class DownloadUtils {
 
             IOUtils.copy(urlStream, new FileOutputStream(targetFile));
 
-            VaadinPluginUtil.logInfo("Fetched " + urlString + " to "
+            ErrorUtil.logInfo("Fetched " + urlString + " to "
                     + targetFile.toString());
             return true;
         } catch (Exception e) {
@@ -417,7 +417,7 @@ public class DownloadUtils {
 
             return dirs;
         } catch (Exception e) {
-            throw VaadinPluginUtil.newCoreException(
+            throw ErrorUtil.newCoreException(
                     "Failed to fetch directory listing for " + urlString, e);
         }
 
@@ -453,7 +453,7 @@ public class DownloadUtils {
                 }
             }
             if (!success) {
-                throw VaadinPluginUtil.newCoreException(
+                throw ErrorUtil.newCoreException(
                         "Failed to fetch Vaadin version " + version, null);
             }
         } finally {
@@ -475,7 +475,7 @@ public class DownloadUtils {
                 return new Version(version, VAADIN_JAR_DOWNLOAD);
             }
         } catch (Exception e) {
-            throw VaadinPluginUtil.newCoreException(
+            throw ErrorUtil.newCoreException(
                     "Checking latest available version of Vaadin failed", e);
         }
     }
@@ -517,7 +517,7 @@ public class DownloadUtils {
             Collections.reverse(versions);
             return versions;
         } catch (Exception e) {
-            throw VaadinPluginUtil.newCoreException(
+            throw ErrorUtil.newCoreException(
                     "Retrieving list of available Vaadin versions failed", e);
         }
     }
@@ -620,8 +620,7 @@ public class DownloadUtils {
                             versions.put(key, new Version(name, dli));
                         } catch (ParseException pe) {
                             // log and ignore
-                            VaadinPluginUtil.handleBackgroundException(
-                                    IStatus.INFO,
+                            ErrorUtil.handleBackgroundException(IStatus.INFO,
                                     "Failed to parse the Vaadin version number "
                                             + name, pe);
                         }
@@ -629,7 +628,7 @@ public class DownloadUtils {
                 }
             }
         } catch (Exception e) {
-            throw VaadinPluginUtil.newCoreException(
+            throw ErrorUtil.newCoreException(
                     "Failed to list local Vaadin versions", e);
         }
 
@@ -683,7 +682,7 @@ public class DownloadUtils {
                 return null;
             }
         } catch (Exception e) {
-            throw VaadinPluginUtil.newCoreException(
+            throw ErrorUtil.newCoreException(
                     "Failed to get the latest local Vaadin version", e);
         }
     }

@@ -46,6 +46,10 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 import org.eclipse.ui.ide.IDE;
 
+import com.vaadin.integration.eclipse.util.ErrorUtil;
+import com.vaadin.integration.eclipse.util.LegacyUtil;
+import com.vaadin.integration.eclipse.util.ProjectDependencyManager;
+import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.util.WebXmlUtil;
 
@@ -75,7 +79,7 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
     @Override
     public void addPages() {
         // use currently selected project (if applicable)
-        IProject project = VaadinPluginUtil.getProject(selection);
+        IProject project = ProjectUtil.getProject(selection);
         page = new NewWidgetsetWizardPage(project);
         addPage(page);
     }
@@ -127,13 +131,12 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
             // widget set goes to sub package "client"
             packageText += ".client";
 
-            VaadinPluginUtil.ensureGWTLibraries(page.getProject(),
+            ProjectDependencyManager.ensureGWTLibraries(page.getProject(),
                     new SubProgressMonitor(monitor, 5));
 
             final IPackageFragment packageFragment = page.getPackageFragment();
 
-            IFolder srcFolder = VaadinPluginUtil
-                    .getSrcFolder(page.getProject());
+            IFolder srcFolder = ProjectUtil.getSrcFolder(page.getProject());
 
             IPackageFragmentRoot root = page.getJavaProject()
                     .getPackageFragmentRoot(srcFolder);
@@ -169,7 +172,7 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
             monitor.worked(2);
 
         } catch (InterruptedException e) {
-            VaadinPluginUtil.handleBackgroundException(IStatus.INFO,
+            ErrorUtil.handleBackgroundException(IStatus.INFO,
                     "Type creation interrupted", e);
         } finally {
             monitor.done();
@@ -218,11 +221,11 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
 
             // refresh only the WebContent/VAADIN/widgetsets or
             // WebContent/ITMILL/widgetsets directory
-            String resourceDirectory = VaadinPluginUtil
+            String resourceDirectory = LegacyUtil
                     .getVaadinResourceDirectory(project);
             IWorkingSetManager workingSetManager = PlatformUI.getWorkbench()
                     .getWorkingSetManager();
-            IFolder wsDir = VaadinPluginUtil.getWebContentFolder(project)
+            IFolder wsDir = ProjectUtil.getWebContentFolder(project)
                     .getFolder(resourceDirectory).getFolder("widgetsets");
             // refresh this requires that the directory exists
             VaadinPluginUtil.createFolders(wsDir, monitor);
@@ -255,7 +258,7 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
             }
 
             String compilerClass = "com.google.gwt.dev.GWTCompiler";
-            if (VaadinPluginUtil.isVaadin6(project)) {
+            if (ProjectUtil.isVaadin6(project)) {
                 compilerClass = "com.vaadin.tools.WidgetsetCompiler";
             }
 
@@ -275,7 +278,7 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
             }
 
         } catch (CoreException e) {
-            VaadinPluginUtil
+            ErrorUtil
                     .displayError(
                             "Failed to create a launch configuration for compiling a widgetset",
                             e, getShell());
@@ -290,7 +293,7 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
         WebArtifactEdit artifact = WebArtifactEdit
                 .getWebArtifactEditForWrite(project);
         if (artifact == null) {
-            VaadinPluginUtil.logWarning("Could not open web.xml for edit.");
+            ErrorUtil.logWarning("Could not open web.xml for edit.");
             return;
         }
 
@@ -331,10 +334,10 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
                         IDE.openEditor(wbPage, javaFile, true);
                     }
                 } catch (PartInitException e) {
-                    VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                    ErrorUtil.handleBackgroundException(IStatus.WARNING,
                             "Failed to open created files in editor", e);
                 } catch (JavaModelException e) {
-                    VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                    ErrorUtil.handleBackgroundException(IStatus.WARNING,
                             "Failed to open created files in editor", e);
                 }
             }
@@ -368,10 +371,10 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
             widgetSetXmlFile.create(xmlstream, true, null);
 
         } catch (JavaModelException e) {
-            throw VaadinPluginUtil.newCoreException(
+            throw ErrorUtil.newCoreException(
                     "Failed to create widgetset XML file", e);
         } catch (IOException e) {
-            throw VaadinPluginUtil.newCoreException(
+            throw ErrorUtil.newCoreException(
                     "Failed to create widgetset XML file", e);
         }
     }

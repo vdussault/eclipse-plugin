@@ -7,6 +7,7 @@ public class VaadinPlugin extends AbstractUIPlugin {
     public static final String PLUGIN_ID = "com.vaadin.integration.eclipse";
 
     public static final String VAADIN_PACKAGE_PREFIX = "com.vaadin.";
+    @Deprecated
     public static final String TOOLKIT_PACKAGE_PREFIX = "com.itmill.toolkit.";
     public static final String APPLICATION_CLASS_NAME = "Application";
 

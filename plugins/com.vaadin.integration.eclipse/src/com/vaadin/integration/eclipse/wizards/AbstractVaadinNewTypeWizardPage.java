@@ -12,7 +12,7 @@ import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.ErrorUtil;
 
 public abstract class AbstractVaadinNewTypeWizardPage extends NewTypeWizardPage {
 
@@ -46,7 +46,7 @@ public abstract class AbstractVaadinNewTypeWizardPage extends NewTypeWizardPage 
                     }
                 }
             } catch (JavaModelException e1) {
-                VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+                ErrorUtil.handleBackgroundException(IStatus.WARNING,
                         "Failed to select the project for the wizard", e1);
             }
         }

@@ -38,7 +38,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.ErrorUtil;
 
 /**
  * A wizard to edit the metadata of a Vaadin add-on package, store it to the
@@ -181,11 +181,11 @@ public class DirectoryPackageWizard extends JarPackageWizard {
             try {
                 directoryPackage.setupProject((IJavaProject) selected);
             } catch (CoreException e) {
-                VaadinPluginUtil.displayError(
-                        "Could not read project manifest", e, getShell());
+                ErrorUtil.displayError("Could not read project manifest", e,
+                        getShell());
             } catch (IOException e) {
-                VaadinPluginUtil.displayError(
-                        "Could not read project manifest", e, getShell());
+                ErrorUtil.displayError("Could not read project manifest", e,
+                        getShell());
             }
         }
 
@@ -255,11 +255,11 @@ public class DirectoryPackageWizard extends JarPackageWizard {
         try {
             saveManifest();
         } catch (CoreException ex) {
-            VaadinPluginUtil.displayError("Updating the manifest failed.", ex,
+            ErrorUtil.displayError("Updating the manifest failed.", ex,
                     getShell());
             return false;
         } catch (IOException ex) {
-            VaadinPluginUtil.displayError("Updating the manifest failed.", ex,
+            ErrorUtil.displayError("Updating the manifest failed.", ex,
                     getShell());
             return false;
         }

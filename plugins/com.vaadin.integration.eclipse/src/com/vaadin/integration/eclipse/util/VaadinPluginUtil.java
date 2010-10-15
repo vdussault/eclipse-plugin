@@ -31,7 +31,6 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -47,7 +46,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -56,7 +54,6 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -68,12 +65,7 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jst.j2ee.web.componentcore.util.WebArtifactEdit;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -81,9 +73,6 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
-import org.eclipse.wst.common.componentcore.ComponentCore;
-import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
-import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
 import org.osgi.framework.Bundle;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
@@ -91,7 +80,6 @@ import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
 import com.vaadin.integration.eclipse.builder.WidgetsetNature;
 import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
-import com.vaadin.integration.eclipse.variables.VaadinClasspathVariableInitializer;
 import com.vaadin.integration.eclipse.wizards.DirectoryManifestProvider;
 
 public class VaadinPluginUtil {
@@ -99,309 +87,6 @@ public class VaadinPluginUtil {
     public static final String DEFAULT_WIDGET_SET_NAME = "com.vaadin.terminal.gwt.DefaultWidgetSet";
 
     private static final String WS_COMPILATION_CONSOLE_NAME = "Vaadin Widgetset Compilation";
-
-    /**
-     * Handle an exception in a background thread or other non-UI context. The
-     * handling primarily consists of tracing the exception.
-     * 
-     * @param t
-     */
-    public static void handleBackgroundException(Throwable t) {
-        handleBackgroundException(t.getMessage(), t);
-    }
-
-    /**
-     * Handle an exception in a background thread or other non-UI context. The
-     * handling primarily consists of tracing the exception.
-     * 
-     * @param message
-     * @param t
-     */
-    public static void handleBackgroundException(String message, Throwable t) {
-        handleBackgroundException(IStatus.ERROR, message, t);
-    }
-
-    /**
-     * Handle an exception in a background thread or other non-UI context. The
-     * handling primarily consists of tracing the exception.
-     * 
-     * @param severity
-     *            IStatus.OK, IStatus.INFO, IStatus.WARNING or IStatus.ERROR
-     * @param message
-     * @param t
-     */
-    public static void handleBackgroundException(int severity, String message,
-            Throwable t) {
-        // TODO trace the exception and do any other background exception
-        // handling
-        IStatus status = new Status(severity, VaadinPlugin.PLUGIN_ID, message,
-                t);
-        VaadinPlugin.getInstance().getLog().log(status);
-        // ex.printStackTrace();
-    }
-
-    /**
-     * Logs an information level event to the Eclipse error log (or other
-     * configured destination).
-     * 
-     * @param message
-     */
-    public static void logInfo(String message) {
-        IStatus status = new Status(IStatus.INFO, VaadinPlugin.PLUGIN_ID,
-                message);
-        VaadinPlugin.getInstance().getLog().log(status);
-        // ex.printStackTrace();
-    }
-
-    /**
-     * Logs a warning not related to an exception to the Eclipse error log (or
-     * other configured destination).
-     * 
-     * @param message
-     */
-    public static void logWarning(String message) {
-        IStatus status = new Status(IStatus.WARNING, VaadinPlugin.PLUGIN_ID,
-                message);
-        VaadinPlugin.getInstance().getLog().log(status);
-        // ex.printStackTrace();
-    }
-
-    /**
-     * Display an error message to the user.
-     * 
-     * @param message
-     * @param ex
-     */
-    public static void displayError(String message, Throwable ex, Shell shell) {
-        // TODO trace if needed and report to the user
-        MessageDialog.openError(shell, "Error", message);
-    }
-
-    /**
-     * Find a project that has the Vaadin project facet based on a selection.
-     * 
-     * If the selection is an element in a suitable project, return that
-     * project.
-     * 
-     * Otherwise, return null.
-     * 
-     * @param selection
-     * @return a Vaadin project
-     */
-    public static IProject getProject(ISelection selection) {
-        IProject project = null;
-        if (selection != null && selection.isEmpty() == false
-                && selection instanceof IStructuredSelection) {
-            IStructuredSelection ssel = (IStructuredSelection) selection;
-            if (ssel.size() == 1) {
-                Object obj = ssel.getFirstElement();
-                if (ssel instanceof TreeSelection) {
-                    TreeSelection ts = (TreeSelection) ssel;
-                    obj = ts.getPaths()[0].getFirstSegment();
-                } else {
-                    obj = ssel.getFirstElement();
-                }
-                if (obj instanceof IJavaProject) {
-                    return ((IJavaProject) obj).getProject();
-                }
-                if (obj instanceof IResource) {
-                    project = getProject((IResource) obj);
-                } else if (obj instanceof IJavaProject) {
-                    project = ((IJavaProject) obj).getProject();
-                }
-            }
-        }
-        return project;
-    }
-
-    /**
-     * Find a project that has the Vaadin project facet based on a resource.
-     * 
-     * If the resource is an element in a suitable project, return that project.
-     * 
-     * Otherwise, return null.
-     * 
-     * @param selection
-     * @return a Vaadin project or null
-     */
-    public static IProject getProject(IResource resource) {
-        IContainer container = null;
-        IProject project = null;
-        if (resource instanceof IContainer) {
-            container = (IContainer) resource;
-        } else if (resource != null) {
-            container = (resource).getParent();
-        }
-        if (container != null
-                && VaadinFacetUtils.isVaadinProject(container.getProject())) {
-            project = container.getProject();
-        }
-        return project;
-    }
-
-    public static IFolder getWebInfLibFolder(IProject project) {
-        IVirtualComponent component = ComponentCore.createComponent(project);
-        IVirtualFolder contentFolder = component.getRootFolder();
-        return (IFolder) contentFolder.getFolder(WebArtifactEdit.WEBLIB)
-                .getUnderlyingFolder();
-    }
-
-    public static IFolder getWebInfFolder(IProject project) {
-        IVirtualComponent component = ComponentCore.createComponent(project);
-        IVirtualFolder contentFolder = component.getRootFolder();
-        return (IFolder) contentFolder.getFolder(WebArtifactEdit.WEB_INF)
-                .getUnderlyingFolder();
-    }
-
-    public static IFolder getWebContentFolder(IProject project) {
-        IVirtualComponent component = ComponentCore.createComponent(project);
-        IVirtualFolder contentFolder = component.getRootFolder();
-        return (IFolder) contentFolder.getUnderlyingFolder();
-    }
-
-    public static IFolder getSrcFolder(IProject project) throws CoreException {
-        try {
-            IJavaProject javaProject = JavaCore.create(project);
-            for (IClasspathEntry classPathEntry : javaProject.getRawClasspath()) {
-                if (classPathEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-                    IPath path = classPathEntry.getPath();
-                    return project.getWorkspace().getRoot().getFolder(path);
-                    // return project.getFolder(path);
-                }
-            }
-
-            return null;
-        } catch (JavaModelException e) {
-            throw newCoreException("Unable to locate source folder", e);
-        }
-    }
-
-    /**
-     * Find the Vaadin Application type for a project or null if none found.
-     * 
-     * @param jproject
-     * @return
-     * @throws JavaModelException
-     */
-    private static IType findVaadinApplicationType(IJavaProject jproject)
-            throws JavaModelException {
-        if (jproject == null) {
-            return null;
-        }
-        IType type = jproject.findType(VaadinPlugin.VAADIN_PACKAGE_PREFIX
-                + VaadinPlugin.APPLICATION_CLASS_NAME);
-        if (type == null) {
-            type = jproject.findType(VaadinPlugin.TOOLKIT_PACKAGE_PREFIX
-                    + VaadinPlugin.APPLICATION_CLASS_NAME);
-        }
-        return type;
-    }
-
-    /**
-     * Returns either "com.vaadin." or "com.itmill.toolkit." depending on the
-     * Vaadin version in the project. Defaults to "com.vaadin." if neither
-     * found.
-     * 
-     * @param project
-     * @return
-     */
-    public static String getVaadinPackagePrefix(IProject project) {
-        if (isVaadin6(project)) {
-            return VaadinPlugin.VAADIN_PACKAGE_PREFIX;
-        } else {
-            return VaadinPlugin.TOOLKIT_PACKAGE_PREFIX;
-        }
-    }
-
-    /**
-     * Returns either "VAADIN" or "ITMILL" depending on the Vaadin version in
-     * the project, returning a default value if neither is found.
-     * 
-     * @param project
-     * @return
-     */
-    public static String getVaadinResourceDirectory(IProject project) {
-        if (isVaadin6(project)) {
-            return "VAADIN";
-        } else {
-            return "ITMILL";
-        }
-    }
-
-    /**
-     * Checks the Vaadin version, returns true for Vaadin 6.0+, false for IT
-     * Mill Toolkit.
-     * 
-     * @param project
-     * @return true if a Vaadin project (or unknown), false for IT Mill Toolkit
-     *         project
-     */
-    public static boolean isVaadin6(IProject project) {
-        IJavaProject jproject = JavaCore.create(project);
-        if (jproject != null) {
-            try {
-                if (jproject.findType(VaadinPlugin.VAADIN_PACKAGE_PREFIX
-                        + VaadinPlugin.APPLICATION_CLASS_NAME) != null) {
-                    return true;
-                } else if (jproject
-                        .findType(VaadinPlugin.TOOLKIT_PACKAGE_PREFIX
-                                + VaadinPlugin.APPLICATION_CLASS_NAME) != null) {
-                    return false;
-                }
-            } catch (JavaModelException e) {
-                handleBackgroundException(
-                        IStatus.WARNING,
-                        "Failed to check the Vaadin version used in the project, assuming 6.0+",
-                        e);
-                return true;
-            }
-        }
-        // default value
-        return true;
-    }
-
-    /**
-     * Check is a project uses Vaadin 6.2 or later.
-     * 
-     * @param project
-     * @return
-     */
-    public static boolean isVaadin62(IProject project) {
-        if (!isVaadin6(project)) {
-            return false;
-        }
-
-        IPath findProjectVaadinJarPath;
-        try {
-            findProjectVaadinJarPath = findProjectVaadinJarPath(JavaCore
-                    .create(project));
-        } catch (CoreException e) {
-            return false;
-        }
-
-        return findProjectVaadinJarPath != null
-                && VaadinPluginUtil
-                        .isWidgetsetPackage(findProjectVaadinJarPath);
-
-    }
-
-    public static boolean isGwt20(IProject project) {
-        IJavaProject jproject = JavaCore.create(project);
-        if (jproject != null) {
-            try {
-                if (jproject.findType("com.google.gwt.dev.DevMode") != null) {
-                    return true;
-                }
-            } catch (JavaModelException e) {
-                handleBackgroundException(
-                        IStatus.WARNING,
-                        "Failed to check the GWT version used in the project, assuming 1.x",
-                        e);
-            }
-        }
-        // default value
-        return false;
-    }
 
     private static IPackageFragmentRoot getJavaFragmentRoot(IProject project)
             throws CoreException {
@@ -417,7 +102,8 @@ public class VaadinPluginUtil {
 
             return null;
         } catch (JavaModelException e) {
-            throw newCoreException("Unable to locate source folder", e);
+            throw ErrorUtil.newCoreException("Unable to locate source folder",
+                    e);
         }
     }
 
@@ -448,10 +134,10 @@ public class VaadinPluginUtil {
             return file;
 
         } catch (JavaModelException e) {
-            throw VaadinPluginUtil.newCoreException(
+            throw ErrorUtil.newCoreException(
                     "Failed to create " + file.getName() + " file", e);
         } catch (IOException e) {
-            throw VaadinPluginUtil.newCoreException(
+            throw ErrorUtil.newCoreException(
                     "Failed to create " + file.getName() + " file", e);
         }
     }
@@ -467,7 +153,8 @@ public class VaadinPluginUtil {
             dest.create(input, true, null);
             input.close();
         } catch (Exception e) {
-            throw newCoreException("Failed to copy file to project", e);
+            throw ErrorUtil.newCoreException("Failed to copy file to project",
+                    e);
         }
     }
 
@@ -495,7 +182,8 @@ public class VaadinPluginUtil {
 
             // JavaCore.create(project.getWorkspace().getRoot().getFolder(sourceFile))
         } catch (Exception e) {
-            throw newCoreException("Failed to copy source file to project", e);
+            throw ErrorUtil.newCoreException(
+                    "Failed to copy source file to project", e);
         }
 
     }
@@ -516,211 +204,6 @@ public class VaadinPluginUtil {
 
         return template;
 
-    }
-
-    /**
-     * Ensure that some Vaadin jar file can be found in the project. If none can
-     * be found, adds the specified version from the local repository.
-     * 
-     * No launch configurations are updated. Use updateVaadinLibraries if such
-     * updates are needed.
-     * 
-     * Requests to the user for widgetset builds in the project are suspended
-     * for the duration of this operation and resumed after completion. At the
-     * end, the user is asked about compiling the widgetset if it is dirty.
-     * 
-     * @param project
-     * @param vaadinJarVersion
-     * @param monitor
-     * @throws CoreException
-     */
-    public static void ensureVaadinLibraries(IProject project,
-            Version vaadinJarVersion, IProgressMonitor monitor)
-            throws CoreException {
-        if (monitor == null) {
-            monitor = new NullProgressMonitor();
-        }
-        try {
-            monitor.beginTask(
-                    "Ensuring the project includes the Vaadin library", 1);
-
-            IJavaProject jproject = JavaCore.create(project);
-            try {
-                IType findType = findVaadinApplicationType(jproject);
-                if (findType == null) {
-                    WidgetsetBuildManager
-                            .internalSuspendWidgetsetBuilds(project);
-                    try {
-                        addVaadinLibrary(jproject, vaadinJarVersion,
-                                new SubProgressMonitor(monitor, 1));
-
-                        // refresh library folder to recompile parts of project
-                        IFolder lib = getWebInfLibFolder(project);
-                        if (lib.exists()) {
-                            // should exist after adding the library
-                            lib.refreshLocal(IResource.DEPTH_ONE, null);
-                        }
-                    } finally {
-                        WidgetsetBuildManager
-                                .internalResumeWidgetsetBuilds(project);
-                        if (VaadinPluginUtil.isWidgetsetDirty(project)) {
-                            WidgetsetBuildManager.runWidgetSetBuildTool(
-                                    project, false, new NullProgressMonitor());
-                        }
-                    }
-                }
-            } catch (JavaModelException e) {
-                throw newCoreException(
-                        "Failed to ensure that a Vaadin jar is included in project",
-                        e);
-            }
-        } finally {
-            monitor.done();
-        }
-    }
-
-    /**
-     * Ensure that an Vaadin jar file can be found in the project and is of the
-     * correct version. If none can be found or the version does not match,
-     * replaces any old Vaadin JAR with the specified version from the local
-     * repository.
-     * 
-     * Update widgetset compilation launch configurations in the project to
-     * refer to the new Vaadin and GWT versions (only when changing Vaadin
-     * version, not when adding the JAR).
-     * 
-     * Requests to the user for widgetset builds in the project are suspended
-     * for the duration of this operation and resumed after completion. At the
-     * end, the user is asked about compiling the widgetset if it is dirty.
-     * 
-     * @param project
-     * @param vaadinJarVersion
-     *            or null to remove current Vaadin library
-     * @throws CoreException
-     */
-    public static void updateVaadinLibraries(IProject project,
-            Version vaadinJarVersion, IProgressMonitor monitor)
-            throws CoreException {
-        if (monitor == null) {
-            monitor = new NullProgressMonitor();
-        }
-        try {
-            monitor.beginTask("Updating Vaadin libraries in the project", 12);
-
-            // do nothing if correct version is already in the project
-            Version currentVersion = getVaadinLibraryVersion(project, true);
-            if ((vaadinJarVersion == currentVersion)
-                    || (vaadinJarVersion != null && vaadinJarVersion
-                            .equals(currentVersion))) {
-                return;
-            }
-            IJavaProject jproject = JavaCore.create(project);
-            WidgetsetBuildManager.internalSuspendWidgetsetBuilds(project);
-            try {
-                // replace the Vaadin JAR (currentVersion) with the new one
-                if (currentVersion != null) {
-                    removeVaadinLibrary(jproject, currentVersion);
-                }
-                monitor.worked(1);
-                if (vaadinJarVersion != null) {
-                    addVaadinLibrary(jproject, vaadinJarVersion,
-                            new SubProgressMonitor(monitor, 9));
-                }
-                // refresh library folder to recompile parts of project
-                IFolder lib = getWebInfLibFolder(project);
-                if (lib.exists()) {
-                    // should exist at least if added to the project
-                    lib.refreshLocal(IResource.DEPTH_ONE, null);
-                }
-
-                // TODO also handle adding Vaadin JAR to a project if the user
-                // has removed it and adds a different version?
-                if (currentVersion != null && vaadinJarVersion != null) {
-                    // update launches
-                    String oldVaadinJarName = currentVersion.getJarFileName();
-                    String newVaadinJarName = vaadinJarVersion.getJarFileName();
-                    // this is safer than findProjectVaadinJarPath() as we may
-                    // be in the process of changing the classpath
-                    IPath vaadinJarPath = getWebInfLibFolder(project).getFile(
-                            newVaadinJarName).getFullPath();
-                    updateLaunchClassPath(project,
-                            new String[] { oldVaadinJarName }, vaadinJarPath);
-                    monitor.worked(1);
-
-                    // check if Vaadin JAR is explicitly on classpath instead of
-                    // through the "magic" classpath container for WEB-INF/lib
-                    // => update classpath reference
-                    IClasspathEntry[] rawClasspath = jproject.getRawClasspath();
-                    List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
-                    for (IClasspathEntry entry : rawClasspath) {
-                        entries.add(entry);
-                    }
-
-                    IClasspathEntry vaadinEntry = JavaCore.newLibraryEntry(
-                            vaadinJarPath, null, null);
-
-                    // replace explicit reference to the Vaadin JAR if found,
-                    // otherwise do nothing
-                    replaceClassPathEntry(entries, vaadinEntry,
-                            new String[] { oldVaadinJarName }, false);
-
-                    IClasspathEntry[] entryArray = entries
-                            .toArray(new IClasspathEntry[entries.size()]);
-                    jproject.setRawClasspath(entryArray, null);
-
-                    monitor.worked(1);
-                }
-            } catch (JavaModelException e) {
-                throw newCoreException(
-                        "Failed to update Vaadin jar in project", e);
-            } finally {
-                WidgetsetBuildManager.internalResumeWidgetsetBuilds(project);
-                if (VaadinPluginUtil.isWidgetsetDirty(project)) {
-                    WidgetsetBuildManager.runWidgetSetBuildTool(project, false,
-                            new NullProgressMonitor());
-                }
-            }
-        } finally {
-            monitor.done();
-        }
-    }
-
-    /**
-     * Is the project type Vaadin Liferay project, i.e. does the plugin use
-     * Vaadin from a Liferay directory instead of managing it itself.
-     * 
-     * @param project
-     * @return
-     */
-    public static boolean isLiferayProject(IProject project) {
-        if (project == null) {
-            return false;
-        }
-        ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
-                new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
-
-        return prefStore
-                .getBoolean(VaadinPlugin.PREFERENCES_PROJECT_TYPE_LIFERAY);
-    }
-
-    /**
-     * Returns the Liferay WEB-INF path of a Liferay project, or null if not a
-     * Liferay project.
-     * 
-     * @param project
-     * @return
-     */
-    public static String getLiferayWebInfPath(IProject project) {
-        if (project == null) {
-            return null;
-        }
-        ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
-                new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
-
-        boolean liferayProject = prefStore
-                .getBoolean(VaadinPlugin.PREFERENCES_PROJECT_TYPE_LIFERAY);
-        return liferayProject ? prefStore
-                .getString(VaadinPlugin.PREFERENCES_LIFERAY_PATH) : null;
     }
 
     /**
@@ -748,12 +231,12 @@ public class VaadinPluginUtil {
         if (project == null) {
             return false;
         }
-        IFolder lib = getWebInfLibFolder(project);
+        IFolder lib = ProjectUtil.getWebInfLibFolder(project);
         if (!lib.exists()) {
             return false;
         }
 
-        if (isLiferayProject(project)) {
+        if (LiferayUtil.isLiferayProject(project)) {
             return false;
         }
 
@@ -764,46 +247,7 @@ public class VaadinPluginUtil {
 
     }
 
-    /**
-     * Checks which Vaadin version is in use in the project. This optionally
-     * also checks the classpath for Vaadin JARs and deduces the version from
-     * the meta-data inside the JAR if no official Vaadin JAR is found in
-     * WEB-INF/lib.
-     * 
-     * @param project
-     * @param useClasspath
-     *            true to also search elsewhere on the classpath if no Vaadin
-     *            JAR is found in WEB-INF/lib
-     * @return
-     * @throws CoreException
-     */
-    public static Version getVaadinLibraryVersion(IProject project,
-            boolean useClasspath) throws CoreException {
-        IFolder lib = getWebInfLibFolder(project);
-        if (lib.exists()) {
-            IResource[] files = lib.members();
-            for (IResource resource : files) {
-                // is it a Vaadin JAR?
-                if (resource instanceof IFile) {
-                    Version version = DownloadUtils
-                            .getVaadinJarVersion(resource.getName());
-                    if (version != null) {
-                        return version;
-                    }
-                }
-            }
-        }
-
-        if (useClasspath) {
-            IJavaProject jproject = JavaCore.create(project);
-            IPath resource = findProjectVaadinJarPath(jproject);
-            return getVaadinVersionFromJar(resource);
-        }
-
-        return null;
-    }
-
-    private static Version getVaadinVersionFromJar(IPath resource) {
+    static Version getVaadinVersionFromJar(IPath resource) {
         if (resource == null || !resource.toPortableString().endsWith(".jar")
                 || !resource.toFile().exists()) {
             return null;
@@ -830,262 +274,12 @@ public class VaadinPluginUtil {
                         + versionString + ".jar");
             }
         } catch (Throwable t) {
-            handleBackgroundException(IStatus.INFO,
+            ErrorUtil.handleBackgroundException(IStatus.INFO,
                     "Could not access JAR when checking for Vaadin version", t);
         } finally {
             closeJarFile(jarFile);
         }
         return null;
-    }
-
-    /**
-     * Checks which Vaadin version is present in a Liferay installation.
-     * 
-     * @param project
-     * @return Vaadin version in Liferay, or null if none
-     * @throws CoreException
-     */
-    public static Version getVaadinLibraryVersionInLiferay(String liferayPath)
-            throws CoreException {
-        if (liferayPath == null || "".equals(liferayPath)) {
-            return null;
-        }
-
-        // get version from META-INF/VERSION in lib/vaadin.jar
-        IPath resource = getLiferayVaadinJarPath(liferayPath);
-        return getVaadinVersionFromJar(resource);
-    }
-
-    public static CoreException newCoreException(String message, Throwable e) {
-        return new CoreException(new Status(Status.ERROR,
-                VaadinPlugin.PLUGIN_ID, message, e));
-    }
-
-    /**
-     * Adds the specified Vaadin jar version from the local store to the
-     * project. The specified version must be found from the local store or an
-     * exception is thrown.
-     * 
-     * @param jproject
-     * @param vaadinJarVersion
-     * @param monitor
-     * @throws CoreException
-     */
-    private static void addVaadinLibrary(IJavaProject jproject,
-            Version vaadinJarVersion, IProgressMonitor monitor)
-            throws CoreException {
-
-        if (monitor == null) {
-            monitor = new NullProgressMonitor();
-        }
-        try {
-            monitor.beginTask(
-                    "Adding Vaadin required libraries to the project", 5);
-
-            IProject project = jproject.getProject();
-            IFolder lib = getWebInfLibFolder(project);
-            if (!lib.exists()) {
-                createFolders(lib, monitor);
-            }
-            IFile targetFile = lib.getFile(vaadinJarVersion.getJarFileName());
-            DownloadUtils.ensureVaadinJarExists(vaadinJarVersion,
-                    new SubProgressMonitor(monitor, 1));
-            IPath sourceFile = DownloadUtils
-                    .getLocalVaadinJar(vaadinJarVersion);
-
-            VaadinPluginUtil.copyPluginFileToProject(sourceFile, targetFile);
-
-            // refresh project
-            lib.refreshLocal(IResource.DEPTH_ONE, null);
-
-            // make sure the GWT library versions match the Vaadin JAR
-            // requirements
-            updateGWTLibraries(jproject, new SubProgressMonitor(monitor, 4));
-        } catch (Exception e) {
-            throw newCoreException("Failed to add Vaadin jar to project", e);
-        } finally {
-            monitor.done();
-        }
-    }
-
-    /**
-     * Removes the specified Vaadin jar version from the project (if it exists).
-     * 
-     * @param jproject
-     * @param vaadinJarVersion
-     * @throws CoreException
-     */
-    private static void removeVaadinLibrary(IJavaProject jproject,
-            Version vaadinJarVersion) throws CoreException {
-        try {
-            IProject project = jproject.getProject();
-            IFolder lib = getWebInfLibFolder(project);
-            // if not in WEB-INF/lib, don't try to make any changes
-            if (lib.exists()) {
-                IFile targetFile = lib.getFile(vaadinJarVersion
-                        .getJarFileName());
-                targetFile.delete(true, null);
-
-                // refresh project
-                lib.refreshLocal(IResource.DEPTH_ONE, null);
-            }
-        } catch (Exception e) {
-            throw newCoreException("Failed to remove Vaadin jar from project",
-                    e);
-        }
-    }
-
-    /**
-     * Ensure that the project classpath contains the GWT libraries, adding them
-     * if necessary.
-     * 
-     * Also update widgetset compilation launch configuration paths as needed.
-     * 
-     * Requests to the user for widgetset builds in the project are suspended
-     * for the duration of this operation and resumed after completion. At the
-     * end, the user is asked about compiling the widgetset if it is dirty.
-     * 
-     * @param project
-     * @param monitor
-     * @throws CoreException
-     */
-    public static void ensureGWTLibraries(IProject project,
-            IProgressMonitor monitor) throws CoreException {
-        if (monitor == null) {
-            monitor = new NullProgressMonitor();
-        }
-        try {
-            monitor.beginTask(
-                    "Ensuring that the project classpath contains GWT libraries",
-                    1);
-
-            IJavaProject jproject = JavaCore.create(project);
-            try {
-                IType findType = jproject
-                        .findType("com.google.gwt.core.client.EntryPoint");
-
-                if (findType == null) {
-                    WidgetsetBuildManager
-                            .internalSuspendWidgetsetBuilds(project);
-                    try {
-                        updateGWTLibraries(jproject, new SubProgressMonitor(
-                                monitor, 1));
-                    } finally {
-                        WidgetsetBuildManager
-                                .internalResumeWidgetsetBuilds(project);
-                        if (VaadinPluginUtil.isWidgetsetDirty(project)) {
-                            WidgetsetBuildManager.runWidgetSetBuildTool(
-                                    project, false, new NullProgressMonitor());
-                        }
-                    }
-                }
-            } catch (JavaModelException e) {
-                throw newCoreException(
-                        "Failed to ensure GWT libraries are present in the project",
-                        e);
-            }
-        } finally {
-            monitor.done();
-        }
-    }
-
-    /**
-     * Download and add or update GWT libraries in a project based on the Vaadin
-     * version in the project (if any).
-     * 
-     * The project build path and any external launches (including the widgetset
-     * compilation launch for Vaadin 6.1 or earlier) are also updated.
-     * 
-     * If the project build path contains user-defined GWT JARs, neither the
-     * build path nor the launches are modified.
-     * 
-     * @param jproject
-     * @param monitor
-     * @throws CoreException
-     */
-    private static void updateGWTLibraries(IJavaProject jproject,
-            IProgressMonitor monitor) throws CoreException {
-        if (monitor == null) {
-            monitor = new NullProgressMonitor();
-        }
-        try {
-            monitor.beginTask("Updating GWT libraries", 14);
-
-            String gwtVersion = getRequiredGWTVersionForProject(jproject);
-            monitor.worked(1);
-
-            // do not replace the GWT JARs directly on the build path and in
-            // launches if they are user-defined
-            // this ignores JARs in WEB-INF/lib, which could be temporary for
-            // OOPHM, and does modify the top-level classpath entries - it is up
-            // to the user to ensure the correct classpath order in such cases
-            if (isUsingUserDefinedGwt(jproject, false)) {
-                return;
-            }
-
-            try {
-                DownloadUtils.ensureGwtUserJarExists(gwtVersion,
-                        new SubProgressMonitor(monitor, 5));
-                DownloadUtils.ensureGwtDevJarExists(gwtVersion,
-                        new SubProgressMonitor(monitor, 5));
-
-                IClasspathEntry[] rawClasspath = jproject.getRawClasspath();
-                List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
-                for (IClasspathEntry entry : rawClasspath) {
-                    entries.add(entry);
-                }
-
-                // use the VAADIN_DOWNLOAD_VARIABLE variable and variable
-                // classpath entries where feasible
-
-                IPath devJarPath = DownloadUtils.getLocalGwtDevJar(gwtVersion);
-                IClasspathEntry gwtDev = makeVariableClasspathEntry(
-                        VaadinClasspathVariableInitializer.VAADIN_DOWNLOAD_VARIABLE,
-                        devJarPath);
-
-                IPath userJarPath = DownloadUtils
-                        .getLocalGwtUserJar(gwtVersion);
-                IClasspathEntry gwtUser = makeVariableClasspathEntry(
-                        VaadinClasspathVariableInitializer.VAADIN_DOWNLOAD_VARIABLE,
-                        userJarPath);
-
-                // replace gwt-dev-[platform].jar and/or gwt-dev.jar if found,
-                // otherwise append new entry
-                String devJarName = "gwt-dev-" + getPlatform() + ".jar";
-                replaceClassPathEntry(entries, gwtDev, new String[] {
-                        "gwt-dev.jar", devJarName }, true);
-
-                // replace gwt-user.jar if found, otherwise append new entry
-                replaceClassPathEntry(entries, gwtUser,
-                        new String[] { "gwt-user.jar" }, true);
-
-                IClasspathEntry[] entryArray = entries
-                        .toArray(new IClasspathEntry[entries.size()]);
-                jproject.setRawClasspath(entryArray, null);
-
-                monitor.worked(1);
-
-                IProject project = jproject.getProject();
-
-                // update classpaths also in launches
-                if (!isUsingUserDefinedGwt(jproject, true)) {
-                    updateLaunchClassPath(project, new String[] {
-                            "gwt-dev.jar", devJarName }, devJarPath);
-                    monitor.worked(1);
-
-                    updateLaunchClassPath(project,
-                            new String[] { "gwt-user.jar" }, userJarPath);
-                    monitor.worked(1);
-                } else {
-                    monitor.worked(2);
-                }
-            } catch (JavaModelException e) {
-                throw newCoreException("addGWTLibraries failed", e);
-            }
-        } finally {
-            monitor.done();
-        }
-
     }
 
     /**
@@ -1096,7 +290,7 @@ public class VaadinPluginUtil {
      * @param jarPath
      * @return
      */
-    private static IClasspathEntry makeVariableClasspathEntry(
+    public static IClasspathEntry makeVariableClasspathEntry(
             String variableName, IPath jarPath) {
         IPath variablePath = JavaCore.getClasspathVariable(variableName);
         if (variablePath.isPrefixOf(jarPath)) {
@@ -1128,7 +322,7 @@ public class VaadinPluginUtil {
      *            true to add the entry if no entry matching entryNames was
      *            found
      */
-    private static void replaceClassPathEntry(List<IClasspathEntry> entries,
+    static void replaceClassPathEntry(List<IClasspathEntry> entries,
             IClasspathEntry newEntry, String[] entryNames, boolean addIfMissing) {
         boolean found = false;
         for (int i = 0; i < entries.size(); ++i) {
@@ -1163,8 +357,8 @@ public class VaadinPluginUtil {
      * 
      * @throws CoreException
      */
-    private static void updateLaunchClassPath(IProject project,
-            String[] jarNames, IPath jarPath) throws CoreException {
+    static void updateLaunchClassPath(IProject project, String[] jarNames,
+            IPath jarPath) throws CoreException {
         // list all launches
         ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
         ILaunchConfigurationType typeExternal = manager
@@ -1296,96 +490,6 @@ public class VaadinPluginUtil {
         workingCopy.doSave();
     }
 
-    /**
-     * Checks if the project is using a custom (user-defined) GWT version
-     * directly on the build path.
-     * 
-     * @param jproject
-     * @param useContainers
-     *            also look into classpath containers such as WEB-INF/lib
-     * @return true if the classpath contains GWT JARs other than those managed
-     *         by the plugin
-     */
-    private static boolean isUsingUserDefinedGwt(IJavaProject jproject,
-            boolean useContainers) {
-        try {
-            // make sure both kinds of paths are handled
-            String gwtDownloadPath1 = getDownloadDirectory().toPortableString();
-            String gwtDownloadPath2 = getDownloadDirectory().toOSString();
-
-            IClasspathEntry[] rawClasspath = jproject.getRawClasspath();
-            for (int i = 0; i < rawClasspath.length; i++) {
-                IClasspathEntry cp = rawClasspath[i];
-                if (cp.toString().contains("gwt-dev")
-                        || cp.toString().contains("gwt-user")) {
-                    if (!cp.toString().startsWith("VAADIN_DOWNLOAD")
-                            && !cp.toString().startsWith(gwtDownloadPath1)
-                            && !cp.toString().startsWith(gwtDownloadPath2)) {
-                        return true;
-                    }
-                } else if (useContainers
-                        && cp.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-                    // primarily WEB-INF/lib
-                    IClasspathContainer container = JavaCore
-                            .getClasspathContainer(cp.getPath(), jproject);
-                    IClasspathEntry[] containerEntries = container
-                            .getClasspathEntries();
-                    for (IClasspathEntry ccp : containerEntries) {
-                        if (ccp.toString().contains("gwt-dev")
-                                || ccp.toString().contains("gwt-user")) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        } catch (CoreException e) {
-            handleBackgroundException(
-                    IStatus.WARNING,
-                    "Could not determine whether the project uses user-defined GWT JARs. Assuming GWT JARs are managed by the plugin.",
-                    e);
-        }
-        return false;
-    }
-
-    /**
-     * Returns the first gwt dev jar defined in project classpath.
-     * 
-     * If not set, a gwt jar file provided by plugin is returned.
-     */
-    public static IPath getGWTDevJarPath(IJavaProject jproject)
-            throws CoreException {
-        // check first for explicitly set gwt-dev jar file
-        IClasspathEntry[] rawClasspath = jproject.getRawClasspath();
-        for (IClasspathEntry cp : rawClasspath) {
-            if (cp.toString().contains("gwt-dev")) {
-                // User has explicitly defined GWT version to use directly on
-                // the classpath, or classpath entry created by the plugin
-                IClasspathEntry resolvedClasspathEntry = JavaCore
-                        .getResolvedClasspathEntry(cp);
-                return resolvedClasspathEntry.getPath();
-            } else if (cp.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-                // primarily WEB-INF/lib
-                IClasspathContainer container = JavaCore.getClasspathContainer(
-                        cp.getPath(), jproject);
-                if (container != null) {
-                    IClasspathEntry[] containerEntries = container
-                            .getClasspathEntries();
-                    for (IClasspathEntry ccp : containerEntries) {
-                        if (ccp.toString().contains("gwt-dev")) {
-                            // User has explicitly defined GWT version to use
-                            IClasspathEntry resolvedClasspathEntry = JavaCore
-                                    .getResolvedClasspathEntry(ccp);
-                            return resolvedClasspathEntry.getPath();
-                        }
-                    }
-                }
-            }
-        }
-
-        String gwtVersion = getRequiredGWTVersionForProject(jproject);
-        return DownloadUtils.getLocalGwtDevJar(gwtVersion);
-    }
-
     public static String getPlatform() {
         String osname = System.getProperty("os.name");
         if (osname.toLowerCase().contains("mac")) {
@@ -1431,7 +535,8 @@ public class VaadinPluginUtil {
             }
         }
 
-        String gwtVersion = getRequiredGWTVersionForProject(jproject);
+        String gwtVersion = ProjectUtil
+                .getRequiredGWTVersionForProject(jproject);
         return DownloadUtils.getLocalGwtUserJar(gwtVersion);
     }
 
@@ -1449,7 +554,7 @@ public class VaadinPluginUtil {
             resourceAsStream.close();
         } catch (IOException e) {
             // TODO this error message might not be ideal
-            handleBackgroundException(IStatus.ERROR,
+            ErrorUtil.handleBackgroundException(IStatus.ERROR,
                     "Failed to read template file from the Vaadin plugin", e);
         }
 
@@ -1468,7 +573,8 @@ public class VaadinPluginUtil {
                         .getPath()).append(IPath.SEPARATOR
                         + VaadinPlugin.PLUGIN_ID);
             } catch (IOException e) {
-                throw newCoreException("getConfigurationPath failed", e);
+                throw ErrorUtil.newCoreException("getConfigurationPath failed",
+                        e);
             }
         }
 
@@ -1477,7 +583,8 @@ public class VaadinPluginUtil {
                 return new Path(FileLocator.toFileURL(userLocation).getPath())
                         .append(IPath.SEPARATOR + VaadinPlugin.PLUGIN_ID);
             } catch (IOException e) {
-                throw newCoreException("getConfigurationPath failed", e);
+                throw ErrorUtil.newCoreException("getConfigurationPath failed",
+                        e);
             }
         }
 
@@ -1486,7 +593,7 @@ public class VaadinPluginUtil {
             return stateLocation;
         }
 
-        throw newCoreException(
+        throw ErrorUtil.newCoreException(
                 "getConfigurationPath found nowhere to store files", null);
     }
 
@@ -1521,127 +628,6 @@ public class VaadinPluginUtil {
                 IPath.SEPARATOR + version);
 
         return path;
-    }
-
-    public static String getRequiredGWTVersionForProject(IJavaProject jproject) {
-        // if no information exists, default to 2.0.4
-        String gwtVersion = "2.0.4";
-
-        try {
-            // find Vaadin JAR on the classpath
-            IPath vaadinJarPath = findProjectVaadinJarPath(jproject);
-            if (vaadinJarPath == null) {
-                throw newCoreException("Could not access Vaadin JAR", null);
-            }
-            File vaadinJarFile = vaadinJarPath.toFile();
-            if (!vaadinJarFile.exists()) {
-                return gwtVersion;
-            }
-
-            // Check gwt version from included Vaadin jar
-            JarFile jarFile = null;
-            try {
-                jarFile = new JarFile(vaadinJarFile.getAbsolutePath());
-                ZipEntry entry = jarFile.getEntry("META-INF/GWT-VERSION");
-                if (entry == null) {
-                    // found JAR but not GWT version information in it, use
-                    // default
-                    return gwtVersion;
-                }
-
-                // extract GWT version from the JAR
-                InputStream gwtVersionStream = jarFile.getInputStream(entry);
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(gwtVersionStream));
-
-                gwtVersion = reader.readLine();
-            } finally {
-                if (jarFile != null) {
-                    closeJarFile(jarFile);
-                }
-            }
-        } catch (IOException ex) {
-            handleBackgroundException(IStatus.WARNING,
-                    "Failed to determine the GWT library version to use, defaulting to "
-                            + gwtVersion, ex);
-        } catch (CoreException ex) {
-            handleBackgroundException(IStatus.WARNING,
-                    "Failed to determine the GWT library version to use, defaulting to "
-                            + gwtVersion, ex);
-        }
-
-        return gwtVersion;
-    }
-
-    public static IPath findProjectVaadinJarPath(IJavaProject javaProject)
-            throws CoreException {
-        IJavaElement type;
-        type = findVaadinApplicationType(javaProject);
-
-        while (type != null && type.getParent() != null) {
-            if (type instanceof IPackageFragmentRoot) {
-                IPackageFragmentRoot jar = (IPackageFragmentRoot) type;
-                IResource resource = jar.getResource();
-                if (resource == null) {
-                    // Galileo
-                    return jar.getPath();
-                } else {
-                    // Ganymede
-                    IPath rawLocation = resource.getRawLocation();
-                    return rawLocation;
-                }
-            }
-            type = type.getParent();
-        }
-
-        // at project creation, maybe not yet compiled => search for JARs on
-        // the classpath
-        IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-        for (IClasspathEntry cp : rawClasspath) {
-            if (cp.toString().contains(".jar")) {
-                // User has explicitly defined GWT version to use directly on
-                // the classpath, or classpath entry created by the plugin
-                IClasspathEntry resolvedClasspathEntry = JavaCore
-                        .getResolvedClasspathEntry(cp);
-                IPath path = resolvedClasspathEntry.getPath();
-                if (isVaadinJar(path)) {
-                    return path;
-                }
-            } else if (cp.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-                // primarily WEB-INF/lib, but possibly also Liferay etc.
-                IClasspathContainer container = JavaCore.getClasspathContainer(
-                        cp.getPath(), javaProject);
-                IClasspathEntry[] containerEntries = container
-                        .getClasspathEntries();
-                for (IClasspathEntry ccp : containerEntries) {
-                    if (ccp.toString().contains(".jar")) {
-                        // User has explicitly defined GWT version to use
-                        IClasspathEntry resolvedClasspathEntry = JavaCore
-                                .getResolvedClasspathEntry(ccp);
-                        IPath path = resolvedClasspathEntry.getPath();
-                        if (isVaadinJar(path)) {
-                            return path;
-                        }
-                    }
-                }
-            }
-        }
-
-        // still no luck? check WEB-INF/lib
-        IFolder lib = getWebInfLibFolder(javaProject.getProject());
-        if (!lib.exists()) {
-            return null;
-        }
-        for (IResource resource : lib.members()) {
-            // is it a Vaadin JAR?
-            if (resource instanceof IFile
-                    && isVaadinJar(resource.getLocation())) {
-                return resource.getLocation();
-            }
-        }
-
-        // For some reason we were not able to locate the Vaadin JAR
-        return null;
     }
 
     /**
@@ -1730,15 +716,17 @@ public class VaadinPluginUtil {
     public static IType[] getApplicationClasses(IProject project,
             IProgressMonitor monitor) throws JavaModelException {
         // find all non-binary subclasses of Application in the project
-        return getSubClasses(project, getVaadinPackagePrefix(project)
-                + VaadinPlugin.APPLICATION_CLASS_NAME, true, monitor);
+        return getSubClasses(project,
+                LegacyUtil.getVaadinPackagePrefix(project)
+                        + VaadinPlugin.APPLICATION_CLASS_NAME, true, monitor);
     }
 
     public static IType[] getWidgetSetClasses(IProject project,
             IProgressMonitor monitor) throws JavaModelException {
         // find all non-binary subclasses of WidgetSet in the project
-        return getSubClasses(project, getVaadinPackagePrefix(project)
-                + "terminal.gwt.client.WidgetSet", true, monitor);
+        return getSubClasses(project,
+                LegacyUtil.getVaadinPackagePrefix(project)
+                        + "terminal.gwt.client.WidgetSet", true, monitor);
     }
 
     /**
@@ -1871,16 +859,16 @@ public class VaadinPluginUtil {
             wsName += "Widgetset";
             String fullyQualifiedName = defaultPackage + "." + wsName;
 
-            VaadinPluginUtil.logInfo("No widget set found, "
-                    + fullyQualifiedName + " will be created...");
+            ErrorUtil.logInfo("No widget set found, " + fullyQualifiedName
+                    + " will be created...");
 
             /* Update web.xml */
 
             WebArtifactEdit artifact = WebArtifactEdit
                     .getWebArtifactEditForWrite(project.getProject());
             if (artifact == null) {
-                handleBackgroundException("Couldn't open web.xml for edit.",
-                        null);
+                ErrorUtil.handleBackgroundException(
+                        "Couldn't open web.xml for edit.", null);
             } else {
                 try {
                     WebXmlUtil.setWidgetSet(artifact, fullyQualifiedName,
@@ -1925,8 +913,8 @@ public class VaadinPluginUtil {
         WebArtifactEdit artifact = WebArtifactEdit
                 .getWebArtifactEditForRead(project.getProject());
         if (artifact == null) {
-            handleBackgroundException("Couldn't open web.xml for reading.",
-                    null);
+            ErrorUtil.handleBackgroundException(
+                    "Couldn't open web.xml for reading.", null);
         } else {
             try {
                 Map<String, String> widgetsets = WebXmlUtil
@@ -2091,7 +1079,7 @@ public class VaadinPluginUtil {
                     return true;
                 }
             } catch (Throwable t) {
-                handleBackgroundException(IStatus.INFO,
+                ErrorUtil.handleBackgroundException(IStatus.INFO,
                         "Could not access JAR when checking for widgetsets", t);
             } finally {
                 closeJarFile(jarFile);
@@ -2133,12 +1121,14 @@ public class VaadinPluginUtil {
                 String message = (jarFile == null) ? "Could not access JAR when searching for widgetsets"
                         : "Could not access JAR when searching for widgetsets: "
                                 + jarFile.getName();
-                handleBackgroundException(IStatus.WARNING, message, e);
+                ErrorUtil
+                        .handleBackgroundException(IStatus.WARNING, message, e);
             } catch (IOException e) {
                 String message = (jarFile == null) ? "Could not access JAR when searching for widgetsets"
                         : "Could not access JAR when searching for widgetsets: "
                                 + jarFile.getName();
-                handleBackgroundException(IStatus.WARNING, message, e);
+                ErrorUtil
+                        .handleBackgroundException(IStatus.WARNING, message, e);
             } finally {
                 closeJarFile(jarFile);
             }
@@ -2170,11 +1160,13 @@ public class VaadinPluginUtil {
             } catch (MalformedURLException e) {
                 String message = (jarFile == null) ? "Could not access JAR"
                         : "Could not access JAR " + jarFile.getName();
-                handleBackgroundException(IStatus.WARNING, message, e);
+                ErrorUtil
+                        .handleBackgroundException(IStatus.WARNING, message, e);
             } catch (IOException e) {
                 String message = (jarFile == null) ? "Could not access JAR"
                         : "Could not access JAR " + jarFile.getName();
-                handleBackgroundException(IStatus.WARNING, message, e);
+                ErrorUtil
+                        .handleBackgroundException(IStatus.WARNING, message, e);
             } finally {
                 closeJarFile(jarFile);
             }
@@ -2182,7 +1174,7 @@ public class VaadinPluginUtil {
         return false;
     }
 
-    private static void closeJarFile(JarFile jarFile) {
+    static void closeJarFile(JarFile jarFile) {
         // TODO make better jar handling. Windows locks files without
         // this, mac fails to rebuild widgetset with
         if (getPlatform().equals("windows")) {
@@ -2190,7 +1182,7 @@ public class VaadinPluginUtil {
                 try {
                     jarFile.close();
                 } catch (IOException e) {
-                    handleBackgroundException(IStatus.WARNING,
+                    ErrorUtil.handleBackgroundException(IStatus.WARNING,
                             "Closing JAR file failed", e);
                 }
             }
@@ -2210,7 +1202,8 @@ public class VaadinPluginUtil {
             IJavaProject jproject) throws CoreException {
         final Collection<IPath> vaadinpackages = new HashSet<IPath>();
 
-        // IFolder webInfLibFolder = getWebInfLibFolder(jproject.getProject());
+        // IFolder webInfLibFolder =
+        // ProjectUtil.getWebInfLibFolder(jproject.getProject());
         // if (!webInfLibFolder.exists()) {
         // return vaadinpackages;
         // }
@@ -2281,7 +1274,7 @@ public class VaadinPluginUtil {
                 WidgetsetNature.addWidgetsetNature(project);
             }
         } catch (Exception e) {
-            handleBackgroundException(IStatus.WARNING,
+            ErrorUtil.handleBackgroundException(IStatus.WARNING,
                     "Adding widgetset nature to the project failed.", e);
         }
     }
@@ -2304,7 +1297,7 @@ public class VaadinPluginUtil {
         boolean result = false;
         try {
             IProgressMonitor monitor = new NullProgressMonitor();
-            if (!isVaadin62(project)) {
+            if (!ProjectUtil.isVaadin62(project)) {
                 return false;
             }
 
@@ -2347,7 +1340,7 @@ public class VaadinPluginUtil {
         try {
             prefStore.save();
         } catch (IOException e) {
-            handleBackgroundException(IStatus.WARNING,
+            ErrorUtil.handleBackgroundException(IStatus.WARNING,
                     "Could not save widgetset compilation state for project "
                             + project.getName(), e);
         }
@@ -2415,7 +1408,7 @@ public class VaadinPluginUtil {
             monitor.subTask("Checking GWT version in the project "
                     + project.getName());
             // make sure the project has GWT JARs
-            VaadinPluginUtil.ensureGWTLibraries(project,
+            ProjectDependencyManager.ensureGWTLibraries(project,
                     new SubProgressMonitor(monitor, 10));
 
             monitor.subTask("Preparing to compile widgetset " + moduleName
@@ -2429,9 +1422,10 @@ public class VaadinPluginUtil {
             args.add(vmName);
 
             // refresh only the WebContent/VAADIN/widgetsets
-            String resourceDirectory = getVaadinResourceDirectory(project);
-            final IFolder wsDir = getWebContentFolder(project).getFolder(
-                    resourceDirectory).getFolder("widgetsets");
+            String resourceDirectory = LegacyUtil
+                    .getVaadinResourceDirectory(project);
+            final IFolder wsDir = ProjectUtil.getWebContentFolder(project)
+                    .getFolder(resourceDirectory).getFolder("widgetsets");
 
             // refresh this requires that the directory exists
             createFolders(wsDir, new SubProgressMonitor(monitor, 1));
@@ -2443,7 +1437,8 @@ public class VaadinPluginUtil {
 
             // add widgetset JARs
             Collection<IPath> widgetpackagets = getAvailableVaadinWidgetsetPackages(jproject);
-            IPath vaadinJarPath = findProjectVaadinJarPath(jproject);
+            IPath vaadinJarPath = ProjectUtil
+                    .findProjectVaadinJarPath(jproject);
             for (IPath file2 : widgetpackagets) {
                 if (!file2.equals(vaadinJarPath)) {
                     classPath = classPath + classpathSeparator
@@ -2668,7 +1663,8 @@ public class VaadinPluginUtil {
 
         // key libraries
         IRuntimeClasspathEntry gwtdev = JavaRuntime
-                .newArchiveRuntimeClasspathEntry(getGWTDevJarPath(jproject));
+                .newArchiveRuntimeClasspathEntry(ProjectDependencyManager
+                        .getGWTDevJarPath(jproject));
         otherLocations.add(getRawLocation(project, gwtdev.getPath()));
 
         IRuntimeClasspathEntry gwtuser = JavaRuntime
@@ -2676,7 +1672,8 @@ public class VaadinPluginUtil {
         otherLocations.add(getRawLocation(project, gwtuser.getPath()));
 
         IRuntimeClasspathEntry vaadinJar = JavaRuntime
-                .newArchiveRuntimeClasspathEntry(findProjectVaadinJarPath(jproject));
+                .newArchiveRuntimeClasspathEntry(ProjectUtil
+                        .findProjectVaadinJarPath(jproject));
         otherLocations.add(getRawLocation(project, vaadinJar.getPath()));
 
         // iterate over build path and classify its components
@@ -2817,7 +1814,7 @@ public class VaadinPluginUtil {
             IJavaProject jproject = JavaCore.create(project);
 
             // check GWT version
-            boolean isGwt20 = isGwt20(project);
+            boolean isGwt20 = ProjectUtil.isGwt20(project);
 
             String launchName = "GWT " + (isGwt20 ? "development" : "hosted")
                     + " mode for " + project.getName();
@@ -2833,7 +1830,8 @@ public class VaadinPluginUtil {
                                     IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
                                     "");
                     if (project.getName().equals(launchProject)) {
-                        logInfo("GWT development mode launch already exists for the project");
+                        ErrorUtil
+                                .logInfo("GWT development mode launch already exists for the project");
                         return launchConfiguration;
                     }
                 }
@@ -2861,9 +1859,10 @@ public class VaadinPluginUtil {
                     IJavaLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY,
                     location.toOSString());
 
-            String resourceDirectory = getVaadinResourceDirectory(project);
-            IFolder wsDir = getWebContentFolder(project).getFolder(
-                    resourceDirectory).getFolder("widgetsets");
+            String resourceDirectory = LegacyUtil
+                    .getVaadinResourceDirectory(project);
+            IFolder wsDir = ProjectUtil.getWebContentFolder(project)
+                    .getFolder(resourceDirectory).getFolder("widgetsets");
             String wsDirString = wsDir.getLocation().toPortableString();
             if (wsDirString.startsWith(location.toPortableString())) {
                 wsDirString = wsDirString.replaceFirst(
@@ -2896,7 +1895,8 @@ public class VaadinPluginUtil {
 
             // GWT libraries should come first
             classPath.add(JavaRuntime.newArchiveRuntimeClasspathEntry(
-                    getGWTDevJarPath(jproject)).getMemento());
+                    ProjectDependencyManager.getGWTDevJarPath(jproject))
+                    .getMemento());
             classPath.add(JavaRuntime.newArchiveRuntimeClasspathEntry(
                     getGWTUserJarPath(jproject)).getMemento());
 
@@ -2925,81 +1925,11 @@ public class VaadinPluginUtil {
             return workingCopy.doSave();
 
         } catch (CoreException e) {
-            handleBackgroundException(
+            ErrorUtil.handleBackgroundException(
                     "Failed to find or create development mode launch for project "
                             + project.getName(), e);
             return null;
         }
     }
 
-    /**
-     * Check that a Liferay path is valid: WEB-INF directory exists and contains
-     * lib/vaadin.jar .
-     * 
-     * @param liferayPath
-     *            path to validate as a string
-     * @return true if the Liferay WEB-INF directory exists and has
-     *         lib/vaadin.jar
-     */
-    public static boolean validateLiferayPath(String liferayPath) {
-        IPath jarPath = getLiferayVaadinJarPath(liferayPath);
-        return jarPath.toFile().exists();
-    }
-
-    public static void setLiferayPath(IProject project, String liferayPath)
-            throws CoreException {
-
-        // assuming the path has already been validated
-
-        // save path
-
-        ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
-                new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
-
-        prefStore.setValue(VaadinPlugin.PREFERENCES_LIFERAY_PATH, liferayPath);
-
-        try {
-            prefStore.save();
-        } catch (IOException e) {
-            throw VaadinPluginUtil.newCoreException(
-                    "Failed to save project preferences", e);
-        }
-
-        // update classpath
-
-        IJavaProject jproject = JavaCore.create(project);
-
-        IClasspathEntry[] rawClasspath = jproject.getRawClasspath();
-        List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
-        for (IClasspathEntry entry : rawClasspath) {
-            entries.add(entry);
-        }
-
-        IPath vaadinJarPath = getLiferayVaadinJarPath(liferayPath);
-        IClasspathEntry vaadinClasspathEntry = JavaCore.newLibraryEntry(
-                vaadinJarPath, null, null);
-
-        // replace vaadin.jar if found, otherwise append new entry
-        replaceClassPathEntry(entries, vaadinClasspathEntry,
-                new String[] { "vaadin.jar" }, true);
-
-        IClasspathEntry[] entryArray = entries
-                .toArray(new IClasspathEntry[entries.size()]);
-        jproject.setRawClasspath(entryArray, null);
-    }
-
-    public static IPath getLiferayWebInfPath(String liferayPath) {
-        // TODO make this work with other application servers
-        if (!liferayPath.contains("WEB-INF")
-                && !(new File(liferayPath + "/lib/vaadin.jar").exists())) {
-            // assuming Tomcat with default Liferay directory structure
-            liferayPath = liferayPath + "/webapps/ROOT/WEB-INF";
-        }
-        return new Path(liferayPath);
-    }
-
-    public static IPath getLiferayVaadinJarPath(String liferayPath) {
-        return getLiferayWebInfPath(liferayPath).append(
-                IPath.SEPARATOR + "lib" + IPath.SEPARATOR + "vaadin.jar");
-    }
 }

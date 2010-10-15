@@ -26,6 +26,9 @@ import org.eclipse.swt.widgets.Label;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
+import com.vaadin.integration.eclipse.util.ErrorUtil;
+import com.vaadin.integration.eclipse.util.LegacyUtil;
+import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 // TODO rename as NewWidgetWizardPage?
@@ -122,7 +125,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
         setDescription("This wizard creates a new Vaadin widget.");
 
         setTypeName("MyComponent", true);
-        setSuperClass(VaadinPluginUtil.getVaadinPackagePrefix(getProject())
+        setSuperClass(LegacyUtil.getVaadinPackagePrefix(getProject())
                 + "ui.AbstractComponent", true);
     }
 
@@ -160,7 +163,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
 
             setTypeName("MyComponent", true);
 
-            is62Project = VaadinPluginUtil.isVaadin62(project);
+            is62Project = ProjectUtil.isVaadin62(project);
             if (is62Project) {
                 if (isControlCreated()) {
                     extWidgetSetNameText.setVisible(false);
@@ -193,7 +196,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
             }
 
         } catch (CoreException e1) {
-            VaadinPluginUtil
+            ErrorUtil
                     .handleBackgroundException(
                             IStatus.WARNING,
                             "Failed to select the project in the New Widget wizard",
@@ -308,7 +311,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
         extWidgetSetNameLabel.setVisible(!template.isVaadin62()
                 && buildClientSideStub);
 
-        String prefix = VaadinPluginUtil.getVaadinPackagePrefix(getProject());
+        String prefix = LegacyUtil.getVaadinPackagePrefix(getProject());
         if (template.hasClientWidget()) {
             setSuperClass(prefix + "ui.AbstractComponent", true);
         } else {
@@ -320,7 +323,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
     protected void createTypeMembers(IType type, ImportsManager imports,
             IProgressMonitor monitor) throws CoreException {
 
-        String prefix = VaadinPluginUtil.getVaadinPackagePrefix(getProject());
+        String prefix = LegacyUtil.getVaadinPackagePrefix(getProject());
 
         // server-side CustomComponent
         if (!currentTemplate.hasClientWidget()
@@ -381,7 +384,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
         } catch (IOException e) {
             // handle exception - should not happen as templates are
             // inside the plugin
-            VaadinPluginUtil.handleBackgroundException(
+            ErrorUtil.handleBackgroundException(
                     "Could not find method templates in plugin", e);
         }
     }

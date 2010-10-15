@@ -43,7 +43,9 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.ErrorUtil;
+import com.vaadin.integration.eclipse.util.LegacyUtil;
+import com.vaadin.integration.eclipse.util.ProjectUtil;
 
 /**
  * Wizard to create new theme. If project is selected, it is created there,
@@ -124,29 +126,28 @@ public class NewThemeWizard extends Wizard implements INewWizard {
         monitor.beginTask("Creating " + themeName, 2);
         IProject root = page.getProject();
 
-        String directory = VaadinPluginUtil.getVaadinResourceDirectory(root);
+        String directory = LegacyUtil.getVaadinResourceDirectory(root);
 
-        IFolder folder = VaadinPluginUtil.getWebContentFolder(root).getFolder(
+        IFolder folder = ProjectUtil.getWebContentFolder(root).getFolder(
                 directory);
         if (!folder.exists()) {
             folder.create(true, false, monitor);
         }
-        folder = VaadinPluginUtil.getWebContentFolder(root)
-                .getFolder(directory).getFolder("themes");
+        folder = ProjectUtil.getWebContentFolder(root).getFolder(directory)
+                .getFolder("themes");
         if (!folder.exists()) {
             folder.create(true, false, monitor);
         }
         folder = folder.getFolder(themeName);
         if (folder.exists()) {
-            throw VaadinPluginUtil.newCoreException("Theme already exists",
-                    null);
+            throw ErrorUtil.newCoreException("Theme already exists", null);
         } else {
             folder.create(true, false, monitor);
         }
         final IFile file = folder.getFile(new Path("styles.css"));
         try {
-            InputStream stream = openContentStream(VaadinPluginUtil
-                    .isVaadin6(root) ? "reindeer" : "default");
+            InputStream stream = openContentStream(ProjectUtil.isVaadin6(root) ? "reindeer"
+                    : "default");
             file.create(stream, true, monitor);
             stream.close();
         } catch (IOException e) {
@@ -230,13 +231,11 @@ public class NewThemeWizard extends Wizard implements INewWizard {
                     try {
                         rewrite.apply(document);
                     } catch (MalformedTreeException e) {
-                        VaadinPluginUtil.handleBackgroundException(
-                                IStatus.WARNING,
+                        ErrorUtil.handleBackgroundException(IStatus.WARNING,
                                 "Failed to set the theme in the application class "
                                         + app.getFullyQualifiedName(), e);
                     } catch (BadLocationException e) {
-                        VaadinPluginUtil.handleBackgroundException(
-                                IStatus.WARNING,
+                        ErrorUtil.handleBackgroundException(IStatus.WARNING,
                                 "Failed to set the theme in the application class "
                                         + app.getFullyQualifiedName(), e);
                     }

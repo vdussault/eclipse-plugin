@@ -19,10 +19,10 @@ public class GaeConfigurationUtil {
     @SuppressWarnings("unchecked")
     public static IFile createAppEngineWebXml(IProject project)
             throws CoreException {
-        VaadinPluginUtil.ensureFileFromTemplate(VaadinPluginUtil
-                .getWebInfFolder(project).getFile("logging.properties"),
-                "logging.properties.txt");
-        return VaadinPluginUtil.ensureFileFromTemplate(VaadinPluginUtil
+        VaadinPluginUtil.ensureFileFromTemplate(
+                ProjectUtil.getWebInfFolder(project).getFile(
+                        "logging.properties"), "logging.properties.txt");
+        return VaadinPluginUtil.ensureFileFromTemplate(ProjectUtil
                 .getWebInfFolder(project).getFile("appengine-web.xml"),
                 "appengine-web.txt");
     }

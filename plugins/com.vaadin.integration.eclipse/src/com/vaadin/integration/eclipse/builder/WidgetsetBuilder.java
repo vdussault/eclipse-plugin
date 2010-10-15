@@ -23,6 +23,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import com.vaadin.integration.eclipse.util.DownloadUtils;
+import com.vaadin.integration.eclipse.util.ErrorUtil;
+import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 public class WidgetsetBuilder extends IncrementalProjectBuilder {
@@ -57,7 +59,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                     // creation - needed for Ganymede?
                     IProject project = resource.getProject();
                     IJavaProject jproject = JavaCore.create(project);
-                    IPath vaadinJarPath = VaadinPluginUtil
+                    IPath vaadinJarPath = ProjectUtil
                             .findProjectVaadinJarPath(jproject);
                     vaadinJarPath = VaadinPluginUtil.getRawLocation(project,
                             vaadinJarPath);
@@ -100,7 +102,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                                 JavaCore.create(getProject()),
                                 new NullProgressMonitor());
                     } catch (CoreException e) {
-                        VaadinPluginUtil
+                        ErrorUtil
                                 .handleBackgroundException(
                                         IStatus.WARNING,
                                         "Could not check if project has widgetsets, not marking as dirty",
@@ -180,7 +182,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                                 }
                             }
                         } catch (CoreException e) {
-                            VaadinPluginUtil.handleBackgroundException(
+                            ErrorUtil.handleBackgroundException(
                                     IStatus.WARNING,
                                     "Could not list children of folder "
                                             + parent.getFullPath(), e);
@@ -212,7 +214,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                         }
                     }
                 } catch (JavaModelException e) {
-                    VaadinPluginUtil
+                    ErrorUtil
                             .handleBackgroundException(
                                     IStatus.WARNING,
                                     "Could not check if "

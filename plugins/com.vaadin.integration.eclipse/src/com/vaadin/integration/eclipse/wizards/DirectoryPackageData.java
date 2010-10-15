@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.jarpackager.IJarBuilder;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
+import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 /**
@@ -56,15 +57,15 @@ public class DirectoryPackageData extends JarPackageData {
             return;
         }
 
-        webcontentPath = VaadinPluginUtil.getWebContentFolder(
-                jproject.getProject()).getProjectRelativePath();
+        webcontentPath = ProjectUtil.getWebContentFolder(jproject.getProject())
+                .getProjectRelativePath();
 
         setExportJavaFiles(true);
 
         // find manifest from WebContent
         // IFile rootManifest =
         // jproject.getProject().getFile("META-INF/MANIFEST.MF");
-        IFile manifestFile = VaadinPluginUtil.getWebContentFolder(
+        IFile manifestFile = ProjectUtil.getWebContentFolder(
                 jproject.getProject()).getFile("META-INF/MANIFEST.MF");
         boolean manifestExists = manifestFile.exists();
 

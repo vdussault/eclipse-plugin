@@ -8,6 +8,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ClasspathVariableInitializer;
 import org.eclipse.jdt.core.JavaCore;
 
+import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 /**
@@ -35,7 +36,7 @@ public class VaadinClasspathVariableInitializer extends
             }
         } catch (CoreException ex) {
             // this should not happen
-            VaadinPluginUtil.handleBackgroundException(IStatus.ERROR,
+            ErrorUtil.handleBackgroundException(IStatus.ERROR,
                     "Could not resolve classpath variable "
                             + VAADIN_DOWNLOAD_VARIABLE, ex);
         }

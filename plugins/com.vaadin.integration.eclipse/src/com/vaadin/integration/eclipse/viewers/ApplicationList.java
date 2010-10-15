@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
+import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 /**
@@ -83,9 +84,9 @@ public class ApplicationList extends Composite {
         } catch (JavaModelException e) {
             // do not list the applications to modify
             // TODO should this be displayed?
-            // VaadinPluginUtil.displayError(
+            // ErrorUtil.displayError(
             // "Failed to list Application classes in the project", e);
-            VaadinPluginUtil.handleBackgroundException(IStatus.WARNING,
+            ErrorUtil.handleBackgroundException(IStatus.WARNING,
                     "Failed to list the Application classes in the project", e);
         }
 
