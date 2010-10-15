@@ -12,6 +12,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -21,7 +22,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
-import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
+import com.vaadin.integration.eclipse.util.data.LocalVaadinVersion;
+import com.vaadin.integration.eclipse.util.files.LocalFileManager;
+import com.vaadin.integration.eclipse.util.network.DownloadManager;
 import com.vaadin.integration.eclipse.variables.VaadinClasspathVariableInitializer;
 
 public class ProjectDependencyManager {
@@ -42,7 +45,7 @@ public class ProjectDependencyManager {
      * @throws CoreException
      */
     public static void ensureVaadinLibraries(IProject project,
-            Version vaadinJarVersion, IProgressMonitor monitor)
+            LocalVaadinVersion vaadinVersion, IProgressMonitor monitor)
             throws CoreException {
         if (monitor == null) {
             monitor = new NullProgressMonitor();
@@ -59,8 +62,9 @@ public class ProjectDependencyManager {
                     WidgetsetBuildManager
                             .internalSuspendWidgetsetBuilds(project);
                     try {
-                        addVaadinLibrary(jproject, vaadinJarVersion,
-                                new SubProgressMonitor(monitor, 1));
+                        ProjectDependencyManager.addVaadinLibrary(jproject,
+                                vaadinVersion, new SubProgressMonitor(monitor,
+                                        1));
 
                         // refresh library folder to recompile parts of project
                         IFolder lib = ProjectUtil.getWebInfLibFolder(project);
@@ -103,13 +107,13 @@ public class ProjectDependencyManager {
      * end, the user is asked about compiling the widgetset if it is dirty.
      * 
      * @param project
-     * @param vaadinJarVersion
+     * @param newLocalVaadinJarVersion
      *            or null to remove current Vaadin library
      * @throws CoreException
      */
     public static void updateVaadinLibraries(IProject project,
-            Version vaadinJarVersion, IProgressMonitor monitor)
-            throws CoreException {
+            LocalVaadinVersion newLocalVaadinJarVersion,
+            IProgressMonitor monitor) throws CoreException {
         if (monitor == null) {
             monitor = new NullProgressMonitor();
         }
@@ -117,11 +121,10 @@ public class ProjectDependencyManager {
             monitor.beginTask("Updating Vaadin libraries in the project", 12);
 
             // do nothing if correct version is already in the project
-            Version currentVersion = ProjectUtil.getVaadinLibraryVersion(
+            String currentVersion = ProjectUtil.getVaadinLibraryVersion(
                     project, true);
-            if ((vaadinJarVersion == currentVersion)
-                    || (vaadinJarVersion != null && vaadinJarVersion
-                            .equals(currentVersion))) {
+            if ((newLocalVaadinJarVersion != null && newLocalVaadinJarVersion
+                    .getVersionNumber().equals(currentVersion))) {
                 return;
             }
             IJavaProject jproject = JavaCore.create(project);
@@ -132,8 +135,8 @@ public class ProjectDependencyManager {
                     removeVaadinLibrary(jproject, currentVersion);
                 }
                 monitor.worked(1);
-                if (vaadinJarVersion != null) {
-                    addVaadinLibrary(jproject, vaadinJarVersion,
+                if (newLocalVaadinJarVersion != null) {
+                    addVaadinLibrary(jproject, newLocalVaadinJarVersion,
                             new SubProgressMonitor(monitor, 9));
                 }
                 // refresh library folder to recompile parts of project
@@ -145,10 +148,13 @@ public class ProjectDependencyManager {
 
                 // TODO also handle adding Vaadin JAR to a project if the user
                 // has removed it and adds a different version?
-                if (currentVersion != null && vaadinJarVersion != null) {
+                if (currentVersion != null && newLocalVaadinJarVersion != null) {
                     // update launches
-                    String oldVaadinJarName = currentVersion.getJarFileName();
-                    String newVaadinJarName = vaadinJarVersion.getJarFileName();
+                    String oldVaadinJarName = VersionUtil
+                            .getVaadinJarFilename(currentVersion);
+                    String newVaadinJarName = newLocalVaadinJarVersion
+                            .getJarFilename();
+
                     // this is safer than findProjectVaadinJarPath() as we may
                     // be in the process of changing the classpath
                     IPath vaadinJarPath = ProjectUtil
@@ -208,7 +214,7 @@ public class ProjectDependencyManager {
      * @throws CoreException
      */
     private static void addVaadinLibrary(IJavaProject jproject,
-            Version vaadinJarVersion, IProgressMonitor monitor)
+            LocalVaadinVersion vaadinJarVersion, IProgressMonitor monitor)
             throws CoreException {
 
         if (monitor == null) {
@@ -223,12 +229,8 @@ public class ProjectDependencyManager {
             if (!lib.exists()) {
                 VaadinPluginUtil.createFolders(lib, monitor);
             }
-            IFile targetFile = lib.getFile(vaadinJarVersion.getJarFileName());
-            DownloadUtils.ensureVaadinJarExists(vaadinJarVersion,
-                    new SubProgressMonitor(monitor, 1));
-            IPath sourceFile = DownloadUtils
-                    .getLocalVaadinJar(vaadinJarVersion);
-
+            IFile targetFile = lib.getFile(vaadinJarVersion.getJarFilename());
+            Path sourceFile = new Path(vaadinJarVersion.getJarLocation());
             VaadinPluginUtil.copyPluginFileToProject(sourceFile, targetFile);
 
             // refresh project
@@ -253,14 +255,14 @@ public class ProjectDependencyManager {
      * @throws CoreException
      */
     private static void removeVaadinLibrary(IJavaProject jproject,
-            Version vaadinJarVersion) throws CoreException {
+            String vaadinJarVersion) throws CoreException {
         try {
             IProject project = jproject.getProject();
             IFolder lib = ProjectUtil.getWebInfLibFolder(project);
             // if not in WEB-INF/lib, don't try to make any changes
             if (lib.exists()) {
-                IFile targetFile = lib.getFile(vaadinJarVersion
-                        .getJarFileName());
+                IFile targetFile = lib.getFile(VersionUtil
+                        .getVaadinJarFilename(vaadinJarVersion));
                 targetFile.delete(true, null);
 
                 // refresh project
@@ -363,9 +365,9 @@ public class ProjectDependencyManager {
             }
 
             try {
-                DownloadUtils.ensureGwtUserJarExists(gwtVersion,
+                DownloadManager.downloadGwtUserJar(gwtVersion,
                         new SubProgressMonitor(monitor, 5));
-                DownloadUtils.ensureGwtDevJarExists(gwtVersion,
+                DownloadManager.downloadGwtDevJar(gwtVersion,
                         new SubProgressMonitor(monitor, 5));
 
                 IClasspathEntry[] rawClasspath = jproject.getRawClasspath();
@@ -377,13 +379,14 @@ public class ProjectDependencyManager {
                 // use the VAADIN_DOWNLOAD_VARIABLE variable and variable
                 // classpath entries where feasible
 
-                IPath devJarPath = DownloadUtils.getLocalGwtDevJar(gwtVersion);
+                IPath devJarPath = LocalFileManager
+                        .getLocalGwtDevJar(gwtVersion);
                 IClasspathEntry gwtDev = VaadinPluginUtil
                         .makeVariableClasspathEntry(
                                 VaadinClasspathVariableInitializer.VAADIN_DOWNLOAD_VARIABLE,
                                 devJarPath);
 
-                IPath userJarPath = DownloadUtils
+                IPath userJarPath = LocalFileManager
                         .getLocalGwtUserJar(gwtVersion);
                 IClasspathEntry gwtUser = VaadinPluginUtil
                         .makeVariableClasspathEntry(
@@ -522,7 +525,7 @@ public class ProjectDependencyManager {
 
         String gwtVersion = ProjectUtil
                 .getRequiredGWTVersionForProject(jproject);
-        return DownloadUtils.getLocalGwtDevJar(gwtVersion);
+        return LocalFileManager.getLocalGwtDevJar(gwtVersion);
     }
 
 }

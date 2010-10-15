@@ -22,10 +22,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import com.vaadin.integration.eclipse.util.DownloadUtils;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.VersionUtil;
 
 public class WidgetsetBuilder extends IncrementalProjectBuilder {
 
@@ -94,8 +94,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                 // dirty - that will be done when adding a new Vaadin JAR to
                 // the project (#3869).
                 // TODO #3590 clean GWT module
-                if (!resource.getName()
-                        .matches(DownloadUtils.VAADIN_JAR_REGEXP)) {
+                if (!VersionUtil.couldBeVaadinJar(resource.getName())) {
                     boolean hasWidgetset = false;
                     try {
                         hasWidgetset = VaadinPluginUtil.hasWidgetSets(

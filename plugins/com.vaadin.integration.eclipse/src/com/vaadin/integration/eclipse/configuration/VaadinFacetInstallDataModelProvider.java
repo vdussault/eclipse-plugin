@@ -24,11 +24,10 @@ import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
 import com.vaadin.integration.eclipse.IVaadinFacetInstallDataModelProperties;
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
-import com.vaadin.integration.eclipse.util.DownloadUtils;
-import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.LiferayUtil;
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.data.LocalVaadinVersion;
+import com.vaadin.integration.eclipse.util.files.LocalFileManager;
 
 /**
  * This data model provider is used whenever installing the Vaadin facet to a
@@ -139,9 +138,9 @@ public class VaadinFacetInstallDataModelProvider extends
             }
         } else if (propertyName.equals(VAADIN_VERSION)) {
             try {
-                Version latestLocal = DownloadUtils
-                        .getLatestLocalVaadinJarVersion();
-                return (latestLocal != null) ? latestLocal.getVersionString()
+                LocalVaadinVersion latestLocal = LocalFileManager
+                        .getNewestLocalVaadinJarVersion();
+                return (latestLocal != null) ? latestLocal.getVersionNumber()
                         : null;
             } catch (CoreException ex) {
                 ErrorUtil
@@ -301,8 +300,9 @@ public class VaadinFacetInstallDataModelProvider extends
 
     private List<String> getVaadinVersions() throws CoreException {
         List<String> versions = new ArrayList<String>();
-        for (Version version : DownloadUtils.getLocalVaadinJarVersions()) {
-            versions.add(version.getVersionString());
+        for (LocalVaadinVersion version : LocalFileManager
+                .getLocalVaadinJarVersions()) {
+            versions.add(version.getVersionNumber());
         }
         return versions;
     }

@@ -16,7 +16,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.vaadin.integration.eclipse.VaadinPlugin;
-import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
 
 public class LiferayUtil {
 
@@ -98,7 +97,7 @@ public class LiferayUtil {
      * @return Vaadin version in Liferay, or null if none
      * @throws CoreException
      */
-    public static Version getVaadinLibraryVersionInLiferay(String liferayPath)
+    public static String getVaadinLibraryVersionInLiferay(String liferayPath)
             throws CoreException {
         if (liferayPath == null || "".equals(liferayPath)) {
             return null;
@@ -106,7 +105,7 @@ public class LiferayUtil {
 
         // get version from META-INF/VERSION in lib/vaadin.jar
         IPath resource = getLiferayVaadinJarPath(liferayPath);
-        return VaadinPluginUtil.getVaadinVersionFromJar(resource);
+        return VersionUtil.getVaadinVersionFromJar(resource);
     }
 
     /**

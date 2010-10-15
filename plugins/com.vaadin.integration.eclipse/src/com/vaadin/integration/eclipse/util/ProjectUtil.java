@@ -34,7 +34,6 @@ import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
-import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
 
 public class ProjectUtil {
     /**
@@ -166,6 +165,7 @@ public class ProjectUtil {
      * @return true if a Vaadin project (or unknown), false for IT Mill Toolkit
      *         project
      */
+    @Deprecated
     public static boolean isVaadin6(IProject project) {
         IJavaProject jproject = JavaCore.create(project);
         if (jproject != null) {
@@ -272,10 +272,12 @@ public class ProjectUtil {
      * @param useClasspath
      *            true to also search elsewhere on the classpath if no Vaadin
      *            JAR is found in WEB-INF/lib
-     * @return
+     * @return The version of the Vaadin JAR currently in the project. Returns
+     *         null if no Vaadin JAR was found or if the version number could
+     *         not be determined.
      * @throws CoreException
      */
-    public static Version getVaadinLibraryVersion(IProject project,
+    public static String getVaadinLibraryVersion(IProject project,
             boolean useClasspath) throws CoreException {
         IFolder lib = ProjectUtil.getWebInfLibFolder(project);
         if (lib.exists()) {
@@ -283,8 +285,8 @@ public class ProjectUtil {
             for (IResource resource : files) {
                 // is it a Vaadin JAR?
                 if (resource instanceof IFile) {
-                    Version version = DownloadUtils
-                            .getVaadinJarVersion(resource.getName());
+                    String version = VersionUtil
+                            .getVaadinJarVersionFromFilename(resource.getName());
                     if (version != null) {
                         return version;
                     }
@@ -295,7 +297,7 @@ public class ProjectUtil {
         if (useClasspath) {
             IJavaProject jproject = JavaCore.create(project);
             IPath resource = ProjectUtil.findProjectVaadinJarPath(jproject);
-            return VaadinPluginUtil.getVaadinVersionFromJar(resource);
+            return VersionUtil.getVaadinVersionFromJar(resource);
         }
 
         return null;

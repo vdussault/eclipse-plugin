@@ -33,11 +33,15 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.AbstractElementListSelectionDialog;
 
-import com.vaadin.integration.eclipse.util.DownloadUtils;
-import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.LiferayUtil;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
+import com.vaadin.integration.eclipse.util.data.AbstractVaadinVersion;
+import com.vaadin.integration.eclipse.util.data.DownloadableVaadinVersion;
+import com.vaadin.integration.eclipse.util.data.LocalVaadinVersion;
+import com.vaadin.integration.eclipse.util.files.LocalFileManager;
+import com.vaadin.integration.eclipse.util.files.LocalFileManager.FileType;
+import com.vaadin.integration.eclipse.util.network.DownloadManager;
 
 /**
  * Project property page for selecting an Vaadin version and updating the JAR in
@@ -49,7 +53,7 @@ public class VaadinVersionComposite extends Composite {
     private Text liferayPathField;
     private Button liferayPathButton;
     private Combo versionCombo;
-    private Map<String, Version> versionMap = new HashMap<String, Version>();
+    private Map<String, LocalVaadinVersion> versionMap = new HashMap<String, LocalVaadinVersion>();
     private Button downloadButton;
     private IProject project = null;
 
@@ -69,9 +73,10 @@ public class VaadinVersionComposite extends Composite {
                 Comparator<String> {
             private Map<String, Integer> positions = new HashMap<String, Integer>();
 
-            public VersionStringComparator(List<Version> versionList) {
+            public VersionStringComparator(
+                    List<DownloadableVaadinVersion> versionList) {
                 for (int i = 0; i < versionList.size(); ++i) {
-                    positions.put(versionList.get(i).toString(), i);
+                    positions.put(versionList.get(i).getVersionNumber(), i);
                 }
             }
 
@@ -129,20 +134,24 @@ public class VaadinVersionComposite extends Composite {
         // development versions and nightly builds
         protected void updateVersionList(boolean development) {
             try {
-                Version selected = getSelectedVersion();
+                DownloadableVaadinVersion selected = getSelectedVersion();
 
-                List<Version> available = DownloadUtils
-                        .listDownloadableVaadinVersions(development);
-                available.removeAll(DownloadUtils.getLocalVaadinJarVersions());
+                List<DownloadableVaadinVersion> available = DownloadManager
+                        .getAvailableVersions(!development);
+                // Equals and hasCode implementation in
+                // AbstractVaadinVersion enables us to do this
+                available.removeAll(LocalFileManager
+                        .getLocalVaadinJarVersions());
 
-                Version[] versions = available.toArray(new Version[0]);
+                DownloadableVaadinVersion[] versions = available
+                        .toArray(new DownloadableVaadinVersion[0]);
                 fFilteredList.setComparator(new VersionStringComparator(
                         available));
                 setListElements(versions);
 
                 // try to preserve selection
                 if (selected != null) {
-                    setSelection(new Version[] { selected });
+                    setSelection(new DownloadableVaadinVersion[] { selected });
                 } else {
                     setSelection(getInitialElementSelections().toArray());
                 }
@@ -180,8 +189,8 @@ public class VaadinVersionComposite extends Composite {
          * 
          * @return String version or null
          */
-        public Version getSelectedVersion() {
-            return (Version) getFirstResult();
+        public DownloadableVaadinVersion getSelectedVersion() {
+            return (DownloadableVaadinVersion) getFirstResult();
         }
 
         @Override
@@ -277,24 +286,33 @@ public class VaadinVersionComposite extends Composite {
         try {
             versionCombo.removeAll();
             versionMap.clear();
-            for (Version version : DownloadUtils.getLocalVaadinJarVersions()) {
-                versionMap.put(version.getVersionString(), version);
-                versionCombo.add(version.getVersionString());
+            for (LocalVaadinVersion version : LocalFileManager
+                    .getLocalVaadinJarVersions()) {
+                versionMap.put(version.getVersionNumber(), version);
+                versionCombo.add(version.getVersionNumber());
             }
             try {
                 // select current version (if any)
                 if (project != null) {
-                    Version currentVaadinVersion = ProjectUtil
+                    String currentVaadinVersionString = ProjectUtil
                             .getVaadinLibraryVersion(project, true);
-                    if (currentVaadinVersion != null) {
+                    if (currentVaadinVersionString != null) {
                         // #3863 add custom Vaadin version in project if any
-                        String versionString = currentVaadinVersion
-                                .getVersionString();
-                        if (!versionMap.containsKey(versionString)) {
-                            versionMap.put(versionString, currentVaadinVersion);
-                            versionCombo.add(versionString, 0);
+                        if (!versionMap.containsKey(currentVaadinVersionString)) {
+
+                            // Map to a fake LocalVersion so version number can
+                            // be compared and local version is not replaced
+                            // unless the selection is changed
+                            LocalVaadinVersion projectVaadinVersion = new LocalVaadinVersion(
+                                    FileType.VAADIN_RELEASE,
+                                    currentVaadinVersionString, null);
+                            versionMap.put(currentVaadinVersionString,
+                                    projectVaadinVersion);
+                            // Add the string to the combo box as first
+                            // (selected)
+                            versionCombo.add(currentVaadinVersionString, 0);
                         }
-                        versionCombo.setText(versionString);
+                        versionCombo.setText(currentVaadinVersionString);
                     }
                 }
             } catch (CoreException ce) {
@@ -319,13 +337,15 @@ public class VaadinVersionComposite extends Composite {
             DownloadVaadinDialog dialog = new DownloadVaadinDialog(getShell());
 
             if (dialog.open() == Window.OK) {
-                final Version version = dialog.getSelectedVersion();
+                final AbstractVaadinVersion version = dialog
+                        .getSelectedVersion();
                 if (version != null) {
                     IRunnableWithProgress op = new IRunnableWithProgress() {
                         public void run(IProgressMonitor monitor)
                                 throws InvocationTargetException {
                             try {
-                                DownloadUtils.fetchVaadinJar(version, monitor);
+                                DownloadManager.downloadVaadinJar(
+                                        version.getVersionNumber(), monitor);
                             } catch (CoreException e) {
                                 throw new InvocationTargetException(e);
                             } finally {
@@ -338,7 +358,7 @@ public class VaadinVersionComposite extends Composite {
                     new ProgressMonitorDialog(getShell()).run(true, true, op);
 
                     updateVersionCombo();
-                    versionCombo.setText(version.getVersionString());
+                    versionCombo.setText(version.getVersionNumber());
                 }
             }
         } catch (InterruptedException e) {
@@ -380,8 +400,9 @@ public class VaadinVersionComposite extends Composite {
         return this;
     }
 
-    public Version getSelectedVersion() {
-        Version newVaadinVersion = versionMap.get(versionCombo.getText());
+    public LocalVaadinVersion getSelectedVersion() {
+        LocalVaadinVersion newVaadinVersion = versionMap.get(versionCombo
+                .getText());
         if ("".equals(newVaadinVersion)) {
             newVaadinVersion = null;
         }
@@ -439,14 +460,15 @@ public class VaadinVersionComposite extends Composite {
             liferayPathField.setText(liferayPath);
         }
         try {
-            Version currentVaadinVersion = LiferayUtil
+            String liferayVaadinVersionNumber = LiferayUtil
                     .getVaadinLibraryVersionInLiferay(liferayPathField
                             .getText());
-            if (currentVaadinVersion != null) {
-                String versionString = currentVaadinVersion.getVersionString();
-                versionMap.put(versionString, currentVaadinVersion);
-                versionCombo.add(versionString, 0);
-                versionCombo.setText(versionString);
+            if (liferayVaadinVersionNumber != null) {
+                versionMap.put(liferayVaadinVersionNumber,
+                        new LocalVaadinVersion(FileType.VAADIN_RELEASE,
+                                liferayVaadinVersionNumber, null));
+                versionCombo.add(liferayVaadinVersionNumber, 0);
+                versionCombo.setText(liferayVaadinVersionNumber);
             }
         } catch (CoreException e) {
             // ignore:
@@ -456,10 +478,11 @@ public class VaadinVersionComposite extends Composite {
 
     protected void selectLatestLocalVersion() {
         try {
-            Version latestVaadinVersion = DownloadUtils
-                    .getLatestLocalVaadinJarVersion();
-            if (latestVaadinVersion != null) {
-                versionCombo.setText(latestVaadinVersion.getVersionString());
+            LocalVaadinVersion newestLocalVaadinVersion = LocalFileManager
+                    .getNewestLocalVaadinJarVersion();
+            if (newestLocalVaadinVersion != null) {
+                versionCombo.setText(newestLocalVaadinVersion
+                        .getVersionNumber());
             }
         } catch (CoreException e) {
             // maybe there is no version downloaded - ignore

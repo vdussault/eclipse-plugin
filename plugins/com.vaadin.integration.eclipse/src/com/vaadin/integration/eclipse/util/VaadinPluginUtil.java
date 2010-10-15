@@ -28,7 +28,6 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.resources.IFile;
@@ -79,7 +78,7 @@ import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
 import com.vaadin.integration.eclipse.builder.WidgetsetNature;
-import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
+import com.vaadin.integration.eclipse.util.files.LocalFileManager;
 import com.vaadin.integration.eclipse.wizards.DirectoryManifestProvider;
 
 public class VaadinPluginUtil {
@@ -247,41 +246,6 @@ public class VaadinPluginUtil {
 
     }
 
-    static Version getVaadinVersionFromJar(IPath resource) {
-        if (resource == null || !resource.toPortableString().endsWith(".jar")
-                || !resource.toFile().exists()) {
-            return null;
-        }
-        JarFile jarFile = null;
-        try {
-            URL url = new URL("file:" + resource.toPortableString());
-            url = new URL("jar:" + url.toExternalForm() + "!/");
-            JarURLConnection conn = (JarURLConnection) url.openConnection();
-            jarFile = conn.getJarFile();
-            String versionString = null;
-            ZipEntry entry = jarFile.getEntry("META-INF/VERSION");
-            if (entry != null) {
-                InputStream inputStream = jarFile.getInputStream(entry);
-                versionString = new BufferedReader(new InputStreamReader(
-                        inputStream)).readLine();
-                inputStream.close();
-            }
-            closeJarFile(jarFile);
-            jarFile = null;
-            if (versionString != null) {
-                // TODO assuming official version
-                return DownloadUtils.getVaadinJarVersion("vaadin-"
-                        + versionString + ".jar");
-            }
-        } catch (Throwable t) {
-            ErrorUtil.handleBackgroundException(IStatus.INFO,
-                    "Could not access JAR when checking for Vaadin version", t);
-        } finally {
-            closeJarFile(jarFile);
-        }
-        return null;
-    }
-
     /**
      * Create a variable-based classpath entry if the given path is under the
      * target of the variable, an absolute one otherwise.
@@ -322,7 +286,7 @@ public class VaadinPluginUtil {
      *            true to add the entry if no entry matching entryNames was
      *            found
      */
-    static void replaceClassPathEntry(List<IClasspathEntry> entries,
+    public static void replaceClassPathEntry(List<IClasspathEntry> entries,
             IClasspathEntry newEntry, String[] entryNames, boolean addIfMissing) {
         boolean found = false;
         for (int i = 0; i < entries.size(); ++i) {
@@ -537,7 +501,7 @@ public class VaadinPluginUtil {
 
         String gwtVersion = ProjectUtil
                 .getRequiredGWTVersionForProject(jproject);
-        return DownloadUtils.getLocalGwtUserJar(gwtVersion);
+        return LocalFileManager.getLocalGwtUserJar(gwtVersion);
     }
 
     public static Path getPathToTemplateFile(String path) throws IOException {

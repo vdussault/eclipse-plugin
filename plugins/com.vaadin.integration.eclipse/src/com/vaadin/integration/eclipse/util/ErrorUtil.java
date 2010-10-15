@@ -90,4 +90,10 @@ public class ErrorUtil {
         return new CoreException(new Status(Status.ERROR,
                 VaadinPlugin.PLUGIN_ID, message, e));
     }
+
+    public static CoreException newCoreException(String message) {
+        return new CoreException(new Status(Status.ERROR,
+                VaadinPlugin.PLUGIN_ID, message));
+    }
+
 }

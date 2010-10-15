@@ -30,12 +30,12 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
-import com.vaadin.integration.eclipse.util.DownloadUtils.Version;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.LiferayUtil;
 import com.vaadin.integration.eclipse.util.ProjectDependencyManager;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.data.LocalVaadinVersion;
 
 /**
  * Property page grouping Vaadin related project properties.
@@ -175,7 +175,8 @@ public class VaadinProjectPropertyPage extends PropertyPage {
         }
 
         if (VaadinPluginUtil.isVaadinJarManagedByPlugin(project)) {
-            final Version newVaadinVersion = useVaadinButton.getSelection() ? vaadinVersionComposite
+            final LocalVaadinVersion newVaadinVersion = useVaadinButton
+                    .getSelection() ? vaadinVersionComposite
                     .getSelectedVersion() : null;
 
             // replace the Vaadin JAR in the project if it has changed
@@ -184,7 +185,7 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             // version elsewhere on the classpath, and do nothing if there is a
             // Vaadin JAR with the correct version on the classpath
             try {
-                Version currentVaadinVersion = ProjectUtil
+                String currentVaadinVersion = ProjectUtil
                         .getVaadinLibraryVersion(project, true);
 
                 if (useVaadinButton.getSelection()) {
@@ -197,24 +198,24 @@ public class VaadinProjectPropertyPage extends PropertyPage {
 
                 if ((newVaadinVersion == null && currentVaadinVersion != null)
                         || (newVaadinVersion != null && !newVaadinVersion
+                                .getVersionNumber()
                                 .equals(currentVaadinVersion))) {
                     // confirm replacement, return false if not confirmed
                     String message;
                     if (currentVaadinVersion != null
                             && newVaadinVersion == null) {
                         message = "Do you want to remove the Vaadin version "
-                                + currentVaadinVersion.getVersionString()
-                                + " from the project " + project.getName()
-                                + "?";
+                                + currentVaadinVersion + " from the project "
+                                + project.getName() + "?";
                     } else if (currentVaadinVersion == null) {
                         message = "Do you want to add the Vaadin version "
-                                + newVaadinVersion.getVersionString()
+                                + newVaadinVersion.getVersionNumber()
                                 + " to the project " + project.getName() + "?";
                     } else {
                         message = "Do you want to change the Vaadin version from "
-                                + currentVaadinVersion.getVersionString()
+                                + currentVaadinVersion
                                 + " to "
-                                + newVaadinVersion.getVersionString()
+                                + newVaadinVersion.getVersionNumber()
                                 + " in the project " + project.getName() + "?";
                     }
                     if (!MessageDialog.openConfirm(getShell(),
