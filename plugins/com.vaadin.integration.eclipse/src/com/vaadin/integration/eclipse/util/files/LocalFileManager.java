@@ -187,11 +187,7 @@ public class LocalFileManager {
      * placed.
      * 
      * @param type
-     *            "" for Vaadin release versions<br/>
-     *            "vaadin-nightly" for Vaadin nightly versions<br/>
-     *            "vaadin-prerelease" for Vaadin pre releases<br/>
-     *            "gwt-user" for gwt-user jar<br/>
-     *            "gwt-dev" for gwt-dev.jar<br/>
+     *            Type of file
      * 
      * @param version
      *            Version string
@@ -285,9 +281,12 @@ public class LocalFileManager {
                                 key += "0" + revision;
                             }
                             LocalVaadinVersion version = new LocalVaadinVersion(
-                                    type, name,
-                                    new File(jarDirectory, VersionUtil
-                                            .getVaadinJarFilename(name)));
+                                    type,
+                                    name,
+                                    new Path(jarDirectory.getAbsolutePath()
+                                            + Path.SEPARATOR
+                                            + VersionUtil
+                                                    .getVaadinJarFilename(name)));
                             versions.put(key, version);
                         } catch (ParseException pe) {
                             // log and ignore

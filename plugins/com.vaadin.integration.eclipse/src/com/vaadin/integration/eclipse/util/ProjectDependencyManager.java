@@ -12,7 +12,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -230,7 +229,7 @@ public class ProjectDependencyManager {
                 VaadinPluginUtil.createFolders(lib, monitor);
             }
             IFile targetFile = lib.getFile(vaadinJarVersion.getJarFilename());
-            Path sourceFile = new Path(vaadinJarVersion.getJarLocation());
+            IPath sourceFile = vaadinJarVersion.getJarFile();
             VaadinPluginUtil.copyPluginFileToProject(sourceFile, targetFile);
 
             // refresh project
