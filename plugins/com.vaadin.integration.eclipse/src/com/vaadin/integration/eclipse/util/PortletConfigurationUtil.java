@@ -36,9 +36,9 @@ public class PortletConfigurationUtil {
 
     /**
      * Adds a portlet to the portlet configuration files.
-     *
+     * 
      * The corresponding servlet should already exist in web.xml .
-     *
+     * 
      * @param project
      * @param applicationName
      *            servlet name (from path) in web.xml or application classname
@@ -120,8 +120,9 @@ public class PortletConfigurationUtil {
                     portletTitle);
 
             // insert the portlet section in the <portlet-app> tag
-            modifyXml(portletXmlFile, new AddToTagXmlModifier(portletXmlFile
-                    .getName(), "portlet-app", portletstub));
+            modifyXml(portletXmlFile,
+                    new AddToTagXmlModifier(portletXmlFile.getName(),
+                            "portlet-app", portletstub));
         } catch (IOException e) {
             throw VaadinPluginUtil.newCoreException(
                     "Failed to add a portlet to portlets.xml", e);
@@ -134,7 +135,8 @@ public class PortletConfigurationUtil {
             // create the file if it does not exist
             IFile portletXmlFile = VaadinPluginUtil
                     .ensureFileFromTemplate(
-                    getPortletConfigurationFile(project, "liferay-portlet.xml"),
+                            getPortletConfigurationFile(project,
+                                    "liferay-portlet.xml"),
                             "portlet/liferayportletxmlstub.txt");
 
             // prepare the portlet section from template
@@ -145,8 +147,9 @@ public class PortletConfigurationUtil {
                     portletName);
 
             // insert the portlet section in the <liferay-portlet-app> tag
-            modifyXml(portletXmlFile, new AddToTagXmlModifier(portletXmlFile
-                    .getName(), "liferay-portlet-app", portletstub));
+            modifyXml(portletXmlFile,
+                    new AddToTagXmlModifier(portletXmlFile.getName(),
+                            "liferay-portlet-app", portletstub));
         } catch (IOException e) {
             throw VaadinPluginUtil.newCoreException(
                     "Failed to add a portlet to liferay-portlet.xml", e);
@@ -162,8 +165,9 @@ public class PortletConfigurationUtil {
 
         // add the portlet section to the category
         // create the category section if does not exist
-        modifyXml(portletXmlFile, new LiferayDisplayXmlModifier(portletXmlFile
-                .getName(), category, portletName));
+        modifyXml(portletXmlFile,
+                new LiferayDisplayXmlModifier(portletXmlFile.getName(),
+                        category, portletName));
     }
 
     private static void addPortletToLiferayPluginPackageProperties(
@@ -182,8 +186,8 @@ public class PortletConfigurationUtil {
                         shortDescription);
                 stub = stub.replaceAll("STUB_MODULEGROUP", moduleGroup);
 
-                ByteArrayInputStream stubstream = new ByteArrayInputStream(stub
-                        .getBytes());
+                ByteArrayInputStream stubstream = new ByteArrayInputStream(
+                        stub.getBytes());
 
                 file.create(stubstream, true, null);
             }
@@ -198,7 +202,7 @@ public class PortletConfigurationUtil {
 
     /**
      * Modify an XML file with a given modifier.
-     *
+     * 
      * @param portletsXmlFile
      *            the file to modify
      * @param Modifier
@@ -309,7 +313,7 @@ public class PortletConfigurationUtil {
     /**
      * Modify an XML document by adding given String content to the first
      * instance of the named tag.
-     *
+     * 
      * The named parent tag must exist in the document.
      */
     private static class AddToTagXmlModifier implements XmlModifier {

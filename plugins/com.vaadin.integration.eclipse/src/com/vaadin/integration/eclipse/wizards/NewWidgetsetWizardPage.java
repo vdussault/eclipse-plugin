@@ -163,9 +163,9 @@ public class NewWidgetsetWizardPage extends AbstractVaadinNewTypeWizardPage {
         imports.addImport(prefix + "terminal.gwt.client.UIDL");
         imports.addImport(prefix + "terminal.gwt.client.Paintable");
         try {
-            type.createMethod(VaadinPluginUtil
-                    .readTextFromTemplate("widgetsetstub.txt"), null, false,
-                    null);
+            type.createMethod(
+                    VaadinPluginUtil.readTextFromTemplate("widgetsetstub.txt"),
+                    null, false, null);
         } catch (IOException e) {
             throw VaadinPluginUtil.newCoreException("createTypeMembers failed",
                     e);

@@ -24,7 +24,7 @@ public class LaunchRefactorer extends VaadinTextFileRefactorer {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see
      * org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant#
      * createChange(org.eclipse.core.runtime.IProgressMonitor)
@@ -119,7 +119,7 @@ public class LaunchRefactorer extends VaadinTextFileRefactorer {
     /**
      * Returns a pattern that matches an external launch arguments definition
      * containing a package name which matches the packageNameString parameter.
-     *
+     * 
      * @param packageNameString
      * @return
      */

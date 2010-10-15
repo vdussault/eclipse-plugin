@@ -98,8 +98,8 @@ public class VaadinFacetInstallDataModelProvider extends
         if (propertyName.equals(CONFIG_FOLDER)) {
             // this is required when adding the facet to an existing project, as
             // not inheriting WebFacetInstallDataModelProvider
-            return J2EEPlugin.getDefault().getJ2EEPreferences().getString(
-                    J2EEPreferences.Keys.WEB_CONTENT_FOLDER);
+            return J2EEPlugin.getDefault().getJ2EEPreferences()
+                    .getString(J2EEPreferences.Keys.WEB_CONTENT_FOLDER);
         } else if (propertyName.equals(APPLICATION_NAME)) {
             String projectName = getProjectName();
             if (projectName == null) {
@@ -219,7 +219,8 @@ public class VaadinFacetInstallDataModelProvider extends
             }
         } else if (LIFERAY_PATH.equals(propertyName)) {
             // set project type if not Liferay project and setting path
-            if (propertyValue != null && !"".equals(propertyValue)
+            if (propertyValue != null
+                    && !"".equals(propertyValue)
                     && !PROJECT_TYPE_LIFERAY_PORTLET
                             .equals(getProperty(VAADIN_PROJECT_TYPE))) {
                 setProperty(VAADIN_PROJECT_TYPE, PROJECT_TYPE_LIFERAY_PORTLET);
@@ -233,7 +234,7 @@ public class VaadinFacetInstallDataModelProvider extends
     /**
      * Set up the directory layout (context root dir and output folder) for
      * default or Google App Engine configuration.
-     *
+     * 
      * @param useGae
      */
     private void useGaeDirectoryStructure(boolean useGae) {
@@ -353,8 +354,7 @@ public class VaadinFacetInstallDataModelProvider extends
         }
         if (packageName == null) {
             return J2EEPlugin.newErrorStatus(
-                    "Application package name cannot be empty",
-                    null);
+                    "Application package name cannot be empty", null);
         } else if (JavaConventions.validatePackageName(packageName).isOK()) {
             // have to choose between deprecated API or internal constants...
             return OK_STATUS;

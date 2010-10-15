@@ -13,7 +13,7 @@ import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 /**
  * Vaadin Directory package model for export.
- *
+ * 
  * This provides some defaults and a somewhat more convenient API than using
  * {@link JarPackageData} directly.
  */
@@ -39,11 +39,11 @@ public class DirectoryPackageData extends JarPackageData {
 
     /**
      * Prepare the directory package description for a project.
-     *
+     * 
      * Setup the manifest location and load the manifest, as well as set up
      * generation of the manifest. The manifest is assumed to be located in the
      * webcontent directory.
-     *
+     * 
      * @param jproject
      * @throws IOException
      *             if loading of a pre-existing manifest fails

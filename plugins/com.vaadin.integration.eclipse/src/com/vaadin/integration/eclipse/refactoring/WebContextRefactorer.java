@@ -20,7 +20,7 @@ public class WebContextRefactorer extends VaadinTextFileRefactorer {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see
      * org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant#
      * createChange(org.eclipse.core.runtime.IProgressMonitor)
@@ -31,8 +31,8 @@ public class WebContextRefactorer extends VaadinTextFileRefactorer {
         if (getSourceProject() == null) {
             return null;
         }
-        IFile webXml = VaadinPluginUtil.getWebInfFolder(getSourceProject()).getFile(
-                "web.xml");
+        IFile webXml = VaadinPluginUtil.getWebInfFolder(getSourceProject())
+                .getFile("web.xml");
         if (webXml == null) {
             return null;
         }
@@ -104,7 +104,7 @@ public class WebContextRefactorer extends VaadinTextFileRefactorer {
      * Returns a pattern that matches a servlet definition for the
      * ApplicationServlet containing an application value which matches the
      * applicationString parameter.
-     *
+     * 
      * @param applicationString
      * @return
      */
@@ -117,10 +117,9 @@ public class WebContextRefactorer extends VaadinTextFileRefactorer {
         Pattern pattern = Pattern.compile("<servlet>"
                 + "(.*?)<servlet-class>(\\s*)"
                 + "((com\\.vaadin\\.)|(com\\.itmill\\.toolkit\\.))"
-                + applicationServletClassRegexp
-                + "(\\s*)</servlet-class>" + "(.*?)<param-value>(\\s*)"
-                + applicationString + "(\\s*)</param-value>"
-                + "(.*?)</servlet>", Pattern.DOTALL);
+                + applicationServletClassRegexp + "(\\s*)</servlet-class>"
+                + "(.*?)<param-value>(\\s*)" + applicationString
+                + "(\\s*)</param-value>" + "(.*?)</servlet>", Pattern.DOTALL);
 
         return pattern;
 

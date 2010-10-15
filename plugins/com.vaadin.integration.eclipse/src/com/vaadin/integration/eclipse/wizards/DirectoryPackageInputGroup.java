@@ -35,10 +35,10 @@ import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 /**
  * Input group view: tree and list side by side.
- *
+ * 
  * Filtering etc. is mostly taken care of the view. A single
- * {@link IJavaProject} can be selected as the initial selection, selecting
- * a default set of elements in it and hiding other projects.
+ * {@link IJavaProject} can be selected as the initial selection, selecting a
+ * default set of elements in it and hiding other projects.
  */
 class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
 
@@ -48,11 +48,9 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
             ITreeContentProvider treeContentProvider,
             ILabelProvider treeLabelProvider,
             IStructuredContentProvider listContentProvider,
-            ILabelProvider listLabelProvider, int style, int width,
-            int height) {
+            ILabelProvider listLabelProvider, int style, int width, int height) {
         super(parent, rootObject, treeContentProvider, treeLabelProvider,
-                listContentProvider, listLabelProvider, style, width,
-                height);
+                listContentProvider, listLabelProvider, style, width, height);
 
         addTreeFilter(new EmptyInnerPackageFilter());
         setTreeComparator(new JavaElementComparator());
@@ -106,14 +104,13 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
 
     /**
      * Get the elements to select by default for a Java project.
-     *
+     * 
      * These include the source directories of the project, the class
      * directories of the project, WebContent/META-INF and
      * WebContent/VAADIN/themes .
-     *
+     * 
      * @param javaProject
-     * @return List of elements to select (IFolder, IPackageFragmentRoot
-     *         etc.)
+     * @return List of elements to select (IFolder, IPackageFragmentRoot etc.)
      */
     private List getDefaultElements(IJavaProject javaProject) {
         List result = new ArrayList();
@@ -130,12 +127,11 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
                     // in practice, this is the package fragment root;
                     // this needs to be selected as a IJavaElement and not
                     // as an IFolder
-                    IJavaElement root = JavaCore.create(getFolder(
-                            project, entry.getPath()));
+                    IJavaElement root = JavaCore.create(getFolder(project,
+                            entry.getPath()));
                     result.add(root);
                     if (entry.getOutputLocation() != null) {
-                        result.add(getFolder(project, entry
-                                .getOutputLocation()));
+                        result.add(getFolder(project, entry.getOutputLocation()));
                     }
                 }
             }
@@ -167,9 +163,9 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
     /**
      * Make default selections in the tree based on a Java project and hide
      * other projects from the view.
-     *
+     * 
      * @see #getDefaultElements(IJavaProject)
-     *
+     * 
      * @param javaProject
      */
     public void selectProject(final IJavaProject javaProject) {
@@ -190,8 +186,7 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
     }
 
     @Override
-    protected void setTreeChecked(final Object element,
-            final boolean state) {
+    protected void setTreeChecked(final Object element, final boolean state) {
         if (isInitiallySelecting() && element instanceof IResource) {
             final IResource resource = (IResource) element;
             if (resource.getName().charAt(0) == '.') {
@@ -211,14 +206,14 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
 
     /**
      * Return the elements which will be exported.
-     *
+     * 
      * {@see
      * org.eclipse.jdt.ui.jarpackager.JarPackageData.setElements(Object[])}
-     *
+     * 
      * Everything under the returned elements will be exported and the elements
      * should correspond to entities in the file system, so the elements should
      * be mostly leaf elements (e.g. IFile), not their parent containers.
-     *
+     * 
      * @return Object[] elements to export
      */
     // adapted from JarPackageWizardPage
@@ -298,14 +293,14 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
      * Create a list with {@link IResource} instances for the folders / projects
      * that correspond to the Java elements (Java project, package, package
      * root) in a set.
-     *
+     * 
      * The set can contain objects of different types, but only
      * {@link IJavaElement} instances are taken into account.
      */
     // adapted from JarPackageWizardPage
     private Set<IResource> getCorrespondingContainers(Set elements) {
-        Set<IResource> javaElementResources = new HashSet<IResource>(elements
-                .size());
+        Set<IResource> javaElementResources = new HashSet<IResource>(
+                elements.size());
         Iterator iter = elements.iterator();
         while (iter.hasNext()) {
             Object element = iter.next();

@@ -236,9 +236,12 @@ public class CoreFacetInstallDelegate implements IDelegate,
                                         portletName, portletTitle, category,
                                         portletVersion);
                     } else {
-                        PortletConfigurationUtil.addPortlet(project, servletName,
-                                vaadinPackagePrefix
-                                        + "terminal.gwt.server.ApplicationPortlet",
+                        PortletConfigurationUtil
+                                .addPortlet(
+                                        project,
+                                        servletName,
+                                        vaadinPackagePrefix
+                                                + "terminal.gwt.server.ApplicationPortlet",
                                         portletName, portletTitle, category,
                                         portletVersion);
                     }

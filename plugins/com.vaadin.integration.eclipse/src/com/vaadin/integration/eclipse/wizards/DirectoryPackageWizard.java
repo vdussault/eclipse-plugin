@@ -92,7 +92,8 @@ public class DirectoryPackageWizard extends JarPackageWizard {
         // cannot call super.addPages() here - would add problematic pages
     }
 
-    private void addJavaElement(List<IJavaProject> selectedElements, IJavaElement je) {
+    private void addJavaElement(List<IJavaProject> selectedElements,
+            IJavaElement je) {
         int elementType = je.getElementType();
         if (elementType == IJavaElement.COMPILATION_UNIT
                 || elementType == IJavaElement.CLASS_FILE
@@ -121,7 +122,8 @@ public class DirectoryPackageWizard extends JarPackageWizard {
         return root != null && (root.isArchive() || root.isExternal());
     }
 
-    private void addProject(List<IJavaProject> selectedElements, IProject project) {
+    private void addProject(List<IJavaProject> selectedElements,
+            IProject project) {
         try {
             if (project != null && project.hasNature(JavaCore.NATURE_ID)) {
                 selectedElements.add(JavaCore.create(project));
@@ -135,7 +137,7 @@ public class DirectoryPackageWizard extends JarPackageWizard {
      * Gets the current workspace page selection and converts it to a valid
      * selection for this wizard: the (first) Java project containing the
      * selection
-     *
+     * 
      * @return a valid structured selection based on the current selection
      */
     @Override
@@ -152,8 +154,8 @@ public class DirectoryPackageWizard extends JarPackageWizard {
                 if (selectedElement instanceof IProject) {
                     addProject(selectedElements, (IProject) selectedElement);
                 } else if (selectedElement instanceof IResource) {
-                    addProject(selectedElements, ((IResource) selectedElement)
-                            .getProject());
+                    addProject(selectedElements,
+                            ((IResource) selectedElement).getProject());
                 } else if (selectedElement instanceof IJavaElement) {
                     addJavaElement(selectedElements,
                             (IJavaElement) selectedElement);
@@ -211,7 +213,7 @@ public class DirectoryPackageWizard extends JarPackageWizard {
 
     /**
      * Exports the directory package.
-     *
+     * 
      * @param op
      *            the export operation to run
      * @return a boolean indicating success or failure
@@ -295,12 +297,10 @@ public class DirectoryPackageWizard extends JarPackageWizard {
             if (directoryPackage.allowOverwrite()
                     || queryDialog(
                             "Confirm Update",
-                            Messages
-                                    .format(
-                                            "Do you want to update the manifest file ''{0}'' and use it in the package?",
-                                            BasicElementLabels.getPathLabel(
-                                                    manifestFile.getFullPath(),
-                                                    false)))) {
+                            Messages.format(
+                                    "Do you want to update the manifest file ''{0}'' and use it in the package?",
+                                    BasicElementLabels.getPathLabel(
+                                            manifestFile.getFullPath(), false)))) {
                 manifestFile.setContents(fileInput, true, true, null);
             }
         } else {

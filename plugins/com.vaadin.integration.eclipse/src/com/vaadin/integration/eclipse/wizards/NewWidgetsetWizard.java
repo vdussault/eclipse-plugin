@@ -105,8 +105,8 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
             return false;
         } catch (InvocationTargetException e) {
             Throwable realException = e.getTargetException();
-            MessageDialog.openError(getShell(), "Error", realException
-                    .getMessage());
+            MessageDialog.openError(getShell(), "Error",
+                    realException.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -190,7 +190,7 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
     /**
      * Create either an external launch configuration that builds a widgetset
      * and refreshes the build target directory in the workspace
-     *
+     * 
      * @param monitor
      */
     private void createBuildScript(IProgressMonitor monitor) {
@@ -230,8 +230,8 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
             IWorkingSet workingSet = workingSetManager
                     .createWorkingSet("launchConfigurationWorkingSet",
                             new IAdaptable[] { wsDir });
-            workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_SCOPE, RefreshTab
-                    .getRefreshAttribute(workingSet));
+            workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_SCOPE,
+                    RefreshTab.getRefreshAttribute(workingSet));
             // alternatively, could refresh the whole project
             // workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_SCOPE,
             // "${project}");
@@ -350,8 +350,8 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
             String gwtxmlstub = VaadinPluginUtil
                     .readTextFromTemplate("widgetsetxmlstub.txt");
 
-            gwtxmlstub = gwtxmlstub.replace("WS_NAME", wsClass
-                    .getFullyQualifiedName());
+            gwtxmlstub = gwtxmlstub.replace("WS_NAME",
+                    wsClass.getFullyQualifiedName());
 
             String superClass = page.getSuperClass();
             String superModudle = superClass.replace(".client.", ".");
@@ -379,7 +379,7 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
     /**
      * We will accept the selection in the workbench to see if we can initialize
      * from it.
-     *
+     * 
      * @see IWorkbenchWizard#init(IWorkbench, IStructuredSelection)
      */
     public void init(IWorkbench workbench, IStructuredSelection selection) {

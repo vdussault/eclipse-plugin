@@ -48,7 +48,7 @@ import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 /**
  * Wizard to create new theme. If project is selected, it is created there,
  * otherwise to first web project.
- *
+ * 
  * Created with eclipse template.
  */
 
@@ -105,8 +105,8 @@ public class NewThemeWizard extends Wizard implements INewWizard {
             return false;
         } catch (InvocationTargetException e) {
             Throwable realException = e.getTargetException();
-            MessageDialog.openError(getShell(), "Error", realException
-                    .getMessage());
+            MessageDialog.openError(getShell(), "Error",
+                    realException.getMessage());
             return false;
         }
         return true;
@@ -276,7 +276,7 @@ public class NewThemeWizard extends Wizard implements INewWizard {
     /**
      * We will accept the selection in the workbench to see if we can initialize
      * from it.
-     *
+     * 
      * @see IWorkbenchWizard#init(IWorkbench, IStructuredSelection)
      */
     public void init(IWorkbench workbench, IStructuredSelection selection) {

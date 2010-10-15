@@ -14,9 +14,9 @@ import com.vaadin.integration.eclipse.VaadinFacetUtils;
 
 /**
  * Data model provider when creating a Vaadin top-level project.
- *
+ * 
  * This sets up the list of required facets and the default project structure.
- *
+ * 
  * This class is not used when just adding the Vaadin facet to a Dynamic Web
  * Project.
  */

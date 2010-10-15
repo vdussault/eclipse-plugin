@@ -12,7 +12,7 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 /**
  * Manifest provider for directory package manifest generation (when none
  * exists) or update.
- *
+ * 
  * This class should only be user with a {@link DirectoryPackageData}.
  */
 public class DirectoryManifestProvider extends ManifestProvider {
@@ -25,7 +25,7 @@ public class DirectoryManifestProvider extends ManifestProvider {
 
     /**
      * Load and update an existing manifest or generate one if none exists.
-     *
+     * 
      * Note that this can have a side effect on jarPackage: generateManifest is
      * turned on and back off if it was off and no manifest existed.
      */
@@ -50,8 +50,8 @@ public class DirectoryManifestProvider extends ManifestProvider {
                     directoryPackage.getImplementationVersion());
             if (directoryPackage.getWidgetsets() != null
                     && !"".equals(directoryPackage.getWidgetsets().trim())) {
-                attributes.putValue(MANIFEST_VAADIN_WIDGETSETS, directoryPackage
-                        .getWidgetsets());
+                attributes.putValue(MANIFEST_VAADIN_WIDGETSETS,
+                        directoryPackage.getWidgetsets());
             } else {
                 attributes.remove(new Attributes.Name(
                         MANIFEST_VAADIN_WIDGETSETS));
@@ -63,14 +63,14 @@ public class DirectoryManifestProvider extends ManifestProvider {
     /**
      * Read the directory-related attributes from the manifest file associated
      * with a directory package into the package object.
-     *
+     * 
      * @param directoryPackage
      * @throws CoreException
      * @throws IOException
      */
     public static void loadDirectoryAttributesFromManifest(
-            DirectoryPackageData directoryPackage)
-            throws CoreException, IOException {
+            DirectoryPackageData directoryPackage) throws CoreException,
+            IOException {
         // No need to use buffer here because Manifest(...) does
         InputStream stream = directoryPackage.getManifestFile().getContents(
                 false);

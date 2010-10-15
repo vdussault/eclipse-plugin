@@ -21,7 +21,7 @@ public class WidgetSetRefactorer extends VaadinTextFileRefactorer {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see
      * org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant#
      * createChange(org.eclipse.core.runtime.IProgressMonitor)
@@ -140,7 +140,7 @@ public class WidgetSetRefactorer extends VaadinTextFileRefactorer {
      * Returns a pattern that matches the widgetset entry point class name that
      * contains a string matching pattern inside double quotes. This can be e.g.
      * in the entry point or inherits tags.
-     *
+     * 
      * @param classNamePattern
      *            class name pattern for entry point class, matching the whole
      *            fully qualified class name

@@ -29,7 +29,7 @@ import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 /**
  * Our sample handler extends AbstractHandler, an IHandler base class.
- *
+ * 
  * @see org.eclipse.core.commands.IHandler
  * @see org.eclipse.core.commands.AbstractHandler
  */
@@ -78,8 +78,9 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                             if (project == null) {
                                 IFile file = getFileForEditor(activeEditor);
                                 if (file != null && file.exists()) {
-                                    VaadinFacetUtils.upgradeFacet(file
-                                            .getProject(),
+                                    VaadinFacetUtils
+                                            .upgradeFacet(
+                                                    file.getProject(),
                                                     VaadinFacetUtils.VAADIN_FACET_CURRENT);
                                     if (VaadinPluginUtil
                                             .isWidgetsetManagedByPlugin(file
@@ -115,15 +116,15 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                         if (file != null
                                 && VaadinPluginUtil
                                         .isWidgetsetManagedByPlugin(file
-                                .getProject())) {
+                                                .getProject())) {
                             compiled = compileFile(monitor, file);
                         }
                     }
 
                     if (!compiled) {
 
-                        PlatformUI.getWorkbench().getDisplay().asyncExec(
-                                new Runnable() {
+                        PlatformUI.getWorkbench().getDisplay()
+                                .asyncExec(new Runnable() {
 
                                     public void run() {
                                         Shell shell = PlatformUI.getWorkbench()
@@ -167,8 +168,7 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                 }
                 // only one branch is executed so progress is tracked correctly
                 boolean compiled = false;
-                if (file != null
-                        && file.getName().endsWith(".gwt.xml")
+                if (file != null && file.getName().endsWith(".gwt.xml")
                         && file.getName().toLowerCase().contains("widgetset")) {
                     WidgetsetBuildManager.compileWidgetset(file, monitor);
                     compiled = true;

@@ -58,7 +58,7 @@ public class VaadinVersionComposite extends Composite {
          * This is an ugly and inefficient hack: as sorting cannot be disabled
          * for AbstractElementListSelectionDialog, use a comparator that
          * compares the positions of the elements in a reference list.
-         *
+         * 
          * Cannot do real version comparison as no information is available
          * about which builds are official releases, pre-releases or release
          * candidates, nightly builds etc.
@@ -97,7 +97,7 @@ public class VaadinVersionComposite extends Composite {
         /**
          * Creates the checkbox to show or hide development versions and nightly
          * builds.
-         *
+         * 
          * @param composite
          *            the parent composite of the message area.
          */
@@ -175,7 +175,7 @@ public class VaadinVersionComposite extends Composite {
 
         /**
          * Gets the selected version string or null if none.
-         *
+         * 
          * @return String version or null
          */
         public Version getSelectedVersion() {
@@ -344,15 +344,15 @@ public class VaadinVersionComposite extends Composite {
             return;
         } catch (InvocationTargetException e) {
             VaadinPluginUtil.displayError(
-                    "Failed to download selected Vaadin version", e
-                            .getTargetException(), getShell());
+                    "Failed to download selected Vaadin version",
+                    e.getTargetException(), getShell());
         }
     }
 
     /**
      * This method exists only to enable automatic synchronization with a model.
      * The combo box value is the selected version string.
-     *
+     * 
      * @return Combo
      */
     public Combo getVersionCombo() {
@@ -442,8 +442,7 @@ public class VaadinVersionComposite extends Composite {
                     .getVaadinLibraryVersionInLiferay(liferayPathField
                             .getText());
             if (currentVaadinVersion != null) {
-                String versionString = currentVaadinVersion
-                        .getVersionString();
+                String versionString = currentVaadinVersion.getVersionString();
                 versionMap.put(versionString, currentVaadinVersion);
                 versionCombo.add(versionString, 0);
                 versionCombo.setText(versionString);

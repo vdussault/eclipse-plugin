@@ -109,8 +109,8 @@ public class NewComponentWizard extends Wizard implements INewWizard {
             return false;
         } catch (InvocationTargetException e) {
             Throwable realException = e.getTargetException();
-            MessageDialog.openError(getShell(), "Error", realException
-                    .getMessage());
+            MessageDialog.openError(getShell(), "Error",
+                    realException.getMessage());
             return false;
         }
         return true;
@@ -153,8 +153,7 @@ public class NewComponentWizard extends Wizard implements INewWizard {
     }
 
     private void buildClientSideClass(TEMPLATE template,
-            IProgressMonitor monitor)
-            throws CoreException {
+            IProgressMonitor monitor) throws CoreException {
         // we know that a client side widget should be built
         String widgetSetName;
         if (template.isVaadin62()) {
@@ -226,8 +225,8 @@ public class NewComponentWizard extends Wizard implements INewWizard {
             iComponentStub = iComponentStub.replaceAll(
                     "STUB_CLIENT_SIDE_PREFIX", clientSidePrefix.toLowerCase());
 
-            iComponentStub = iComponentStub.replaceAll("STUB_TAGNAME", typeName
-                    .toLowerCase());
+            iComponentStub = iComponentStub.replaceAll("STUB_TAGNAME",
+                    typeName.toLowerCase());
 
             final ICompilationUnit clientSideClass = uiPackage
                     .createCompilationUnit(simpleName + ".java",
@@ -268,8 +267,7 @@ public class NewComponentWizard extends Wizard implements INewWizard {
     }
 
     private void updateWidgetsetClass(IProgressMonitor monitor,
-            IType widgetSet,
-            final String packageName, final String simpleName)
+            IType widgetSet, final String packageName, final String simpleName)
             throws JavaModelException, CoreException {
         ICompilationUnit compilationUnit = null;
         boolean openWorkingCopy = false;
@@ -491,7 +489,7 @@ public class NewComponentWizard extends Wizard implements INewWizard {
     /**
      * We will accept the selection in the workbench to see if we can initialize
      * from it.
-     *
+     * 
      * @see IWorkbenchWizard#init(IWorkbench, IStructuredSelection)
      */
     public void init(IWorkbench workbench, IStructuredSelection selection) {

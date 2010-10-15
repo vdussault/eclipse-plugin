@@ -30,7 +30,7 @@ public abstract class VaadinTextFileRefactorer {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see
      * org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant#
      * createChange(org.eclipse.core.runtime.IProgressMonitor)
@@ -41,7 +41,7 @@ public abstract class VaadinTextFileRefactorer {
     /**
      * Initialize a move operation of "element" to "destination". No operation
      * is performed if element and destination belong to separate projects.
-     *
+     * 
      * @param element
      * @param arguments
      * @return
@@ -95,7 +95,7 @@ public abstract class VaadinTextFileRefactorer {
      * the new package name for the class (if newNameIsPackage is true) or the
      * new simple class name (no package information, should be placed in the
      * same package as the element).
-     *
+     * 
      * @param element
      * @param newName
      * @param newNameIsPackage
@@ -147,7 +147,7 @@ public abstract class VaadinTextFileRefactorer {
 
     /**
      * Returns the full class name for the type.
-     *
+     * 
      * @param type
      * @return
      */
@@ -169,7 +169,7 @@ public abstract class VaadinTextFileRefactorer {
     /**
      * Returns the name of the type if includeType is true. If includeType is
      * false it returns the name of the parent type (package or class).
-     *
+     * 
      * @param type
      * @param includeType
      * @return

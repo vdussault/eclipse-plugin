@@ -36,7 +36,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see
          * org.eclipse.core.resources.IResourceDeltaVisitor#visit(org.eclipse
          * .core.resources.IResourceDelta)
@@ -96,8 +96,8 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                         .matches(DownloadUtils.VAADIN_JAR_REGEXP)) {
                     boolean hasWidgetset = false;
                     try {
-                        hasWidgetset = VaadinPluginUtil.hasWidgetSets(JavaCore
-                                .create(getProject()),
+                        hasWidgetset = VaadinPluginUtil.hasWidgetSets(
+                                JavaCore.create(getProject()),
                                 new NullProgressMonitor());
                     } catch (CoreException e) {
                         VaadinPluginUtil
@@ -155,11 +155,11 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
 
         /**
          * Check if given resource is java file in gwt module.
-         *
+         * 
          * Only resources with "client" as a segment of their path are
          * considered. The existence of a GWT module in the parent of that
          * segment is then checked.
-         *
+         * 
          * @param resource
          * @return true if the resource is a java file in a GWT module
          */
@@ -232,7 +232,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.eclipse.core.internal.events.InternalBuilder#build(int,
      * java.util.Map, org.eclipse.core.runtime.IProgressMonitor)
      */

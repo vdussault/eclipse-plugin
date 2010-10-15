@@ -44,12 +44,12 @@ public class WidgetsetParametersComposite extends Composite {
 
         ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
                 new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
-        
+
         // get values from project or defaults if none stored
 
         boolean enabled = VaadinPluginUtil.isWidgetsetManagedByPlugin(project);
         setWidgetsetManagedByPlugin(enabled);
-        
+
         boolean suspendBuilds = WidgetsetBuildManager
                 .isWidgetsetBuildsSuspended(project);
 
@@ -57,8 +57,7 @@ public class WidgetsetParametersComposite extends Composite {
 
         boolean verboseOutput = prefStore
                 .contains(VaadinPlugin.PREFERENCES_WIDGETSET_VERBOSE) ? prefStore
-                .getBoolean(VaadinPlugin.PREFERENCES_WIDGETSET_VERBOSE)
-                : false;
+                .getBoolean(VaadinPlugin.PREFERENCES_WIDGETSET_VERBOSE) : false;
 
         verboseCompilation.setSelection(verboseOutput);
 
@@ -106,7 +105,6 @@ public class WidgetsetParametersComposite extends Composite {
         }
     }
 
-
     public Composite createContents() {
         setLayout(new GridLayout(1, false));
         setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
@@ -124,9 +122,7 @@ public class WidgetsetParametersComposite extends Composite {
     private void createOptionsComposite(Composite parent) {
         Composite options = new Composite(parent, SWT.NULL);
         options.setLayout(new GridLayout(2, false));
-        options
-                .setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
-                        false));
+        options.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
         suspendAutomaticBuilds = new Button(options, SWT.CHECK);
         suspendAutomaticBuilds.setText("Suspend automatic widgetset builds");
@@ -180,19 +176,16 @@ public class WidgetsetParametersComposite extends Composite {
         // absolute width in pixels)!
 
         Label label = new Label(instructions, SWT.WRAP);
-        label
-                .setText("To optimize widgetset compilation time, modify the \"user.agent\" parameter in the\n"
-                        + "widgetset module file (.gwt.xml).");
+        label.setText("To optimize widgetset compilation time, modify the \"user.agent\" parameter in the\n"
+                + "widgetset module file (.gwt.xml).");
 
         label = new Label(instructions, SWT.WRAP);
-        label
-                .setText("To debug client-side code with hosted mode, first download a full GWT package and replace\n"
-                        + "the GWT JARs on the build path with it.");
+        label.setText("To debug client-side code with hosted mode, first download a full GWT package and replace\n"
+                + "the GWT JARs on the build path with it.");
 
         label = new Label(instructions, SWT.WRAP);
-        label
-                .setText("To use OOPHM, download the OOPHM Vaadin package and use the GWT version bundled with it.\n"
-                        + "Then install the appropriate browser plugin from the package.");
+        label.setText("To use OOPHM, download the OOPHM Vaadin package and use the GWT version bundled with it.\n"
+                + "Then install the appropriate browser plugin from the package.");
     }
 
     /**
@@ -202,27 +195,25 @@ public class WidgetsetParametersComposite extends Composite {
     private void createHostedModeComposite(Composite parent) {
         Composite hosted = new Composite(parent, SWT.NULL);
         hosted.setLayout(new GridLayout(2, false));
-        hosted
-                .setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
-                        false));
+        hosted.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
         // hosted mode launch creation button on the right
         createDevelopmentModeLaunchButton = new Button(hosted, SWT.NULL);
         createDevelopmentModeLaunchButton
                 .setText("Create development mode launch");
-        createDevelopmentModeLaunchButton
-                .setLayoutData(new GridData(SWT.RIGHT, SWT.BEGINNING, true,
-                        false));
+        createDevelopmentModeLaunchButton.setLayoutData(new GridData(SWT.RIGHT,
+                SWT.BEGINNING, true, false));
         createDevelopmentModeLaunchButton
                 .addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                VaadinPluginUtil.createHostedModeLaunch(project);
-                // need to set as dirty for Vaadin 6.2 and earlier (need to
-                // recompile with OOPHM)
-                VaadinPluginUtil.setWidgetsetDirty(project, true);
-            }
-        });
+                    @Override
+                    public void widgetSelected(SelectionEvent e) {
+                        VaadinPluginUtil.createHostedModeLaunch(project);
+                        // need to set as dirty for Vaadin 6.2 and earlier (need
+                        // to
+                        // recompile with OOPHM)
+                        VaadinPluginUtil.setWidgetsetDirty(project, true);
+                    }
+                });
     }
 
     /**

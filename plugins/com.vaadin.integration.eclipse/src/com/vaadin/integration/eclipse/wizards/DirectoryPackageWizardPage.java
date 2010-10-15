@@ -28,17 +28,16 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
 
-
 /**
  * The first (main) page of the Vaadin Directory package export wizard.
- *
+ * 
  * This is a simplified and customized variant of the JAR export wizard page
  * that supports editing of the Vaadin manifest fields and pre-selects the most
  * relevant resources to export.
- *
+ * 
  * Many messages could otherwise be reused from {@link JarPackagerMessages} but
  * that could lead to a part English, part local language UI.
- *
+ * 
  * Some code is duplicated from Eclipse JDT jarpackager as it has limited
  * visibility or is not designed to be extended.
  */
@@ -115,7 +114,7 @@ public class DirectoryPackageWizardPage extends
 
     /**
      * Creates the checkbox tree and list for selecting resources.
-     *
+     * 
      * @param parent
      *            the parent control
      */
@@ -134,9 +133,8 @@ public class DirectoryPackageWizardPage extends
         final DecoratingLabelProvider provider = new DecoratingLabelProvider(
                 new JavaElementLabelProvider(labelFlags),
                 new ProblemsLabelDecorator(null));
-        inputGroup = new DirectoryPackageInputGroup(
-                parent, JavaCore
-                .create(ResourcesPlugin.getWorkspace().getRoot()),
+        inputGroup = new DirectoryPackageInputGroup(parent,
+                JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()),
                 treeContentProvider, provider,
                 new StandardJavaElementContentProvider(), provider, SWT.NONE,
                 SIZING_SELECTION_WIDGET_WIDTH, SIZING_SELECTION_WIDGET_HEIGHT);
@@ -154,11 +152,11 @@ public class DirectoryPackageWizardPage extends
 
     /**
      * Create the export options widgets.
-     *
+     * 
      * Use reasonable defaults for most values instead of offering many options.
      * When additional flexibility is needed, the user can directly launch the
      * JAR export wizard.
-     *
+     * 
      * @param parent
      *            org.eclipse.swt.widgets.Composite
      */
@@ -176,9 +174,9 @@ public class DirectoryPackageWizardPage extends
 
     /**
      * Create the manifest contents widgets.
-     *
+     * 
      * Only the Vaadin addon package specific fields are presented.
-     *
+     * 
      * @param parent
      *            org.eclipse.swt.widgets.Composite
      */
@@ -211,8 +209,7 @@ public class DirectoryPackageWizardPage extends
         implementationVersionText.addListener(SWT.Modify, this);
 
         label = new Label(manifestGroup, SWT.NONE);
-        label
-                .setText("    Version of the addon. A \"major.minor.revision\" format is suggested.");
+        label.setText("    Version of the addon. A \"major.minor.revision\" format is suggested.");
         gd = new GridData(SWT.LEFT, SWT.TOP, true, false);
         gd.horizontalSpan = 2;
         label.setLayoutData(gd);
@@ -224,8 +221,7 @@ public class DirectoryPackageWizardPage extends
         widgetsetsText.addListener(SWT.Modify, this);
 
         label = new Label(manifestGroup, SWT.NONE);
-        label
-                .setText("    Comma separated list of widgetsets included in the add-on. Refers to the GWT xml files (.gwt.xml).");
+        label.setText("    Comma separated list of widgetsets included in the add-on. Refers to the GWT xml files (.gwt.xml).");
         gd = new GridData(SWT.LEFT, SWT.TOP, true, false);
         gd.horizontalSpan = 2;
         label.setLayoutData(gd);
@@ -270,7 +266,7 @@ public class DirectoryPackageWizardPage extends
 
     /**
      * {@inheritDoc}
-     *
+     * 
      * In practice, we should only get {@link IJavaProject} instances in the
      * selection here.
      */
@@ -311,13 +307,13 @@ public class DirectoryPackageWizardPage extends
 
     /**
      * Return the elements which will be exported.
-     *
+     * 
      * {@see
      * org.eclipse.jdt.ui.jarpackager.JarPackageData#setElements(Object[])}
-     *
+     * 
      * {@see
      * DirectoryPackageInputGroup#getSelectedElementsWithoutContainedChildren()}
-     *
+     * 
      * @return Object[] elements to export
      */
     Object[] getSelectedElementsWithoutContainedChildren() {

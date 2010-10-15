@@ -66,7 +66,8 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             useVaadinButton.setSelection(false);
         }
 
-        vaadinVersionComposite.enablePluginManagedVaadin(useVaadinButton.getSelection());
+        vaadinVersionComposite.enablePluginManagedVaadin(useVaadinButton
+                .getSelection());
 
         // TODO validate liferay path on the fly
     }
@@ -322,8 +323,9 @@ public class VaadinProjectPropertyPage extends PropertyPage {
         useVaadinButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                vaadinVersionComposite.enablePluginManagedVaadin(useVaadinButton
-                        .getSelection());
+                vaadinVersionComposite
+                        .enablePluginManagedVaadin(useVaadinButton
+                                .getSelection());
             }
         });
 

@@ -22,7 +22,7 @@ public class VaadinFacetUtils {
 
     /**
      * Check whether a project has the Vaadin project nature.
-     *
+     * 
      * @param project
      * @return true if the project is an Vaadin project
      */
@@ -43,7 +43,7 @@ public class VaadinFacetUtils {
     /**
      * Upgrade/change the Vaadin facet to the given version. If the project does
      * not have the Vaadin facet, nothing is modified.
-     *
+     * 
      * @param project
      *            the project to upgrade
      * @param version

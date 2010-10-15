@@ -10,7 +10,7 @@ public class GaeConfigurationUtil {
      * Create the Google App Engine configuration file appengine-web.xml from a
      * template if it does not exist. Session support is activated in the
      * template.
-     *
+     * 
      * Also the logging properties file is created.
      * 
      * @param project

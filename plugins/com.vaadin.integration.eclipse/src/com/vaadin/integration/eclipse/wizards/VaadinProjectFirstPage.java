@@ -28,11 +28,11 @@ import com.vaadin.integration.eclipse.properties.VaadinVersionComposite;
 
 /**
  * The first (main) page of the Vaadin top-level project creation wizard.
- *
+ * 
  * This replaces WebProjectFirstPage when creating a Vaadin project through its
  * own wizard, and collects the key configuration items on the first page so
  * that the user can typically just click Finish after the first page.
- *
+ * 
  * Some settings are omitted when creating a project through the Vaadin wizard.
  */
 public class VaadinProjectFirstPage extends WebProjectFirstPage implements

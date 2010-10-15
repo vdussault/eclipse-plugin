@@ -48,7 +48,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
 
     /**
      * Component template to use.
-     *
+     * 
      * The titles are shown in combo boxes and are used to identify the
      * templates (together with vaadin62). The first suitable template is
      * selected by default.
@@ -113,7 +113,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
 
     /**
      * Constructor for Component wizard page.
-     *
+     * 
      * @param pageName
      */
     public NewComponentWizardPage(IProject project) {
@@ -328,22 +328,20 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
             // CustomComponent must set composition root
             imports.addImport(prefix + "ui.Label");
 
-            type
-                    .createMethod(
-                            "\n\tpublic "
-                                    + type.getElementName()
-                                    + "() {\n"
-                                    + "\t\tsetCompositionRoot(new Label(\"Custom component\"));\n"
-                                    + "\t}\n", null, false, monitor);
+            type.createMethod(
+                    "\n\tpublic "
+                            + type.getElementName()
+                            + "() {\n"
+                            + "\t\tsetCompositionRoot(new Label(\"Custom component\"));\n"
+                            + "\t}\n", null, false, monitor);
         }
 
         // pre-6.2 getTag()
         if (!currentTemplate.isVaadin62() && currentTemplate.hasClientWidget()) {
-            type
-                    .createMethod(
-                            "@Override\n\tpublic String getTag(){\n\t\treturn \""
-                                    + type.getElementName().toLowerCase()
-                                    + "\" ;\n}\n", null, false, monitor);
+            type.createMethod(
+                    "@Override\n\tpublic String getTag(){\n\t\treturn \""
+                            + type.getElementName().toLowerCase() + "\" ;\n}\n",
+                    null, false, monitor);
         }
 
         // template prefix for server-side methods

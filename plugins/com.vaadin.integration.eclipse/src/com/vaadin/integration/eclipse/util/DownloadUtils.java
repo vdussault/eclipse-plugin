@@ -329,7 +329,7 @@ public class DownloadUtils {
     /**
      * Extracts a Vaadin version from a filename, returns null if not a valid
      * Vaadin JAR file name.
-     *
+     * 
      * @param filename
      *            JAR file name
      * @return Version or null if not a Vaadin JAR
@@ -486,10 +486,8 @@ public class DownloadUtils {
         // check the Vaadin site only, not the old IT Mill site
         versions.addAll(listDownloadableVaadinVersions(TOOLKIT_JAR_DOWNLOAD));
         if (includeDevelopment) {
-            versions
-                    .addAll(listDownloadableVaadinVersions(VAADIN_PRERELEASE_JAR_DOWNLOAD));
-            versions
-                    .addAll(listDownloadableVaadinVersions(VAADIN_NIGHTLY_JAR_DOWNLOAD));
+            versions.addAll(listDownloadableVaadinVersions(VAADIN_PRERELEASE_JAR_DOWNLOAD));
+            versions.addAll(listDownloadableVaadinVersions(VAADIN_NIGHTLY_JAR_DOWNLOAD));
         } else {
             // Check LATEST and include that if not already in the list
             Version latestVersion = getLatestVaadinVersion();
@@ -525,9 +523,8 @@ public class DownloadUtils {
     }
 
     private static void listDownloadableVaadinVersions(
-            DownloadInformation information,
-            List<Version> versions, int branchDepth, String relativeDir)
-            throws CoreException {
+            DownloadInformation information, List<Version> versions,
+            int branchDepth, String relativeDir) throws CoreException {
         // fetch version list from the server
         List<String> dirs = listHttpLinks(information.getFileListUrl()
                 + relativeDir);
@@ -572,9 +569,9 @@ public class DownloadUtils {
     /**
      * Returns the versions for all the locally available Vaadin jars, sorted
      * with the latest version first.
-     *
+     * 
      * If no local jar is found, an empty List is returned.
-     *
+     * 
      * @return
      * @throws CoreException
      */
@@ -647,7 +644,7 @@ public class DownloadUtils {
     /**
      * Get the local (downloaded) Vaadin JAR version object for a given version
      * number.
-     *
+     * 
      * @param versionString
      *            Vaadin version number string
      * @return Version object or null if none found
@@ -672,7 +669,7 @@ public class DownloadUtils {
     /**
      * Returns the version for the newest, locally available Vaadin jar. If no
      * local jar is found, null is returned.
-     *
+     * 
      * @return
      * @throws CoreException
      */
@@ -720,8 +717,7 @@ public class DownloadUtils {
     }
 
     public static void ensureVaadinJarExists(Version version,
-            IProgressMonitor monitor)
-            throws CoreException {
+            IProgressMonitor monitor) throws CoreException {
         if (monitor == null) {
             monitor = new NullProgressMonitor();
         }
@@ -737,14 +733,12 @@ public class DownloadUtils {
     }
 
     public static void ensureGwtUserJarExists(String version,
-            IProgressMonitor monitor)
-            throws CoreException {
+            IProgressMonitor monitor) throws CoreException {
         if (monitor == null) {
             monitor = new NullProgressMonitor();
         }
         try {
-            monitor.beginTask("Downloading GWT JARs",
-                    IProgressMonitor.UNKNOWN);
+            monitor.beginTask("Downloading GWT JARs", IProgressMonitor.UNKNOWN);
             if (!getLocalGwtUserJar(version).toFile().exists()) {
                 fetch(GWT_USER_JAR_DOWNLOAD, new Version(version,
                         GWT_USER_JAR_DOWNLOAD));
@@ -756,14 +750,12 @@ public class DownloadUtils {
     }
 
     public static void ensureGwtDevJarExists(String version,
-            IProgressMonitor monitor)
-            throws CoreException {
+            IProgressMonitor monitor) throws CoreException {
         if (monitor == null) {
             monitor = new NullProgressMonitor();
         }
         try {
-            monitor.beginTask("Downloading GWT JARs",
-                    IProgressMonitor.UNKNOWN);
+            monitor.beginTask("Downloading GWT JARs", IProgressMonitor.UNKNOWN);
             if (!getLocalGwtDevJar(version).toFile().exists()) {
                 if (version.matches(GWT2_VERSION_REGEXP)) {
                     fetch(GWT2_DEV_JAR_DOWNLOAD, new Version(version,

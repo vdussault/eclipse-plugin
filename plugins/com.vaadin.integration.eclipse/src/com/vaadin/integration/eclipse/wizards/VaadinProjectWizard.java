@@ -14,11 +14,11 @@ import com.vaadin.integration.eclipse.configuration.VaadinProjectCreationDataMod
 
 /**
  * Vaadin top level project creation wizard.
- *
+ * 
  * Note that Vaadin projects can also be created through the normal
  * "Dynamic Web Project" wizard by adding the Vaadin facet there or by adding
  * the Vaadin facet to an already existing project.
- *
+ * 
  * This is really just a customized and pre-configured version of the standard
  * dynamic web project creation wizard.
  */

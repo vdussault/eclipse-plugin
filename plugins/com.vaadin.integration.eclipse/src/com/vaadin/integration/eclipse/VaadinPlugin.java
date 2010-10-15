@@ -42,8 +42,8 @@ public class VaadinPlugin extends AbstractUIPlugin {
     public static final String PREFERENCES_PROJECT_TYPE_LIFERAY = PLUGIN_ID
             + "." + "projectTypeLiferay";
 
-    public static final String PREFERENCES_LIFERAY_PATH = PLUGIN_ID
-            + "." + "liferayWebInfPath";
+    public static final String PREFERENCES_LIFERAY_PATH = PLUGIN_ID + "."
+            + "liferayWebInfPath";
 
     private static VaadinPlugin instance = null;
 

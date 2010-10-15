@@ -28,7 +28,7 @@ import com.vaadin.integration.eclipse.properties.VaadinVersionComposite;
  * The install page that is used to configure the Vaadin facet when adding it to
  * a project, whether at project creation through the "Dynamic Web Project"
  * wizard or by adding a facet to an existing project.
- *
+ * 
  * In the latter case, opening this page is optional.
  */
 public class VaadinCoreFacetInstallPage extends J2EEModuleFacetInstallPage

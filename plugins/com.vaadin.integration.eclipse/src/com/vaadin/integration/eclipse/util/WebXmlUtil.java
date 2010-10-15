@@ -30,7 +30,7 @@ public class WebXmlUtil {
 
     /**
      * Adds a servlet and its mapping to web.xml.
-     *
+     * 
      * @param artifact
      * @param applicationName
      * @param applicationClass
@@ -79,7 +79,7 @@ public class WebXmlUtil {
 
     /**
      * Adds the given context parameter to web.xml
-     *
+     * 
      * @param webApp
      * @param name
      * @param value
@@ -201,7 +201,7 @@ public class WebXmlUtil {
 
     /**
      * Updates the widgetset parameter for all Vaadin applications in web.xml
-     *
+     * 
      * @param artifact
      * @param widgetsetname
      */
@@ -232,7 +232,7 @@ public class WebXmlUtil {
      * Returns a map from application names to the corresponding widgetset names
      * in web.xml. If no widgetset is configured for an application, the tuple
      * (application, null) is returned for it.
-     *
+     * 
      * @param artifact
      * @return map from application name to its configured widgetset name or to
      *         null if no widgetset configured
@@ -273,7 +273,7 @@ public class WebXmlUtil {
     /**
      * Checks if the servlet is an Vaadin application servlet and returns its
      * class name or null if not a Vaadin application.
-     *
+     * 
      * @param webApp
      * @param servlet
      * @return
