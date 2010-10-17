@@ -10,6 +10,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
@@ -25,7 +26,6 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
-import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
@@ -141,8 +141,10 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                                 });
 
                     }
+                } catch (OperationCanceledException e) {
+                    // Do nothing if user cancels compilation
                 } catch (Exception e) {
-                    ErrorUtil.handleBackgroundException(e);
+                    showException(e);
                 } finally {
                     monitor.done();
                 }
@@ -194,5 +196,22 @@ public class CompileWidgetsetHandler extends AbstractHandler {
         job.schedule();
 
         return null;
+    }
+
+    protected void showException(final Exception e) {
+        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+
+            public void run() {
+                Shell shell = PlatformUI.getWorkbench()
+                        .getActiveWorkbenchWindow().getShell();
+
+                MessageDialog.openError(shell, "Error compiling widgetset",
+                        "Error compiling widgetset:\n" + e.getClass().getName()
+                                + " - " + e.getMessage()
+                                + "\n\nSee error log for details.");
+
+            }
+        });
+
     }
 }
