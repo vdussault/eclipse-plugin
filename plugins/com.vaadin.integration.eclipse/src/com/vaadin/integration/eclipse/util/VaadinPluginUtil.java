@@ -36,7 +36,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
@@ -1193,6 +1196,7 @@ public class VaadinPluginUtil {
                 IClasspathEntry resolvedClasspathEntry = JavaCore
                         .getResolvedClasspathEntry(cp);
                 IPath path = resolvedClasspathEntry.getPath();
+                path = makePathAbsolute(path);
                 if (isNeededForWidgetsetCompilation(path)) {
                     vaadinpackages.add(path);
                 }
@@ -1204,10 +1208,12 @@ public class VaadinPluginUtil {
                         .getClasspathEntries();
                 for (IClasspathEntry ccp : containerEntries) {
                     if (ccp.toString().contains(".jar")) {
-                        // User has explicitly defined GWT version to use
                         IClasspathEntry resolvedClasspathEntry = JavaCore
                                 .getResolvedClasspathEntry(ccp);
                         IPath path = resolvedClasspathEntry.getPath();
+                        IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
+                                .getRoot();
+                        path = makePathAbsolute(path);
                         if (isNeededForWidgetsetCompilation(path)) {
                             vaadinpackages.add(path);
                         }
@@ -1217,6 +1223,15 @@ public class VaadinPluginUtil {
         }
 
         return vaadinpackages;
+    }
+
+    private static IPath makePathAbsolute(IPath path) {
+        IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+        IResource workspaceResource = root.findMember(path);
+        if (workspaceResource != null) {
+            path = workspaceResource.getRawLocation();
+        }
+        return path;
     }
 
     /**
