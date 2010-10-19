@@ -36,7 +36,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -233,9 +232,15 @@ public class VaadinPluginUtil {
         if (project == null) {
             return false;
         }
-        IFolder lib = ProjectUtil.getWebInfLibFolder(project);
-        if (!lib.exists()) {
-            return false;
+        IFolder lib;
+        try {
+            lib = ProjectUtil.getWebInfLibFolder(project);
+            if (!lib.exists()) {
+                return false;
+            }
+        } catch (CoreException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
 
         if (LiferayUtil.isLiferayProject(project)) {
@@ -1650,9 +1655,12 @@ public class VaadinPluginUtil {
                 .newArchiveRuntimeClasspathEntry(getGWTUserJarPath(jproject));
         otherLocations.add(getRawLocation(project, gwtuser.getPath()));
 
+        IPath vaadinJarPath = ProjectUtil.findProjectVaadinJarPath(jproject);
+        if (vaadinJarPath == null) {
+            throw ErrorUtil.newCoreException("Vaadin JAR could not be found");
+        }
         IRuntimeClasspathEntry vaadinJar = JavaRuntime
-                .newArchiveRuntimeClasspathEntry(ProjectUtil
-                        .findProjectVaadinJarPath(jproject));
+                .newArchiveRuntimeClasspathEntry(vaadinJarPath);
         otherLocations.add(getRawLocation(project, vaadinJar.getPath()));
 
         // iterate over build path and classify its components

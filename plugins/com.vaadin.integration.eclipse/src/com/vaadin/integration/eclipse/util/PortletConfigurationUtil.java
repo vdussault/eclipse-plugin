@@ -79,7 +79,7 @@ public class PortletConfigurationUtil {
     }
 
     private static IFile getPortletConfigurationFile(IProject project,
-            String filename) {
+            String filename) throws CoreException {
         return ProjectUtil.getWebInfFolder(project).getFile(filename);
     }
 

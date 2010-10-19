@@ -11,6 +11,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -156,6 +157,11 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
         } catch (JavaModelException e) {
             ErrorUtil.handleBackgroundException(IStatus.WARNING,
                     "Could not select contents of project "
+                            + javaProject.getProject().getName(), e);
+            return Collections.EMPTY_LIST;
+        } catch (CoreException e) {
+            ErrorUtil.handleBackgroundException(IStatus.ERROR,
+                    "Could not make default selections for project "
                             + javaProject.getProject().getName(), e);
             return Collections.EMPTY_LIST;
         }

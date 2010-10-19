@@ -98,24 +98,49 @@ public class ProjectUtil {
         return project;
     }
 
-    public static IFolder getWebInfLibFolder(IProject project) {
+    public static IFolder getWebInfLibFolder(IProject project)
+            throws CoreException {
         IVirtualComponent component = ComponentCore.createComponent(project);
+        if (component == null) {
+            throw ErrorUtil
+                    .newCoreException("Unable to find WEB-INF/lib folder. Ensure the project is a dynamic web project.");
+        }
         IVirtualFolder contentFolder = component.getRootFolder();
         return (IFolder) contentFolder.getFolder(WebArtifactEdit.WEBLIB)
                 .getUnderlyingFolder();
     }
 
-    public static IFolder getWebInfFolder(IProject project) {
+    public static IFolder getWebInfFolder(IProject project)
+            throws CoreException {
         IVirtualComponent component = ComponentCore.createComponent(project);
+        if (component == null) {
+            throw ErrorUtil
+                    .newCoreException("Unable to locate WEB-INF folder. Ensure the project is a dynamic web project.");
+        }
         IVirtualFolder contentFolder = component.getRootFolder();
-        return (IFolder) contentFolder.getFolder(WebArtifactEdit.WEB_INF)
-                .getUnderlyingFolder();
+        IContainer underlying = contentFolder
+                .getFolder(WebArtifactEdit.WEB_INF).getUnderlyingFolder();
+        if (!(underlying instanceof IFolder)) {
+            throw ErrorUtil
+                    .newCoreException("Unable to locate WEB-INF folder. Ensure the project is a dynamic web project.");
+        }
+        return (IFolder) underlying;
     }
 
-    public static IFolder getWebContentFolder(IProject project) {
+    public static IFolder getWebContentFolder(IProject project)
+            throws CoreException {
         IVirtualComponent component = ComponentCore.createComponent(project);
+        if (component == null) {
+            throw ErrorUtil
+                    .newCoreException("Unable to locate WebContent folder. Ensure the project is a dynamic web project.");
+        }
         IVirtualFolder contentFolder = component.getRootFolder();
-        return (IFolder) contentFolder.getUnderlyingFolder();
+        IContainer underlying = contentFolder.getUnderlyingFolder();
+        if (!(underlying instanceof IFolder)) {
+            throw ErrorUtil
+                    .newCoreException("Unable to locate WebContent folder. Ensure the project is a dynamic web project.");
+        }
+        return (IFolder) underlying;
     }
 
     public static IFolder getSrcFolder(IProject project) throws CoreException {

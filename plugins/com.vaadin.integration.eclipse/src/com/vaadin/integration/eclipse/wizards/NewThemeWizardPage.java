@@ -3,6 +3,7 @@ package com.vaadin.integration.eclipse.wizards;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.IDialogPage;
 import org.eclipse.jface.viewers.ISelection;
@@ -165,7 +166,13 @@ public class NewThemeWizardPage extends WizardPage {
             return;
         }
 
-        IResource container = ProjectUtil.getWebContentFolder(project);
+        IResource container;
+        try {
+            container = ProjectUtil.getWebContentFolder(project);
+        } catch (CoreException e) {
+            updateStatus("Error finding WebContent folder");
+            return;
+        }
         String themeName = getThemeName();
 
         if (container == null
