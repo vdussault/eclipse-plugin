@@ -179,13 +179,6 @@ public class WidgetsetParametersComposite extends Composite {
         label.setText("To optimize widgetset compilation time, modify the \"user.agent\" parameter in the\n"
                 + "widgetset module file (.gwt.xml).");
 
-        label = new Label(instructions, SWT.WRAP);
-        label.setText("To debug client-side code with hosted mode, first download a full GWT package and replace\n"
-                + "the GWT JARs on the build path with it.");
-
-        label = new Label(instructions, SWT.WRAP);
-        label.setText("To use OOPHM, download the OOPHM Vaadin package and use the GWT version bundled with it.\n"
-                + "Then install the appropriate browser plugin from the package.");
     }
 
     /**
