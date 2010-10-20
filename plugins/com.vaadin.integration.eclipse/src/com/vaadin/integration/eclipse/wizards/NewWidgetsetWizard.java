@@ -57,6 +57,7 @@ import com.vaadin.integration.eclipse.util.WebXmlUtil;
  * Wizard to create a new Widgetset
  */
 
+@SuppressWarnings("restriction")
 public class NewWidgetsetWizard extends Wizard implements INewWizard {
     private NewWidgetsetWizardPage page;
     private ISelection selection;
@@ -196,6 +197,7 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
      * 
      * @param monitor
      */
+    @SuppressWarnings("deprecation")
     private void createBuildScript(IProgressMonitor monitor) {
 
         IType createdType = page.getCreatedType();

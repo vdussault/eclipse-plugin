@@ -33,6 +33,7 @@ import com.vaadin.integration.eclipse.util.files.LocalFileManager;
  * This data model provider is used whenever installing the Vaadin facet to a
  * project, whether at project creation or for an existing project.
  */
+@SuppressWarnings({ "restriction", "deprecation" })
 public class VaadinFacetInstallDataModelProvider extends
         J2EEModuleFacetInstallDataModelProvider implements
         IVaadinFacetInstallDataModelProperties {
@@ -61,8 +62,9 @@ public class VaadinFacetInstallDataModelProvider extends
     private List<String> vaadinVersions;
 
     @Override
-    public Set getPropertyNames() {
-        Set names = super.getPropertyNames();
+    @SuppressWarnings("unchecked")
+    public Set<String> getPropertyNames() {
+        Set<String> names = super.getPropertyNames();
         names.add(APPLICATION_NAME);
         names.add(APPLICATION_PACKAGE);
         names.add(APPLICATION_CLASS);

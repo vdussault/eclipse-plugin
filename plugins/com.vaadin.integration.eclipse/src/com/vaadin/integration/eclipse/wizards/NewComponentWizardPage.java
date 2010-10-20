@@ -32,6 +32,7 @@ import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 // TODO rename as NewWidgetWizardPage?
+@SuppressWarnings("restriction")
 public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
 
     private Combo extWidgetSetNameText;
@@ -247,7 +248,6 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
 
     }
 
-    @SuppressWarnings("restriction")
     private void createClientSideControls(Composite composite, int columns) {
 
         GridData gd = new GridData(GridData.FILL_HORIZONTAL);

@@ -1,7 +1,6 @@
 package com.vaadin.integration.eclipse.wizards;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -42,6 +41,7 @@ import com.vaadin.integration.eclipse.util.ProjectUtil;
  * {@link IJavaProject} can be selected as the initial selection, selecting a
  * default set of elements in it and hiding other projects.
  */
+@SuppressWarnings("restriction")
 class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
 
     private boolean initiallySelecting = true;
@@ -114,8 +114,8 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
      * @param javaProject
      * @return List of elements to select (IFolder, IPackageFragmentRoot etc.)
      */
-    private List getDefaultElements(IJavaProject javaProject) {
-        List result = new ArrayList();
+    private List<Object> getDefaultElements(IJavaProject javaProject) {
+        List<Object> result = new ArrayList<Object>();
         try {
             IProject project = javaProject.getProject();
 
@@ -158,12 +158,12 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
             ErrorUtil.handleBackgroundException(IStatus.WARNING,
                     "Could not select contents of project "
                             + javaProject.getProject().getName(), e);
-            return Collections.EMPTY_LIST;
+            return new ArrayList<Object>();
         } catch (CoreException e) {
             ErrorUtil.handleBackgroundException(IStatus.ERROR,
                     "Could not make default selections for project "
                             + javaProject.getProject().getName(), e);
-            return Collections.EMPTY_LIST;
+            return new ArrayList<Object>();
         }
     }
 
@@ -223,18 +223,19 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
      * 
      * @return Object[] elements to export
      */
+    @SuppressWarnings("unchecked")
     // adapted from JarPackageWizardPage
     Object[] getSelectedElementsWithoutContainedChildren() {
-        Set closure = removeContainedChildren(getWhiteCheckedTreeItems());
+        Set<Object> closure = removeContainedChildren(getWhiteCheckedTreeItems());
         closure.addAll(getExportedNonContainers());
         return closure.toArray();
     }
 
     // adapted from JarPackageWizardPage
-    private Set removeContainedChildren(Set elements) {
-        Set newList = new HashSet(elements.size());
-        Set<IResource> javaElementResources = getCorrespondingContainers(elements);
-        Iterator iter = elements.iterator();
+    private Set<Object> removeContainedChildren(Set<Object> elements) {
+        Set<Object> newList = new HashSet<Object>(elements.size());
+        Set<Object> javaElementResources = getCorrespondingContainers(elements);
+        Iterator<Object> iter = elements.iterator();
         boolean removedOne = false;
         while (iter.hasNext()) {
             Object element = iter.next();
@@ -275,11 +276,13 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
     }
 
     // adapted from JarPackageWizardPage
-    private Set getExportedNonContainers() {
-        Set whiteCheckedTreeItems = getWhiteCheckedTreeItems();
-        Set exportedNonContainers = new HashSet(whiteCheckedTreeItems.size());
-        Set javaElementResources = getCorrespondingContainers(whiteCheckedTreeItems);
-        Iterator iter = getAllCheckedListItems();
+    @SuppressWarnings("unchecked")
+    private Set<Object> getExportedNonContainers() {
+        Set<Object> whiteCheckedTreeItems = getWhiteCheckedTreeItems();
+        Set<Object> exportedNonContainers = new HashSet<Object>(
+                whiteCheckedTreeItems.size());
+        Set<Object> javaElementResources = getCorrespondingContainers(whiteCheckedTreeItems);
+        Iterator<Object> iter = getAllCheckedListItems();
         while (iter.hasNext()) {
             Object element = iter.next();
             Object parent = null;
@@ -305,10 +308,9 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
      * {@link IJavaElement} instances are taken into account.
      */
     // adapted from JarPackageWizardPage
-    private Set<IResource> getCorrespondingContainers(Set elements) {
-        Set<IResource> javaElementResources = new HashSet<IResource>(
-                elements.size());
-        Iterator iter = elements.iterator();
+    private Set<Object> getCorrespondingContainers(Set<Object> elements) {
+        Set<Object> javaElementResources = new HashSet<Object>(elements.size());
+        Iterator<Object> iter = elements.iterator();
         while (iter.hasNext()) {
             Object element = iter.next();
             if (element instanceof IJavaElement) {

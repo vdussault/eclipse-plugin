@@ -1,6 +1,5 @@
 package com.vaadin.integration.eclipse.builder;
 
-import java.util.Date;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -227,8 +226,6 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
 
     }
 
-    private Date start;
-
     public static final String BUILDER_ID = "com.vaadin.integration.eclipse.widgetsetBuilder";
 
     /*
@@ -237,21 +234,19 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
      * @see org.eclipse.core.internal.events.InternalBuilder#build(int,
      * java.util.Map, org.eclipse.core.runtime.IProgressMonitor)
      */
+    @SuppressWarnings("rawtypes")
     @Override
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
             throws CoreException {
         if (kind == FULL_BUILD) {
             fullBuild(monitor);
         } else {
-            start = new Date();
             IResourceDelta delta = getDelta(getProject());
             if (delta == null) {
                 fullBuild(monitor);
             } else {
                 incrementalBuild(delta, monitor);
             }
-            // System.out.println("Vaadin WS: Incr build took: "
-            // + (new Date().getTime() - start.getTime()));
         }
         return null;
     }

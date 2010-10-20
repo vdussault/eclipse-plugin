@@ -22,6 +22,7 @@ import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
  */
 public class WidgetsetPublishDelegate extends PublishTaskDelegate {
 
+    @SuppressWarnings("rawtypes")
     @Override
     public PublishOperation[] getTasks(IServer server, int kind, List modules,
             List kindList) {

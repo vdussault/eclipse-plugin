@@ -16,7 +16,6 @@ public class GaeConfigurationUtil {
      * @param project
      * @throws CoreException
      */
-    @SuppressWarnings("unchecked")
     public static IFile createAppEngineWebXml(IProject project)
             throws CoreException {
         VaadinPluginUtil.ensureFileFromTemplate(

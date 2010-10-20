@@ -31,6 +31,7 @@ import com.vaadin.integration.eclipse.properties.VaadinVersionComposite;
  * 
  * In the latter case, opening this page is optional.
  */
+@SuppressWarnings("restriction")
 public class VaadinCoreFacetInstallPage extends J2EEModuleFacetInstallPage
         implements IVaadinFacetInstallDataModelProperties {
 

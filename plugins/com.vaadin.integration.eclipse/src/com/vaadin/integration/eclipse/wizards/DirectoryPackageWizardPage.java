@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.TreeItem;
  * Some code is duplicated from Eclipse JDT jarpackager as it has limited
  * visibility or is not designed to be extended.
  */
+@SuppressWarnings("restriction")
 public class DirectoryPackageWizardPage extends
         AbstractJarDestinationWizardPage {
 
@@ -270,9 +271,10 @@ public class DirectoryPackageWizardPage extends
      * In practice, we should only get {@link IJavaProject} instances in the
      * selection here.
      */
+    @SuppressWarnings("unchecked")
     @Override
     protected void setupBasedOnInitialSelections() {
-        Iterator iterator = initialSelection.iterator();
+        Iterator<Object> iterator = initialSelection.iterator();
         while (iterator.hasNext()) {
             Object selectedElement = iterator.next();
 

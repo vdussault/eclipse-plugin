@@ -21,6 +21,7 @@ import org.eclipse.jst.j2ee.webapplication.ServletType;
 import org.eclipse.jst.j2ee.webapplication.WebApp;
 import org.eclipse.jst.j2ee.webapplication.WebapplicationFactory;
 
+@SuppressWarnings("restriction")
 public class WebXmlUtil {
 
     public static final String VAADIN_SERVLET_CLASS = "terminal.gwt.server.ApplicationServlet";
@@ -130,7 +131,7 @@ public class WebXmlUtil {
 
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     private static InitParam getInitParameter_2_3(Servlet servlet, String name) {
         EList params = servlet.getParams();
         for (Object object : params) {
@@ -145,7 +146,7 @@ public class WebXmlUtil {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     private static ParamValue getInitParameter_2_4(Servlet servlet, String name) {
         EList params = servlet.getInitParams();
         for (Object object : params) {
@@ -205,7 +206,7 @@ public class WebXmlUtil {
      * @param artifact
      * @param widgetsetname
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     public static void setWidgetSet(WebArtifactEdit artifact,
             String widgetsetname, List<IType> applications) {
         final WebApp root = artifact.getWebApp();
@@ -237,7 +238,7 @@ public class WebXmlUtil {
      * @return map from application name to its configured widgetset name or to
      *         null if no widgetset configured
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     public static Map<String, String> getWidgetSets(WebArtifactEdit artifact) {
         Map<String, String> widgetsets = new LinkedHashMap<String, String>();
 

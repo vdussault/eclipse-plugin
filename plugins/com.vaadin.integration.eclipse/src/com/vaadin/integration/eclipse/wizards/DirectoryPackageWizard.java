@@ -51,6 +51,7 @@ import com.vaadin.integration.eclipse.util.ErrorUtil;
  * Some code is duplicated from Eclipse JDT jarpackager as it has limited
  * visibility or is not designed to be extended.
  */
+@SuppressWarnings("restriction")
 public class DirectoryPackageWizard extends JarPackageWizard {
 
     public static final String WIZARD_TITLE = "Vaadin Add-on Package Export";
@@ -140,6 +141,7 @@ public class DirectoryPackageWizard extends JarPackageWizard {
      * 
      * @return a valid structured selection based on the current selection
      */
+    @SuppressWarnings("unchecked")
     @Override
     protected IStructuredSelection getValidSelection() {
         ISelection currentSelection = JavaPlugin.getActiveWorkbenchWindow()
@@ -148,7 +150,7 @@ public class DirectoryPackageWizard extends JarPackageWizard {
             IStructuredSelection structuredSelection = (IStructuredSelection) currentSelection;
             List<IJavaProject> selectedElements = new ArrayList<IJavaProject>(
                     structuredSelection.size());
-            Iterator iter = structuredSelection.iterator();
+            Iterator<Object> iter = structuredSelection.iterator();
             while (iter.hasNext()) {
                 Object selectedElement = iter.next();
                 if (selectedElement instanceof IProject) {

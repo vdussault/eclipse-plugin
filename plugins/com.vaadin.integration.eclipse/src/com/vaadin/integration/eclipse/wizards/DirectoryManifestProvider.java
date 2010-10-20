@@ -15,6 +15,7 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
  * 
  * This class should only be user with a {@link DirectoryPackageData}.
  */
+@SuppressWarnings("restriction")
 public class DirectoryManifestProvider extends ManifestProvider {
 
     public static final String MANIFEST_VAADIN_PACKAGE_VERSION = "Vaadin-Package-Version";

@@ -56,7 +56,6 @@ public class PortletConfigurationUtil {
      *            {@link IVaadinFacetInstallDataModelProperties#PORTLET_VERSION20}
      * @throws CoreException
      */
-    @SuppressWarnings("unchecked")
     public static void addPortlet(IProject project, String applicationName,
             String portletClass, String portletName, String portletTitle,
             String category, String portletVersion) throws CoreException {

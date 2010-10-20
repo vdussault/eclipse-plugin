@@ -53,6 +53,7 @@ import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
  * Manager for asking the user about triggering widgetset builds, triggering the
  * builds for a project and ensuring multiple builds are not run concurrently.
  */
+@SuppressWarnings("restriction")
 public class WidgetsetBuildManager {
 
     /**
@@ -124,7 +125,6 @@ public class WidgetsetBuildManager {
      */
     private static class SelectWidgetsetLocationDialog extends
             ElementListSelectionDialog {
-        private String widgetsetPackage = null;
         private IPackageFragmentRoot root = null;
 
         public SelectWidgetsetLocationDialog(Shell parent, IJavaProject jproject)
@@ -177,13 +177,13 @@ public class WidgetsetBuildManager {
         private List<IPackageFragment> listPackages(Shell shell,
                 final IJavaProject jproject, final boolean includeDefaultPackage)
                 throws JavaModelException {
-            final List<IPackageFragment> packageList = new ArrayList();
+            final List<IPackageFragment> packageList = new ArrayList<IPackageFragment>();
             final JavaModelException[] exception = new JavaModelException[1];
             final boolean[] monitorCanceled = new boolean[] { false };
             IRunnableWithProgress r = new IRunnableWithProgress() {
                 public void run(IProgressMonitor monitor) {
                     try {
-                        Set packageNameSet = new HashSet();
+                        Set<String> packageNameSet = new HashSet<String>();
                         monitor.beginTask("Listing packages in project", 1);
                         IPackageFragmentRoot[] roots = jproject
                                 .getPackageFragmentRoots();

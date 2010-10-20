@@ -20,6 +20,7 @@ import com.vaadin.integration.eclipse.VaadinFacetUtils;
  * This class is not used when just adding the Vaadin facet to a Dynamic Web
  * Project.
  */
+@SuppressWarnings("deprecation")
 public class VaadinProjectCreationDataModelProvider extends
         J2EEFacetProjectCreationDataModelProvider implements
         IVaadinFacetInstallDataModelProperties {

@@ -20,6 +20,7 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 
+@SuppressWarnings("restriction")
 public class LaunchRefactorer extends VaadinTextFileRefactorer {
 
     /*
@@ -29,6 +30,7 @@ public class LaunchRefactorer extends VaadinTextFileRefactorer {
      * org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant#
      * createChange(org.eclipse.core.runtime.IProgressMonitor)
      */
+    @SuppressWarnings("deprecation")
     @Override
     public Change createChange(IProgressMonitor pm) throws CoreException,
             OperationCanceledException {

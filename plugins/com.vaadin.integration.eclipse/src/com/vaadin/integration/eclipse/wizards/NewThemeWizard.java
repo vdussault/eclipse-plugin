@@ -119,6 +119,7 @@ public class NewThemeWizard extends Wizard implements INewWizard {
      * or just replace its contents, and open the editor on the newly created
      * file.
      */
+    @SuppressWarnings("unchecked")
     private void doFinish(final String themeName,
             List<IType> appClassesToModify, IProgressMonitor monitor)
             throws CoreException {

@@ -83,6 +83,7 @@ import com.vaadin.integration.eclipse.builder.WidgetsetNature;
 import com.vaadin.integration.eclipse.util.files.LocalFileManager;
 import com.vaadin.integration.eclipse.wizards.DirectoryManifestProvider;
 
+@SuppressWarnings("restriction")
 public class VaadinPluginUtil {
 
     public static final String DEFAULT_WIDGET_SET_NAME = "com.vaadin.terminal.gwt.DefaultWidgetSet";
@@ -116,7 +117,6 @@ public class VaadinPluginUtil {
      * @param template
      * @throws CoreException
      */
-    @SuppressWarnings("unchecked")
     public static IFile ensureFileFromTemplate(IFile file, String template)
             throws CoreException {
 
@@ -329,6 +329,7 @@ public class VaadinPluginUtil {
      * 
      * @throws CoreException
      */
+    @SuppressWarnings("deprecation")
     static void updateLaunchClassPath(IProject project, String[] jarNames,
             IPath jarPath) throws CoreException {
         // list all launches
@@ -371,6 +372,7 @@ public class VaadinPluginUtil {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private static void updateLaunchClassPath(
             ILaunchConfiguration launchConfiguration, String jarName,
             IPath jarPath) throws CoreException {
@@ -414,6 +416,7 @@ public class VaadinPluginUtil {
         workingCopy.doSave();
     }
 
+    @SuppressWarnings("unchecked")
     private static void updateJavaLaunchClassPath(IJavaProject jproject,
             ILaunchConfiguration launchConfiguration, String[] jarNames,
             IPath jarPath) throws CoreException {
@@ -1216,8 +1219,8 @@ public class VaadinPluginUtil {
                         IClasspathEntry resolvedClasspathEntry = JavaCore
                                 .getResolvedClasspathEntry(ccp);
                         IPath path = resolvedClasspathEntry.getPath();
-                        IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
-                                .getRoot();
+                        // IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
+                        // .getRoot();
                         path = makePathAbsolute(path);
                         if (isNeededForWidgetsetCompilation(path)) {
                             vaadinpackages.add(path);

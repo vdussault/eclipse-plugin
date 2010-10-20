@@ -35,6 +35,7 @@ import com.vaadin.integration.eclipse.properties.VaadinVersionComposite;
  * 
  * Some settings are omitted when creating a project through the Vaadin wizard.
  */
+@SuppressWarnings("restriction")
 public class VaadinProjectFirstPage extends WebProjectFirstPage implements
         IVaadinFacetInstallDataModelProperties {
 
