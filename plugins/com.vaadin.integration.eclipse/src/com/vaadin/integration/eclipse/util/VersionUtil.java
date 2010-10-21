@@ -1,11 +1,14 @@
 package com.vaadin.integration.eclipse.util;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.JarURLConnection;
 import java.net.URL;
+import java.util.jar.Attributes;
 import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
 import org.eclipse.core.runtime.IPath;
@@ -48,11 +51,13 @@ public class VersionUtil {
             JarURLConnection conn = (JarURLConnection) url.openConnection();
             jarFile = conn.getJarFile();
 
-            // TODO: Try to get version from manifest
+            // Try to get version from manifest (in Vaadin 6.4.6 and newer)
+            String versionString = getManifestVersion(jarFile);
+            if (versionString != null) {
+                return versionString;
+            }
 
             // Try to get version from META-INF/VERSION
-            String versionString = null;
-
             ZipEntry entry = jarFile.getEntry("META-INF/VERSION");
             if (entry != null) {
                 InputStream inputStream = jarFile.getInputStream(entry);
@@ -68,6 +73,21 @@ public class VersionUtil {
         } finally {
             VaadinPluginUtil.closeJarFile(jarFile);
         }
+        return null;
+    }
+
+    private static String getManifestVersion(JarFile jarFile)
+            throws IOException {
+        Manifest manifest = jarFile.getManifest();
+        if (manifest == null) {
+            return null;
+        }
+        Attributes attr = manifest.getMainAttributes();
+        String bundleName = attr.getValue("Bundle-Name");
+        if (bundleName != null && bundleName.equals("Vaadin")) {
+            return attr.getValue("Bundle-Version");
+        }
+
         return null;
     }
 
