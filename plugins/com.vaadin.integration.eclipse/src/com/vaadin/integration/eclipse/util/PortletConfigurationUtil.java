@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
+import org.w3c.dom.DocumentType;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -229,6 +230,7 @@ public class PortletConfigurationUtil {
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             input = portletsXmlFile.getContents();
             Document doc = docBuilder.parse(input);
+            DocumentType docType = doc.getDoctype();
 
             modifier.performModification(docBuilder, doc);
 
@@ -240,7 +242,12 @@ public class PortletConfigurationUtil {
                 transFactory.setAttribute("indent-number", 4);
                 Transformer transformer = transFactory.newTransformer();
                 transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-
+                if (docType != null) {
+                    transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,
+                            docType.getSystemId());
+                    transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC,
+                            docType.getPublicId());
+                }
                 // this is a trick to get the indentations to almost work;
                 // nevertheless, some tricks are needed below for first lines of
                 // added sections
