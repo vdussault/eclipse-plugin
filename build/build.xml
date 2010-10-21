@@ -16,7 +16,7 @@
 
 	<fail unless="com.vaadin.eclipse.integration.version" message="com.vaadin.eclipse.integration.version must define the plugin version" />
 	<property name="com.vaadin.eclipse.integration.fullversion" value="${com.vaadin.eclipse.integration.version}.${timestamp}" />
-	
+
 	<property name="target.dir" location="output" />
 	<property name="update-site.dir" location="${target.dir}/${archivePrefix}" />
 
@@ -41,10 +41,11 @@
 			<arg value="-DarchivePrefix=${archivePrefix}" />
 		</java>
 
+		
 	</target>
 
 	<target name="build-eclipse-wysiwyg-plugin">
-	        <fail unless="gwt.location" message="gwt.location must be defined"/>
+		<fail unless="gwt.location" message="gwt.location must be defined" />
 		<delete dir="${update-site.dir}" />
 
 		<java jar="${eclipse.home}/plugins/${launcher}" failonerror="yes" fork="yes" maxmemory="512m">
@@ -61,5 +62,13 @@
 		</java>
 
 	</target>
+		
+	<target name="sign-plugin-and-feature">
+		<!-- Sign resulting plugin and feature -->
+		<exec executable="${jarsigner.bin}">
+			<arg path="${target.dir}/${archivePrefix}/**/*.jar" />
+		</exec>
+	</target>
+
 
 </project>
