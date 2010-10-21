@@ -289,8 +289,8 @@ public class DirectoryPackageWizardPage extends
                 } finally {
                     inputGroup.setInitiallySelecting(false);
                     // only use the first project found
-                    break;
                 }
+                break;
             }
         }
 
