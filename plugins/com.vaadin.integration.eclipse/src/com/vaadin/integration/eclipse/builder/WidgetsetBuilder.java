@@ -54,8 +54,9 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
             if (VaadinPluginUtil.isWidgetsetPackage(resource.getRawLocation())) {
                 switch (delta.getKind()) {
                 case IResourceDelta.ADDED:
-                    // skip build when the Vaadin JAR is added at project
-                    // creation - needed for Ganymede?
+                case IResourceDelta.CHANGED:
+                    // Do not set the widgetset as dirty if there is no
+                    // widgetset
                     IProject project = resource.getProject();
                     IJavaProject jproject = JavaCore.create(project);
                     IPath vaadinJarPath = ProjectUtil
@@ -65,14 +66,13 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                     IPath resourcePath = VaadinPluginUtil.getRawLocation(
                             project, resource.getRawLocation());
                     if (resourcePath.equals(vaadinJarPath)) {
-                        // #3869 only mark as dirty if the project has a custom
-                        // widgetset
+                        // #3869/#5214 only mark as dirty if the project has a
+                        // custom widgetset
                         if (!VaadinPluginUtil.hasWidgetSets(jproject, monitor)) {
                             break;
                         }
                     }
-                    // fall-through: continue like change or JAR
-                case IResourceDelta.CHANGED:
+
                     // compile will clear the dirty flag
                     VaadinPluginUtil.setWidgetsetDirty(getProject(), true);
                     WidgetsetBuildManager.runWidgetSetBuildTool(getProject(),
