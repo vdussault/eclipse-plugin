@@ -31,24 +31,26 @@
 		<delete dir="${buildDirectory}" />
 		<mkdir dir="${buildDirectory}" />
 	</target>
-	
+
 	<target name="copyProject" depends="initBuildDir">
 		<!-- The project has already been checked out to checkout so we use
 		that copy -->
-                <copy todir="${buildDirectory}/plugins">
-                    <fileset dir="checkout/plugins"/>
-                </copy>
-                <copy todir="${buildDirectory}/features">
-                    <fileset dir="checkout/features"/>
-                </copy>
+		<copy todir="${buildDirectory}/plugins">
+			<fileset dir="checkout/plugins" />
+		</copy>
+		<copy todir="${buildDirectory}/features">
+			<fileset dir="checkout/features" />
+		</copy>
+		<replace dir="${buildDirectory}/plugins" token="9.9.9.qualifier" value="${com.vaadin.wysiwyg.eclipse.version.full}" />
+		<replace dir="${buildDirectory}/features" token="9.9.9.qualifier" value="${com.vaadin.wysiwyg.eclipse.version.full}" />
+
 
 	</target>
 	<target name="checkoutProject" depends="initBuildDir">
 		<!--  Check out plugin(s) -->
 		<exec executable="svn">
 			<arg value="checkout" />
-			<arg
-			value="http://dev.vaadin.com/svn/wysiwyg/eclipse-plugin" />
+			<arg value="http://dev.vaadin.com/svn/wysiwyg/eclipse-plugin" />
 			<arg value="${buildDirectory}/plugins/com.vaadin.wysiwyg.eclipse" />
 		</exec>
 		<!--  Check out feature(s) -->
