@@ -112,6 +112,7 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
             Throwable realException = e.getTargetException();
             MessageDialog.openError(getShell(), "Error",
                     realException.getMessage());
+            ErrorUtil.handleBackgroundException(e);
             return false;
         }
         return true;

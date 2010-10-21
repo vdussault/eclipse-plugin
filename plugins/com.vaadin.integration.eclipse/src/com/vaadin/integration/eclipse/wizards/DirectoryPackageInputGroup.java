@@ -1,6 +1,7 @@
 package com.vaadin.integration.eclipse.wizards;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -158,12 +159,12 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
             ErrorUtil.handleBackgroundException(IStatus.WARNING,
                     "Could not select contents of project "
                             + javaProject.getProject().getName(), e);
-            return new ArrayList<Object>();
+            return Collections.emptyList();
         } catch (CoreException e) {
             ErrorUtil.handleBackgroundException(IStatus.ERROR,
                     "Could not make default selections for project "
                             + javaProject.getProject().getName(), e);
-            return new ArrayList<Object>();
+            return Collections.emptyList();
         }
     }
 
@@ -234,7 +235,7 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
     // adapted from JarPackageWizardPage
     private Set<Object> removeContainedChildren(Set<Object> elements) {
         Set<Object> newList = new HashSet<Object>(elements.size());
-        Set<Object> javaElementResources = getCorrespondingContainers(elements);
+        Set<IResource> javaElementResources = getCorrespondingContainers(elements);
         Iterator<Object> iter = elements.iterator();
         boolean removedOne = false;
         while (iter.hasNext()) {
@@ -281,7 +282,7 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
         Set<Object> whiteCheckedTreeItems = getWhiteCheckedTreeItems();
         Set<Object> exportedNonContainers = new HashSet<Object>(
                 whiteCheckedTreeItems.size());
-        Set<Object> javaElementResources = getCorrespondingContainers(whiteCheckedTreeItems);
+        Set<IResource> javaElementResources = getCorrespondingContainers(whiteCheckedTreeItems);
         Iterator<Object> iter = getAllCheckedListItems();
         while (iter.hasNext()) {
             Object element = iter.next();
@@ -308,8 +309,9 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
      * {@link IJavaElement} instances are taken into account.
      */
     // adapted from JarPackageWizardPage
-    private Set<Object> getCorrespondingContainers(Set<Object> elements) {
-        Set<Object> javaElementResources = new HashSet<Object>(elements.size());
+    private Set<IResource> getCorrespondingContainers(Set<Object> elements) {
+        Set<IResource> javaElementResources = new HashSet<IResource>(
+                elements.size());
         Iterator<Object> iter = elements.iterator();
         while (iter.hasNext()) {
             Object element = iter.next();
