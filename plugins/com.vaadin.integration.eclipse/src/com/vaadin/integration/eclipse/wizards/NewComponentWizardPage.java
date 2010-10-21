@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.Label;
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
-import com.vaadin.integration.eclipse.util.LegacyUtil;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
@@ -126,7 +125,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
         setDescription("This wizard creates a new Vaadin widget.");
 
         setTypeName("MyComponent", true);
-        setSuperClass(LegacyUtil.getVaadinPackagePrefix(getProject())
+        setSuperClass(VaadinPlugin.VAADIN_PACKAGE_PREFIX
                 + "ui.AbstractComponent", true);
     }
 
@@ -311,7 +310,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
         extWidgetSetNameLabel.setVisible(!template.isVaadin62()
                 && buildClientSideStub);
 
-        String prefix = LegacyUtil.getVaadinPackagePrefix(getProject());
+        String prefix = VaadinPlugin.VAADIN_PACKAGE_PREFIX;
         if (template.hasClientWidget()) {
             setSuperClass(prefix + "ui.AbstractComponent", true);
         } else {
@@ -323,7 +322,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
     protected void createTypeMembers(IType type, ImportsManager imports,
             IProgressMonitor monitor) throws CoreException {
 
-        String prefix = LegacyUtil.getVaadinPackagePrefix(getProject());
+        String prefix = VaadinPlugin.VAADIN_PACKAGE_PREFIX;
 
         // server-side CustomComponent
         if (!currentTemplate.hasClientWidget()

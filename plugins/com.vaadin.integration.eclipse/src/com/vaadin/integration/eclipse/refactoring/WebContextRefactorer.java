@@ -115,8 +115,7 @@ public class WebContextRefactorer extends VaadinTextFileRefactorer {
                 + WebXmlUtil.VAADIN_GAE_SERVLET_CLASS.replace(".", "\\.")
                 + "))";
         Pattern pattern = Pattern.compile("<servlet>"
-                + "(.*?)<servlet-class>(\\s*)"
-                + "((com\\.vaadin\\.)|(com\\.itmill\\.toolkit\\.))"
+                + "(.*?)<servlet-class>(\\s*)" + "(com\\.vaadin\\.)"
                 + applicationServletClassRegexp + "(\\s*)</servlet-class>"
                 + "(.*?)<param-value>(\\s*)" + applicationString
                 + "(\\s*)</param-value>" + "(.*?)</servlet>", Pattern.DOTALL);

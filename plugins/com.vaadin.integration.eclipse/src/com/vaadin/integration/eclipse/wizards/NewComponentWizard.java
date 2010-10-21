@@ -57,7 +57,6 @@ import org.eclipse.ui.ide.IDE;
 
 import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
-import com.vaadin.integration.eclipse.util.LegacyUtil;
 import com.vaadin.integration.eclipse.util.ProjectDependencyManager;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
@@ -199,21 +198,13 @@ public class NewComponentWizard extends Wizard implements INewWizard {
             IPackageFragment uiPackage = packageFragmentRoot
                     .createPackageFragment(packageName, true, null);
 
-            String vaadinPackagePrefix = LegacyUtil
-                    .getVaadinPackagePrefix(javaProject.getProject());
+            String vaadinPackagePrefix = VaadinPlugin.VAADIN_PACKAGE_PREFIX;
 
             String iComponentStub = VaadinPluginUtil
                     .readTextFromTemplate("component/"
                             + template.getClientTemplate() + ".txt");
 
-            // choose "V" or "I" based on project type (Vaadin or IT Mill
-            // Toolkit)
-            String clientSidePrefix;
-            if (vaadinPackagePrefix.equals(VaadinPlugin.TOOLKIT_PACKAGE_PREFIX)) {
-                clientSidePrefix = "I";
-            } else {
-                clientSidePrefix = "V";
-            }
+            String clientSidePrefix = VaadinPlugin.VAADIN_CLIENT_SIDE_CLASS_PREFIX;
             final String simpleName = clientSidePrefix + typeName;
 
             iComponentStub = iComponentStub.replaceAll("STUB_CLASSNAME",

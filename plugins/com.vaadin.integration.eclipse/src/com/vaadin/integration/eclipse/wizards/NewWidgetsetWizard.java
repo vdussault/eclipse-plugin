@@ -46,8 +46,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 import org.eclipse.ui.ide.IDE;
 
+import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
-import com.vaadin.integration.eclipse.util.LegacyUtil;
 import com.vaadin.integration.eclipse.util.ProjectDependencyManager;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
@@ -220,14 +220,13 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
             workingCopy.setAttribute(IExternalToolConstants.ATTR_LOCATION,
                     vmName);
 
-            // refresh only the WebContent/VAADIN/widgetsets or
-            // WebContent/ITMILL/widgetsets directory
-            String resourceDirectory = LegacyUtil
-                    .getVaadinResourceDirectory(project);
+            // refresh only WebContent/VAADIN/widgetsets
             IWorkingSetManager workingSetManager = PlatformUI.getWorkbench()
                     .getWorkingSetManager();
             IFolder wsDir = ProjectUtil.getWebContentFolder(project)
-                    .getFolder(resourceDirectory).getFolder("widgetsets");
+                    .getFolder(VaadinPlugin.VAADIN_RESOURCE_DIRECTORY)
+                    .getFolder("widgetsets");
+
             // refresh this requires that the directory exists
             VaadinPluginUtil.createFolders(wsDir, monitor);
 
@@ -258,10 +257,7 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
                 vmargs += " -XstartOnFirstThread";
             }
 
-            String compilerClass = "com.google.gwt.dev.GWTCompiler";
-            if (ProjectUtil.isVaadin6(project)) {
-                compilerClass = "com.vaadin.tools.WidgetsetCompiler";
-            }
+            String compilerClass = VaadinPlugin.GWT_COMPILER_CLASS;
 
             String wsDirString = wsDir.getProjectRelativePath()
                     .toPortableString();

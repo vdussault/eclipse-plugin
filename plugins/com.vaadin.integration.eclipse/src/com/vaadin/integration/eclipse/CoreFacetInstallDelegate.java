@@ -183,14 +183,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
                                 monitor);
 
                 // special case as the Vaadin JAR is not yet in the classpath
-                String vaadinPackagePrefix;
-                if (localVaadinVersion != null
-                        && localVaadinVersion.getVersionNumber()
-                                .startsWith("5")) {
-                    vaadinPackagePrefix = VaadinPlugin.TOOLKIT_PACKAGE_PREFIX;
-                } else {
-                    vaadinPackagePrefix = VaadinPlugin.VAADIN_PACKAGE_PREFIX;
-                }
+                String vaadinPackagePrefix = VaadinPlugin.VAADIN_PACKAGE_PREFIX;
 
                 String applicationCode = VaadinPluginUtil
                         .createApplicationClassSource(applicationPackage,

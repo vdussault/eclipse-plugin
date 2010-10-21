@@ -691,17 +691,15 @@ public class VaadinPluginUtil {
     public static IType[] getApplicationClasses(IProject project,
             IProgressMonitor monitor) throws JavaModelException {
         // find all non-binary subclasses of Application in the project
-        return getSubClasses(project,
-                LegacyUtil.getVaadinPackagePrefix(project)
-                        + VaadinPlugin.APPLICATION_CLASS_NAME, true, monitor);
+        return getSubClasses(project, VaadinPlugin.APPLICATION_CLASS_FULL_NAME,
+                true, monitor);
     }
 
     public static IType[] getWidgetSetClasses(IProject project,
             IProgressMonitor monitor) throws JavaModelException {
         // find all non-binary subclasses of WidgetSet in the project
-        return getSubClasses(project,
-                LegacyUtil.getVaadinPackagePrefix(project)
-                        + "terminal.gwt.client.WidgetSet", true, monitor);
+        return getSubClasses(project, VaadinPlugin.VAADIN_PACKAGE_PREFIX
+                + "terminal.gwt.client.WidgetSet", true, monitor);
     }
 
     /**
@@ -1408,11 +1406,10 @@ public class VaadinPluginUtil {
             String vmName = getJvmExecutablePath(jproject);
             args.add(vmName);
 
-            // refresh only the WebContent/VAADIN/widgetsets
-            String resourceDirectory = LegacyUtil
-                    .getVaadinResourceDirectory(project);
+            // refresh only WebContent/VAADIN/widgetsets
             final IFolder wsDir = ProjectUtil.getWebContentFolder(project)
-                    .getFolder(resourceDirectory).getFolder("widgetsets");
+                    .getFolder(VaadinPlugin.VAADIN_RESOURCE_DIRECTORY)
+                    .getFolder("widgetsets");
 
             // refresh this requires that the directory exists
             createFolders(wsDir, new SubProgressMonitor(monitor, 1));
@@ -1849,10 +1846,9 @@ public class VaadinPluginUtil {
                     IJavaLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY,
                     location.toOSString());
 
-            String resourceDirectory = LegacyUtil
-                    .getVaadinResourceDirectory(project);
             IFolder wsDir = ProjectUtil.getWebContentFolder(project)
-                    .getFolder(resourceDirectory).getFolder("widgetsets");
+                    .getFolder(VaadinPlugin.VAADIN_RESOURCE_DIRECTORY)
+                    .getFolder("widgetsets");
             String wsDirString = wsDir.getLocation().toPortableString();
             if (wsDirString.startsWith(location.toPortableString())) {
                 wsDirString = wsDirString.replaceFirst(

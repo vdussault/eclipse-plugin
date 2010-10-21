@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
-import com.vaadin.integration.eclipse.util.LegacyUtil;
+import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.viewers.ApplicationList;
 
@@ -42,8 +42,7 @@ public class NewThemeWizardPage extends WizardPage {
         setTitle("Create a new Vaadin theme");
         this.selection = selection;
 
-        IProject project = ProjectUtil.getProject(selection);
-        String directory = LegacyUtil.getVaadinResourceDirectory(project);
+        String directory = VaadinPlugin.VAADIN_RESOURCE_DIRECTORY;
         setDescription("This wizard creates a theme folder and styles.css file to WebContent/"
                 + directory + " directory.");
     }

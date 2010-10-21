@@ -43,8 +43,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
+import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
-import com.vaadin.integration.eclipse.util.LegacyUtil;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 
 /**
@@ -127,7 +127,7 @@ public class NewThemeWizard extends Wizard implements INewWizard {
         monitor.beginTask("Creating " + themeName, 2);
         IProject root = page.getProject();
 
-        String directory = LegacyUtil.getVaadinResourceDirectory(root);
+        String directory = VaadinPlugin.VAADIN_RESOURCE_DIRECTORY;
 
         IFolder folder = ProjectUtil.getWebContentFolder(root).getFolder(
                 directory);
@@ -147,8 +147,7 @@ public class NewThemeWizard extends Wizard implements INewWizard {
         }
         final IFile file = folder.getFile(new Path("styles.css"));
         try {
-            InputStream stream = openContentStream(ProjectUtil.isVaadin6(root) ? "reindeer"
-                    : "default");
+            InputStream stream = openContentStream(VaadinPlugin.VAADIN_DEFAULT_THEME);
             file.create(stream, true, monitor);
             stream.close();
         } catch (IOException e) {

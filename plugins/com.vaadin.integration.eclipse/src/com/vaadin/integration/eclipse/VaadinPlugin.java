@@ -7,9 +7,9 @@ public class VaadinPlugin extends AbstractUIPlugin {
     public static final String PLUGIN_ID = "com.vaadin.integration.eclipse";
 
     public static final String VAADIN_PACKAGE_PREFIX = "com.vaadin.";
-    @Deprecated
-    public static final String TOOLKIT_PACKAGE_PREFIX = "com.itmill.toolkit.";
     public static final String APPLICATION_CLASS_NAME = "Application";
+    public static final String APPLICATION_CLASS_FULL_NAME = VAADIN_PACKAGE_PREFIX
+            + APPLICATION_CLASS_NAME;
 
     public static final String ID_COMPILE_WS_APP = "compilews";
 
@@ -45,6 +45,14 @@ public class VaadinPlugin extends AbstractUIPlugin {
 
     public static final String PREFERENCES_LIFERAY_PATH = PLUGIN_ID + "."
             + "liferayWebInfPath";
+
+    public static final String VAADIN_CLIENT_SIDE_CLASS_PREFIX = "V";
+
+    public static final String VAADIN_RESOURCE_DIRECTORY = "VAADIN";
+
+    public static final String VAADIN_DEFAULT_THEME = "reindeer";
+
+    public static final String GWT_COMPILER_CLASS = "com.vaadin.tools.WidgetsetCompiler";
 
     private static VaadinPlugin instance = null;
 

@@ -173,47 +173,7 @@ public class ProjectUtil {
         if (jproject == null) {
             return null;
         }
-        IType type = jproject.findType(VaadinPlugin.VAADIN_PACKAGE_PREFIX
-                + VaadinPlugin.APPLICATION_CLASS_NAME);
-        if (type == null) {
-            type = jproject.findType(VaadinPlugin.TOOLKIT_PACKAGE_PREFIX
-                    + VaadinPlugin.APPLICATION_CLASS_NAME);
-        }
-        return type;
-    }
-
-    /**
-     * Checks the Vaadin version, returns true for Vaadin 6.0+, false for IT
-     * Mill Toolkit.
-     * 
-     * @param project
-     * @return true if a Vaadin project (or unknown), false for IT Mill Toolkit
-     *         project
-     */
-    @Deprecated
-    public static boolean isVaadin6(IProject project) {
-        IJavaProject jproject = JavaCore.create(project);
-        if (jproject != null) {
-            try {
-                if (jproject.findType(VaadinPlugin.VAADIN_PACKAGE_PREFIX
-                        + VaadinPlugin.APPLICATION_CLASS_NAME) != null) {
-                    return true;
-                } else if (jproject
-                        .findType(VaadinPlugin.TOOLKIT_PACKAGE_PREFIX
-                                + VaadinPlugin.APPLICATION_CLASS_NAME) != null) {
-                    return false;
-                }
-            } catch (JavaModelException e) {
-                ErrorUtil
-                        .handleBackgroundException(
-                                IStatus.WARNING,
-                                "Failed to check the Vaadin version used in the project, assuming 6.0+",
-                                e);
-                return true;
-            }
-        }
-        // default value
-        return true;
+        return jproject.findType(VaadinPlugin.APPLICATION_CLASS_FULL_NAME);
     }
 
     public static String getRequiredGWTVersionForProject(IJavaProject jproject) {
@@ -412,10 +372,6 @@ public class ProjectUtil {
      * @return
      */
     public static boolean isVaadin62(IProject project) {
-        if (!ProjectUtil.isVaadin6(project)) {
-            return false;
-        }
-
         IPath findProjectVaadinJarPath;
         try {
             findProjectVaadinJarPath = ProjectUtil
