@@ -11,6 +11,7 @@ import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.configuration.VaadinProjectCreationDataModelProvider;
+import com.vaadin.integration.eclipse.util.ErrorUtil;
 
 /**
  * Vaadin top level project creation wizard.
@@ -39,7 +40,7 @@ public class VaadinProjectWizard extends WebProjectWizard {
             return DataModelFactory
                     .createDataModel(new VaadinProjectCreationDataModelProvider());
         } catch (Exception e) {
-            e.printStackTrace();
+            ErrorUtil.handleBackgroundException(e);
             return null;
         }
     }

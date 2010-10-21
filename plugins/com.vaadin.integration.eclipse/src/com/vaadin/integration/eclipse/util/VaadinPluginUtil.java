@@ -239,8 +239,8 @@ public class VaadinPluginUtil {
                 return false;
             }
         } catch (CoreException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            ErrorUtil.handleBackgroundException(e);
+            return false;
         }
 
         if (LiferayUtil.isLiferayProject(project)) {

@@ -8,6 +8,8 @@ import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
+import com.vaadin.integration.eclipse.util.ErrorUtil;
+
 public class VaadinFacetUtils {
     public static final String VAADIN_FACET_ID = "com.vaadin.integration.eclipse.core";
     public static final String VAADIN_PROJECT_DEFAULT_PRESET_ID = "com.vaadin.integration.eclipse.preset15";
@@ -35,7 +37,7 @@ public class VaadinFacetUtils {
             IFacetedProject fproj = ProjectFacetsManager.create(project);
             return fproj != null && fproj.hasProjectFacet(VAADIN_FACET);
         } catch (CoreException e) {
-            e.printStackTrace();
+            ErrorUtil.handleBackgroundException(e);
             return false;
         }
     }
@@ -66,7 +68,7 @@ public class VaadinFacetUtils {
             workingCopy.changeProjectFacetVersion(version);
             workingCopy.commitChanges(null);
         } catch (CoreException e) {
-            e.printStackTrace();
+            ErrorUtil.handleBackgroundException(e);
         }
     }
 

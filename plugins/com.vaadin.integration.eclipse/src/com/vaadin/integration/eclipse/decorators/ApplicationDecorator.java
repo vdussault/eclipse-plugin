@@ -13,6 +13,7 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 
 import com.vaadin.integration.eclipse.VaadinPlugin;
+import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 public class ApplicationDecorator implements ILightweightLabelDecorator {
@@ -57,7 +58,7 @@ public class ApplicationDecorator implements ILightweightLabelDecorator {
                         VaadinPlugin.APPLICATION_CLASS_NAME);
             } catch (JavaModelException e) {
                 // Can't throw an exception here I think..
-                e.printStackTrace();
+                ErrorUtil.handleBackgroundException(e);
             }
         }
 
