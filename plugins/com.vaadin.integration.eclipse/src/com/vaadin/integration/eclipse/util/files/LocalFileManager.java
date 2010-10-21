@@ -362,9 +362,6 @@ public class LocalFileManager {
             throws CoreException {
         FileType fileType = FileType.GWT_DEV_JAR;
         if (LegacyUtil.isPlatformDependentGWT(gwtVersion)) {
-
-        }
-        if (fileType.getFilename(gwtVersion) == null) {
             fileType = FileType.GWT_DEV_JAR_PLATFORM_DEPENDENT;
         }
         return getLocalFile(fileType, gwtVersion);
