@@ -1,12 +1,6 @@
 package com.vaadin.integration.eclipse.util;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -177,55 +171,25 @@ public class ProjectUtil {
     }
 
     public static String getRequiredGWTVersionForProject(IJavaProject jproject) {
-        // if no information exists, default to 2.0.4
-        String gwtVersion = "2.0.4";
-
         try {
             // find Vaadin JAR on the classpath
             IPath vaadinJarPath = ProjectUtil
                     .findProjectVaadinJarPath(jproject);
-            if (vaadinJarPath == null) {
-                throw ErrorUtil.newCoreException("Could not access Vaadin JAR",
-                        null);
-            }
-            File vaadinJarFile = vaadinJarPath.toFile();
-            if (!vaadinJarFile.exists()) {
+            String gwtVersion = VersionUtil
+                    .getRequiredGWTVersionForVaadinJar(vaadinJarPath);
+            if (gwtVersion != null) {
                 return gwtVersion;
-            }
-
-            // Check gwt version from included Vaadin jar
-            JarFile jarFile = null;
-            try {
-                jarFile = new JarFile(vaadinJarFile.getAbsolutePath());
-                ZipEntry entry = jarFile.getEntry("META-INF/GWT-VERSION");
-                if (entry == null) {
-                    // found JAR but not GWT version information in it, use
-                    // default
-                    return gwtVersion;
-                }
-
-                // extract GWT version from the JAR
-                InputStream gwtVersionStream = jarFile.getInputStream(entry);
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(gwtVersionStream));
-
-                gwtVersion = reader.readLine();
-            } finally {
-                if (jarFile != null) {
-                    VaadinPluginUtil.closeJarFile(jarFile);
-                }
             }
         } catch (IOException ex) {
             ErrorUtil.handleBackgroundException(IStatus.WARNING,
-                    "Failed to determine the GWT library version to use, defaulting to "
-                            + gwtVersion, ex);
+                    "Failed to determine the GWT library version to use.", ex);
         } catch (CoreException ex) {
             ErrorUtil.handleBackgroundException(IStatus.WARNING,
-                    "Failed to determine the GWT library version to use, defaulting to "
-                            + gwtVersion, ex);
+                    "Failed to determine the GWT library version to use.", ex);
         }
 
-        return gwtVersion;
+        // if no information exists, default to 2.0.4
+        return "2.0.4";
     }
 
     public static boolean isGwt20(IProject project) {

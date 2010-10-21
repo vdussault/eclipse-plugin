@@ -1,6 +1,7 @@
 package com.vaadin.integration.eclipse.util;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -52,7 +53,7 @@ public class VersionUtil {
             jarFile = conn.getJarFile();
 
             // Try to get version from manifest (in Vaadin 6.4.6 and newer)
-            String versionString = getManifestVersion(jarFile);
+            String versionString = getManifestVaadinVersion(jarFile);
             if (versionString != null) {
                 return versionString;
             }
@@ -76,7 +77,7 @@ public class VersionUtil {
         return null;
     }
 
-    private static String getManifestVersion(JarFile jarFile)
+    private static String getManifestVaadinVersion(JarFile jarFile)
             throws IOException {
         Manifest manifest = jarFile.getManifest();
         if (manifest == null) {
@@ -86,6 +87,21 @@ public class VersionUtil {
         String bundleName = attr.getValue("Bundle-Name");
         if (bundleName != null && bundleName.equals("Vaadin")) {
             return attr.getValue("Bundle-Version");
+        }
+
+        return null;
+    }
+
+    private static String getManifestGWTVersion(JarFile jarFile)
+            throws IOException {
+        Manifest manifest = jarFile.getManifest();
+        if (manifest == null) {
+            return null;
+        }
+        Attributes attr = manifest.getMainAttributes();
+        String bundleName = attr.getValue("Bundle-Name");
+        if (bundleName != null && bundleName.equals("Vaadin")) {
+            return attr.getValue("GWT-Version");
         }
 
         return null;
@@ -106,4 +122,50 @@ public class VersionUtil {
         return name.matches(VAADIN_JAR_REGEXP);
     }
 
+    /**
+     * Returns the GWT version required by the given vaadin jar.
+     * 
+     * @param vaadinJarPath
+     *            The path of Vaadin jar, must not be null.
+     * @return The required GWT version or null if it could not be determined
+     * @throws IOException
+     */
+    public static String getRequiredGWTVersionForVaadinJar(IPath vaadinJarPath)
+            throws IOException {
+
+        File vaadinJarFile = vaadinJarPath.toFile();
+        if (!vaadinJarFile.exists()) {
+            return null;
+        }
+
+        // Check gwt version from included Vaadin jar
+        JarFile jarFile = null;
+        try {
+            jarFile = new JarFile(vaadinJarFile.getAbsolutePath());
+            // Check GWT version from manifest
+            String manifestGWTVersion = getManifestGWTVersion(jarFile);
+            if (manifestGWTVersion != null) {
+                return manifestGWTVersion;
+            }
+
+            ZipEntry entry = jarFile.getEntry("META-INF/GWT-VERSION");
+            if (entry == null) {
+                // found JAR but not GWT version information in it, use
+                // default
+                return null;
+            }
+
+            // extract GWT version from the JAR
+            InputStream gwtVersionStream = jarFile.getInputStream(entry);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    gwtVersionStream));
+
+            String gwtVersion = reader.readLine();
+            return gwtVersion;
+        } finally {
+            if (jarFile != null) {
+                VaadinPluginUtil.closeJarFile(jarFile);
+            }
+        }
+    }
 }
