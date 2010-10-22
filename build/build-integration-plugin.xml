@@ -40,8 +40,8 @@
                 <copy todir="${buildDirectory}/features">
 					<fileset dir="checkout/features"/>
                 </copy>
-          		<replace dir="${buildDirectory}/plugins" token="9.9.9.qualifier" value="${com.vaadin.eclipse.integration.version.full}"/>
-          		<replace dir="${buildDirectory}/features" token="9.9.9.qualifier" value="${com.vaadin.eclipse.integration.version.full}"/>
+          		<replace dir="${buildDirectory}/plugins" token="9.9.9.qualifier" value="${com.vaadin.integration.eclipse.version.full}"/>
+          		<replace dir="${buildDirectory}/features" token="9.9.9.qualifier" value="${com.vaadin.integration.eclipse.version.full}"/>
 
         </target>
 

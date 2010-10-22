@@ -21,9 +21,10 @@
 	</condition>
 	<fail unless="eclipse.home.ok" message="eclipse.home must be a valid Eclipse installation" />
 
+	<!-- Build Vaadin Eclipse integration plugin -->
 	<target name="build-eclipse-integration-plugin">
-		<fail unless="com.vaadin.eclipse.integration.version" message="com.vaadin.eclipse.integration.version must define the plugin version" />
-		<property name="com.vaadin.eclipse.integration.version.full" value="${com.vaadin.eclipse.integration.version}.${timestamp}" />
+		<fail unless="com.vaadin.integration.eclipse.version" message="com.vaadin.integration.eclipse.version must define the plugin version" />
+		<property name="com.vaadin.integration.eclipse.version.full" value="${com.vaadin.integration.eclipse.version}.${timestamp}" />
 
 		<delete dir="${update-site.dir}" />
 
@@ -33,19 +34,20 @@
 			<arg value="-buildfile" />
 			<arg value="build-integration-plugin.xml" />
 			<arg value="-Dtarget.dir=${target.dir}" />
-			<arg value="-Dcom.vaadin.eclipse.integration.version=${com.vaadin.eclipse.integration.version}" />
-			<arg value="-Dcom.vaadin.eclipse.integration.version.full=${com.vaadin.eclipse.integration.version.full}" />
+			<arg value="-Dcom.vaadin.integration.eclipse.version=${com.vaadin.integration.eclipse.version}" />
+			<arg value="-Dcom.vaadin.integration.eclipse.version.full=${com.vaadin.integration.eclipse.version.full}" />
 			<arg value="-Dtimestamp=${timestamp}" />
 			<arg value="-DarchivePrefix=${archivePrefix}" />
 		</java>
 
-		
+
 	</target>
 
+	<!-- Build Vaadin Eclipse wysiwyg plugin -->
 	<target name="build-eclipse-wysiwyg-plugin">
 		<fail unless="com.vaadin.wysiwyg.eclipse.version" message="com.vaadin.wysiwyg.eclipse.version must define the plugin version" />
 		<property name="com.vaadin.wysiwyg.eclipse.version.full" value="${com.vaadin.wysiwyg.eclipse.version}.${timestamp}" />
-		
+
 		<fail unless="gwt.location" message="gwt.location must be defined" />
 		<delete dir="${update-site.dir}" />
 
@@ -64,7 +66,8 @@
 		</java>
 
 	</target>
-		
+
+	<!-- Sign all plugins and features that were built -->
 	<target name="sign-plugin-and-feature">
 		<!-- Sign resulting plugin and feature -->
 		<exec executable="${jarsigner.bin}">
