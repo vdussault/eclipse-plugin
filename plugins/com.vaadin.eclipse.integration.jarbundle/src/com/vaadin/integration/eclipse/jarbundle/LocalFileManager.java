@@ -1,4 +1,4 @@
-package com.vaadin.eclipse.integration.jarbundle;
+package com.vaadin.integration.eclipse.jarbundle;
 
 import java.io.IOException;
 import java.net.URL;

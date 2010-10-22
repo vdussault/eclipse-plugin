@@ -1,4 +1,4 @@
-package com.vaadin.eclipse.integration.jarbundle;
+package com.vaadin.integration.eclipse.jarbundle;
 
 import java.io.File;
 import java.io.FileNotFoundException;

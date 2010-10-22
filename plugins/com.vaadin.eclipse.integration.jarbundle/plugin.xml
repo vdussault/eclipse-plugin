@@ -3,7 +3,7 @@
 <plugin>
    <extension
          point="org.eclipse.ui.startup">
-         <startup class="com.vaadin.eclipse.integration.jarbundle.VaadinJarBundlePlugin"/>
+         <startup class="com.vaadin.integration.eclipse.jarbundle.VaadinJarBundlePlugin"/>
    </extension>
 
 </plugin>

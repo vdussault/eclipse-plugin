@@ -1,13 +1,13 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Vaadin Jar Bundle
-Bundle-SymbolicName: com.vaadin.eclipse.integration.jarbundle;singleton:=true
+Bundle-SymbolicName: com.vaadin.integration.eclipse.jarbundle;singleton:=true
 Bundle-Version: 9.9.9.qualifier
 Bundle-Vendor: Vaadin Ltd
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui
 Bundle-ActivationPolicy: lazy
-Bundle-Activator: com.vaadin.eclipse.integration.jarbundle.VaadinJarBundlePlugin
+Bundle-Activator: com.vaadin.integration.eclipse.jarbundle.VaadinJarBundlePlugin
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ClassPath: lib/commons-io-1.4.jar,
  .
