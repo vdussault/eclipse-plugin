@@ -77,23 +77,37 @@ public class VersionUtil {
         return null;
     }
 
+    /**
+     * Returns the Vaadin JAR version, as specified in the manifest.
+     * 
+     * @param jarFile
+     *            A JarFile reference to a vaadin jar. Not closed by the method,
+     *            needs to be closed afterwards. Must not be null.
+     * @return The Vaadin version stated in the manifest or null if not found.
+     * @throws IOException
+     */
     private static String getManifestVaadinVersion(JarFile jarFile)
             throws IOException {
-        Manifest manifest = jarFile.getManifest();
-        if (manifest == null) {
-            return null;
-        }
-        Attributes attr = manifest.getMainAttributes();
-        String bundleName = attr.getValue("Bundle-Name");
-        if (bundleName != null && bundleName.equals("Vaadin")) {
-            return attr.getValue("Bundle-Version");
-        }
-
-        return null;
+        return getManifestVersion(jarFile, "Bundle-Version");
     }
 
+    /**
+     * Returns the GWT version required by the Vaadin JAR, as specified in the
+     * manifest.
+     * 
+     * @param jarFile
+     *            A JarFile reference to a vaadin jar. Not closed by the method,
+     *            needs to be closed afterwards. Must not be null.
+     * @return The Vaadin version stated in the manifest or null if not found.
+     * @throws IOException
+     */
     private static String getManifestGWTVersion(JarFile jarFile)
             throws IOException {
+        return getManifestVersion(jarFile, "GWT-Version");
+    }
+
+    private static String getManifestVersion(JarFile jarFile,
+            String versionAttribute) throws IOException {
         Manifest manifest = jarFile.getManifest();
         if (manifest == null) {
             return null;
@@ -101,7 +115,7 @@ public class VersionUtil {
         Attributes attr = manifest.getMainAttributes();
         String bundleName = attr.getValue("Bundle-Name");
         if (bundleName != null && bundleName.equals("Vaadin")) {
-            return attr.getValue("GWT-Version");
+            return attr.getValue(versionAttribute);
         }
 
         return null;
