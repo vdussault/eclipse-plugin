@@ -1858,6 +1858,15 @@ public class VaadinPluginUtil {
             if (isGwt20) {
                 arguments = "-noserver -war " + wsDirString + " "
                         + getConfiguredWidgetSet(jproject);
+
+                // Could maybe make a more educated guess but this will at least
+                // allow the user to launch a browser session and show what the
+                // url parameters should be
+                arguments += " -startupUrl http://localhost:8080/"
+                        + project.getName();
+                // Same as GWT default. Added to show users how to change the
+                // bind address
+                arguments += " -bindAddress 127.0.0.1";
             } else {
                 arguments = "-noserver -out " + wsDirString;
             }
