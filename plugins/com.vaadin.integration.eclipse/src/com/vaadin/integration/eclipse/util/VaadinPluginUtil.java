@@ -243,10 +243,6 @@ public class VaadinPluginUtil {
             return false;
         }
 
-        if (LiferayUtil.isLiferayProject(project)) {
-            return false;
-        }
-
         // TODO check if there is a Vaadin JAR on the classpath outside of the
         // WEB-INF/lib folder => return false
 
