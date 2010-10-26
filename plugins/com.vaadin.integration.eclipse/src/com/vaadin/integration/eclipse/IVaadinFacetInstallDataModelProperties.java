@@ -14,9 +14,6 @@ public interface IVaadinFacetInstallDataModelProperties extends
 
     public static final String CREATE_ARTIFACTS = "IVaadinFacetInstallDataModelProperties.CREATE_ARTIFACTS"; //$NON-NLS-1$
 
-    // if a Liferay project using Vaadin directly from it
-    public static final String LIFERAY_PATH = "IVaadinFacetInstallDataModelProperties.LIFERAY_PATH"; //$NON-NLS-1$
-
     /**
      * Value is one of the PORTLET_VERSION_* constants.
      */

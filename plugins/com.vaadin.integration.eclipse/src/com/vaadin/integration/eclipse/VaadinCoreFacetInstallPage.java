@@ -12,16 +12,12 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wst.common.componentcore.datamodel.properties.IFacetDataModelProperties;
-import org.eclipse.wst.common.frameworks.datamodel.DataModelEvent;
-import org.eclipse.wst.common.frameworks.datamodel.IDataModelListener;
 import org.eclipse.wst.common.project.facet.core.internal.FacetedProjectWorkingCopy;
 
-import com.vaadin.integration.eclipse.configuration.VaadinFacetInstallDataModelProvider;
 import com.vaadin.integration.eclipse.properties.VaadinVersionComposite;
 
 /**
@@ -191,33 +187,6 @@ public class VaadinCoreFacetInstallPage extends J2EEModuleFacetInstallPage
         // synch version string to model
         synchHelper.synchCombo(versionComposite.getVersionCombo(),
                 VAADIN_VERSION, new Control[] {});
-        synchHelper.synchText(versionComposite.getLiferayPathField(),
-                LIFERAY_PATH, new Control[] {});
-        // select Liferay mode or normal mode based on project type
-        model.addListener(new IDataModelListener() {
-            public void propertyChanged(DataModelEvent event) {
-                String propertyName = event.getPropertyName();
-                if (VAADIN_PROJECT_TYPE.equals(propertyName)) {
-                    boolean liferayMode = VaadinFacetInstallDataModelProvider.PROJECT_TYPE_LIFERAY_PORTLET
-                            .equals(event.getProperty());
-                    synchUIWithModel(liferayMode);
-                }
-            }
-
-            public void synchUIWithModel(final boolean liferayMode) {
-                if (Thread.currentThread() == Display.getDefault().getThread()) {
-                    // run in UI thread
-                    versionComposite.setLiferayMode(liferayMode);
-                } else {
-                    Display.getDefault().asyncExec(new Runnable() {
-                        public void run() {
-                            // run in UI thread
-                            versionComposite.setLiferayMode(liferayMode);
-                        }
-                    });
-                }
-            }
-        });
     }
 
     protected void enableFields(boolean enabled) {

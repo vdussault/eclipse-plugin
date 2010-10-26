@@ -31,7 +31,6 @@ import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
-import com.vaadin.integration.eclipse.util.LiferayUtil;
 import com.vaadin.integration.eclipse.util.ProjectDependencyManager;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
@@ -96,12 +95,6 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
                     new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
 
-            // save Liferay path (if a Liferay project)
-            if (LiferayUtil.isLiferayProject(project)) {
-                LiferayUtil.setLiferayPath(project, vaadinVersionComposite
-                        .getLiferayPathField().getText());
-            }
-
             // save widgetset compilation parameters
 
             boolean suspended = widgetsetComposite
@@ -165,12 +158,6 @@ public class VaadinProjectPropertyPage extends PropertyPage {
                     getShell());
             ErrorUtil.handleBackgroundException(IStatus.WARNING,
                     "Failed to save widgetset compilation parameters.", e);
-            return false;
-        } catch (CoreException e) {
-            ErrorUtil.displayError("Failed to save Liferay path.", e,
-                    getShell());
-            ErrorUtil.handleBackgroundException(IStatus.WARNING,
-                    "Failed to save Liferay path.", e);
             return false;
         }
 

@@ -13,12 +13,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.wst.common.frameworks.datamodel.DataModelEvent;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
-import org.eclipse.wst.common.frameworks.datamodel.IDataModelListener;
 import org.eclipse.wst.common.frameworks.internal.datamodel.ui.DataModelSynchHelper;
 
 import com.vaadin.integration.eclipse.IVaadinFacetInstallDataModelProperties;
@@ -115,35 +112,6 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
         synchHelper.synchCombo(versionComposite.getVersionCombo(),
                 VAADIN_VERSION, new Control[] {});
 
-        synchHelper.synchText(versionComposite.getLiferayPathField(),
-                LIFERAY_PATH, new Control[] {});
-
-        // select Liferay mode or normal mode based on project type
-        vaadinFacetDataModel.addListener(new IDataModelListener() {
-            public void propertyChanged(DataModelEvent event) {
-                String propertyName = event.getPropertyName();
-                if (VAADIN_PROJECT_TYPE.equals(propertyName)) {
-                    boolean liferayMode = VaadinFacetInstallDataModelProvider.PROJECT_TYPE_LIFERAY_PORTLET
-                            .equals(event.getProperty());
-                    synchUIWithModel(liferayMode);
-                }
-            }
-
-            public void synchUIWithModel(final boolean liferayMode) {
-                if (Thread.currentThread() == Display.getDefault().getThread()) {
-                    // run in UI thread
-                    versionComposite.setLiferayMode(liferayMode);
-                } else {
-                    Display.getDefault().asyncExec(new Runnable() {
-                        public void run() {
-                            // run in UI thread
-                            versionComposite.setLiferayMode(liferayMode);
-                        }
-                    });
-                }
-            }
-        });
-
         return group;
     }
 
@@ -157,7 +125,6 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
         arrayList.add(APPLICATION_NAME);
         arrayList.add(APPLICATION_PACKAGE);
         arrayList.add(APPLICATION_CLASS);
-        arrayList.add(LIFERAY_PATH);
         arrayList.add(VAADIN_PROJECT_TYPE);
         arrayList.add(IWebFacetInstallDataModelProperties.CONTEXT_ROOT);
         // validating this leads to strange behavior for Finish button
