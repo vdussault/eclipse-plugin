@@ -2,21 +2,19 @@ package com.vaadin.integration.eclipse.jarbundle;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
+import java.util.Enumeration;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.PlatformUI;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 public class VaadinJarBundlePlugin extends Plugin implements IStartup {
@@ -61,54 +59,52 @@ public class VaadinJarBundlePlugin extends Plugin implements IStartup {
         // Find configuration path
         IPath downloadPath = LocalFileManager.getDownloadDirectory();
 
-        // Local directory
-        IPath localPluginDirectory = findBundledJarLocation();
-
         // Copy locally bundled files if needed
-        copyNonexistingFilesRecursively(localPluginDirectory.toFile(),
+        copyNonexistingFilesRecursively(LOCAL_JAR_FILE_LOCATION,
                 downloadPath.toFile());
 
     }
 
-    private IPath findBundledJarLocation() throws IOException {
-        Bundle bundle = bundleContext.getBundle();
-        File bundleRoot = FileLocator.getBundleFile(bundle);
-        return new Path(bundleRoot.getAbsolutePath() + File.separator
-                + LOCAL_JAR_FILE_LOCATION);
+    private void copyNonexistingFilesRecursively(String bundleEntry, File target)
+            throws IOException {
+        if (bundleEntry.contains(".svn")) {
+            return;
+        }
 
-    }
+        @SuppressWarnings("unchecked")
+        Enumeration<String> paths = getBundle().getEntryPaths(bundleEntry);
 
-    private void copyNonexistingFilesRecursively(File source, File target) {
-        // System.out.println("Copy from " + source + " to " + target);
+        if (paths != null) {
+            // Directory
+            target.mkdirs();
 
-        if (source.isDirectory()) {
-            if (!target.exists()) {
-                target.mkdirs();
-            }
-
-            for (File f : source.listFiles()) {
-                copyNonexistingFilesRecursively(f,
-                        new File(target, f.getName()));
+            while (paths.hasMoreElements()) {
+                String path = paths.nextElement();
+                copyNonexistingFilesRecursively(path,
+                        new File(target, path.substring(bundleEntry.length())));
             }
         } else {
+
             // Files are copied only if the target does not exist (never
             // overwrite)
             if (!target.exists()) {
+                URL file = getBundle().getEntry(bundleEntry);
                 try {
-                    copyFile(source, target);
+                    copyFile(file, target);
                 } catch (Exception e) {
-                    showErrorMessage("Copy failed", "Copying file " + source
-                            + " to " + target + " failed");
+                    String message = "Copying file " + file.toString() + " to "
+                            + target + " failed";
+                    getLog().log(new Status(Status.ERROR, PLUGIN_ID, message));
+
                 }
             }
         }
-
     }
 
-    private void copyFile(File source, File target)
+    private void copyFile(URL source, File target)
             throws FileNotFoundException, IOException {
         // System.out.println("Copy file: " + source + " -> " + target);
-        IOUtils.copyLarge(new FileReader(source), new FileWriter(target));
+        IOUtils.copyLarge(source.openStream(), new FileOutputStream(target));
 
     }
 
