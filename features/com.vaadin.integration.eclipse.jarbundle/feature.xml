@@ -31,7 +31,7 @@ permissions and limitations under the License.
    </url>
 
    <requires>
-      <import plugin="com.vaadin.integration.eclipse.jarbundle"/>
+      <import plugin="com.vaadin.integration.eclipse"/>
    </requires>
 
    <plugin
