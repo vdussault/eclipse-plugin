@@ -25,7 +25,7 @@ import org.eclipse.core.runtime.Platform;
 import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.LegacyUtil;
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.PlatformUtil;
 import com.vaadin.integration.eclipse.util.VersionUtil;
 import com.vaadin.integration.eclipse.util.data.LocalVaadinVersion;
 
@@ -73,7 +73,7 @@ public class LocalFileManager {
 
         public String getFilename(String version) {
             return filename.replace("#version#", version).replace("#platform#",
-                    VaadinPluginUtil.getPlatform());
+                    PlatformUtil.getPlatform());
         }
 
         /**

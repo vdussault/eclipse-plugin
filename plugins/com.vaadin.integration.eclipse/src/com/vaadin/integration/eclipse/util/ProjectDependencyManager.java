@@ -394,7 +394,7 @@ public class ProjectDependencyManager {
 
                 // replace gwt-dev-[platform].jar and/or gwt-dev.jar if found,
                 // otherwise append new entry
-                String devJarName = "gwt-dev-" + VaadinPluginUtil.getPlatform()
+                String devJarName = "gwt-dev-" + PlatformUtil.getPlatform()
                         + ".jar";
                 VaadinPluginUtil.replaceClassPathEntry(entries, gwtDev,
                         new String[] { "gwt-dev.jar", devJarName }, true);

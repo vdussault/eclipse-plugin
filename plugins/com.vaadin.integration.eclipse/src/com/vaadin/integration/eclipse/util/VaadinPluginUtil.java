@@ -341,7 +341,7 @@ public class VaadinPluginUtil {
         // replace it with the new path
         // on all platforms, also need to handle &quot;
         String separators;
-        if ("windows".equals(VaadinPluginUtil.getPlatform())) {
+        if ("windows".equals(PlatformUtil.getPlatform())) {
             separators = ";&\"";
         } else {
             separators = ":&;\"";
@@ -417,18 +417,6 @@ public class VaadinPluginUtil {
 
         // save the launch
         workingCopy.doSave();
-    }
-
-    public static String getPlatform() {
-        String osname = System.getProperty("os.name");
-        if (osname.toLowerCase().contains("mac")) {
-            return "mac";
-        } else if (osname.toLowerCase().contains("linux")) {
-            return "linux";
-        } else {
-            return "windows";
-        }
-
     }
 
     /**
@@ -688,7 +676,7 @@ public class VaadinPluginUtil {
     public static void closeJarFile(JarFile jarFile) {
         // TODO make better jar handling. Windows locks files without
         // this, mac fails to rebuild widgetset with
-        if (getPlatform().equals("windows")) {
+        if (PlatformUtil.getPlatform().equals("windows")) {
             if (jarFile != null) {
                 try {
                     jarFile.close();
@@ -729,7 +717,7 @@ public class VaadinPluginUtil {
     public static String getProjectBaseClasspath(IJavaProject jproject,
             boolean includeOutputDirectories) throws CoreException,
             JavaModelException {
-        String classpathSeparator = getClasspathSeparator();
+        String classpathSeparator = PlatformUtil.getClasspathSeparator();
         IProject project = jproject.getProject();
 
         // use LinkedHashSet that preserves order but eliminates duplicates
@@ -812,22 +800,6 @@ public class VaadinPluginUtil {
     }
 
     /**
-     * Gets the platform specific separator to use between classpath string
-     * segments.
-     * 
-     * @return a colon or a semicolon to use as classpath separator
-     */
-    public static String getClasspathSeparator() {
-        String classpathSeparator;
-        if ("windows".equals(getPlatform())) {
-            classpathSeparator = ";";
-        } else {
-            classpathSeparator = ":";
-        }
-        return classpathSeparator;
-    }
-    
-    /**
      * Returns the full path to the Java executable. The project JVM is used if
      * available, the workspace default VM if none is specified for the project.
      * 
@@ -846,13 +818,14 @@ public class VaadinPluginUtil {
         File vmBinDir = new File(vmInstall.getInstallLocation(), "bin");
         // windows hack, as Eclipse can run the JVM but does not give its
         // executable name through public APIs
-        if ("windows".equals(getPlatform())) {
+        if ("windows".equals(PlatformUtil.getPlatform())) {
             vmName = new File(vmBinDir, "java.exe").getAbsolutePath();
         } else {
             vmName = new File(vmBinDir, "java").getAbsolutePath();
         }
         return vmName;
     }
+
     /**
      * Convert a path to a raw filesystem location - also works when the project
      * is outside the workspace
@@ -971,7 +944,7 @@ public class VaadinPluginUtil {
                     arguments);
 
             String vmargs = "-Xmx512M -XX:MaxPermSize=256M";
-            if (getPlatform().equals("mac") && !isGwt20) {
+            if (PlatformUtil.getPlatform().equals("mac") && !isGwt20) {
                 vmargs = vmargs + " -XstartOnFirstThread";
             }
             workingCopy

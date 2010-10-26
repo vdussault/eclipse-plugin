@@ -150,8 +150,7 @@ public class WidgetsetUtil {
             String classPath = VaadinPluginUtil.getProjectBaseClasspath(
                     jproject, true);
 
-            String classpathSeparator = VaadinPluginUtil
-                    .getClasspathSeparator();
+            String classpathSeparator = PlatformUtil.getClasspathSeparator();
 
             // add widgetset JARs
             Collection<IPath> widgetpackagets = getAvailableVaadinWidgetsetPackages(jproject);
@@ -171,7 +170,7 @@ public class WidgetsetUtil {
             args.add("-Xmx512M");
             args.add("-XX:MaxPermSize=512M");
 
-            if (VaadinPluginUtil.getPlatform().equals("mac")) {
+            if (PlatformUtil.getPlatform().equals("mac")) {
                 args.add("-XstartOnFirstThread");
             }
 

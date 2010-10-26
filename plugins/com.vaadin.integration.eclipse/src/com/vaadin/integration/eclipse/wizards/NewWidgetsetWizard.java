@@ -48,6 +48,7 @@ import org.eclipse.ui.ide.IDE;
 
 import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
+import com.vaadin.integration.eclipse.util.PlatformUtil;
 import com.vaadin.integration.eclipse.util.ProjectDependencyManager;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
@@ -254,7 +255,7 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
             moduleName = moduleName.replace(".client.", ".");
 
             String vmargs = "-Djava.awt.headless=true -Xss8M -Xmx500M";
-            if (VaadinPluginUtil.getPlatform().equals("mac")) {
+            if (PlatformUtil.getPlatform().equals("mac")) {
                 vmargs += " -XstartOnFirstThread";
             }
 
