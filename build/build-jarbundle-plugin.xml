@@ -26,7 +26,7 @@
 
 	<property name="jarfiles-location" location="checkout/plugins/com.vaadin.integration.eclipse.jarbundle/jarfiles" />
 
-	<target name="downloadVaadinJars" depends="checkoutProject">
+	<target name="downloadVaadinJars">
 		<!-- Vaadin downloader outputs the vaadin version to stderr -->
 		<java classname="com.vaadin.integration.eclipse.tools.VaadinDownloader" classpath="build/classes" errorproperty="vaadin-version">
 			<arg path="${jarfiles-location}" />
@@ -70,14 +70,14 @@
 		<property name="feature.dir" value="checkout/features/com.vaadin.integration.eclipse.jarbundle" />
 
 		<!--  Check out plugin(s) -->
-		<exec executable="c:/itmill/program/cygwin/bin/svn">
+		<exec executable="svn">
 			<arg value="checkout" />
 			<arg value="http://dev.vaadin.com/svn/integration/eclipse/plugins/com.vaadin.integration.eclipse.jarbundle" />
 			<arg value="${plugin.dir}" />
 		</exec>
 
 		<!--  Check out feature(s) -->
-		<exec executable="c:/itmill/program/cygwin/bin/svn">
+		<exec executable="svn">
 			<arg value="checkout" />
 			<arg value="http://dev.vaadin.com/svn/integration/eclipse/features/com.vaadin.integration.eclipse.jarbundle" />
 			<arg value="${feature.dir}" />
