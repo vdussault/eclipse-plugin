@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Build integration plugin" default="build-update-site">
+<project name="Build integration plugin" default="create-update-site">
 
 	<property name="update-site.dir" location="update-site" />
 	<property name="checkout.dir" location="checkout" />
