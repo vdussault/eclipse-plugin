@@ -319,6 +319,13 @@ public class WidgetsetUtil {
             t.interrupt();
 
             if (waitFor == 0) {
+                // Remove the widgetset-aux dir if one was created (#4443)
+                IFolder auxDir = wsDir.getFolder(moduleName + "-aux");
+                if (auxDir.exists()) {
+                    auxDir.delete(true, null);
+                }
+
+                // Refresh the workspace so the new widgetset is visible
                 wsDir.refreshLocal(IResource.DEPTH_INFINITE,
                         new SubProgressMonitor(monitor, 1));
                 setWidgetsetDirty(project, false);
