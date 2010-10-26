@@ -29,8 +29,6 @@ public class VaadinJarBundlePlugin extends Plugin implements IStartup {
 
     private static VaadinJarBundlePlugin instance;
 
-    private BundleContext bundleContext;
-
     public VaadinJarBundlePlugin() {
         instance = this;
     }
@@ -42,7 +40,6 @@ public class VaadinJarBundlePlugin extends Plugin implements IStartup {
     @Override
     public void start(BundleContext bundleContext) throws Exception {
         super.start(bundleContext);
-        this.bundleContext = bundleContext;
         try {
             copyJarFiles();
         } catch (IOException e) {
