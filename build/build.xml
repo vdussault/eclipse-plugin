@@ -72,6 +72,11 @@
 		</java>
 
 	</target>
+	
+	<!-- Build Eclipse site addon -->
+	<target name="build-eclipse-update-site-addon" depends="build-eclipse-jarbundle-plugin, sign-plugin-and-feature">
+		 <ant antfile="build-jarbundle-addon.xml"></ant>
+	</target>
 
 	<!-- Build Vaadin Eclipse wysiwyg plugin -->
 	<target name="build-eclipse-wysiwyg-plugin">

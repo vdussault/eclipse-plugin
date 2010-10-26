@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Build Jar bundle add-on / update site" default="build-addon">
+
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+	  <classpath>
+	    <pathelement location="lib/ant-contrib-1.0b3.jar"/>
+	  </classpath>
+	</taskdef>
+	
+	<fail unless="timestamp" message="Timestamp must be defined" />
+	<property name="addon.dir" location="jarbundle-addon" />
+	<property name="addon-update-site.dir" location="${addon.dir}/update-site" />
+
+	<target name="build-addon" depends="init-update-site, copy-jarbundle-plugin, download-other-plugins, site.xml, zip-addon, teamcity-publish-artifacts">
+	</target>
+
+	<target name="zip-addon">
+		<!-- addon.version comes from jarbundle plugin version -->
+		<path id="jarbundle.file.id">
+			<fileset dir="${addon-update-site.dir}/features">
+				<include name="com.vaadin.integration.eclipse.jarbundle*" />
+			</fileset>
+		</path>
+
+		<property name="jarbundle.file" refid="jarbundle.file.id" />
+		<propertyregex property="addon.version.full" input="${jarbundle.file}" regexp="com.vaadin.integration.eclipse.jarbundle.(.*).jar" select="\1" casesensitive="false" />
+
+		<!-- Create the zip manifest -->
+		<delete file="MANIFEST.MF" />
+		<manifest file="MANIFEST.MF">
+			<attribute name="Vaadin-Package-Version" value="1" />
+			<attribute name="Implementation-Title" value="Vaadin Eclipse Integration" />
+			<attribute name="Implementation-Version" value="${addon.version.full}" />
+		</manifest>
+
+		<!-- And package the update site -->
+		<jar file="${addon.dir}/vaadin-jar-bundle-${addon.version.full}.zip" manifest="MANIFEST.MF">
+			<fileset dir="${addon-update-site.dir}">
+				<include name="**/**" />
+			</fileset>
+		</jar>
+	</target>
+	<target name="init-update-site">
+		<delete dir="${addon-update-site.dir}" failonerror="false" />
+		<mkdir dir="${addon-update-site.dir}" />
+	</target>
+
+	<target name="copy-jarbundle-plugin" description="Copy the (recently built) jarbundle plugin to the update site">
+		<copy todir="${addon-update-site.dir}">
+			<fileset dir="output/nightly" includes="**/**">
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="download-other-plugins" description="Download the latest stable version of all plugins not found from the update site">
+		<java classname="com.vaadin.integration.eclipse.tools.EclipsePluginDownloader" classpath="build/classes">
+			<arg path="${addon-update-site.dir}" />
+			<classpath>
+				<fileset dir="lib">
+					<include name="**.jar" />
+				</fileset>
+			</classpath>
+		</java>
+	</target>
+
+	<target name="site.xml">
+		<javac source="1.5" target="1.5" destdir="." encoding="UTF-8" debug="true">
+			<src path="." />
+			<include name="CreateSiteXml.java" />
+		</javac>
+		<java classname="CreateSiteXml" failonerror="yes" fork="no" output="${addon-update-site.dir}/site.xml">
+			<classpath>
+				<pathelement location="." />
+			</classpath>
+			<arg value="jarbundle-site.xml.tpl" />
+			<arg value="${addon-update-site.dir}/features" />
+		</java>
+	</target>
+
+	<target name="teamcity-publish-artifacts">
+		<!-- Publish as a TeamCity artifact. -->
+		<echo>##teamcity[publishArtifacts '${addon.dir}']</echo>
+		<!--<echo>##teamcity[publishArtifacts '${addon-update-site.dir}']</echo>-->
+	</target>
+
+</project>
