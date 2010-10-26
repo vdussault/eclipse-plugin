@@ -346,6 +346,9 @@ public class WidgetsetBuildManager {
                             job.schedule(500);
                         } else {
                             projectWidgetsetBuildPending.remove(project);
+                            // Also mark as not dirty so we will not ask again
+                            // until a new change has been made
+                            WidgetsetUtil.setWidgetsetDirty(project, false);
                         }
                     }
                 }

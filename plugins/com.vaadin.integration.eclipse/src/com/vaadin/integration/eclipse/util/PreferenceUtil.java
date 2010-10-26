@@ -98,7 +98,7 @@ public class PreferenceUtil {
 
     public String getWidgetsetCompilationStyle() {
         if (!prefStore.contains(PREFERENCES_WIDGETSET_STYLE)) {
-            return "OBF";
+            return "";
         } else {
             return prefStore.getString(PREFERENCES_WIDGETSET_STYLE);
         }
