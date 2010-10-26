@@ -11,6 +11,7 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IStartup;
@@ -25,6 +26,8 @@ public class VaadinJarBundlePlugin extends Plugin implements IStartup {
      * by the Vaadin Eclipse Integration Plugin.
      */
     private static final String LOCAL_JAR_FILE_LOCATION = "jarfiles";
+
+    private static final String PLUGIN_ID = "com.vaadin.integration.eclipse.jarbundle";
 
     private static VaadinJarBundlePlugin instance;
 
@@ -52,6 +55,9 @@ public class VaadinJarBundlePlugin extends Plugin implements IStartup {
     }
 
     private void copyJarFiles() throws IOException {
+        getLog().log(
+                new Status(Status.INFO, PLUGIN_ID,
+                        "Copying bundled Vaadin files to integration plugin if needed"));
         // Find configuration path
         IPath downloadPath = LocalFileManager.getDownloadDirectory();
 
