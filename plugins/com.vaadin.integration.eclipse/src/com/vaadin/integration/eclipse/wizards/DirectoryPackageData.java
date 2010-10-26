@@ -10,7 +10,7 @@ import org.eclipse.jdt.ui.jarpackager.IJarBuilder;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import com.vaadin.integration.eclipse.util.ProjectUtil;
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 
 /**
  * Vaadin Directory package model for export.
@@ -93,7 +93,7 @@ public class DirectoryPackageData extends JarPackageData {
         }
 
         if (getWidgetsets() == null) {
-            setWidgetsets(VaadinPluginUtil.findWidgetSetsString(jproject, null));
+            setWidgetsets(WidgetsetUtil.findWidgetSetsString(jproject, null));
         }
     }
 

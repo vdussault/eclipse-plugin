@@ -16,6 +16,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 
 /**
  * Widgetset compilation preferences in project properties.
@@ -47,7 +48,7 @@ public class WidgetsetParametersComposite extends Composite {
 
         // get values from project or defaults if none stored
 
-        boolean enabled = VaadinPluginUtil.isWidgetsetManagedByPlugin(project);
+        boolean enabled = WidgetsetUtil.isWidgetsetManagedByPlugin(project);
         setWidgetsetManagedByPlugin(enabled);
 
         boolean suspendBuilds = WidgetsetBuildManager
@@ -202,9 +203,8 @@ public class WidgetsetParametersComposite extends Composite {
                     public void widgetSelected(SelectionEvent e) {
                         VaadinPluginUtil.createHostedModeLaunch(project);
                         // need to set as dirty for Vaadin 6.2 and earlier (need
-                        // to
-                        // recompile with OOPHM)
-                        VaadinPluginUtil.setWidgetsetDirty(project, true);
+                        // to recompile with OOPHM)
+                        WidgetsetUtil.setWidgetsetDirty(project, true);
                     }
                 });
     }

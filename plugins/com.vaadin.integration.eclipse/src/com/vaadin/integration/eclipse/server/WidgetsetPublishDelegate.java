@@ -11,7 +11,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.PublishOperation;
 import org.eclipse.wst.server.core.model.PublishTaskDelegate;
 
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 
 /**
  * A delegate that is called when publishing a project to a server, and asks
@@ -55,7 +55,7 @@ public class WidgetsetPublishDelegate extends PublishTaskDelegate {
         List<PublishOperation> tasks = new ArrayList<PublishOperation>();
         for (IProject project : projects) {
             // check if project widgetset is dirty (not compiled)
-            if (VaadinPluginUtil.isWidgetsetDirty(project)) {
+            if (WidgetsetUtil.isWidgetsetDirty(project)) {
                 tasks.add(new WidgetsetPublishTask(project));
             }
         }

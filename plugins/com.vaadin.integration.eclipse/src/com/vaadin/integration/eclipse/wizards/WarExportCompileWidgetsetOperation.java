@@ -10,7 +10,7 @@ import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
 import org.eclipse.wst.common.frameworks.datamodel.AbstractDataModelOperation;
 
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 
 public class WarExportCompileWidgetsetOperation extends
         AbstractDataModelOperation {
@@ -25,7 +25,7 @@ public class WarExportCompileWidgetsetOperation extends
                 IJ2EEComponentExportDataModelProperties.COMPONENT);
         if (component instanceof IVirtualComponent) {
             IProject project = ((IVirtualComponent) component).getProject();
-            if (VaadinPluginUtil.isWidgetsetDirty(project)) {
+            if (WidgetsetUtil.isWidgetsetDirty(project)) {
                 WidgetsetBuildManager.runWidgetSetBuildTool(project, true,
                         monitor);
             }

@@ -7,7 +7,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.server.core.model.PublishOperation;
 
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 
 /**
  * Task to compile widgetset(s) in a project, to be executed when publishing to
@@ -26,7 +26,7 @@ public class WidgetsetPublishTask extends PublishOperation {
     @Override
     public void execute(IProgressMonitor monitor, IAdaptable info)
             throws CoreException {
-        if (VaadinPluginUtil.isWidgetsetDirty(project)) {
+        if (WidgetsetUtil.isWidgetsetDirty(project)) {
             WidgetsetBuildManager.runWidgetSetBuildTool(project, true, monitor);
         }
     }

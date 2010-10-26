@@ -29,6 +29,7 @@ import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 
 // TODO rename as NewWidgetWizardPage?
 @SuppressWarnings("restriction")
@@ -176,8 +177,8 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
                     extWidgetSetNameLabel.setVisible(true);
                 }
                 // Detect widgetsets in this project and update the combo
-                IType[] wsSubtypes = VaadinPluginUtil.getWidgetSetClasses(
-                        project, null);
+                IType[] wsSubtypes = WidgetsetUtil.getWidgetSetClasses(project,
+                        null);
 
                 if (extWidgetSetNameText != null) {
                     for (IType ws : wsSubtypes) {

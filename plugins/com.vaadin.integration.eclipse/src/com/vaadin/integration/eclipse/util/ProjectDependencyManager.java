@@ -74,7 +74,7 @@ public class ProjectDependencyManager {
                     } finally {
                         WidgetsetBuildManager
                                 .internalResumeWidgetsetBuilds(project);
-                        if (VaadinPluginUtil.isWidgetsetDirty(project)) {
+                        if (WidgetsetUtil.isWidgetsetDirty(project)) {
                             WidgetsetBuildManager.runWidgetSetBuildTool(
                                     project, false, new NullProgressMonitor());
                         }
@@ -192,7 +192,7 @@ public class ProjectDependencyManager {
                         "Failed to update Vaadin jar in project", e);
             } finally {
                 WidgetsetBuildManager.internalResumeWidgetsetBuilds(project);
-                if (VaadinPluginUtil.isWidgetsetDirty(project)) {
+                if (WidgetsetUtil.isWidgetsetDirty(project)) {
                     WidgetsetBuildManager.runWidgetSetBuildTool(project, false,
                             new NullProgressMonitor());
                 }
@@ -311,7 +311,7 @@ public class ProjectDependencyManager {
                     } finally {
                         WidgetsetBuildManager
                                 .internalResumeWidgetsetBuilds(project);
-                        if (VaadinPluginUtil.isWidgetsetDirty(project)) {
+                        if (WidgetsetUtil.isWidgetsetDirty(project)) {
                             WidgetsetBuildManager.runWidgetSetBuildTool(
                                     project, false, new NullProgressMonitor());
                         }

@@ -34,6 +34,7 @@ import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.ProjectDependencyManager;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 import com.vaadin.integration.eclipse.util.data.LocalVaadinVersion;
 
 /**
@@ -149,7 +150,7 @@ public class VaadinProjectPropertyPage extends PropertyPage {
                     hasWidgetSets = hasWidgetSets(jproject);
                 }
                 if (hasWidgetSets) {
-                    VaadinPluginUtil.setWidgetsetDirty(project, true);
+                    WidgetsetUtil.setWidgetsetDirty(project, true);
                 }
             }
         } catch (IOException e) {
@@ -178,8 +179,8 @@ public class VaadinProjectPropertyPage extends PropertyPage {
                 if (useVaadinButton.getSelection()) {
                     VaadinFacetUtils.upgradeFacet(project,
                             VaadinFacetUtils.VAADIN_FACET_CURRENT);
-                    if (VaadinPluginUtil.isWidgetsetManagedByPlugin(project)) {
-                        VaadinPluginUtil.ensureWidgetsetNature(project);
+                    if (WidgetsetUtil.isWidgetsetManagedByPlugin(project)) {
+                        WidgetsetUtil.ensureWidgetsetNature(project);
                     }
                 }
 
@@ -262,13 +263,13 @@ public class VaadinProjectPropertyPage extends PropertyPage {
                 hasWidgetSets = hasWidgetSets(jproject);
             }
             if (hasWidgetSets) {
-                VaadinPluginUtil.setWidgetsetDirty(project, true);
+                WidgetsetUtil.setWidgetsetDirty(project, true);
             }
         }
 
         // this may also be true because of hosted mode launch creation or older
         // changes
-        if (VaadinPluginUtil.isWidgetsetDirty(project)) {
+        if (WidgetsetUtil.isWidgetsetDirty(project)) {
             WidgetsetBuildManager.runWidgetSetBuildTool(project, false,
                     new NullProgressMonitor());
         }
@@ -278,7 +279,7 @@ public class VaadinProjectPropertyPage extends PropertyPage {
 
     private Boolean hasWidgetSets(IJavaProject jproject) {
         try {
-            return VaadinPluginUtil.hasWidgetSets(jproject,
+            return WidgetsetUtil.hasWidgetSets(jproject,
                     new NullProgressMonitor());
         } catch (CoreException e) {
             ErrorUtil.handleBackgroundException(IStatus.WARNING,

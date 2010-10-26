@@ -59,6 +59,7 @@ import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.ProjectDependencyManager;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 import com.vaadin.integration.eclipse.wizards.NewComponentWizardPage.TEMPLATE;
 
 public class NewComponentWizard extends Wizard implements INewWizard {
@@ -162,9 +163,9 @@ public class NewComponentWizard extends Wizard implements INewWizard {
             // immediately move the widgetset package instead of needing to
             // compile widgetset first; the package is determined based on the
             // new widget's package
-            widgetSetName = VaadinPluginUtil.getWidgetSet(
-                    page.getJavaProject(), true, page.getPackageFragmentRoot(),
-                    page.getPackageText(), monitor);
+            widgetSetName = WidgetsetUtil.getWidgetSet(page.getJavaProject(),
+                    true, page.getPackageFragmentRoot(), page.getPackageText(),
+                    monitor);
         } else {
             widgetSetName = page.getWidgetSetName();
         }

@@ -27,7 +27,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 
 /**
  * Our sample handler extends AbstractHandler, an IHandler base class.
@@ -68,9 +68,9 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                             IProject project = file.getProject();
                             VaadinFacetUtils.upgradeFacet(project,
                                     VaadinFacetUtils.VAADIN_FACET_CURRENT);
-                            if (VaadinPluginUtil
+                            if (WidgetsetUtil
                                     .isWidgetsetManagedByPlugin(project)) {
-                                VaadinPluginUtil.ensureWidgetsetNature(project);
+                                WidgetsetUtil.ensureWidgetsetNature(project);
                                 compiled = compileFile(monitor, file);
                             }
                         }
@@ -84,15 +84,15 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                                             .upgradeFacet(
                                                     file.getProject(),
                                                     VaadinFacetUtils.VAADIN_FACET_CURRENT);
-                                    if (VaadinPluginUtil
+                                    if (WidgetsetUtil
                                             .isWidgetsetManagedByPlugin(file
                                                     .getProject())) {
-                                        VaadinPluginUtil
+                                        WidgetsetUtil
                                                 .ensureWidgetsetNature(file
                                                         .getProject());
                                     }
                                 }
-                                if (VaadinPluginUtil
+                                if (WidgetsetUtil
                                         .isWidgetsetManagedByPlugin(file
                                                 .getProject())) {
                                     compiled = compileFile(monitor, file);
@@ -101,9 +101,9 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                                     .isVaadinProject(project)) {
                                 VaadinFacetUtils.upgradeFacet(project,
                                         VaadinFacetUtils.VAADIN_FACET_CURRENT);
-                                if (VaadinPluginUtil
+                                if (WidgetsetUtil
                                         .isWidgetsetManagedByPlugin(project)) {
-                                    VaadinPluginUtil
+                                    WidgetsetUtil
                                             .ensureWidgetsetNature(project);
                                     IJavaProject jproject = JavaCore
                                             .create(project);
@@ -116,7 +116,7 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                     } else {
                         IFile file = getFileForEditor(activeEditor);
                         if (file != null
-                                && VaadinPluginUtil
+                                && WidgetsetUtil
                                         .isWidgetsetManagedByPlugin(file
                                                 .getProject())) {
                             compiled = compileFile(monitor, file);
@@ -166,8 +166,8 @@ public class CompileWidgetsetHandler extends AbstractHandler {
             // compile widgetsets in the containing project
             private boolean compileFile(IProgressMonitor monitor, IFile file)
                     throws CoreException, IOException, InterruptedException {
-                if (!VaadinPluginUtil.isWidgetsetManagedByPlugin(file
-                        .getProject())) {
+                if (!WidgetsetUtil
+                        .isWidgetsetManagedByPlugin(file.getProject())) {
                     return false;
                 }
                 // only one branch is executed so progress is tracked correctly

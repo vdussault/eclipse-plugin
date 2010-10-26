@@ -47,7 +47,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
+import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 
 /**
  * Manager for asking the user about triggering widgetset builds, triggering the
@@ -310,7 +310,7 @@ public class WidgetsetBuildManager {
     public static void runWidgetSetBuildTool(final IProject project,
             final boolean synchronous, final IProgressMonitor monitor) {
 
-        if (!VaadinPluginUtil.isWidgetsetManagedByPlugin(project)
+        if (!WidgetsetUtil.isWidgetsetManagedByPlugin(project)
                 || isBuildRunning(project)
                 || isWidgetsetBuildingSuspended(project)) {
             // no message, ignore request
@@ -434,17 +434,17 @@ public class WidgetsetBuildManager {
                             + project.getName());
             return;
         }
-        if (!VaadinPluginUtil.isWidgetsetManagedByPlugin(project)) {
+        if (!WidgetsetUtil.isWidgetsetManagedByPlugin(project)) {
             return;
         }
         try {
             monitor.beginTask(
                     "Compiling widgetsets in project " + project.getName(), 30);
-            List<String> widgetsets = VaadinPluginUtil.findWidgetSets(jproject,
+            List<String> widgetsets = WidgetsetUtil.findWidgetSets(jproject,
                     monitor);
             if (widgetsets.size() <= 1) {
-                String widgetset = VaadinPluginUtil.getWidgetSet(jproject,
-                        true, null, null, monitor);
+                String widgetset = WidgetsetUtil.getWidgetSet(jproject, true,
+                        null, null, monitor);
                 if (widgetset == null) {
                     final String[] tempWidgetsets = new String[] { null };
                     // ask user whether to create one and where
@@ -533,7 +533,7 @@ public class WidgetsetBuildManager {
             if (result == Dialog.OK) {
                 IPackageFragmentRoot root = dialog.getPackageFragmentRoot();
                 String wsPackage = dialog.getWidgetsetPackage();
-                return VaadinPluginUtil.getWidgetSet(jproject, true, root,
+                return WidgetsetUtil.getWidgetSet(jproject, true, root,
                         wsPackage, monitor);
             }
         } catch (JavaModelException e) {
@@ -567,7 +567,7 @@ public class WidgetsetBuildManager {
         if (!widgetsetBuildRunning.contains(key)) {
             widgetsetBuildRunning.add(key);
             try {
-                VaadinPluginUtil.compileWidgetset(jproject, widgetset, monitor);
+                WidgetsetUtil.compileWidgetset(jproject, widgetset, monitor);
 
                 // could create a hosted mode launch here if it does not exist -
                 // instead, do it on demand from the project properties as it

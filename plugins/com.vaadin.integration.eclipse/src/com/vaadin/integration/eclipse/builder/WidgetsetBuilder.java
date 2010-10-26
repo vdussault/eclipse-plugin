@@ -25,6 +25,7 @@ import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.util.VersionUtil;
+import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 
 public class WidgetsetBuilder extends IncrementalProjectBuilder {
 
@@ -51,7 +52,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                 }
             }
 
-            if (VaadinPluginUtil.isWidgetsetPackage(resource.getRawLocation())) {
+            if (WidgetsetUtil.isWidgetsetPackage(resource.getRawLocation())) {
                 switch (delta.getKind()) {
                 case IResourceDelta.ADDED:
                 case IResourceDelta.CHANGED:
@@ -68,13 +69,13 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                     if (resourcePath.equals(vaadinJarPath)) {
                         // #3869/#5214 only mark as dirty if the project has a
                         // custom widgetset
-                        if (!VaadinPluginUtil.hasWidgetSets(jproject, monitor)) {
+                        if (!WidgetsetUtil.hasWidgetSets(jproject, monitor)) {
                             break;
                         }
                     }
 
                     // compile will clear the dirty flag
-                    VaadinPluginUtil.setWidgetsetDirty(getProject(), true);
+                    WidgetsetUtil.setWidgetsetDirty(getProject(), true);
                     WidgetsetBuildManager.runWidgetSetBuildTool(getProject(),
                             false, monitor);
 
@@ -96,7 +97,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                 if (!VersionUtil.couldBeVaadinJar(resource.getName())) {
                     boolean hasWidgetset = false;
                     try {
-                        hasWidgetset = VaadinPluginUtil.hasWidgetSets(
+                        hasWidgetset = WidgetsetUtil.hasWidgetSets(
                                 JavaCore.create(getProject()),
                                 new NullProgressMonitor());
                     } catch (CoreException e) {
@@ -107,7 +108,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                                         e);
                     }
                     if (hasWidgetset) {
-                        VaadinPluginUtil.setWidgetsetDirty(getProject(), true);
+                        WidgetsetUtil.setWidgetsetDirty(getProject(), true);
                         WidgetsetBuildManager.runWidgetSetBuildTool(
                                 getProject(), false, monitor);
                     }
@@ -120,7 +121,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                 case IResourceDelta.REMOVED:
                     // removed might not arrive here as resource does not
                     // exist...
-                    VaadinPluginUtil.setWidgetsetDirty(getProject(), true);
+                    WidgetsetUtil.setWidgetsetDirty(getProject(), true);
 
                     break;
                 }
@@ -130,7 +131,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                 case IResourceDelta.ADDED:
                 case IResourceDelta.REMOVED:
                     // removed should never arrive here as does not exist...
-                    VaadinPluginUtil.setWidgetsetDirty(getProject(), true);
+                    WidgetsetUtil.setWidgetsetDirty(getProject(), true);
                     break;
                 case IResourceDelta.CHANGED:
                     // TODO only if the @ClientWidget annotation changed
@@ -257,7 +258,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
         // detect if widget set compile is needed, then run tool; the
         // "dirty flag" must be saved to file system, so that new build is not
         // needed on startup
-        if (VaadinPluginUtil.isWidgetsetDirty(getProject())) {
+        if (WidgetsetUtil.isWidgetsetDirty(getProject())) {
             WidgetsetBuildManager.runWidgetSetBuildTool(getProject(), false,
                     monitor);
         }

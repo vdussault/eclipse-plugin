@@ -345,8 +345,7 @@ public class ProjectUtil {
         }
 
         return findProjectVaadinJarPath != null
-                && VaadinPluginUtil
-                        .isWidgetsetPackage(findProjectVaadinJarPath);
+                && WidgetsetUtil.isWidgetsetPackage(findProjectVaadinJarPath);
 
     }
 

@@ -26,6 +26,7 @@ import com.vaadin.integration.eclipse.util.ProjectDependencyManager;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.util.WebXmlUtil;
+import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 import com.vaadin.integration.eclipse.util.data.LocalVaadinVersion;
 import com.vaadin.integration.eclipse.util.files.LocalFileManager;
 import com.vaadin.integration.eclipse.util.network.DownloadManager;
@@ -238,7 +239,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
                 // TODO true for 6.2 and later
                 boolean isNewWidgetSetStyleProject = true;
                 if (isNewWidgetSetStyleProject
-                        && VaadinPluginUtil.isWidgetsetManagedByPlugin(project)) {
+                        && WidgetsetUtil.isWidgetsetManagedByPlugin(project)) {
                     WidgetsetNature.addWidgetsetNature(project);
                 }
             }
