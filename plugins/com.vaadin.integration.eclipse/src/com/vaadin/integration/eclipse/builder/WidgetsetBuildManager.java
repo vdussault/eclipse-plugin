@@ -12,7 +12,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -43,10 +42,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
-import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
+import com.vaadin.integration.eclipse.util.PreferenceUtil;
 import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 
 /**
@@ -95,11 +93,8 @@ public class WidgetsetBuildManager {
             boolean result = dialog.open() == 0;
 
             // save user decision on suspending automatic builds
-            ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
-                    new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
-            prefStore.setValue(VaadinPlugin.PREFERENCES_WIDGETSET_SUSPENDED,
+            PreferenceUtil.get(project).setWidgetsetCompilationSuspended(
                     dialog.suspended);
-
             if (dialog.suspended) {
                 MessageDialog
                         .openInformation(
@@ -660,11 +655,7 @@ public class WidgetsetBuildManager {
      * @return
      */
     public static boolean isWidgetsetBuildsSuspended(final IProject project) {
-        ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
-                new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
-
-        return prefStore
-                .getBoolean(VaadinPlugin.PREFERENCES_WIDGETSET_SUSPENDED);
+        return PreferenceUtil.get(project).isWidgetsetCompilationSuspended();
     }
 
     /**
@@ -675,16 +666,15 @@ public class WidgetsetBuildManager {
      * 
      * @see #runWidgetSetBuildTool(IProject, boolean, IProgressMonitor)
      * 
+     *      Does not persist the suspend value.
+     * 
      * @param project
      * @param suspend
      */
     public static void setWidgetsetBuildsSuspended(IProject project,
             boolean suspend) {
-        ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
-                new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
-
-        prefStore.setValue(VaadinPlugin.PREFERENCES_WIDGETSET_SUSPENDED,
-                suspend);
+        PreferenceUtil preferences = PreferenceUtil.get(project);
+        preferences.setWidgetsetCompilationSuspended(suspend);
 
         // make sure we don't get stuck in an inconsistent state
         projectWidgetsetBuildPending.remove(project);

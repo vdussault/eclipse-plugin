@@ -3,7 +3,6 @@ package com.vaadin.integration.eclipse;
 import java.io.IOException;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -12,7 +11,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.j2ee.web.componentcore.util.WebArtifactEdit;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
@@ -22,6 +20,7 @@ import com.vaadin.integration.eclipse.configuration.VaadinFacetInstallDataModelP
 import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.GaeConfigurationUtil;
 import com.vaadin.integration.eclipse.util.PortletConfigurationUtil;
+import com.vaadin.integration.eclipse.util.PreferenceUtil;
 import com.vaadin.integration.eclipse.util.ProjectDependencyManager;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
@@ -108,13 +107,10 @@ public class CoreFacetInstallDelegate implements IDelegate,
             /*
              * Save the information about project type to the project settings
              */
-            ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
-                    new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
-            prefStore.setValue(VaadinPlugin.PREFERENCES_PROJECT_TYPE_GAE,
-                    gaeProject);
-
             try {
-                prefStore.save();
+                PreferenceUtil preferences = PreferenceUtil.get(project);
+                preferences.setProjectTypeGae(gaeProject);
+                preferences.persist();
             } catch (IOException e) {
                 throw ErrorUtil.newCoreException(
                         "Failed to save project preferences", e);

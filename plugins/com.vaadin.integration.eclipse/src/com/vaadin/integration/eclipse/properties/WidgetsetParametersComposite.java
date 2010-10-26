@@ -1,7 +1,6 @@
 package com.vaadin.integration.eclipse.properties;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -11,10 +10,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
-import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
+import com.vaadin.integration.eclipse.util.PreferenceUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 
@@ -43,9 +41,6 @@ public class WidgetsetParametersComposite extends Composite {
     public void setProject(IProject project) {
         this.project = project;
 
-        ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
-                new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
-
         // get values from project or defaults if none stored
 
         boolean enabled = WidgetsetUtil.isWidgetsetManagedByPlugin(project);
@@ -56,14 +51,12 @@ public class WidgetsetParametersComposite extends Composite {
 
         suspendAutomaticBuilds.setSelection(suspendBuilds);
 
-        boolean verboseOutput = prefStore
-                .contains(VaadinPlugin.PREFERENCES_WIDGETSET_VERBOSE) ? prefStore
-                .getBoolean(VaadinPlugin.PREFERENCES_WIDGETSET_VERBOSE) : false;
+        PreferenceUtil preferences = PreferenceUtil.get(project);
+        boolean verboseOutput = preferences.isWidgetsetCompilationVerboseMode();
 
         verboseCompilation.setSelection(verboseOutput);
 
-        String style = prefStore
-                .getString(VaadinPlugin.PREFERENCES_WIDGETSET_STYLE);
+        String style = preferences.getWidgetsetCompilationStyle();
         if ("DETAILED".equals(style)) {
             styleCombo.setText(DETAILED_LABEL);
         } else if ("PRETTY".equals(style)) {
@@ -74,11 +67,7 @@ public class WidgetsetParametersComposite extends Composite {
             styleCombo.setText(OBF_LABEL);
         }
 
-        String parallelism = prefStore
-                .getString(VaadinPlugin.PREFERENCES_WIDGETSET_PARALLELISM);
-        if (parallelism == null) {
-            parallelism = "";
-        }
+        String parallelism = preferences.getWidgetsetCompilationParallelism();
         parallelismCombo.setText(parallelism);
     }
 

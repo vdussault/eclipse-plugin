@@ -96,26 +96,11 @@ public class WidgetsetUtil {
         final long start = new Date().getTime();
 
         try {
-            ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
-                    new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
+            PreferenceUtil preferences = PreferenceUtil.get(project);
+            boolean verbose = preferences.isWidgetsetCompilationVerboseMode();
 
-            boolean verbose = prefStore
-                    .contains(VaadinPlugin.PREFERENCES_WIDGETSET_VERBOSE) ? prefStore
-                    .getBoolean(VaadinPlugin.PREFERENCES_WIDGETSET_VERBOSE)
-                    : false;
-
-            final Long estimatedCompilationTime;
-            if (prefStore
-                    .contains(VaadinPlugin.PREFERENCES_WIDGETSET_COMPILATION_ETA)) {
-                estimatedCompilationTime = prefStore
-                        .getLong(VaadinPlugin.PREFERENCES_WIDGETSET_COMPILATION_ETA);
-            } else {
-                /**
-                 * An estimation of widgetset compilation time in millis. Will
-                 * be updated after each compilation.
-                 */
-                estimatedCompilationTime = 120 * 1000l;
-            }
+            final long estimatedCompilationTime = preferences
+                    .getEstimatedCompilationTime();
 
             // TODO should report progress more correctly - unknown?
             monitor.beginTask("Compiling widgetset " + moduleName
@@ -185,8 +170,7 @@ public class WidgetsetUtil {
             IPath projectRelativePath = wsDir.getProjectRelativePath();
             args.add(projectRelativePath.toString());
 
-            String style = prefStore
-                    .getString(VaadinPlugin.PREFERENCES_WIDGETSET_STYLE);
+            String style = preferences.getWidgetsetCompilationStyle();
             if ("DRAFT".equals(style)) {
                 args.add("-style");
                 args.add("PRETTY");
@@ -196,8 +180,8 @@ public class WidgetsetUtil {
                 args.add(style);
             }
 
-            String parallelism = prefStore
-                    .getString(VaadinPlugin.PREFERENCES_WIDGETSET_PARALLELISM);
+            String parallelism = preferences
+                    .getWidgetsetCompilationParallelism();
             if ("".equals(parallelism)) {
                 args.add("-localWorkers");
                 args.add("" + Runtime.getRuntime().availableProcessors());
@@ -329,10 +313,9 @@ public class WidgetsetUtil {
                 wsDir.refreshLocal(IResource.DEPTH_INFINITE,
                         new SubProgressMonitor(monitor, 1));
                 setWidgetsetDirty(project, false);
-                prefStore.setValue(
-                        VaadinPlugin.PREFERENCES_WIDGETSET_COMPILATION_ETA,
-                        new Date().getTime() - start);
-                prefStore.save();
+                preferences.setWidgetsetCompilationTimeEstimate(new Date()
+                        .getTime() - start);
+                preferences.persist();
 
                 if (!verbose) {
                     // if verbose, the output of the compiler is sufficient
@@ -626,16 +609,14 @@ public class WidgetsetUtil {
             // from this point on, default to dirty
             result = true;
 
-            ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
-                    new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
-            if (prefStore.contains(VaadinPlugin.PREFERENCES_WIDGETSET_DIRTY)) {
-                return prefStore
-                        .getBoolean(VaadinPlugin.PREFERENCES_WIDGETSET_DIRTY);
-            } else {
+            PreferenceUtil preferences = PreferenceUtil.get(project);
+            Boolean dirty = preferences.isWidgetsetDirty();
+            if (dirty == null) {
                 result = hasWidgetSets(JavaCore.create(project), monitor);
                 setWidgetsetDirty(project, result);
-                return result;
+                dirty = result;
             }
+            return dirty;
         } catch (CoreException e) {
             return result;
         }
@@ -652,20 +633,18 @@ public class WidgetsetUtil {
      * @param dirty
      */
     public static void setWidgetsetDirty(IProject project, boolean dirty) {
-        ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
-                new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
-
         // save as string so that the value false does not result in the entry
         // being removed - we use three states: true, false and absent
-        prefStore.setValue(VaadinPlugin.PREFERENCES_WIDGETSET_DIRTY,
-                Boolean.toString(dirty));
+        PreferenceUtil preferences = PreferenceUtil.get(project);
+        preferences.setWidgetsetDirty(dirty);
         try {
-            prefStore.save();
+            preferences.persist();
         } catch (IOException e) {
             ErrorUtil.handleBackgroundException(IStatus.WARNING,
                     "Could not save widgetset compilation state for project "
                             + project.getName(), e);
         }
+
     }
 
     /**

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -25,12 +24,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.dialogs.PropertyPage;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
-import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
+import com.vaadin.integration.eclipse.util.PreferenceUtil;
 import com.vaadin.integration.eclipse.util.ProjectDependencyManager;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
@@ -93,9 +91,7 @@ public class VaadinProjectPropertyPage extends PropertyPage {
 
         try {
 
-            ScopedPreferenceStore prefStore = new ScopedPreferenceStore(
-                    new ProjectScope(project), VaadinPlugin.PLUGIN_ID);
-
+            PreferenceUtil preferences = PreferenceUtil.get(project);
             // save widgetset compilation parameters
 
             boolean suspended = widgetsetComposite
@@ -104,17 +100,14 @@ public class VaadinProjectPropertyPage extends PropertyPage {
                     suspended);
 
             boolean verbose = widgetsetComposite.isVerboseOutput();
-            boolean oldVerbose = prefStore
-                    .getBoolean(VaadinPlugin.PREFERENCES_WIDGETSET_VERBOSE);
-            if (verbose != oldVerbose) {
-                prefStore.setValue(VaadinPlugin.PREFERENCES_WIDGETSET_VERBOSE,
-                        verbose);
+            boolean changed = preferences
+                    .setWidgetsetCompilationVerboseMode(verbose);
+            if (changed) {
                 widgetsetDirty = true;
             }
 
             String style = widgetsetComposite.getCompilationStyle();
-            String oldStyle = prefStore
-                    .getString(VaadinPlugin.PREFERENCES_WIDGETSET_STYLE);
+            String oldStyle = preferences.getWidgetsetCompilationStyle();
             // do not store the default value OBF, but handle it if stored
             if ("OBF".equals(oldStyle)) {
                 oldStyle = "";
@@ -122,27 +115,22 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             if ("OBF".equals(style)) {
                 style = "";
             }
-            if (!style.equals(oldStyle)) {
-                prefStore.setValue(VaadinPlugin.PREFERENCES_WIDGETSET_STYLE,
-                        style);
+            changed = preferences.setWidgetsetCompilationStyle(style);
+            if (changed) {
                 widgetsetDirty = true;
             }
 
             String parallelism = widgetsetComposite.getParallelism();
-            // empty string if not set
-            String oldParallelism = prefStore
-                    .getString(VaadinPlugin.PREFERENCES_WIDGETSET_PARALLELISM);
-            if (!parallelism.equals(oldParallelism)) {
-                prefStore.setValue(
-                        VaadinPlugin.PREFERENCES_WIDGETSET_PARALLELISM,
-                        parallelism);
+            changed = preferences
+                    .setWidgetsetCompilationParallelism(parallelism);
+            if (changed) {
                 widgetsetDirty = true;
             }
 
             // if anything changed, mark widgetset as dirty and ask about
             // recompiling it
             if (widgetsetDirty) {
-                prefStore.save();
+                preferences.persist();
 
                 // will also be saved later, here in case Vaadin version
                 // replacement fails
