@@ -46,7 +46,10 @@ public class WidgetsetPublishDelegate extends PublishTaskDelegate {
             // if (moduleKind != ServerBehaviourDelegate.NO_CHANGE
             // || kind == IServer.PUBLISH_CLEAN) {
             for (IModule module : moduleArray) {
-                projects.add(module.getProject());
+                IProject p = module.getProject();
+                if (p != null) {
+                    projects.add(p);
+                }
             }
             // }
             // }
