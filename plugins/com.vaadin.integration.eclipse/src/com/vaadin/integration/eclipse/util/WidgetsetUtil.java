@@ -42,23 +42,18 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.j2ee.web.componentcore.util.WebArtifactEdit;
-import org.eclipse.ui.console.ConsolePlugin;
-import org.eclipse.ui.console.IConsole;
-import org.eclipse.ui.console.IConsoleManager;
-import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
 import com.vaadin.integration.eclipse.builder.WidgetsetNature;
+import com.vaadin.integration.eclipse.consoles.CompileWidgetsetConsole;
 import com.vaadin.integration.eclipse.wizards.DirectoryManifestProvider;
 
 public class WidgetsetUtil {
 
     public static final String DEFAULT_WIDGET_SET_NAME = "com.vaadin.terminal.gwt.DefaultWidgetSet";
-
-    private static final String WS_COMPILATION_CONSOLE_NAME = "Vaadin Widgetset Compilation";
 
     /**
      * Helper method to compile a single widgetset.
@@ -92,6 +87,7 @@ public class WidgetsetUtil {
         }
 
         final long start = new Date().getTime();
+        CompileWidgetsetConsole console = CompileWidgetsetConsole.get();
 
         try {
             PreferenceUtil preferences = PreferenceUtil.get(project);
@@ -253,37 +249,17 @@ public class WidgetsetUtil {
 
             t.start();
 
-            ConsolePlugin plugin = ConsolePlugin.getDefault();
-            IConsoleManager conMan = plugin.getConsoleManager();
-            IConsole[] existing = conMan.getConsoles();
-            MessageConsole myConsole = null;
-            for (int i = 0; i < existing.length; i++) {
-                if (WS_COMPILATION_CONSOLE_NAME.equals(existing[i].getName())) {
-                    myConsole = (MessageConsole) existing[i];
-                }
-            }
-            // no console found, so create a new one
-            if (myConsole == null) {
-                myConsole = new MessageConsole(WS_COMPILATION_CONSOLE_NAME,
-                        null);
-                conMan.addConsoles(new IConsole[] { myConsole });
-            }
+            console.setCompilationProcess(exec);
+            console.clearConsole();
 
-            myConsole.clearConsole();
+            MessageConsoleStream newMessageStream = console.newMessageStream();
 
-            MessageConsoleStream newMessageStream = myConsole
-                    .newMessageStream();
-
+            console.activate();
+            newMessageStream.println();
             if (verbose) {
-                myConsole.activate();
-
-                newMessageStream.println();
                 newMessageStream.println("Executing compiler with parameters "
                         + args);
             } else {
-                myConsole.activate();
-
-                newMessageStream.println();
                 newMessageStream.println("Compiling widgetset " + moduleName);
             }
 
@@ -331,6 +307,8 @@ public class WidgetsetUtil {
             }
         } finally {
             monitor.done();
+            console.setCompilationProcess(null);
+
         }
     }
 
