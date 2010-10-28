@@ -98,7 +98,7 @@ public class PreferenceUtil {
 
     public String getWidgetsetCompilationStyle() {
         if (!prefStore.contains(PREFERENCES_WIDGETSET_STYLE)) {
-            return "";
+            return "OBF";
         } else {
             return prefStore.getString(PREFERENCES_WIDGETSET_STYLE);
         }
@@ -113,6 +113,14 @@ public class PreferenceUtil {
      */
     public boolean setWidgetsetCompilationStyle(String style) {
         String oldValue = getWidgetsetCompilationStyle();
+        if (style == null || "".equals(style)) {
+            // Convert "" -> "OBF" to be more explicit
+            style = "OBF";
+        }
+        if (oldValue == null || "".equals(oldValue)) {
+            // Convert OBF -> "" as it is the default.
+            oldValue = "OBF";
+        }
         prefStore.setValue(PREFERENCES_WIDGETSET_STYLE, style);
         return !equals(oldValue, style);
 

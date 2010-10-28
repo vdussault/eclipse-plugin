@@ -107,14 +107,6 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             }
 
             String style = widgetsetComposite.getCompilationStyle();
-            String oldStyle = preferences.getWidgetsetCompilationStyle();
-            // do not store the default value OBF, but handle it if stored
-            if ("OBF".equals(oldStyle)) {
-                oldStyle = "";
-            }
-            if ("OBF".equals(style)) {
-                style = "";
-            }
             changed = preferences.setWidgetsetCompilationStyle(style);
             if (changed) {
                 widgetsetDirty = true;

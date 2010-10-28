@@ -169,7 +169,7 @@ public class WidgetsetUtil {
                 args.add("-style");
                 args.add("PRETTY");
                 args.add("-draftCompile");
-            } else if (!"".equals(style)) {
+            } else if (!"OBF".equals(style)) {
                 args.add("-style");
                 args.add(style);
             }
