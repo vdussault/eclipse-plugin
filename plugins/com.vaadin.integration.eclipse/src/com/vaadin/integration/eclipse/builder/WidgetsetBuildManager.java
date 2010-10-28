@@ -93,8 +93,17 @@ public class WidgetsetBuildManager {
             boolean result = dialog.open() == 0;
 
             // save user decision on suspending automatic builds
-            PreferenceUtil.get(project).setWidgetsetCompilationSuspended(
-                    dialog.suspended);
+            PreferenceUtil preferences = PreferenceUtil.get(project);
+            if (preferences.setWidgetsetCompilationSuspended(dialog.suspended)) {
+                try {
+                    preferences.persist();
+                } catch (IOException e) {
+                    ErrorUtil
+                            .handleBackgroundException(
+                                    "Error storing widgetset compilation suspend information",
+                                    e);
+                }
+            }
             if (dialog.suspended) {
                 MessageDialog
                         .openInformation(
@@ -669,8 +678,6 @@ public class WidgetsetBuildManager {
      * 
      * @see #runWidgetSetBuildTool(IProject, boolean, IProgressMonitor)
      * 
-     *      Does not persist the suspend value.
-     * 
      * @param project
      * @param suspend
      */
@@ -678,7 +685,12 @@ public class WidgetsetBuildManager {
             boolean suspend) {
         PreferenceUtil preferences = PreferenceUtil.get(project);
         preferences.setWidgetsetCompilationSuspended(suspend);
-
+        try {
+            preferences.persist();
+        } catch (IOException e) {
+            ErrorUtil.handleBackgroundException(
+                    "Error persisting widgetset build suspended state", e);
+        }
         // make sure we don't get stuck in an inconsistent state
         projectWidgetsetBuildPending.remove(project);
     }
