@@ -118,7 +118,7 @@ public class PreferenceUtil {
             style = "OBF";
         }
         if (oldValue == null || "".equals(oldValue)) {
-            // Convert OBF -> "" as it is the default.
+            // Convert ""-> "OBF" for backwards compatibility.
             oldValue = "OBF";
         }
         prefStore.setValue(PREFERENCES_WIDGETSET_STYLE, style);
