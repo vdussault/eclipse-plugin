@@ -21,7 +21,7 @@ public class WidgetSetMoveParticipant extends
     @Override
     public Change createChange(IProgressMonitor pm) throws CoreException,
             OperationCanceledException {
-        return refactorer.createChange(pm);
+        return refactorer.createChange(this, pm);
     }
 
     @Override

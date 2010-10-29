@@ -25,7 +25,7 @@ public class WidgetSetRenameParticipant extends
             return null;
         }
 
-        return refactorer.createChange(pm);
+        return refactorer.createChange(this, pm);
     }
 
     @Override

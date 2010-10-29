@@ -25,7 +25,7 @@ public class WebContextRenameParticipant extends
             return null;
         }
 
-        return refactorer.createChange(pm);
+        return refactorer.createChange(this, pm);
     }
 
     @Override

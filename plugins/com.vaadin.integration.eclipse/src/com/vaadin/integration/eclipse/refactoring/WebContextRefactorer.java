@@ -9,6 +9,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.search.core.text.TextSearchEngine;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
@@ -26,7 +27,8 @@ public class WebContextRefactorer extends VaadinTextFileRefactorer {
      * createChange(org.eclipse.core.runtime.IProgressMonitor)
      */
     @Override
-    public Change createChange(IProgressMonitor pm) throws CoreException,
+    public Change createChange(RefactoringParticipant refactoringParticipant,
+            IProgressMonitor pm) throws CoreException,
             OperationCanceledException {
         if (getSourceProject() == null) {
             return null;
@@ -40,11 +42,13 @@ public class WebContextRefactorer extends VaadinTextFileRefactorer {
         // TODO could also handle widgetset XML file name change - other
         // refactoring API?
 
-        // TextChange change = getTextChange(webXml);
-        // if (change == null) {
-        TextChange change = new TextFileChange("web.xml", webXml);
-        change.setEdit(new MultiTextEdit());
-        // }
+        TextChange change = refactoringParticipant.getTextChange(webXml);
+        boolean createdChange = false;
+        if (change == null) {
+            createdChange = true;
+            change = new TextFileChange("web.xml", webXml);
+            change.setEdit(new MultiTextEdit());
+        }
 
         TextSearchEngine textSearchEngine = TextSearchEngine.create();
         IFile[] scope = new IFile[] { webXml };
@@ -93,7 +97,7 @@ public class WebContextRefactorer extends VaadinTextFileRefactorer {
 
         }
 
-        if (change.getEdit().getChildrenSize() > 0) {
+        if (createdChange && change.getEdit().getChildrenSize() > 0) {
             return change;
         } else {
             return null;

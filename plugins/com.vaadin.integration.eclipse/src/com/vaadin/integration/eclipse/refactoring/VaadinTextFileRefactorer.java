@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.search.core.text.TextSearchMatchAccess;
 import org.eclipse.search.core.text.TextSearchRequestor;
 import org.eclipse.text.edits.ReplaceEdit;
@@ -35,7 +36,8 @@ public abstract class VaadinTextFileRefactorer {
      * org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant#
      * createChange(org.eclipse.core.runtime.IProgressMonitor)
      */
-    public abstract Change createChange(IProgressMonitor pm)
+    public abstract Change createChange(
+            RefactoringParticipant refactoringParticipant, IProgressMonitor pm)
             throws CoreException, OperationCanceledException;
 
     /**

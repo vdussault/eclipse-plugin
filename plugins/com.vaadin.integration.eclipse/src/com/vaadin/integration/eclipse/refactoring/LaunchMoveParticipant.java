@@ -21,7 +21,7 @@ public class LaunchMoveParticipant extends
     @Override
     public Change createChange(IProgressMonitor pm) throws CoreException,
             OperationCanceledException {
-        return refactorer.createChange(pm);
+        return refactorer.createChange(this, pm);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class LaunchMoveParticipant extends
         if (!getArguments().getUpdateReferences()) {
             return false;
         }
-
+        
         return refactorer.initializeMove(element, getArguments()
                 .getDestination());
     }

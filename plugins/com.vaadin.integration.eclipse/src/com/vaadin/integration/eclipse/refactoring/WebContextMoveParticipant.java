@@ -21,7 +21,7 @@ public class WebContextMoveParticipant extends
     @Override
     public Change createChange(IProgressMonitor pm) throws CoreException,
             OperationCanceledException {
-        return refactorer.createChange(pm);
+        return refactorer.createChange(this, pm);
     }
 
     @Override

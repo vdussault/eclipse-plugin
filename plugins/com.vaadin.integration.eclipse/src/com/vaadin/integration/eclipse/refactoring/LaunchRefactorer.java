@@ -15,6 +15,7 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.search.core.text.TextSearchEngine;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
@@ -32,7 +33,8 @@ public class LaunchRefactorer extends VaadinTextFileRefactorer {
      */
     @SuppressWarnings("deprecation")
     @Override
-    public Change createChange(IProgressMonitor pm) throws CoreException,
+    public Change createChange(RefactoringParticipant refactoringParticipant,
+            IProgressMonitor pm) throws CoreException,
             OperationCanceledException {
         if (getSourceProject() == null) {
             return null;
@@ -80,6 +82,10 @@ public class LaunchRefactorer extends VaadinTextFileRefactorer {
     private Change createLaunchChange(IFile launchFile, IProgressMonitor pm) {
         // update the widgetset path if the package name changed, treating the
         // launch as a text file
+
+        // TODO should use RefactoringParticipant,getTextChange() if it is
+        // possible that multiple refactoring participants change the same
+        // launch configuration.
 
         // TODO does not handle class name change nor widgetset XML name change
 
