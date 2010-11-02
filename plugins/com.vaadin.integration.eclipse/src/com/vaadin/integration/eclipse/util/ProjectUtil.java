@@ -175,10 +175,12 @@ public class ProjectUtil {
             // find Vaadin JAR on the classpath
             IPath vaadinJarPath = ProjectUtil
                     .findProjectVaadinJarPath(jproject);
-            String gwtVersion = VersionUtil
-                    .getRequiredGWTVersionForVaadinJar(vaadinJarPath);
-            if (gwtVersion != null) {
-                return gwtVersion;
+            if (vaadinJarPath != null) {
+                String gwtVersion = VersionUtil
+                        .getRequiredGWTVersionForVaadinJar(vaadinJarPath);
+                if (gwtVersion != null) {
+                    return gwtVersion;
+                }
             }
         } catch (IOException ex) {
             ErrorUtil.handleBackgroundException(IStatus.WARNING,

@@ -148,7 +148,7 @@ public class VersionUtil {
             throws IOException {
 
         File vaadinJarFile = vaadinJarPath.toFile();
-        if (!vaadinJarFile.exists()) {
+        if (vaadinJarFile == null || !vaadinJarFile.exists()) {
             return null;
         }
 
