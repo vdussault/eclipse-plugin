@@ -526,14 +526,17 @@ public class VaadinPluginUtil {
      */
     public static void createFolders(IFolder folder, IProgressMonitor monitor)
             throws CoreException {
+        boolean local = true;
+
         if (folder.exists()) {
             return;
         }
+
         if (!folder.getParent().exists()) {
             createFolders((IFolder) folder.getParent(), monitor);
         }
 
-        folder.create(true, false, monitor);
+        folder.create(true, local, monitor);
 
     }
 
