@@ -212,10 +212,34 @@ public class ProjectUtil {
     }
 
     /**
-     * Checks which Vaadin version is in use in the project. This optionally
-     * also checks the classpath for Vaadin JARs and deduces the version from
-     * the meta-data inside the JAR if no official Vaadin JAR is found in
-     * WEB-INF/lib.
+     * Checks which Vaadin version is in use in the project. This uses
+     * {@link #getVaadinLibraryInProject(IProject, boolean)} to find the Vaadin
+     * jar and gets the version from the metadata in the jar.
+     * 
+     * @param project
+     * @param useClasspath
+     *            true to also search the classpath if no Vaadin JAR is found in
+     *            WEB-INF/lib
+     * @return The version of the Vaadin JAR in the project. Returns null if no
+     *         Vaadin JAR was found or if the version number could not be
+     *         determined.
+     * @throws CoreException
+     */
+    public static String getVaadinLibraryVersion(IProject project,
+            boolean useClasspath) throws CoreException {
+        IPath vaadinLibrary = getVaadinLibraryInProject(project, useClasspath);
+        if (vaadinLibrary != null) {
+            return VersionUtil.getVaadinVersionFromJar(vaadinLibrary);
+        }
+
+        return null;
+    }
+
+    /**
+     * Locates the Vaadin JAR in the project. Searches WEB-INF/lib for a Vaadin
+     * JAR and optionally (useClasspath parameter) also the full classpath.
+     * 
+     * A file is considered a Vaadin JAR if it contains the correct metadata
      * 
      * @param project
      * @param useClasspath
@@ -226,7 +250,7 @@ public class ProjectUtil {
      *         not be determined.
      * @throws CoreException
      */
-    public static String getVaadinLibraryVersion(IProject project,
+    public static IPath getVaadinLibraryInProject(IProject project,
             boolean useClasspath) throws CoreException {
         IFolder lib = ProjectUtil.getWebInfLibFolder(project);
         if (lib.exists()) {
@@ -234,7 +258,8 @@ public class ProjectUtil {
             for (IResource resource : files) {
                 // is it a Vaadin JAR?
                 if (resource instanceof IFile) {
-                    if (VersionUtil.couldBeOfficialVaadinJar(resource.getName())) {
+                    if (VersionUtil
+                            .couldBeOfficialVaadinJar(resource.getName())) {
                         // Name matches vaadin jar, still check for version from
                         // the jar itself
 
@@ -242,7 +267,7 @@ public class ProjectUtil {
                                 .getVaadinVersionFromJar(resource.getFullPath());
 
                         if (version != null) {
-                            return version;
+                            return resource.getFullPath();
                         }
                     }
                 }
@@ -252,7 +277,10 @@ public class ProjectUtil {
         if (useClasspath) {
             IJavaProject jproject = JavaCore.create(project);
             IPath resource = ProjectUtil.findProjectVaadinJarPath(jproject);
-            return VersionUtil.getVaadinVersionFromJar(resource);
+            String version = VersionUtil.getVaadinVersionFromJar(resource);
+            if (version != null) {
+                return resource;
+            }
         }
 
         return null;
@@ -365,4 +393,23 @@ public class ProjectUtil {
         }
 
     }
+
+    /**
+     * Checks if the given path is inside the root folder of the given project.
+     * 
+     * @param project
+     * @param vaadinLibrary
+     * @return
+     * @throws CoreException
+     */
+    public static boolean isInProject(IProject project, IPath path)
+            throws CoreException {
+        IPath root = project.getLocation();
+        if (root.isPrefixOf(path)) {
+            return true;
+        }
+
+        return false;
+    }
+
 }

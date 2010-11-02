@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -32,6 +33,7 @@ import org.eclipse.ui.dialogs.AbstractElementListSelectionDialog;
 
 import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
+import com.vaadin.integration.eclipse.util.VersionUtil;
 import com.vaadin.integration.eclipse.util.data.AbstractVaadinVersion;
 import com.vaadin.integration.eclipse.util.data.DownloadableVaadinVersion;
 import com.vaadin.integration.eclipse.util.data.LocalVaadinVersion;
@@ -49,6 +51,7 @@ public class VaadinVersionComposite extends Composite {
     private Map<String, LocalVaadinVersion> versionMap = new HashMap<String, LocalVaadinVersion>();
     private Button downloadButton;
     private IProject project = null;
+    private VersionSelectionChangeListener versionSelectionListener;
 
     private static class DownloadVaadinDialog extends
             AbstractElementListSelectionDialog {
@@ -249,37 +252,67 @@ public class VaadinVersionComposite extends Composite {
     }
 
     private void updateVersionCombo() {
+        versionCombo.setEnabled(true);
+        downloadButton.setEnabled(true);
         try {
+
             versionCombo.removeAll();
+            // Always allow empty selection which removes Vaadin from the
+            // project
+            versionCombo.add("");
             versionMap.clear();
             for (LocalVaadinVersion version : LocalFileManager
                     .getLocalVaadinJarVersions()) {
                 versionMap.put(version.getVersionNumber(), version);
                 versionCombo.add(version.getVersionNumber());
             }
+            versionCombo.setText("");
+
             try {
                 // select current version (if any)
-                if (project != null) {
-                    String currentVaadinVersionString = ProjectUtil
-                            .getVaadinLibraryVersion(project, true);
-                    if (currentVaadinVersionString != null) {
-                        // #3863 add custom Vaadin version in project if any
-                        if (!versionMap.containsKey(currentVaadinVersionString)) {
+                if (project == null) {
+                    return;
+                }
 
-                            // Map to a fake LocalVersion so version number can
-                            // be compared and local version is not replaced
-                            // unless the selection is changed
-                            LocalVaadinVersion projectVaadinVersion = new LocalVaadinVersion(
-                                    FileType.VAADIN_RELEASE,
-                                    currentVaadinVersionString, null);
-                            versionMap.put(currentVaadinVersionString,
-                                    projectVaadinVersion);
-                            // Add the string to the combo box as first
-                            // (selected)
-                            versionCombo.add(currentVaadinVersionString, 0);
-                        }
-                        versionCombo.setText(currentVaadinVersionString);
-                    }
+                IPath vaadinLibrary = ProjectUtil.getVaadinLibraryInProject(
+                        project, true);
+                if (vaadinLibrary == null) {
+                    return;
+                }
+
+                String currentVaadinVersionString = VersionUtil
+                        .getVaadinVersionFromJar(vaadinLibrary);
+                if (currentVaadinVersionString == null) {
+                    return;
+                }
+
+                // There is a version of the Vaadin jar in the project. It might
+                // be in WEB-INF/lib or somewhere else on the classpath.
+
+                // Ensure the version is listed, it might be a custom jar or it
+                // might have been removed from the local store for instance
+                // when Eclipse was upgraded.
+
+                LocalVaadinVersion projectVaadinVersion = new LocalVaadinVersion(
+                        FileType.VAADIN_RELEASE, currentVaadinVersionString,
+                        vaadinLibrary);
+
+                // Always show current version as "6.4.8 (vaadin-*.jar)"
+                String comboboxString = currentVaadinVersionString + " ("
+                        + projectVaadinVersion.getJarFilename() + ")";
+
+                versionMap.put(comboboxString, projectVaadinVersion);
+                // Add the string to the combo box as first
+                // ("" becomes second)
+                versionCombo.add(comboboxString, 0);
+                versionCombo.setText(comboboxString);
+
+                if (!ProjectUtil.isInProject(project, vaadinLibrary)) {
+                    // If the Vaadin JAR is outside the project we just
+                    // show it to the user. We really do not want to delete
+                    // files outside the project anyway.
+                    versionCombo.setEnabled(false);
+                    downloadButton.setEnabled(false);
                 }
             } catch (CoreException ce) {
                 // ignore if cannot select current version
@@ -325,6 +358,7 @@ public class VaadinVersionComposite extends Composite {
 
                     updateVersionCombo();
                     versionCombo.setText(version.getVersionNumber());
+                    fireVersionSelectionChanged();
                 }
             }
         } catch (InterruptedException e) {
@@ -360,6 +394,15 @@ public class VaadinVersionComposite extends Composite {
         return newVaadinVersion;
     }
 
+    /**
+     * Returns the text for the selected item in the version combo box.
+     * 
+     * @return The string shown in the combo box. Never null.
+     */
+    public String getSelectedVersionString() {
+        return versionCombo.getText();
+    }
+
     public void setProject(IProject project) {
         this.project = project;
 
@@ -372,14 +415,8 @@ public class VaadinVersionComposite extends Composite {
         selectLatestLocalVersion();
     }
 
-    public void enablePluginManagedVaadin(boolean useVaadin) {
-        versionCombo.setEnabled(useVaadin);
-        downloadButton.setEnabled(useVaadin);
-    }
-
     protected void updateView() {
         updateVersionCombo();
-        enablePluginManagedVaadin(true);
     }
 
     protected void selectLatestLocalVersion() {
@@ -399,4 +436,26 @@ public class VaadinVersionComposite extends Composite {
                             e);
         }
     }
+
+    public interface VersionSelectionChangeListener {
+        public void versionChanged();
+    }
+
+    public void setVersionSelectionListener(
+            final VersionSelectionChangeListener listener) {
+        versionSelectionListener = listener;
+        versionCombo.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                fireVersionSelectionChanged();
+            }
+        });
+    }
+
+    protected void fireVersionSelectionChanged() {
+        if (versionSelectionListener != null) {
+            versionSelectionListener.versionChanged();
+        }
+    }
+
 }

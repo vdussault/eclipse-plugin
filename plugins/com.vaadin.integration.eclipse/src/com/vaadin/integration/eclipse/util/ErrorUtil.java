@@ -31,6 +31,16 @@ public class ErrorUtil {
     }
 
     /**
+     * Handle an error in a background thread or other non-UI context. The
+     * handling primarily consists of logging the error.
+     * 
+     * @param message
+     */
+    public static void handleBackgroundError(String message) {
+        handleBackgroundException(message, null);
+    }
+
+    /**
      * Handle an exception in a background thread or other non-UI context. The
      * handling primarily consists of tracing the exception.
      * 
@@ -43,8 +53,12 @@ public class ErrorUtil {
             Throwable t) {
         // TODO trace the exception and do any other background exception
         // handling
-        IStatus status = new Status(severity, VaadinPlugin.PLUGIN_ID, message,
-                t);
+        IStatus status;
+        if (t == null) {
+            status = new Status(severity, VaadinPlugin.PLUGIN_ID, message);
+        } else {
+            status = new Status(severity, VaadinPlugin.PLUGIN_ID, message, t);
+        }
         VaadinPlugin.getInstance().getLog().log(status);
         // ex.printStackTrace();
     }

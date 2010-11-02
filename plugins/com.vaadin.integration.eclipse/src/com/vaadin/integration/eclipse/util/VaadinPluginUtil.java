@@ -178,37 +178,6 @@ public class VaadinPluginUtil {
     }
 
     /**
-     * Returns true if the Vaadin JAR should be managed (upgraded etc.) by the
-     * plugin. If the project has a Vaadin JAR on the classpath outside of the
-     * standard location (WEB-INF/lib), or if the project is a Liferay project,
-     * the Vaadin JAR is not be managed by the plugin.
-     * 
-     * @param project
-     * @return true if the plugin should upgrade Vaadin in the project etc.
-     */
-    public static boolean isVaadinJarManagedByPlugin(IProject project) {
-        if (project == null) {
-            return false;
-        }
-        IFolder lib;
-        try {
-            lib = ProjectUtil.getWebInfLibFolder(project);
-            if (!lib.exists()) {
-                return false;
-            }
-        } catch (CoreException e) {
-            ErrorUtil.handleBackgroundException(e);
-            return false;
-        }
-
-        // TODO check if there is a Vaadin JAR on the classpath outside of the
-        // WEB-INF/lib folder => return false
-
-        return true;
-
-    }
-
-    /**
      * Create a variable-based classpath entry if the given path is under the
      * target of the variable, an absolute one otherwise.
      * 
@@ -284,8 +253,8 @@ public class VaadinPluginUtil {
      * @throws CoreException
      */
     @SuppressWarnings("deprecation")
-    static void updateLaunchClassPath(IProject project, String[] jarNames,
-            IPath jarPath) throws CoreException {
+    public static void updateLaunchClassPath(IProject project,
+            String[] jarNames, IPath jarPath) throws CoreException {
         // list all launches
         ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
         ILaunchConfigurationType typeExternal = manager

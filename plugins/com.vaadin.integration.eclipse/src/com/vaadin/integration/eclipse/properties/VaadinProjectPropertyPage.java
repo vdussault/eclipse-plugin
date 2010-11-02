@@ -10,27 +10,24 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.dialogs.PropertyPage;
 
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
+import com.vaadin.integration.eclipse.properties.VaadinVersionComposite.VersionSelectionChangeListener;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.PreferenceUtil;
 import com.vaadin.integration.eclipse.util.ProjectDependencyManager;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 import com.vaadin.integration.eclipse.util.data.LocalVaadinVersion;
 
@@ -41,9 +38,10 @@ import com.vaadin.integration.eclipse.util.data.LocalVaadinVersion;
  */
 public class VaadinProjectPropertyPage extends PropertyPage {
 
-    private Button useVaadinButton;
     private VaadinVersionComposite vaadinVersionComposite;
     private WidgetsetParametersComposite widgetsetComposite;
+    private String projectVaadinVersionString;
+    private Label modifiedLabel;
 
     @Override
     protected void performDefaults() {
@@ -52,11 +50,10 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             IProject project = getVaadinProject();
             vaadinVersionComposite.setProject(project);
             widgetsetComposite.setProject(project);
-            useVaadinButton.setEnabled(VaadinPluginUtil
-                    .isVaadinJarManagedByPlugin(project));
 
-            useVaadinButton.setSelection(useVaadinButton.isEnabled()
-                    && vaadinVersionComposite.getSelectedVersion() != null);
+            projectVaadinVersionString = vaadinVersionComposite
+                    .getSelectedVersionString();
+            vaadinVersionSelectValueChange();
         } catch (CoreException ex) {
             ErrorUtil
                     .handleBackgroundException(
@@ -64,11 +61,8 @@ public class VaadinProjectPropertyPage extends PropertyPage {
                             "Failed reverting to the Vaadin version currently used in the project",
                             ex);
             vaadinVersionComposite.setProject(null);
-            useVaadinButton.setSelection(false);
         }
 
-        vaadinVersionComposite.enablePluginManagedVaadin(useVaadinButton
-                .getSelection());
     }
 
     @Override
@@ -110,50 +104,33 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             return false;
         }
 
-        if (VaadinPluginUtil.isVaadinJarManagedByPlugin(project)) {
+        try {
+            if (isVersionChanged()) {
+                final LocalVaadinVersion selectedVaadinVersion = vaadinVersionComposite
+                        .getSelectedVersion();
 
-            final LocalVaadinVersion newVaadinVersion = useVaadinButton
-                    .getSelection() ? vaadinVersionComposite
-                    .getSelectedVersion() : null;
-
-            // replace the Vaadin JAR in the project if it has changed
-            // - add new JAR in WEB-INF/lib without modifying the reference to
-            // the old one if there is already a Vaadin JAR with a different
-            // version elsewhere on the classpath, and do nothing if there is a
-            // Vaadin JAR with the correct version on the classpath
-            try {
-                String currentVaadinVersion = ProjectUtil
-                        .getVaadinLibraryVersion(project, true);
-
-                if (useVaadinButton.getSelection()) {
+                if (selectedVaadinVersion != null) {
                     ProjectUtil.ensureVaadinFacetAndNature(project);
                 }
-
                 boolean versionUpdated = updateProjectVaadinJar(project,
-                        currentVaadinVersion, newVaadinVersion);
+                        selectedVaadinVersion);
                 if (versionUpdated) {
                     widgetsetDirty = true;
+
+                    // Recreate combo box to ensure the changed version is
+                    // rendered correctly (if user pushed apply)
+                    performDefaults();
                 }
-            } catch (CoreException e) {
-                ErrorUtil
-                        .displayError(
-                                "Failed to change Vaadin version in the project. Check that the Vaadin JAR is not in use.",
-                                e, getShell());
-                ErrorUtil.handleBackgroundException(IStatus.WARNING,
-                        "Failed to change Vaadin version in the project", e);
-                return false;
-            } catch (InterruptedException e) {
-                return false;
-            } catch (InvocationTargetException e) {
-                Throwable realException = e.getTargetException();
-                ErrorUtil
-                        .displayError(
-                                "Failed to change Vaadin version in the project. Check that the Vaadin JAR is not in use.",
-                                realException, getShell());
-                ErrorUtil.handleBackgroundException(IStatus.WARNING,
-                        "Failed to change Vaadin version in the project", e);
-                return false;
             }
+
+        } catch (CoreException e) {
+            ErrorUtil
+                    .displayError(
+                            "Failed to change Vaadin version in the project. Check that the Vaadin JAR is not in use.",
+                            e, getShell());
+            ErrorUtil.handleBackgroundException(IStatus.WARNING,
+                    "Failed to change Vaadin version in the project", e);
+            return false;
         }
 
         // If anything changed, ask about recompiling the widgetset.
@@ -183,49 +160,24 @@ public class VaadinProjectPropertyPage extends PropertyPage {
      * 
      * @param project
      *            The target project
-     * @param currentVaadinVersion
-     * @param newVaadinVersion
+     * @param selectedVaadinVersion
+     *            The version string selected in the version combo box
      * @return true if the version was updated, false otherwise
      * @throws InterruptedException
      * @throws InvocationTargetException
+     * @throws CoreException
      */
     private boolean updateProjectVaadinJar(final IProject project,
-            String currentVaadinVersion,
-            final LocalVaadinVersion newVaadinVersion)
-            throws InvocationTargetException, InterruptedException {
-        if ((newVaadinVersion == null && currentVaadinVersion != null)
-                || (newVaadinVersion != null && !newVaadinVersion
-                        .getVersionNumber().equals(currentVaadinVersion))) {
+            final LocalVaadinVersion selectedVaadinVersion)
+            throws CoreException {
 
-            // confirm replacement, return false if not confirmed
-            String message;
-            if (currentVaadinVersion != null && newVaadinVersion == null) {
-                message = "Do you want to remove the Vaadin version "
-                        + currentVaadinVersion + " from the project "
-                        + project.getName() + "?";
-            } else if (currentVaadinVersion == null) {
-                message = "Do you want to add the Vaadin version "
-                        + newVaadinVersion.getVersionNumber()
-                        + " to the project " + project.getName() + "?";
-            } else {
-                message = "Do you want to change the Vaadin version from "
-                        + currentVaadinVersion + " to "
-                        + newVaadinVersion.getVersionNumber()
-                        + " in the project " + project.getName() + "?";
-            }
-            if (!MessageDialog.openConfirm(getShell(),
-                    "Confirm Vaadin version change", message)) {
-                return false;
-            }
-
-        }
-
+        // Do the actual update
         IRunnableWithProgress op = new IRunnableWithProgress() {
             public void run(IProgressMonitor monitor)
                     throws InvocationTargetException {
                 try {
                     ProjectDependencyManager.updateVaadinLibraries(project,
-                            newVaadinVersion, monitor);
+                            selectedVaadinVersion, monitor);
                 } catch (CoreException e) {
                     throw new InvocationTargetException(e);
                 } finally {
@@ -233,11 +185,17 @@ public class VaadinProjectPropertyPage extends PropertyPage {
                 }
             }
         };
-        // does not show the progress dialog if in a modal dialog
-        // IProgressService service =
-        // PlatformUI.getWorkbench().getProgressService();
-        // service.busyCursorWhile(op);
-        new ProgressMonitorDialog(getShell()).run(true, true, op);
+        try {
+            new ProgressMonitorDialog(getShell()).run(true, true, op);
+        } catch (InvocationTargetException e) {
+            Throwable realException = e.getTargetException();
+            throw ErrorUtil.newCoreException(
+                    "Failed to updated Vaadin library in project",
+                    realException);
+        } catch (InterruptedException e) {
+            throw ErrorUtil.newCoreException(
+                    "Failed to updated Vaadin library in project", e);
+        }
 
         return true;
     }
@@ -302,25 +260,26 @@ public class VaadinProjectPropertyPage extends PropertyPage {
         GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
         composite.setLayoutData(data);
 
-        // enable/disable Vaadin use
-        useVaadinButton = new Button(composite, SWT.CHECK);
-        useVaadinButton.setText("Use Vaadin");
-
         Group group = new Group(composite, SWT.NONE);
         group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         group.setText("Vaadin");
         group.setLayout(new GridLayout(1, false));
+
         vaadinVersionComposite = new VaadinVersionComposite(group, SWT.NULL);
         vaadinVersionComposite.createContents();
+        vaadinVersionComposite
+                .setVersionSelectionListener(new VersionSelectionChangeListener() {
 
-        useVaadinButton.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                vaadinVersionComposite
-                        .enablePluginManagedVaadin(useVaadinButton
-                                .getSelection());
-            }
-        });
+                    public void versionChanged() {
+                        vaadinVersionSelectValueChange();
+                    }
+                });
+
+        modifiedLabel = new Label(group, SWT.NONE);
+        modifiedLabel.setText("");
+        // modifiedLabel.
+        modifiedLabel.setVisible(false);
+        modifiedLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
         group = new Group(composite, SWT.NONE);
         group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -332,6 +291,32 @@ public class VaadinProjectPropertyPage extends PropertyPage {
         performDefaults();
 
         return composite;
+    }
+
+    protected void vaadinVersionSelectValueChange() {
+        if (isVersionChanged()) {
+            modifiedLabel.setVisible(true);
+            String willHappen = "Vaadin jar in the project will be ";
+            if (vaadinVersionComposite.getSelectedVersionString().equals("")) {
+                willHappen += "removed";
+            } else {
+                willHappen += "updated";
+            }
+            modifiedLabel.setText(willHappen);
+        } else {
+            modifiedLabel.setVisible(false);
+        }
+
+    }
+
+    public boolean isVersionChanged() {
+        String selectedVersionString = vaadinVersionComposite
+                .getSelectedVersionString();
+        if (projectVaadinVersionString == null) {
+            return !selectedVersionString.equals("");
+        }
+
+        return !projectVaadinVersionString.equals(selectedVersionString);
     }
 
     private IProject getVaadinProject() throws CoreException {

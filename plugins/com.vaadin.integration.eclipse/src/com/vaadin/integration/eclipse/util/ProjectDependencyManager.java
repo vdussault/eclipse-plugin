@@ -7,6 +7,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -92,10 +93,8 @@ public class ProjectDependencyManager {
     }
 
     /**
-     * Ensure that an Vaadin jar file can be found in the project and is of the
-     * correct version. If none can be found or the version does not match,
-     * replaces any old Vaadin JAR with the specified version from the local
-     * repository.
+     * Update the Vaadin jar file in the project. If the project already
+     * contains a Vaadin jar, it is removed.
      * 
      * Update widgetset compilation launch configurations in the project to
      * refer to the new Vaadin and GWT versions (only when changing Vaadin
@@ -119,19 +118,19 @@ public class ProjectDependencyManager {
         try {
             monitor.beginTask("Updating Vaadin libraries in the project", 12);
 
+            boolean searchOutsideWebinfLib = true;
             // do nothing if correct version is already in the project
-            String currentVersion = ProjectUtil.getVaadinLibraryVersion(
-                    project, true);
-            if ((newLocalVaadinJarVersion != null && newLocalVaadinJarVersion
-                    .getVersionNumber().equals(currentVersion))) {
-                return;
-            }
+            IPath currentJar = ProjectUtil.getVaadinLibraryInProject(project,
+                    searchOutsideWebinfLib);
+            String currentVersion = VersionUtil
+                    .getVaadinVersionFromJar(currentJar);
+
             IJavaProject jproject = JavaCore.create(project);
             WidgetsetBuildManager.internalSuspendWidgetsetBuilds(project);
             try {
                 // replace the Vaadin JAR (currentVersion) with the new one
-                if (currentVersion != null) {
-                    removeVaadinLibrary(jproject, currentVersion);
+                if (currentJar != null) {
+                    removeVaadinLibrary(jproject, currentJar);
                 }
                 monitor.worked(1);
                 if (newLocalVaadinJarVersion != null) {
@@ -248,25 +247,35 @@ public class ProjectDependencyManager {
 
     /**
      * Removes the specified Vaadin jar version from the project (if it exists).
+     * A CoreException is thrown if the jar file is outside the project.
      * 
      * @param jproject
-     * @param vaadinJarVersion
+     * @param currentJar
      * @throws CoreException
      */
-    private static void removeVaadinLibrary(IJavaProject jproject,
-            String vaadinJarVersion) throws CoreException {
+    public static void removeVaadinLibrary(IJavaProject jproject,
+            IPath currentJar) throws CoreException {
         try {
             IProject project = jproject.getProject();
-            IFolder lib = ProjectUtil.getWebInfLibFolder(project);
-            // if not in WEB-INF/lib, don't try to make any changes
-            if (lib.exists()) {
-                IFile targetFile = lib.getFile(VersionUtil
-                        .getVaadinJarFilename(vaadinJarVersion));
-                targetFile.delete(true, null);
-
-                // refresh project
-                lib.refreshLocal(IResource.DEPTH_ONE, null);
+            if (!ProjectUtil.isInProject(project, currentJar)) {
+                throw ErrorUtil
+                        .newCoreException("Cannot remove Vaadin jar outside the project");
             }
+
+            IWorkspace workspace = project.getWorkspace();
+            // IPath location = Path.fromOSString(currentJar.toOSString());
+            IFile file = workspace.getRoot().getFileForLocation(currentJar);
+
+            if (file == null || !file.exists()) {
+                throw ErrorUtil
+                        .newCoreException("Failed to remove old Vaadin jar ("
+                                + currentJar.toOSString() + ")");
+            }
+
+            file.delete(true, null);
+
+            // refresh parent directory
+            file.getParent().refreshLocal(IResource.DEPTH_ONE, null);
         } catch (Exception e) {
             throw ErrorUtil.newCoreException(
                     "Failed to remove Vaadin jar from project", e);
