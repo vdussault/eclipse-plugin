@@ -94,7 +94,7 @@ public class WidgetsetBuilder extends IncrementalProjectBuilder {
                 // dirty - that will be done when adding a new Vaadin JAR to
                 // the project (#3869).
                 // TODO #3590 clean GWT module
-                if (!VersionUtil.couldBeVaadinJar(resource.getName())) {
+                if (!VersionUtil.couldBeOfficialVaadinJar(resource.getName())) {
                     boolean hasWidgetset = false;
                     try {
                         hasWidgetset = WidgetsetUtil.hasWidgetSets(

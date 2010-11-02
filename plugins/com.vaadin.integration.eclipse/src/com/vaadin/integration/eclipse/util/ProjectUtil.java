@@ -234,7 +234,7 @@ public class ProjectUtil {
             for (IResource resource : files) {
                 // is it a Vaadin JAR?
                 if (resource instanceof IFile) {
-                    if (VersionUtil.couldBeVaadinJar(resource.getName())) {
+                    if (VersionUtil.couldBeOfficialVaadinJar(resource.getName())) {
                         // Name matches vaadin jar, still check for version from
                         // the jar itself
 

@@ -128,7 +128,7 @@ public class VersionUtil {
      * @param name
      * @return
      */
-    public static boolean couldBeVaadinJar(String name) {
+    public static boolean couldBeOfficialVaadinJar(String name) {
         // Official Vaadin jars are named vaadin-<version>.jar
         // <version> should always start with a number. Failing to check this
         // will return true for e.g. vaadin-treetable-1.0.0.jar
