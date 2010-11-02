@@ -148,11 +148,12 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
                 result.add(themesFolder);
             }
 
-            // the manifest file is likely to be updated by the export
-            // IFolder metainfFolder = webContentFolder.getFolder("META-INF");
-            // if (metainfFolder.exists()) {
-            // result.add(metainfFolder);
-            // }
+            // Select META-INF to include also everything else than the manifest
+            // by default (e.g. Directory add-on pom.xml)
+            IFolder metainfFolder = webContentFolder.getFolder("META-INF");
+            if (metainfFolder.exists()) {
+                result.add(metainfFolder);
+            }
 
             return result;
         } catch (JavaModelException e) {
