@@ -349,4 +349,20 @@ public class ProjectUtil {
 
     }
 
+    /**
+     * Ensure the project uses the latest Vaadin facet if the project is a
+     * faceted project using Vaadin. Also ensure that the project has the
+     * widgetset nature if the widgetset is managed by the plugin.
+     * 
+     * @param project
+     *            The target project
+     */
+    public static void ensureVaadinFacetAndNature(IProject project) {
+        VaadinFacetUtils.upgradeFacet(project,
+                VaadinFacetUtils.VAADIN_FACET_CURRENT);
+        if (WidgetsetUtil.isWidgetsetManagedByPlugin(project)) {
+            WidgetsetUtil.ensureWidgetsetNature(project);
+        }
+
+    }
 }
