@@ -153,7 +153,18 @@ public class VaadinVersionComposite extends Composite {
                 }
 
             } catch (CoreException ex) {
-                // TODO handle exceptions: message to user?
+                String displayMsg = "Failed to download list of available Vaadin versions";
+                Throwable cause = ex.getCause();
+                if (cause != null) {
+                    displayMsg += "\n\n" + cause.getClass().getName();
+                }
+                String msg = cause.getMessage();
+                if (msg != null && msg.length() > 0) {
+                    displayMsg += ": " + msg;
+                }
+                ErrorUtil.displayError(displayMsg,
+
+                ex, getShell());
                 ErrorUtil
                         .handleBackgroundException(
                                 IStatus.WARNING,
