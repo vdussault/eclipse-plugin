@@ -14,12 +14,14 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.dialogs.PropertyPage;
 
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
@@ -38,10 +40,19 @@ import com.vaadin.integration.eclipse.util.data.LocalVaadinVersion;
  */
 public class VaadinProjectPropertyPage extends PropertyPage {
 
+    private final Image ICON_INFORMATION_SMALL;
+
     private VaadinVersionComposite vaadinVersionComposite;
     private WidgetsetParametersComposite widgetsetComposite;
     private String projectVaadinVersionString;
-    private Label modifiedLabel;
+    private CLabel modifiedLabel;
+
+    public VaadinProjectPropertyPage() {
+        super();
+        ICON_INFORMATION_SMALL = new Image(Display.getDefault(), Display
+                .getDefault().getSystemImage(SWT.ICON_INFORMATION)
+                .getImageData().scaledTo(16, 16));
+    }
 
     @Override
     protected void performDefaults() {
@@ -275,9 +286,9 @@ public class VaadinProjectPropertyPage extends PropertyPage {
                     }
                 });
 
-        modifiedLabel = new Label(group, SWT.NONE);
+        modifiedLabel = new CLabel(group, SWT.NONE);
+        modifiedLabel.setImage(ICON_INFORMATION_SMALL);
         modifiedLabel.setText("");
-        // modifiedLabel.
         modifiedLabel.setVisible(false);
         modifiedLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
@@ -329,5 +340,11 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             throw ErrorUtil.newCoreException("Not a Vaadin project", null);
         }
         return project;
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        ICON_INFORMATION_SMALL.dispose();
     }
 }
