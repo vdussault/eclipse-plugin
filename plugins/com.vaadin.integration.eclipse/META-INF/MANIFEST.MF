@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Vaadin Eclipse Integration
 Bundle-SymbolicName: com.vaadin.integration.eclipse;singleton:=true
 Bundle-Version: 9.9.9.qualifier
-Bundle-Vendor: IT Mill Ltd
+Bundle-Vendor: Vaadin Ltd
 Require-Bundle: org.eclipse.ui,
  org.eclipse.wst.common.project.facet.core,
  org.eclipse.wst.common.project.facet.ui,
