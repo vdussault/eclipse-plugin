@@ -3,7 +3,7 @@
       id="com.vaadin.integration.eclipse"
       label="Vaadin Eclipse Integration"
       version="9.9.9.qualifier"
-      provider-name="IT Mill Ltd"
+      provider-name="Vaadin Ltd"
       plugin="com.vaadin.integration.eclipse">
 
    <description url="http://vaadin.com/">
