@@ -83,7 +83,6 @@
 		<fail unless="com.vaadin.wysiwyg.eclipse.version" message="com.vaadin.wysiwyg.eclipse.version must define the plugin version" />
 		<property name="com.vaadin.wysiwyg.eclipse.version.full" value="${com.vaadin.wysiwyg.eclipse.version}.${timestamp}" />
 
-		<fail unless="gwt.location" message="gwt.location must be defined" />
 		<delete dir="${update-site.dir}" />
 
 		<java jar="${eclipse.home}/plugins/${launcher}" failonerror="yes" fork="yes" maxmemory="512m">
@@ -96,7 +95,6 @@
 			<arg value="-Dcom.vaadin.wysiwyg.eclipse.version.full=${com.vaadin.wysiwyg.eclipse.version.full}" />
 			<arg value="-Dtimestamp=${timestamp}" />
 			<arg value="-DarchivePrefix=${archivePrefix}" />
-			<arg value="-Dgwt.location=${gwt.location}" />
 			<arg value="-v" />
 		</java>
 
