@@ -12,6 +12,7 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 
@@ -144,8 +145,8 @@ public class VersionUtil {
      * @return The required GWT version or null if it could not be determined
      * @throws IOException
      */
-    public static String getRequiredGWTVersionForVaadinJar(IPath vaadinJarPath)
-            throws IOException {
+    public static String getRequiredGWTVersionForVaadinJar(IProject project,
+            IPath vaadinJarPath) throws IOException {
 
         File vaadinJarFile = vaadinJarPath.toFile();
         if (vaadinJarFile == null || !vaadinJarFile.exists()) {
@@ -155,7 +156,7 @@ public class VersionUtil {
         // Check gwt version from included Vaadin jar
         JarFile jarFile = null;
         try {
-            jarFile = new JarFile(vaadinJarFile.getAbsolutePath());
+            jarFile = new JarFile(vaadinJarFile);
             // Check GWT version from manifest
             String manifestGWTVersion = getManifestGWTVersion(jarFile);
             if (manifestGWTVersion != null) {

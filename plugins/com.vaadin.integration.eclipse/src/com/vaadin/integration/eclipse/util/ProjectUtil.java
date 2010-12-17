@@ -30,6 +30,8 @@ import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
 
 public class ProjectUtil {
+    private static final String DEFAULT_GWT_VERSION = "2.0.4";
+
     /**
      * Find a project that has the Vaadin project facet based on a selection.
      * 
@@ -175,9 +177,35 @@ public class ProjectUtil {
             // find Vaadin JAR on the classpath
             IPath vaadinJarPath = ProjectUtil
                     .findProjectVaadinJarPath(jproject);
+
+            String gwtVersion = getRequiredGWTVersionForVaadinJar(
+                    jproject.getProject(), vaadinJarPath);
+            return gwtVersion;
+
+        } catch (CoreException ex) {
+            ErrorUtil.handleBackgroundException(IStatus.WARNING,
+                    "Failed to determine the GWT library version to use.", ex);
+        }
+
+        // if no information exists, default to 2.0.4
+        return DEFAULT_GWT_VERSION;
+    }
+
+    public static String getRequiredGWTVersionForVaadinJar(IProject project,
+            IPath vaadinJarPath) {
+        try {
+            // find Vaadin JAR on the classpath
+            System.err.print("  ");
+            new Throwable("getRequiredGWTVersionForProject")
+                    .printStackTrace(System.err);
+            System.err
+                    .println("  getRequiredGWTVersionForProject: vaadinJarPath = "
+                            + vaadinJarPath);
+
             if (vaadinJarPath != null) {
                 String gwtVersion = VersionUtil
-                        .getRequiredGWTVersionForVaadinJar(vaadinJarPath);
+                        .getRequiredGWTVersionForVaadinJar(project,
+                                vaadinJarPath);
                 if (gwtVersion != null) {
                     return gwtVersion;
                 }
@@ -185,13 +213,9 @@ public class ProjectUtil {
         } catch (IOException ex) {
             ErrorUtil.handleBackgroundException(IStatus.WARNING,
                     "Failed to determine the GWT library version to use.", ex);
-        } catch (CoreException ex) {
-            ErrorUtil.handleBackgroundException(IStatus.WARNING,
-                    "Failed to determine the GWT library version to use.", ex);
         }
-
         // if no information exists, default to 2.0.4
-        return "2.0.4";
+        return DEFAULT_GWT_VERSION;
     }
 
     public static boolean isGwt20(IProject project) {
