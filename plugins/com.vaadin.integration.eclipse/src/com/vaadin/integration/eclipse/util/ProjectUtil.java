@@ -178,9 +178,7 @@ public class ProjectUtil {
             IPath vaadinJarPath = ProjectUtil
                     .findProjectVaadinJarPath(jproject);
 
-            String gwtVersion = getRequiredGWTVersionForVaadinJar(
-                    jproject.getProject(), vaadinJarPath);
-            return gwtVersion;
+            return getRequiredGWTVersionForVaadinJar(vaadinJarPath);
 
         } catch (CoreException ex) {
             ErrorUtil.handleBackgroundException(IStatus.WARNING,
@@ -191,21 +189,12 @@ public class ProjectUtil {
         return DEFAULT_GWT_VERSION;
     }
 
-    public static String getRequiredGWTVersionForVaadinJar(IProject project,
-            IPath vaadinJarPath) {
+    public static String getRequiredGWTVersionForVaadinJar(IPath vaadinJarPath) {
         try {
             // find Vaadin JAR on the classpath
-            System.err.print("  ");
-            new Throwable("getRequiredGWTVersionForProject")
-                    .printStackTrace(System.err);
-            System.err
-                    .println("  getRequiredGWTVersionForProject: vaadinJarPath = "
-                            + vaadinJarPath);
-
             if (vaadinJarPath != null) {
                 String gwtVersion = VersionUtil
-                        .getRequiredGWTVersionForVaadinJar(project,
-                                vaadinJarPath);
+                        .getRequiredGWTVersionForVaadinJar(vaadinJarPath);
                 if (gwtVersion != null) {
                     return gwtVersion;
                 }

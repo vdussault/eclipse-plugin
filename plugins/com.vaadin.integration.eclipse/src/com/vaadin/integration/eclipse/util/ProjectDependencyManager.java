@@ -247,9 +247,6 @@ public class ProjectDependencyManager {
             // make sure the GWT library versions match the Vaadin JAR
             // requirements
 
-            // String gwtVersion =
-            // ProjectUtil.getRequiredGWTVersionForVaadinJar(
-            // project, targetFile.getFullPath());
             String gwtVersion = ProjectUtil
                     .getRequiredGWTVersionForProject(jproject);
 
