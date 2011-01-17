@@ -26,6 +26,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
+import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 
@@ -145,6 +146,9 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                     // Do nothing if user cancels compilation
                 } catch (Exception e) {
                     showException(e);
+                    // Also log the exception
+                    ErrorUtil.handleBackgroundException(IStatus.ERROR,
+                            "Widgetset compilation failed", e);
                 } finally {
                     monitor.done();
                 }
