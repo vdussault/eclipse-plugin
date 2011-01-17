@@ -408,6 +408,10 @@ public class VaadinPluginUtil {
                 // primarily WEB-INF/lib
                 IClasspathContainer container = JavaCore.getClasspathContainer(
                         cp.getPath(), jproject);
+                if (container == null) {
+                    // Container is null at least for an invalid JRE reference
+                    continue;
+                }
                 IClasspathEntry[] containerEntries = container
                         .getClasspathEntries();
                 for (IClasspathEntry ccp : containerEntries) {
