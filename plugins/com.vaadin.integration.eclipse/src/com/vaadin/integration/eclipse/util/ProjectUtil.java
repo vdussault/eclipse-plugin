@@ -339,6 +339,10 @@ public class ProjectUtil {
                 // primarily WEB-INF/lib, but possibly also Liferay etc.
                 IClasspathContainer container = JavaCore.getClasspathContainer(
                         cp.getPath(), javaProject);
+                if (container == null) {
+                    // Container is null at least for an invalid JRE reference
+                    continue;
+                }
                 IClasspathEntry[] containerEntries = container
                         .getClasspathEntries();
                 for (IClasspathEntry ccp : containerEntries) {
