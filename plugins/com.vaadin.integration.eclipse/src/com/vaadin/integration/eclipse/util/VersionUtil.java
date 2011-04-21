@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.JarURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -17,6 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 
 public class VersionUtil {
 
+    private static final String GWT_VERSION_DEPENDENCIES_ATTRIBUTE = "GWT-Version-Dependencies";
     private static final String VAADIN_VERSION_PATTERN = "([0-9]*)\\.([0-9])\\.(.+)";
     public static final String VAADIN_JAR_REGEXP = "^vaadin-"
             + VAADIN_VERSION_PATTERN + "\\.jar$";
@@ -121,6 +124,24 @@ public class VersionUtil {
         return null;
     }
 
+    private static List<String> getManifestArrayAttribute(JarFile jarFile,
+            String attributeName) throws IOException {
+        Manifest manifest = jarFile.getManifest();
+        if (manifest == null) {
+            return null;
+        }
+        Attributes attr = manifest.getMainAttributes();
+        String commaSeparatedValue = attr.getValue(attributeName);
+        ArrayList<String> result = new ArrayList<String>();
+        if (commaSeparatedValue != null) {
+            for (String value : commaSeparatedValue.split(",")) {
+                result.add(value.trim());
+            }
+        }
+
+        return result;
+    }
+
     /**
      * Checks if a file with the given name could be a Vaadin Jar. The file does
      * not necessary exist so only a name based check is done.
@@ -182,4 +203,26 @@ public class VersionUtil {
             }
         }
     }
+
+    public static List<String> getRequiredGWTDependenciesForVaadinJar(
+            IPath vaadinJarPath) throws IOException {
+        File vaadinJarFile = vaadinJarPath.toFile();
+        if (vaadinJarFile == null || !vaadinJarFile.exists()) {
+            return null;
+        }
+
+        // Check gwt version from included Vaadin jar
+        JarFile jarFile = null;
+        try {
+            jarFile = new JarFile(vaadinJarFile);
+            // Check GWT version from manifest
+            return getManifestArrayAttribute(jarFile,
+                    GWT_VERSION_DEPENDENCIES_ATTRIBUTE);
+        } finally {
+            if (jarFile != null) {
+                VaadinPluginUtil.closeJarFile(jarFile);
+            }
+        }
+    }
+
 }

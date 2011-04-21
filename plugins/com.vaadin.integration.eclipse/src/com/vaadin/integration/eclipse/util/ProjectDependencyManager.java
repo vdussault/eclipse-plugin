@@ -1,7 +1,9 @@
 package com.vaadin.integration.eclipse.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -251,9 +253,11 @@ public class ProjectDependencyManager {
                     .getRequiredGWTVersionForProject(jproject);
 
             monitor.worked(1);
+            List<String> dependencies = ProjectUtil
+                    .getRequiredGWTDependenciesForProject(jproject);
 
-            updateGWTLibraries(jproject, gwtVersion, new SubProgressMonitor(
-                    monitor, 4));
+            updateGWTLibraries(jproject, gwtVersion, dependencies,
+                    new SubProgressMonitor(monitor, 4));
         } catch (Exception e) {
             throw ErrorUtil.newCoreException(
                     "Failed to add Vaadin jar to project", e);
@@ -336,8 +340,12 @@ public class ProjectDependencyManager {
                                 .getRequiredGWTVersionForProject(jproject);
 
                         monitor.worked(1);
+                        List<String> gwtDependencies = ProjectUtil
+                                .getRequiredGWTDependenciesForProject(jproject);
                         updateGWTLibraries(jproject, gwtVersion,
-                                new SubProgressMonitor(monitor, 1));
+                                gwtDependencies, new SubProgressMonitor(
+                                        monitor, 1));
+
                     } finally {
                         WidgetsetBuildManager
                                 .internalResumeWidgetsetBuilds(project);
@@ -369,11 +377,13 @@ public class ProjectDependencyManager {
      * build path nor the launches are modified.
      * 
      * @param jproject
+     * @param gwtDependencies
      * @param monitor
      * @throws CoreException
      */
     private static void updateGWTLibraries(IJavaProject jproject,
-            String gwtVersion, IProgressMonitor monitor) throws CoreException {
+            String gwtVersion, List<String> gwtDependencies,
+            IProgressMonitor monitor) throws CoreException {
         if (monitor == null) {
             monitor = new NullProgressMonitor();
         }
@@ -395,29 +405,37 @@ public class ProjectDependencyManager {
                 DownloadManager.downloadGwtDevJar(gwtVersion,
                         new SubProgressMonitor(monitor, 5));
 
+                for (String dependency : gwtDependencies) {
+                    DownloadManager.downloadDependency(gwtVersion, dependency,
+                            new SubProgressMonitor(monitor, 5));
+                }
+
                 IClasspathEntry[] rawClasspath = jproject.getRawClasspath();
                 List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
                 for (IClasspathEntry entry : rawClasspath) {
-                    entries.add(entry);
+                    boolean add = true;
+                    // Skip GWT dependencies. They are re-added below if needed
+                    IPath p = entry.getResolvedEntry().getPath();
+                    if (ProjectUtil.isGWTDependency(jproject, p)) {
+                        add = false;
+                    }
+                    if (add) {
+                        entries.add(entry);
+                    }
                 }
+
+                Map<String, IPath> jarToLocation = new HashMap<String, IPath>();
 
                 // use the VAADIN_DOWNLOAD_VARIABLE variable and variable
                 // classpath entries where feasible
 
+                /* GWT-DEV */
                 IPath devJarPath = LocalFileManager
                         .getLocalGwtDevJar(gwtVersion);
                 IClasspathEntry gwtDev = VaadinPluginUtil
                         .makeVariableClasspathEntry(
                                 VaadinClasspathVariableInitializer.VAADIN_DOWNLOAD_VARIABLE,
                                 devJarPath);
-
-                IPath userJarPath = LocalFileManager
-                        .getLocalGwtUserJar(gwtVersion);
-                IClasspathEntry gwtUser = VaadinPluginUtil
-                        .makeVariableClasspathEntry(
-                                VaadinClasspathVariableInitializer.VAADIN_DOWNLOAD_VARIABLE,
-                                userJarPath);
-
                 // replace gwt-dev-[platform].jar and/or gwt-dev.jar if found,
                 // otherwise append new entry
                 String devJarName = "gwt-dev-" + PlatformUtil.getPlatform()
@@ -425,9 +443,32 @@ public class ProjectDependencyManager {
                 VaadinPluginUtil.replaceClassPathEntry(entries, gwtDev,
                         new String[] { "gwt-dev.jar", devJarName }, true);
 
+                /* GWT-USER */
+                IPath userJarPath = LocalFileManager
+                        .getLocalGwtUserJar(gwtVersion);
+                IClasspathEntry gwtUser = VaadinPluginUtil
+                        .makeVariableClasspathEntry(
+                                VaadinClasspathVariableInitializer.VAADIN_DOWNLOAD_VARIABLE,
+                                userJarPath);
                 // replace gwt-user.jar if found, otherwise append new entry
                 VaadinPluginUtil.replaceClassPathEntry(entries, gwtUser,
                         new String[] { "gwt-user.jar" }, true);
+
+                /* GWT dependencies */
+                for (String dependencyJar : gwtDependencies) {
+                    IPath dependencyPath = LocalFileManager
+                            .getLocalGWTDependencyJar(gwtVersion, dependencyJar);
+                    IClasspathEntry dep = VaadinPluginUtil
+                            .makeVariableClasspathEntry(
+                                    VaadinClasspathVariableInitializer.VAADIN_DOWNLOAD_VARIABLE,
+                                    dependencyPath);
+
+                    // replace dep jars if found, otherwise append new entry
+                    VaadinPluginUtil.replaceClassPathEntry(entries, dep,
+                            new String[] { dependencyJar }, true);
+
+                    jarToLocation.put(dependencyJar, dependencyPath);
+                }
 
                 IClasspathEntry[] entryArray = entries
                         .toArray(new IClasspathEntry[entries.size()]);
@@ -442,11 +483,19 @@ public class ProjectDependencyManager {
                     VaadinPluginUtil.updateLaunchClassPath(project,
                             new String[] { "gwt-dev.jar", devJarName },
                             devJarPath);
-                    monitor.worked(1);
 
                     VaadinPluginUtil.updateLaunchClassPath(project,
                             new String[] { "gwt-user.jar" }, userJarPath);
+
                     monitor.worked(1);
+
+                    for (String jarName : jarToLocation.keySet()) {
+                        VaadinPluginUtil.updateLaunchClassPath(project,
+                                new String[] { jarName },
+                                jarToLocation.get(jarName));
+                    }
+                    monitor.worked(1);
+
                 } else {
                     monitor.worked(2);
                 }

@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -219,6 +220,11 @@ public class DownloadManager {
         return versionUrl + "/" + filename;
     }
 
+    private static String GWT_DEPENDENCY_JAR_DOWNLOAD_URL(String gwtVersion,
+            String dependencyJar) {
+        return GWT_DOWNLOAD_URL + "/" + gwtVersion + "/" + dependencyJar;
+    }
+
     /**
      * Downloads the gwt-user.jar for the specified GWT version if it has not
      * already been dowloaded.
@@ -270,6 +276,24 @@ public class DownloadManager {
         }
     }
 
+    public static void downloadDependency(String gwtVersion,
+            String dependencyJar, IProgressMonitor monitor) throws CoreException {
+        if (monitor == null) {
+            monitor = new NullProgressMonitor();
+        }
+
+        try {
+            String url = GWT_DEPENDENCY_JAR_DOWNLOAD_URL(gwtVersion,
+                    dependencyJar);
+
+            IPath target = LocalFileManager.getLocalGWTDependencyJar(gwtVersion, dependencyJar);
+            downloadFileToLocalStore(url, target.toFile());
+        } finally {
+            monitor.done();
+        }
+
+    }
+
     /**
      * Downloads the url and stores it in the local file store as the selected
      * type and version. Silently returns false if the file already exists in
@@ -292,6 +316,22 @@ public class DownloadManager {
 
         File targetFile = LocalFileManager.getLocalFile(fileType, version)
                 .toFile();
+
+        return downloadFileToLocalStore(url, targetFile);
+    }
+
+    /**
+     * Downloads the file from the given url and stores it as targetFile. Does
+     * nothing if targetFile already exists.
+     * 
+     * @param url
+     * @param targetFile
+     * @return true if the file was downloaded, false otherwise
+     * @throws CoreException
+     *             If the download failed
+     */
+    private static boolean downloadFileToLocalStore(String url, File targetFile)
+            throws CoreException {
         if (targetFile.exists()) {
             return false;
         }
@@ -307,8 +347,10 @@ public class DownloadManager {
 
             return true;
         } catch (IOException e) {
-            throw ErrorUtil.newCoreException("Failed to download " + filename
-                    + " from " + url);
+            throw ErrorUtil.newCoreException("Failed to download "
+                    + targetFile.getName() + " from " + url);
         }
+
     }
+
 }

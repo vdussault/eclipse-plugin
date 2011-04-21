@@ -742,6 +742,15 @@ public class VaadinPluginUtil {
                 // IPath path = classPathEntry.getPath();
                 // IPath rawLocation = getRawLocation(project, path);
                 // otherLocations.add(rawLocation);
+                // } else if (classPathEntry) {
+            } else if (classPathEntry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
+                // Include gwt dependencies aswell
+                if (ProjectUtil.isGWTDependency(jproject,
+                        classPathEntry.getPath())) {
+                    otherLocations.add(getRawLocation(project,
+                            classPathEntry.getPath()));
+                }
+
             }
         }
 

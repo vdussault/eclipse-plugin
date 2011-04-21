@@ -1,6 +1,8 @@
 package com.vaadin.integration.eclipse.util;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -28,6 +30,7 @@ import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
+import com.vaadin.integration.eclipse.util.files.LocalFileManager;
 
 public class ProjectUtil {
     private static final String DEFAULT_GWT_VERSION = "2.0.4";
@@ -170,6 +173,36 @@ public class ProjectUtil {
             return null;
         }
         return jproject.findType(VaadinPlugin.APPLICATION_CLASS_FULL_NAME);
+    }
+
+    /**
+     * Returns a list of jar files required by the GWT version used by the
+     * Vaadin jar in the project.
+     * 
+     * @param jproject
+     * @return
+     * @throws IOException
+     */
+    public static List<String> getRequiredGWTDependenciesForProject(
+            IJavaProject jproject) {
+        try {
+            // find Vaadin JAR on the classpath
+            IPath vaadinJarPath = ProjectUtil
+                    .findProjectVaadinJarPath(jproject);
+            if (vaadinJarPath != null) {
+                return VersionUtil
+                        .getRequiredGWTDependenciesForVaadinJar(vaadinJarPath);
+            }
+
+        } catch (IOException e) {
+            ErrorUtil.handleBackgroundException(IStatus.WARNING,
+                    "Failed to determine required GWT dependencies.", e);
+        } catch (CoreException e) {
+            ErrorUtil.handleBackgroundException(IStatus.WARNING,
+                    "Failed to determine required GWT dependencies.", e);
+        }
+
+        return new ArrayList<String>();
     }
 
     public static String getRequiredGWTVersionForProject(IJavaProject jproject) {
@@ -429,6 +462,11 @@ public class ProjectUtil {
         }
 
         return false;
+    }
+
+    public static boolean isGWTDependency(IJavaProject jproject, IPath path)
+            throws CoreException {
+        return LocalFileManager.isGWTDependency(path);
     }
 
 }

@@ -42,6 +42,12 @@ public class LocalFileManager {
     // this pattern does not filter out old versions
     private static final String VAADIN_VERSION_PART_PATTERN = "([0-9]*)\\.([0-9])\\.(.+)";
 
+    /**
+     * Directory where additional GWT dependencies are stored (as
+     * <dir>/<gwtVersion>/<file.jar>
+     */
+    private static final String GWT_DEPS_DIRECTORY = "gwt-dependencies";
+
     public enum FileType {
         VAADIN_RELEASE("vaadin", "release", "vaadin-#version#.jar"), //
         VAADIN_PRERELEASE("vaadin-prerelease", "prerelease",
@@ -50,7 +56,7 @@ public class LocalFileManager {
         GWT_USER_JAR("gwt-user", null, "gwt-user.jar"), //
         GWT_DEV_JAR("gwt-dev", null, "gwt-dev.jar"), //
         GWT_DEV_JAR_PLATFORM_DEPENDENT("gwt-dev", null,
-                "gwt-dev-#platform#.jar"); //
+                "gwt-dev-#platform#.jar");//
 
         private String localDirectory;
         private String releaseType;
@@ -171,8 +177,13 @@ public class LocalFileManager {
 
     public static IPath getDownloadDirectory(FileType type)
             throws CoreException {
+        return getDownloadDirectory(type.getLocalDirectory());
+    }
+
+    public static IPath getDownloadDirectory(String directoryName)
+            throws CoreException {
         IPath path = getDownloadDirectory().append(
-                IPath.SEPARATOR + type.getLocalDirectory());
+                IPath.SEPARATOR + directoryName);
 
         // Create the directory if it does not exist
         if (!path.toFile().exists()) {
@@ -196,7 +207,12 @@ public class LocalFileManager {
      */
     public static IPath getVersionedDownloadDirectory(FileType type,
             String version) throws CoreException {
-        IPath path = getDownloadDirectory(type).append(
+        return getVersionedDownloadDirectory(type.getLocalDirectory(), version);
+    }
+
+    public static IPath getVersionedDownloadDirectory(String directoryName,
+            String version) throws CoreException {
+        IPath path = getDownloadDirectory(directoryName).append(
                 IPath.SEPARATOR + version);
 
         return path;
@@ -353,9 +369,20 @@ public class LocalFileManager {
                 IPath.SEPARATOR + fileType.getFilename(versionNumber));
     }
 
+    private static IPath getLocalFile(String directoryName,
+            String versionNumber, String filename) throws CoreException {
+        return LocalFileManager.getVersionedDownloadDirectory(directoryName,
+                versionNumber).append(IPath.SEPARATOR + filename);
+    }
+
     public static IPath getLocalGwtUserJar(String gwtVersion)
             throws CoreException {
         return getLocalFile(FileType.GWT_USER_JAR, gwtVersion);
+    }
+
+    public static IPath getLocalGWTDependencyJar(String gwtVersion,
+            String dependencyJar) throws CoreException {
+        return getLocalFile(GWT_DEPS_DIRECTORY, gwtVersion, dependencyJar);
     }
 
     public static IPath getLocalGwtDevJar(String gwtVersion)
@@ -366,4 +393,10 @@ public class LocalFileManager {
         }
         return getLocalFile(fileType, gwtVersion);
     }
+
+    public static boolean isGWTDependency(IPath path) throws CoreException {
+        IPath depsPath = getDownloadDirectory(GWT_DEPS_DIRECTORY);
+        return (depsPath.isPrefixOf(path.makeAbsolute()));
+    }
+
 }
