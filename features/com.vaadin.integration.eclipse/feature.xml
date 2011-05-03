@@ -7,7 +7,7 @@
       plugin="com.vaadin.integration.eclipse">
 
    <description url="http://vaadin.com/">
-      The Vaadin integration plugin for Eclipse helps you to create and maintain Vaadin projects, widgetsets, widgets and more.
+      Vaadin Plug-in for Eclipse helps you to create and maintain Vaadin projects, widgetsets, widgets and more.
    </description>
 
    <copyright>
