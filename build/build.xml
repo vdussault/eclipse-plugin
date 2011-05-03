@@ -39,8 +39,6 @@
 			<arg value="-Dtimestamp=${timestamp}" />
 			<arg value="-DarchivePrefix=${archivePrefix}" />
 		</java>
-
-
 	</target>
 
 	<target name="compileHelpers">
@@ -79,6 +77,7 @@
 	</target>
 
 	<!-- Build Vaadin Eclipse wysiwyg plugin -->
+	<!--
 	<target name="build-eclipse-wysiwyg-plugin">
 		<fail unless="com.vaadin.wysiwyg.eclipse.version" message="com.vaadin.wysiwyg.eclipse.version must define the plugin version" />
 		<property name="com.vaadin.wysiwyg.eclipse.version.full" value="${com.vaadin.wysiwyg.eclipse.version}.${timestamp}" />
@@ -99,6 +98,7 @@
 		</java>
 
 	</target>
+	-->
 
 	<!-- Sign all plugins and features that were built -->
 	<target name="sign-plugin-and-feature">

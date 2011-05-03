@@ -45,17 +45,25 @@ permissions and limitations under the License.
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.ltk.core.refactoring"/>
-      <import plugin="org.eclipse.jface.text"/>
-      <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.eclipse.jface.text" version="3.4.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jdt.ui" version="3.4.1" match="greaterOrEqual"/>
       <import plugin="org.eclipse.debug.core"/>
       <import plugin="org.eclipse.jdt.launching"/>
       <import plugin="org.eclipse.debug.ui"/>
       <import plugin="org.eclipse.search"/>
       <import plugin="org.eclipse.core.filebuffers"/>
+      <import plugin="org.eclipse.ui.editors"/>
    </requires>
 
    <plugin
          id="com.vaadin.integration.eclipse"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.vaadin.wysiwyg.eclipse"
          download-size="0"
          install-size="0"
          version="0.0.0"

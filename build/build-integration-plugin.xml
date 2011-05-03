@@ -25,33 +25,38 @@
 
 	<target name="build-features" depends="copyProject, main, deploy" />
 
-        <target name="initBuildDir">
-                <fail unless="buildDirectory" message="Build directory not specified" />
-                <delete dir="${buildDirectory}" />
-                <mkdir dir="${buildDirectory}" />
-        </target>
+  <target name="initBuildDir">
+          <fail unless="buildDirectory" message="Build directory not specified" />
+          <delete dir="${buildDirectory}" />
+          <mkdir dir="${buildDirectory}" />
+  </target>
 
-        <target name="copyProject" depends="initBuildDir">
-                <!-- The project has already been checked out to checkout so we use
-                that copy -->
-                <copy todir="${buildDirectory}/plugins">
-					<fileset dir="checkout/plugins"/>
-                </copy>
-                <copy todir="${buildDirectory}/features">
-					<fileset dir="checkout/features"/>
-                </copy>
-          		<replace dir="${buildDirectory}/plugins" token="9.9.9.qualifier" value="${com.vaadin.integration.eclipse.version.full}"/>
-          		<replace dir="${buildDirectory}/features" token="9.9.9.qualifier" value="${com.vaadin.integration.eclipse.version.full}"/>
-
-        </target>
+  <target name="copyProject" depends="initBuildDir">
+    <!-- The project has already been checked out to checkout so we use
+    that copy -->
+    <copy todir="${buildDirectory}/plugins">
+		  <fileset dir="checkout/plugins"/>
+    </copy>
+    <copy todir="${buildDirectory}/features">
+		  <fileset dir="checkout/features"/>
+    </copy>
+		<replace dir="${buildDirectory}/plugins" token="9.9.9.qualifier" value="${com.vaadin.integration.eclipse.version.full}"/>
+		<replace dir="${buildDirectory}/features" token="9.9.9.qualifier" value="${com.vaadin.integration.eclipse.version.full}"/>
+  </target>
 
 	<target name="checkoutProject" depends="initBuildDir">
 		<!--  Check out plugin(s) -->
+		<!-- The eclipse integration plugin -->
 		<exec executable="svn">
 			<arg value="checkout" />
-			<arg
-			value="http://dev.vaadin.com/svn/integration/eclipse/plugins/com.vaadin.integration.eclipse" />
+			<arg value="http://dev.vaadin.com/svn/integration/eclipse/plugins/com.vaadin.integration.eclipse" />
 			<arg value="${buildDirectory}/plugins/com.vaadin.integration.eclipse" />
+		</exec>
+		<!--  The visual designer plugin -->
+		<exec executable="svn">
+			<arg value="checkout" />
+			<arg value="http://dev.vaadin.com/svn/wysiwyg/eclipse-plugin" />
+			<arg value="${buildDirectory}/plugins/com.vaadin.wysiwyg.eclipse" />
 		</exec>
 		
 		<!--  Check out feature(s) -->
