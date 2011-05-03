@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Vaadin Eclipse Integration
+Bundle-Name: Vaadin Plug-in for Eclipse
 Bundle-SymbolicName: com.vaadin.integration.eclipse;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: IT Mill Ltd

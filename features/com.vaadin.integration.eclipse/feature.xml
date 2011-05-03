@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.vaadin.integration.eclipse"
-      label="Vaadin Eclipse Integration"
+      label="Vaadin Plug-in for Eclipse"
       version="9.9.9.qualifier"
       provider-name="Vaadin Ltd"
       plugin="com.vaadin.integration.eclipse">

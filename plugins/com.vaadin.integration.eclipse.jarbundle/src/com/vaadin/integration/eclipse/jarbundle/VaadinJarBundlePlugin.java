@@ -21,7 +21,7 @@ public class VaadinJarBundlePlugin extends Plugin implements IStartup {
 
     /**
      * Directory that contains the same hierarchy as the download directory used
-     * by the Vaadin Eclipse Integration Plugin.
+     * by Vaadin Plug-in for Eclipse.
      */
     private static final String LOCAL_JAR_FILE_LOCATION = "jarfiles";
 

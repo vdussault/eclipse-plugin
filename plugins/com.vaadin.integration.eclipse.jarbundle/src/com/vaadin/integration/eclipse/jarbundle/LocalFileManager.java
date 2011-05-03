@@ -10,7 +10,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 
 /**
- * Method copied from Vaadin Eclipse Integration Plugin. Must match for this
+ * Method copied from Vaadin Plug-in for Eclipse. Must match for this
  * plugin to work.
  * 
  * @author Artur Signell

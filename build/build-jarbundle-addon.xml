@@ -29,7 +29,7 @@
 		<delete file="MANIFEST.MF" />
 		<manifest file="MANIFEST.MF">
 			<attribute name="Vaadin-Package-Version" value="1" />
-			<attribute name="Implementation-Title" value="Vaadin Eclipse Integration" />
+			<attribute name="Implementation-Title" value="Vaadin Plug-in for Eclipse" />
 			<attribute name="Implementation-Version" value="${addon.version.full}" />
 		</manifest>
 

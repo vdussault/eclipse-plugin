@@ -7,7 +7,7 @@
       <project-facet
             id="com.vaadin.integration.eclipse.core">
          <label>
-            Vaadin Eclipse Integration
+            Vaadin Plug-in for Eclipse
          </label>
       </project-facet>
       <project-facet-version
