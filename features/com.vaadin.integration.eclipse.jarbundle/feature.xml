@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.vaadin.integration.eclipse.jarbundle"
-      label="Vaadin Eclipse Jar Bundle"
+      label="Vaadin Bundle for Eclipse"
       version="9.9.9.qualifier"
       provider-name="Vaadin Ltd"
       plugin="com.vaadin.integration.eclipse.jarbundle">
 
    <description url="http://vaadin.com/">
-      The Vaadin Jar Bundle includes the Vaadin jar file and GWT jar files. Everything you need to get started using Vaadin.
+      Vaadin Bundle for Eclipse includes the Vaadin jar file and GWT jar files. Everything you need to get started using Vaadin.
    </description>
 
    <copyright>

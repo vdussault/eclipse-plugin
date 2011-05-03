@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Vaadin Jar Bundle
+Bundle-Name: Vaadin Bundle for Eclipse
 Bundle-SymbolicName: com.vaadin.integration.eclipse.jarbundle;singleton:=true
 Bundle-Version: 9.9.9.qualifier
 Bundle-Vendor: Vaadin Ltd
