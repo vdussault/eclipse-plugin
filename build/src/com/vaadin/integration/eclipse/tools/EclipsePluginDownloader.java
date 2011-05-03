@@ -55,6 +55,11 @@ public class EclipsePluginDownloader {
             if (pluginId.equals("com.vaadin.integration.eclipse")) {
                 System.out.println("Latest stable Eclipse plugin version is "
                         + version);
+                if (!version.startsWith("1")) {
+                    // Only download for versions 2 and up.
+                    downloadVisualDesignerPlugin(baseDir,
+                            getRelativeBaseUrl(relativePluginUrl), version);
+                }
             }
 
             downloadFeature(baseDir, relativeFeatureUrl);
@@ -66,6 +71,26 @@ public class EclipsePluginDownloader {
                     "Unable to find out latest stable plugin version");
         }
 
+    }
+
+    /**
+     * Takes a String representing a URL and removes everything following the
+     * last '/'
+     * 
+     * @param relativePluginUrl
+     *            the url to get the base for
+     * @return the base url
+     */
+    private static String getRelativeBaseUrl(String relativePluginUrl) {
+        return relativePluginUrl.substring(0,
+                relativePluginUrl.lastIndexOf('/'));
+    }
+
+    private static void downloadVisualDesignerPlugin(String baseDir,
+            String relativePluginBaseUri, String version) throws IOException {
+        downloadPlugin(baseDir, String.format(
+                "%s/com.vaadin.wysiwyg.eclipse_%s.jar", relativePluginBaseUri,
+                version));
     }
 
     private static void downloadPlugin(String baseDir, String relativePluginUrl)
