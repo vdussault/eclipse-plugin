@@ -99,18 +99,13 @@ public class VaadinVersionComposite extends Composite {
 
         /**
          * Creates the checkbox to show or hide development versions and nightly
-         * builds.
+         * builds and the refresh button.
          * 
          * @param composite
          *            the parent composite of the message area.
+         * @return development mode check box
          */
-        protected Button createDevelopmentCheckbox(Composite composite) {
-            GridData data = new GridData();
-            data.grabExcessVerticalSpace = false;
-            data.grabExcessHorizontalSpace = true;
-            data.horizontalAlignment = GridData.FILL;
-            data.verticalAlignment = GridData.BEGINNING;
-
+        protected Button createFooterControls(Composite composite) {
             final Button developmentCheckbox = new Button(composite, SWT.CHECK);
             developmentCheckbox
                     .setText("Show pre-release versions and nightly builds");
@@ -121,7 +116,20 @@ public class VaadinVersionComposite extends Composite {
                     updateVersionList(developmentCheckbox.getSelection());
                 }
             });
-            developmentCheckbox.setLayoutData(data);
+            developmentCheckbox.setLayoutData(new GridData(GridData.FILL,
+                    GridData.BEGINNING, true, false));
+
+            Button refreshButton = new Button(composite, SWT.DEFAULT);
+            refreshButton.setText("Refresh version list");
+            refreshButton.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    DownloadManager.flushCache();
+                    updateVersionList(developmentCheckbox.getSelection());
+                }
+            });
+            refreshButton.setLayoutData(new GridData(GridData.FILL,
+                    GridData.BEGINNING, true, false));
 
             return developmentCheckbox;
         }
@@ -184,7 +192,7 @@ public class VaadinVersionComposite extends Composite {
             createFilterText(contents);
             createFilteredList(contents);
 
-            createDevelopmentCheckbox(contents);
+            createFooterControls(contents);
 
             updateVersionList(false);
 

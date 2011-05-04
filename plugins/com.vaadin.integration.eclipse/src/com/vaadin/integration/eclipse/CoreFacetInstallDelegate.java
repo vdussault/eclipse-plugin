@@ -92,6 +92,10 @@ public class CoreFacetInstallDelegate implements IDelegate,
             monitor.worked(1);
             monitor.subTask("Downloading Vaadin JAR (" + latestVaadinVersion
                     + ")");
+            // In this case, reload list of Vaadin versions prior to downloading
+            // Vaadin itself to make sure the latest version is on the cached
+            // list.
+            DownloadManager.flushCache();
             DownloadManager.downloadVaadinJar(latestVaadinVersion,
                     new SubProgressMonitor(monitor, 2));
 

@@ -93,7 +93,7 @@ public class DownloadManager {
      * It is not guaranteed that the list is fetched from the site every time
      * this is called.
      * 
-     * @param includeDevelopment
+     * @param onlyRelease
      *            True to include only release builds, false to include others
      *            also (nightly, pre-release)
      * @return A sorted list of available Vaadin versions
@@ -122,6 +122,14 @@ public class DownloadManager {
         }
         return versions;
 
+    }
+
+    /**
+     * Flush the cached list of versions, forcing it to be reloaded the next
+     * time it is requested.
+     */
+    public static void flushCache() {
+        availableVersions = null;
     }
 
     /**
@@ -277,7 +285,8 @@ public class DownloadManager {
     }
 
     public static void downloadDependency(String gwtVersion,
-            String dependencyJar, IProgressMonitor monitor) throws CoreException {
+            String dependencyJar, IProgressMonitor monitor)
+            throws CoreException {
         if (monitor == null) {
             monitor = new NullProgressMonitor();
         }
@@ -286,7 +295,8 @@ public class DownloadManager {
             String url = GWT_DEPENDENCY_JAR_DOWNLOAD_URL(gwtVersion,
                     dependencyJar);
 
-            IPath target = LocalFileManager.getLocalGWTDependencyJar(gwtVersion, dependencyJar);
+            IPath target = LocalFileManager.getLocalGWTDependencyJar(
+                    gwtVersion, dependencyJar);
             downloadFileToLocalStore(url, target.toFile());
         } finally {
             monitor.done();
