@@ -66,6 +66,12 @@
 			<arg value="${buildDirectory}/features/com.vaadin.integration.eclipse" />
 		</exec>
 		
+		<exec executable="svn">
+			<arg value="checkout" />
+			<arg value="http://dev.vaadin.com/svn/wysiwyg/eclipse-feature" />
+			<arg value="${buildDirectory}/features/com.vaadin.wysiwyg.eclipse" />
+		</exec>
+		
 	</target>
 
 	<target name="deploy">
