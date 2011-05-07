@@ -10,7 +10,9 @@
       <category name="base"/>
    </feature>
    <feature url="features/com.vaadin.wysiwyg.eclipse_@com.vaadin.wysiwyg.eclipse-version@.jar" id="com.vaadin.wysiwyg.eclipse" version="@com.vaadin.wysiwyg.eclipse-version@">
-      <!-- for upgrade only, not in any category -->
+      <!-- for upgrade only -->                     
+      <category name="old"/>               
    </feature>
    <category-def name="base" label="Vaadin"/>
-</site>
+   <category-def name="old" label="Vaadin - old plug-ins (upgrade only)"/>
+<</site>
