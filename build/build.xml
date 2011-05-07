@@ -87,20 +87,22 @@
 
 		<!-- set version number -->
 		<copy todir="${buildDirectory}/features">
-			<fileset dir="checkout/features" />
+			<fileset dir="checkout/features">
+				<include name="com.vaadin.wysiwyg.eclipse/**"/>
+			</fileset>
 		</copy>
 		<replace dir="${buildDirectory}/features" token="9.9.9.qualifier" value="${com.vaadin.wysiwyg.eclipse.version.full}" />
 
 		<delete file="${buildDirectory}/features/com.vaadin.wysiwyg.eclipse/META-INF/MANIFEST.MF" />
 		<mkdir dir="${buildDirectory}/features/com.vaadin.wysiwyg.eclipse/META-INF/"/>
 
-		<jar destfile="${update-site.dir}/com.vaadin.wysiwyg.eclipse_${com.vaadin.wysiwyg.eclipse.version.full}.jar">
+		<jar destfile="${update-site.dir}/features/com.vaadin.wysiwyg.eclipse_${com.vaadin.wysiwyg.eclipse.version.full}.jar">
 			<manifest>
 				<attribute name="Vaadin-Package-Version" value="1" />
 				<attribute name="Implementation-Title" value="Vaadin Visual Designer for Eclipse" />
 				<attribute name="Implementation-Version" value="${com.vaadin.wysiwyg.eclipse.version.full}" />
 			</manifest>
-			<fileset dir="${buildDirectory}">
+			<fileset dir="${buildDirectory}/features/com.vaadin.wysiwyg.eclipse">
 				<include name="feature.xml" />
 			</fileset>
 		</jar>
