@@ -15,4 +15,4 @@
    </feature>
    <category-def name="base" label="Vaadin"/>
    <category-def name="old" label="Vaadin - old plug-ins (upgrade only)"/>
-<</site>
+</site>
