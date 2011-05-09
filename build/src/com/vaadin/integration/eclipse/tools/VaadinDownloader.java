@@ -18,6 +18,7 @@ public class VaadinDownloader {
     private static final String LATEST_URL = VAADIN_BASE_URL + "/LATEST";
     private static final String VAADIN_VERSION_ATTRIBUTE = "Bundle-version";
     private static final String GWT_VERSION_ATTRIBUTE = "GWT-Version";
+    private static final String GWT_DEPENDENCIES_ATTRIBUTE = "GWT-Version-Dependencies";
 
     public static void main(String[] args) throws IOException {
         // Download the latest jar available and gwt-dev and gwt-user. Place
@@ -74,6 +75,8 @@ public class VaadinDownloader {
                 .getMainAttributes();
         String vaadinVersion = attributes.getValue(VAADIN_VERSION_ATTRIBUTE);
         String gwtVersion = attributes.getValue(GWT_VERSION_ATTRIBUTE);
+        String gwtDependencies = attributes
+                .getValue(GWT_DEPENDENCIES_ATTRIBUTE);
         if (gwtVersion == null) {
             if (vaadinVersion.startsWith("6.4.")) {
                 // Make it work with 6.4 also. 6.5 and newer contains the
@@ -90,7 +93,10 @@ public class VaadinDownloader {
         System.out.println("Downloaded Vaadin jar version " + vaadinVersion);
         System.err.print(vaadinVersion);
         downloadGWTJars(baseDir, gwtVersion);
-        System.out.println("Downloaded GWT version " + gwtVersion);
+        downloadGWTDependencies(baseDir, gwtVersion, gwtDependencies);
+        System.out.println(String.format(
+                "Downloaded GWT version %s and dependencies (%s)", gwtVersion,
+                gwtDependencies));
 
     }
 
@@ -107,6 +113,35 @@ public class VaadinDownloader {
         URLConnection userUrl = new URL(VAADIN_BASE_URL + "/external/gwt/"
                 + gwtVersion + "/" + jarName).openConnection();
         File userTargetDir = getDownloadDir(baseDir, type, gwtVersion);
+        File targetFile = new File(userTargetDir, jarName);
+
+        // Only download if it has not already been downloaded
+        if (!targetFile.exists()) {
+            IOUtils.copy(userUrl.getInputStream(), new FileOutputStream(
+                    targetFile));
+        }
+    }
+
+    private static void downloadGWTDependencies(String baseDir,
+            String gwtVersion, String dependencies)
+            throws MalformedURLException, IOException {
+        if (dependencies == null) {
+            return;
+        }
+
+        String[] deps = dependencies.split("\\s");
+        for (String dep : deps) {
+            downloadGWTDependency(baseDir, gwtVersion, dep);
+        }
+    }
+
+    private static void downloadGWTDependency(String baseDir,
+            String gwtVersion, String jarName) throws MalformedURLException,
+            IOException {
+        URLConnection userUrl = new URL(VAADIN_BASE_URL + "/external/gwt/"
+                + gwtVersion + "/" + jarName).openConnection();
+        File userTargetDir = getDownloadDir(baseDir, "gwt-dependencies",
+                gwtVersion);
         File targetFile = new File(userTargetDir, jarName);
 
         // Only download if it has not already been downloaded
