@@ -102,24 +102,9 @@ public class VaadinDownloader {
 
     private static void downloadGWTJars(String baseDir, String gwtVersion)
             throws IOException {
-        downloadGWTJar(baseDir, "gwt-user", gwtVersion);
-        downloadGWTJar(baseDir, "gwt-dev", gwtVersion);
+        downloadGWTJar(baseDir, "gwt-user", gwtVersion, "gwt-user.jar");
+        downloadGWTJar(baseDir, "gwt-dev", gwtVersion, "gwt-dev.jar");
 
-    }
-
-    private static void downloadGWTJar(String baseDir, String type,
-            String gwtVersion) throws MalformedURLException, IOException {
-        String jarName = type + ".jar";
-        URLConnection userUrl = new URL(VAADIN_BASE_URL + "/external/gwt/"
-                + gwtVersion + "/" + jarName).openConnection();
-        File userTargetDir = getDownloadDir(baseDir, type, gwtVersion);
-        File targetFile = new File(userTargetDir, jarName);
-
-        // Only download if it has not already been downloaded
-        if (!targetFile.exists()) {
-            IOUtils.copy(userUrl.getInputStream(), new FileOutputStream(
-                    targetFile));
-        }
     }
 
     private static void downloadGWTDependencies(String baseDir,
@@ -131,17 +116,16 @@ public class VaadinDownloader {
 
         String[] deps = dependencies.split(",\\s*");
         for (String dep : deps) {
-            downloadGWTDependency(baseDir, gwtVersion, dep);
+            downloadGWTJar(baseDir, "gwt-dependencies", gwtVersion, dep.trim());
         }
     }
 
-    private static void downloadGWTDependency(String baseDir,
+    private static void downloadGWTJar(String baseDir, String type,
             String gwtVersion, String jarName) throws MalformedURLException,
             IOException {
         URLConnection userUrl = new URL(VAADIN_BASE_URL + "/external/gwt/"
                 + gwtVersion + "/" + jarName).openConnection();
-        File userTargetDir = getDownloadDir(baseDir, "gwt-dependencies",
-                gwtVersion);
+        File userTargetDir = getDownloadDir(baseDir, type, gwtVersion);
         File targetFile = new File(userTargetDir, jarName);
 
         // Only download if it has not already been downloaded
