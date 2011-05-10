@@ -129,7 +129,7 @@ public class VaadinDownloader {
             return;
         }
 
-        String[] deps = dependencies.split("\\s");
+        String[] deps = dependencies.split(",\\s*");
         for (String dep : deps) {
             downloadGWTDependency(baseDir, gwtVersion, dep);
         }
