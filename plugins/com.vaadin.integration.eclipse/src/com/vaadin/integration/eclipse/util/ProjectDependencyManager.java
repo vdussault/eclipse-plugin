@@ -10,15 +10,13 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.core.runtime.jobs.IJobManager;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -225,7 +223,7 @@ public class ProjectDependencyManager {
         }
         try {
             monitor.beginTask(
-                    "Adding Vaadin required libraries to the project", 6);
+                    "Adding Vaadin required libraries to the project", 10);
 
             IProject project = jproject.getProject();
             IFolder lib = ProjectUtil.getWebInfLibFolder(project);
@@ -237,14 +235,12 @@ public class ProjectDependencyManager {
             VaadinPluginUtil.copyPluginFileToProject(sourceFile, targetFile);
 
             // refresh project
-            lib.refreshLocal(IResource.DEPTH_ONE, null);
+            lib.refreshLocal(IResource.DEPTH_ONE, new SubProgressMonitor(
+                    monitor, 1));
 
-            // TODO there could be a better way to do this
-            IJobManager jobMan = Job.getJobManager();
-            Job[] build = jobMan.find(ResourcesPlugin.FAMILY_AUTO_BUILD);
-            if (build.length == 1) {
-                build[0].join();
-            }
+            // force build in this thread to avoid possible deadlock
+            project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD,
+                    new SubProgressMonitor(monitor, 3));
 
             // make sure the GWT library versions match the Vaadin JAR
             // requirements

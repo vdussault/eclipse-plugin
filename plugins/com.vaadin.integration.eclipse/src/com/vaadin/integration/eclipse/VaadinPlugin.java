@@ -1,6 +1,9 @@
 package com.vaadin.integration.eclipse;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.BundleContext;
+
+import com.vaadin.integration.eclipse.background.NightlyBuildUpdater;
 
 public class VaadinPlugin extends AbstractUIPlugin {
 
@@ -23,12 +26,28 @@ public class VaadinPlugin extends AbstractUIPlugin {
 
     private static VaadinPlugin instance = null;
 
+    private NightlyBuildUpdater nightlyBuildUpdater;
+
     public VaadinPlugin() {
         instance = this;
     }
 
     public static VaadinPlugin getInstance() {
         return instance;
+    }
+
+    @Override
+    public void start(BundleContext context) throws Exception {
+        super.start(context);
+        nightlyBuildUpdater = new NightlyBuildUpdater();
+        nightlyBuildUpdater.startUpdateJob();
+    }
+
+    @Override
+    public void stop(BundleContext context) throws Exception {
+        nightlyBuildUpdater.stopUpdateJob();
+        nightlyBuildUpdater = null;
+        super.stop(context);
     }
 
 }

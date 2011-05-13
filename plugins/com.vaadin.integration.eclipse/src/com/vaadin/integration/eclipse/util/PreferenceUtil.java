@@ -49,6 +49,10 @@ public class PreferenceUtil {
     private static final String PREFERENCES_PROJECT_TYPE_GAE = VaadinPlugin.PLUGIN_ID
             + "." + "projectTypeGae";
 
+    // "true"/"false"/missing - missing means false
+    private static final String PREFERENCES_USE_LATEST_NIGHTLY = VaadinPlugin.PLUGIN_ID
+            + "." + "useLatestNightly";
+
     /**
      * Checks whether widgetset building for a project has been suspended
      * explicitly by the user.
@@ -204,6 +208,33 @@ public class PreferenceUtil {
     public void setWidgetsetDirty(boolean dirty) {
         prefStore
                 .setValue(PREFERENCES_WIDGETSET_DIRTY, Boolean.toString(dirty));
+    }
+
+    /**
+     * Checks if the project is configured to use the latest nightly build.
+     * 
+     * @return
+     */
+    public boolean isUsingLatestNightly() {
+        if (prefStore.contains(PREFERENCES_USE_LATEST_NIGHTLY)) {
+            return prefStore.getBoolean(PREFERENCES_USE_LATEST_NIGHTLY);
+        }
+        return false;
+    }
+
+    /**
+     * Sets whether the project should always use the latest nightly build of
+     * the branch. Returns true if the value was changed, false if it remained
+     * the same.
+     * 
+     * @param style
+     * @return
+     */
+    public boolean setUsingLatestNightly(boolean useLatestNightly) {
+        boolean oldValue = isUsingLatestNightly();
+        prefStore.setValue(PREFERENCES_USE_LATEST_NIGHTLY,
+                Boolean.toString(useLatestNightly));
+        return oldValue != useLatestNightly;
     }
 
     /**

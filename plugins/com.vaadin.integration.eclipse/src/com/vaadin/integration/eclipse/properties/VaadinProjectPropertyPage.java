@@ -217,25 +217,26 @@ public class VaadinProjectPropertyPage extends PropertyPage {
         PreferenceUtil preferences = PreferenceUtil.get(project);
         // save widgetset compilation parameters
 
+        boolean useLatestNightly = vaadinVersionComposite.isUseLatestNightly();
+        if (preferences.setUsingLatestNightly(useLatestNightly)) {
+            modifiedValues = true;
+        }
+
         boolean suspended = widgetsetComposite.areWidgetsetBuildsSuspended();
         WidgetsetBuildManager.setWidgetsetBuildsSuspended(project, suspended);
 
         boolean verbose = widgetsetComposite.isVerboseOutput();
-        boolean changed = preferences
-                .setWidgetsetCompilationVerboseMode(verbose);
-        if (changed) {
+        if (preferences.setWidgetsetCompilationVerboseMode(verbose)) {
             modifiedValues = true;
         }
 
         String style = widgetsetComposite.getCompilationStyle();
-        changed = preferences.setWidgetsetCompilationStyle(style);
-        if (changed) {
+        if (preferences.setWidgetsetCompilationStyle(style)) {
             modifiedValues = true;
         }
 
         String parallelism = widgetsetComposite.getParallelism();
-        changed = preferences.setWidgetsetCompilationParallelism(parallelism);
-        if (changed) {
+        if (preferences.setWidgetsetCompilationParallelism(parallelism)) {
             modifiedValues = true;
         }
 
