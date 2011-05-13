@@ -253,52 +253,55 @@ public class VaadinVersionComposite extends Composite {
         latestNightlyCheckbox.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                if (null != project) {
+                boolean enabled;
+                if (null == project) {
+                    enabled = true;
+                } else {
                     PreferenceUtil preferenceUtil = PreferenceUtil.get(project);
                     boolean oldValue = preferenceUtil.isUsingLatestNightly();
-                    if (oldValue != latestNightlyCheckbox.getSelection()) {
-                        // set preference on commit, not here
+                    enabled = (oldValue != latestNightlyCheckbox.getSelection());
+                }
+                if (enabled) {
+                    // set preference on commit, not here
 
-                        // TODO progress monitoring?
+                    // TODO progress monitoring?
 
-                        // download latest nightly in the branch immediately -
-                        // actual upgrade of project takes place when applying
-                        // changes
-                        try {
-                            List<DownloadableVaadinVersion> availableNightlies = DownloadManager
-                                    .getAvailableNightlyVersions();
+                    // download latest nightly in the branch immediately -
+                    // actual upgrade of project takes place when applying
+                    // changes
+                    try {
+                        List<DownloadableVaadinVersion> availableNightlies = DownloadManager
+                                .getAvailableNightlyVersions();
 
-                            int index = versionCombo.getSelectionIndex();
-                            String currentVersion = index >= 0 ? versionCombo
-                                    .getItem(index) : null;
-                            if ((null == currentVersion || ""
-                                    .equals(currentVersion.trim()))
-                                    && !availableNightlies.isEmpty()) {
-                                // latest nightly build in the list if no branch
-                                // specified by current version
-                                currentVersion = availableNightlies.get(0)
-                                        .getVersionNumber();
-                            }
-
-                            DownloadableVaadinVersion latestNightly = NightlyCheckJob
-                                    .getNightlyToUpgradeTo(currentVersion,
-                                            availableNightlies);
-
-                            updateVersionCombo();
-                            versionCombo.select(versionCombo
-                                    .indexOf(latestNightly.getVersionNumber()));
-                        } catch (CoreException ex) {
-                            // log error and display message
-                            ErrorUtil
-                                    .handleBackgroundException(
-                                            IStatus.WARNING,
-                                            "Failed to upgrade to the latest Vaadin nightly build",
-                                            ex);
-                            ErrorUtil
-                                    .displayError(
-                                            "Failed to upgrade to the latest Vaadin nightly build",
-                                            ex, getShell());
+                        int index = versionCombo.getSelectionIndex();
+                        String currentVersion = index >= 0 ? versionCombo
+                                .getItem(index) : null;
+                        if ((null == currentVersion || "".equals(currentVersion
+                                .trim())) && !availableNightlies.isEmpty()) {
+                            // latest nightly build in the list if no branch
+                            // specified by current version
+                            currentVersion = availableNightlies.get(0)
+                                    .getVersionNumber();
                         }
+
+                        DownloadableVaadinVersion latestNightly = NightlyCheckJob
+                                .getNightlyToUpgradeTo(currentVersion,
+                                        availableNightlies);
+
+                        updateVersionCombo();
+                        versionCombo.select(versionCombo.indexOf(latestNightly
+                                .getVersionNumber()));
+                    } catch (CoreException ex) {
+                        // log error and display message
+                        ErrorUtil
+                                .handleBackgroundException(
+                                        IStatus.WARNING,
+                                        "Failed to upgrade to the latest Vaadin nightly build",
+                                        ex);
+                        ErrorUtil
+                                .displayError(
+                                        "Failed to upgrade to the latest Vaadin nightly build",
+                                        ex, getShell());
                     }
                 }
             }
@@ -459,6 +462,16 @@ public class VaadinVersionComposite extends Composite {
      */
     public Combo getVersionCombo() {
         return versionCombo;
+    }
+
+    /**
+     * This method exists only to enable automatic synchronization with a model.
+     * For other purposes, use {@link #isUseLatestNightly()}.
+     * 
+     * @return Button
+     */
+    public Button getUseLatestNightlyCheckbox() {
+        return latestNightlyCheckbox;
     }
 
     public Composite createContents() {

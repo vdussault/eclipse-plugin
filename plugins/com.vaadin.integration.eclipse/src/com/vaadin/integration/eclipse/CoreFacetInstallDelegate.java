@@ -52,6 +52,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
                 .equals(projectType);
         String portletVersion = model.getStringProperty(PORTLET_VERSION);
         boolean createPortlet = !PORTLET_VERSION_NONE.equals(portletVersion);
+        boolean useLatestNightly = model.getBooleanProperty(USE_LATEST_NIGHTLY);
 
         // Reference to the local Vaadin JAR that we should use
         LocalVaadinVersion localVaadinVersion = null;
@@ -114,6 +115,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
             try {
                 PreferenceUtil preferences = PreferenceUtil.get(project);
                 preferences.setProjectTypeGae(gaeProject);
+                preferences.setUsingLatestNightly(useLatestNightly);
                 preferences.persist();
             } catch (IOException e) {
                 throw ErrorUtil.newCoreException(

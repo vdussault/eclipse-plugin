@@ -28,4 +28,6 @@ public interface IVaadinFacetInstallDataModelProperties extends
     public static final String VAADIN_VERSION = "IVaadinFacetInstallDataModelProperties.VAADIN_VERSION"; //$NON-NLS-1$
 
     public static final String VAADIN_PROJECT_TYPE = "IVaadinFacetInstallDataModelProperties.VAADIN_PROJECT_TYPE"; //$NON-NLS-1$
+
+    public static final String USE_LATEST_NIGHTLY = "IVaadinFacetInstallDataModelProperties.USE_LATEST_NIGTLY"; //$NON-NLS-1$
 }

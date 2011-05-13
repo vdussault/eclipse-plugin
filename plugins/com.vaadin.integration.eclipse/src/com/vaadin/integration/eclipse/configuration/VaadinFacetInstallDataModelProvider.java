@@ -69,6 +69,7 @@ public class VaadinFacetInstallDataModelProvider extends
         names.add(PORTLET_VERSION);
         names.add(PORTLET_TITLE);
         names.add(VAADIN_VERSION);
+        names.add(USE_LATEST_NIGHTLY);
         names.add(VAADIN_PROJECT_TYPE);
         return names;
     }
@@ -134,6 +135,8 @@ public class VaadinFacetInstallDataModelProvider extends
             } else {
                 return projectName.toString();
             }
+        } else if (propertyName.equals(USE_LATEST_NIGHTLY)) {
+            return Boolean.FALSE;
         } else if (propertyName.equals(VAADIN_VERSION)) {
             try {
                 LocalVaadinVersion latestLocal = LocalFileManager

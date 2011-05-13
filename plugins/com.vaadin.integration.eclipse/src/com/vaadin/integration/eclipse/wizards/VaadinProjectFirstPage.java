@@ -111,6 +111,9 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
         // synch version string to model
         synchHelper.synchCombo(versionComposite.getVersionCombo(),
                 VAADIN_VERSION, new Control[] {});
+        synchHelper.synchCheckbox(
+                versionComposite.getUseLatestNightlyCheckbox(),
+                USE_LATEST_NIGHTLY, new Control[] {});
 
         return group;
     }
