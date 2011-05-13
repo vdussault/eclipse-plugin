@@ -21,8 +21,8 @@ public final class NightlyCheckSchedulerJob extends Job {
         nightlyCheckJob.addJobChangeListener(new JobChangeAdapter() {
             @Override
             public void done(IJobChangeEvent event) {
-                // reschedule: check every hour
-                schedule(60 * 60 * 1000l);
+                // reschedule: check every 24h
+                schedule(24 * 60 * 60 * 1000l);
             }
         });
     }

@@ -13,6 +13,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
+import org.eclipse.ui.PlatformUI;
 
 import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
@@ -57,7 +58,7 @@ public final class NightlyCheckJob extends Job {
 
             monitor.worked(1);
 
-            Map<IProject, DownloadableVaadinVersion> possibleUpgrades = new HashMap<IProject, DownloadableVaadinVersion>();
+            final Map<IProject, DownloadableVaadinVersion> possibleUpgrades = new HashMap<IProject, DownloadableVaadinVersion>();
 
             for (IProject project : nightlyProjects.keySet()) {
                 String currentVersion = nightlyProjects.get(project);
@@ -90,6 +91,17 @@ public final class NightlyCheckJob extends Job {
             upgradeJob.schedule();
 
             monitor.worked(1);
+
+            // "tray notification": the following projects were upgraded to
+            // the latest Vaadin nightly builds
+            PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+                public void run() {
+                    final UpgradeNotificationPopup popup = new UpgradeNotificationPopup(
+                            PlatformUI.getWorkbench().getDisplay(),
+                            possibleUpgrades);
+                    popup.open();
+                }
+            });
 
             return Status.OK_STATUS;
         } catch (CoreException e) {
