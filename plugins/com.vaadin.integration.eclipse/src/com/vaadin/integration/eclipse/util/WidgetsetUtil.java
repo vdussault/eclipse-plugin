@@ -98,7 +98,7 @@ public class WidgetsetUtil {
 
             // TODO should report progress more correctly - unknown?
             monitor.beginTask("Compiling widgetset " + moduleName
-                    + " in project " + project.getName(), 100 + 10);
+                    + " in project " + project.getName(), 100 + 10 + 4);
 
             monitor.subTask("Checking GWT version in the project "
                     + project.getName());
@@ -277,12 +277,17 @@ public class WidgetsetUtil {
             t.interrupt();
 
             if (waitFor == 0) {
-                // Remove the widgetset-aux dir if one was created (#4443)
+                // Remove the widgetset-aux and widgetset-deploy dirs if they
+                // were created (#4443 and #7099)
                 // Must apparently refresh before so it is in the local
                 // workspace, otherwise it won't exist and won't be deleted
                 IFolder auxDir = wsDir.getFolder(moduleName + "-aux");
                 auxDir.refreshLocal(0, new SubProgressMonitor(monitor, 1));
                 auxDir.delete(true, null);
+
+                IFolder deployDir = wsDir.getFolder(moduleName + "-deploy");
+                deployDir.refreshLocal(0, new SubProgressMonitor(monitor, 1));
+                deployDir.delete(true, null);
 
                 // Refresh the workspace so the new widgetset is visible
                 wsDir.refreshLocal(IResource.DEPTH_INFINITE,
