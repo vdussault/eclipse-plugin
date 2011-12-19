@@ -55,17 +55,21 @@ public class PortletConfigurationUtil {
      *            {@link IVaadinFacetInstallDataModelProperties#PORTLET_VERSION10}
      *            or
      *            {@link IVaadinFacetInstallDataModelProperties#PORTLET_VERSION20}
+     * @param rootMapping
+     *            true to create a Root mapping (Vaadin 7) instead of an
+     *            Application mapping
      * @throws CoreException
      */
     public static void addPortlet(IProject project, String applicationName,
             String portletClass, String portletName, String portletTitle,
-            String category, String portletVersion) throws CoreException {
+            String category, String portletVersion, boolean rootMapping)
+            throws CoreException {
 
         // TODO check indentation issues (first inserted line)
 
         // portlets.xml
         addPortletToPortletsXml(project, applicationName, portletClass,
-                portletName, portletTitle, portletVersion);
+                portletName, portletTitle, portletVersion, rootMapping);
 
         // liferay-portlet.xml
         addPortletToLiferayPortletXml(project, portletName);
@@ -85,7 +89,8 @@ public class PortletConfigurationUtil {
 
     private static void addPortletToPortletsXml(IProject project,
             String applicationName, String portletClass, String portletName,
-            String portletTitle, String portletVersion) throws CoreException {
+            String portletTitle, String portletVersion, boolean rootMapping)
+            throws CoreException {
         try {
             boolean portlet2 = IVaadinFacetInstallDataModelProperties.PORTLET_VERSION20
                     .equals(portletVersion);
@@ -112,6 +117,9 @@ public class PortletConfigurationUtil {
                     portletClass);
             portletstub = portletstub.replaceAll("STUB_APPLICATION",
                     applicationName);
+            portletstub = portletstub.replaceAll("STUB_INITPARAMNAME",
+                    rootMapping ? WebXmlUtil.VAADIN_ROOT_CLASS_PARAMETER
+                            : WebXmlUtil.VAADIN_APPLICATION_CLASS_PARAMETER);
 
             // these are for Liferay
             portletstub = portletstub.replaceAll("STUB_PORTLETTITLE",

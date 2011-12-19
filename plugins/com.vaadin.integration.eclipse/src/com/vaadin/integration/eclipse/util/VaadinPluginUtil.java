@@ -177,6 +177,23 @@ public class VaadinPluginUtil {
 
     }
 
+    public static String createRootClassSource(String packageName,
+            String applicationName, String rootClass, String vaadinPackagePrefix) {
+        String template = "package " + packageName + ";\n\n" + "import "
+                + vaadinPackagePrefix + "ui.*;\n" + "import "
+                + vaadinPackagePrefix + "terminal.WrappedRequest;\n\n"
+                + "public class " + rootClass + " extends Root {\n"
+                + "\t@Override\n"
+                + "\tpublic void init(WrappedRequest request) {\n"
+                + "\t\tsetCaption(\"" + applicationName + "\");\n"
+                + "\t\tLabel label = new Label(\"Hello Vaadin user\");\n"
+                + "\t\tgetContent().addComponent(label);\n" + "\t}\n" + "\n"
+                + "}\n";
+
+        return template;
+
+    }
+
     /**
      * Create a variable-based classpath entry if the given path is under the
      * target of the variable, an absolute one otherwise.
@@ -767,6 +784,7 @@ public class VaadinPluginUtil {
         locations.remove(null);
 
         // construct classpath string
+        // TODO deprecated variable, broken - can give wrong JRE
         IRuntimeClasspathEntry systemLibsEntry = JavaRuntime
                 .newVariableRuntimeClasspathEntry(new Path(
                         JavaRuntime.JRELIB_VARIABLE));

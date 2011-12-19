@@ -4,7 +4,7 @@
         
         <portlet-class>STUB_PORTLETCLASS</portlet-class>
         <init-param>
-            <name>application</name>
+            <name>STUB_INITPARAMNAME</name>
             <value>STUB_APPLICATION</value>
         </init-param>
         

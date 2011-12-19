@@ -25,6 +25,7 @@ import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import com.vaadin.integration.eclipse.IVaadinFacetInstallDataModelProperties;
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
+import com.vaadin.integration.eclipse.util.VersionUtil;
 import com.vaadin.integration.eclipse.util.data.LocalVaadinVersion;
 import com.vaadin.integration.eclipse.util.files.LocalFileManager;
 
@@ -54,7 +55,7 @@ public class VaadinFacetInstallDataModelProvider extends
 
     public static final String DEFAULT_APPLICATION_NAME = "Vaadin Application";
     public static final String DEFAULT_APPLICATION_PACKAGE = BASE_PACKAGE_NAME;
-    public static final String DEFAULT_APPLICATION_CLASS = "VaadinApplication";
+    public static final String DEFAULT_APPLICATION_CLASS_PREFIX = "Vaadin";
 
     private List<String> vaadinVersions;
 
@@ -116,10 +117,12 @@ public class VaadinFacetInstallDataModelProvider extends
             }
         } else if (propertyName.equals(APPLICATION_CLASS)) {
             String projectName = getProjectName();
+            String suffix = getApplicationClassSuffix();
+
             if (projectName == null) {
-                return DEFAULT_APPLICATION_CLASS;
+                return DEFAULT_APPLICATION_CLASS_PREFIX + suffix;
             } else {
-                return projectName + "Application";
+                return projectName + suffix;
             }
         } else if (propertyName.equals(CREATE_ARTIFACTS)) {
             // by default, do not create artifacts if the configuration page is
@@ -159,27 +162,72 @@ public class VaadinFacetInstallDataModelProvider extends
         return super.getDefaultProperty(propertyName);
     }
 
+    /**
+     * Returns "Application" (for Vaadin 6 or unknown) or "Root" (for other
+     * Vaadin versions - 7 or higher).
+     * 
+     * @return
+     */
+    private String getApplicationClassSuffix() {
+        String suffix = "Application";
+        Object versionObject = getProperty(VAADIN_VERSION);
+        if (null != versionObject && !"".equals(versionObject)) {
+            boolean useRoot = VersionUtil.isVaadin7VersionString(String
+                    .valueOf(versionObject));
+            if (useRoot) {
+                suffix = "Root";
+            }
+        }
+        return suffix;
+    }
+
     @Override
     public boolean propertySet(String propertyName, Object propertyValue) {
         if (FACET_PROJECT_NAME.equals(propertyName)) {
             // re-compute application name, class and package
             resetProperty(APPLICATION_NAME, DEFAULT_APPLICATION_NAME);
             resetProperty(APPLICATION_PACKAGE, DEFAULT_APPLICATION_PACKAGE);
-            resetProperty(APPLICATION_CLASS, DEFAULT_APPLICATION_CLASS);
+            resetProperty(APPLICATION_CLASS, DEFAULT_APPLICATION_CLASS_PREFIX
+                    + getApplicationClassSuffix());
             resetProperty(PORTLET_TITLE, null);
         }
         // notify of valid values change
-        if (VAADIN_VERSION.equals(propertyName)
-                && !vaadinVersions.contains(propertyValue)) {
-            try {
-                vaadinVersions = getVaadinVersions();
-                model.notifyPropertyChange(propertyName,
-                        IDataModel.VALID_VALUES_CHG);
-            } catch (CoreException e) {
-                // no notification nor change of value list if listing local
-                // versions failed
-                ErrorUtil.handleBackgroundException(IStatus.WARNING,
-                        "Failed to update Vaadin version list", e);
+        if (VAADIN_VERSION.equals(propertyName)) {
+            if (!vaadinVersions.contains(propertyValue)) {
+                try {
+                    vaadinVersions = getVaadinVersions();
+                    model.notifyPropertyChange(propertyName,
+                            IDataModel.VALID_VALUES_CHG);
+                } catch (CoreException e) {
+                    // no notification nor change of value list if listing local
+                    // versions failed
+                    ErrorUtil.handleBackgroundException(IStatus.WARNING,
+                            "Failed to update Vaadin version list", e);
+                }
+            }
+            // update application class name (*Application/*Root) if necessary
+            if (null != propertyValue && !"".equals(propertyValue)) {
+                boolean useRoot = VersionUtil.isVaadin7VersionString(String
+                        .valueOf(propertyValue));
+                Object classNameObject = getProperty(APPLICATION_CLASS);
+                if (null != classNameObject) {
+                    String className = classNameObject.toString();
+                    if (useRoot) {
+                        if (className.endsWith("Application")) {
+                            className = className.substring(0,
+                                    className.lastIndexOf("Application"))
+                                    + "Root";
+                            setProperty(APPLICATION_CLASS, className);
+                        }
+                    } else {
+                        if (className.endsWith("Root")) {
+                            className = className.substring(0,
+                                    className.lastIndexOf("Root"))
+                                    + "Application";
+                            setProperty(APPLICATION_CLASS, className);
+                        }
+                    }
+                }
             }
         } else if (PORTLET_VERSION.equals(propertyName)) {
             if (PORTLET_VERSION20.equals(propertyValue)

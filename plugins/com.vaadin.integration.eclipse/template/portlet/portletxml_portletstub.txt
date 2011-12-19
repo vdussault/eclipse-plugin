@@ -6,7 +6,7 @@
         <!-- Map portlet to a servlet. -->
         <portlet-class>STUB_PORTLETCLASS</portlet-class>
         <init-param>
-            <name>application</name>
+            <name>STUB_INITPARAMNAME</name>
             <!-- Must match the servlet URL mapping in web.xml. -->
             <value>STUB_APPLICATION</value>
         </init-param>

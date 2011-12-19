@@ -17,6 +17,8 @@ import java.util.zip.ZipEntry;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 
+import com.vaadin.integration.eclipse.util.data.AbstractVaadinVersion;
+
 public class VersionUtil {
 
     private static final String GWT_VERSION_DEPENDENCIES_ATTRIBUTE = "GWT-Version-Dependencies";
@@ -222,6 +224,40 @@ public class VersionUtil {
             if (jarFile != null) {
                 VaadinPluginUtil.closeJarFile(jarFile);
             }
+        }
+    }
+
+    /**
+     * Checks if the Vaadin version is 7 or higher.
+     * 
+     * If major version cannot be determined, false is returned.
+     * 
+     * @param vaadinVersion
+     * @return
+     */
+    public static boolean isVaadin7(AbstractVaadinVersion vaadinVersion) {
+        return isVaadin7VersionString(vaadinVersion.getVersionNumber());
+    }
+
+    /**
+     * Checks if the Vaadin version is 7 or higher.
+     * 
+     * If major version cannot be determined, false is returned.
+     * 
+     * @param vaadinVersion
+     * @return
+     */
+    public static boolean isVaadin7VersionString(String vaadinVersion) {
+        if (null == vaadinVersion || vaadinVersion.indexOf(".") < 0) {
+            return false;
+        }
+        String majorVersionString = vaadinVersion.substring(0,
+                vaadinVersion.indexOf("."));
+        try {
+            int majorVersion = Integer.parseInt(majorVersionString);
+            return majorVersion >= 7;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 

@@ -27,6 +27,7 @@ public class WebXmlUtil {
     public static final String VAADIN_SERVLET_CLASS = "terminal.gwt.server.ApplicationServlet";
     public static final String VAADIN_GAE_SERVLET_CLASS = "terminal.gwt.server.GAEApplicationServlet";
     public static final String VAADIN_APPLICATION_CLASS_PARAMETER = "application";
+    public static final String VAADIN_ROOT_CLASS_PARAMETER = "root";
     public static final String VAADIN_WIDGETSET_PARAMETER = "widgetset";
 
     /**
@@ -35,12 +36,19 @@ public class WebXmlUtil {
      * @param artifact
      * @param applicationName
      * @param applicationClass
+     *            application or root class name
      * @param urlPattern
+     * @param servletClassName
+     * @param addVaadinMapping
+     * @param rootMapping
+     *            true to create a Root mapping (Vaadin 7) instead of an
+     *            Application mapping
      */
     @SuppressWarnings("unchecked")
     public static void addServlet(WebApp webApp, String applicationName,
             String applicationClass, String urlPattern,
-            String servletClassName, boolean addVaadinMapping) {
+            String servletClassName, boolean addVaadinMapping,
+            boolean rootMapping) {
 
         /* Create servlet type compatible with Vaadin */
         ServletType servletType = WebapplicationFactory.eINSTANCE
@@ -52,9 +60,17 @@ public class WebXmlUtil {
         servlet.setServletName(applicationName);
         servlet.setWebType(servletType);
 
-        addServletInitParameter(webApp, servlet,
-                VAADIN_APPLICATION_CLASS_PARAMETER, applicationClass,
-                "Vaadin application class to start");
+        if (rootMapping) {
+            // Vaadin 7 Root instead of a Vaadin 6 Application
+            addServletInitParameter(webApp, servlet,
+                    VAADIN_ROOT_CLASS_PARAMETER, applicationClass,
+                    "Vaadin root class to use");
+        } else {
+            // Vaadin 6 Application
+            addServletInitParameter(webApp, servlet,
+                    VAADIN_APPLICATION_CLASS_PARAMETER, applicationClass,
+                    "Vaadin application class to start");
+        }
 
         /* Set up servlet mapping */
         ServletMapping servletMapping = WebapplicationFactory.eINSTANCE
