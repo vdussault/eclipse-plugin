@@ -10,7 +10,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -238,19 +237,16 @@ public class ProjectDependencyManager {
             lib.refreshLocal(IResource.DEPTH_ONE, new SubProgressMonitor(
                     monitor, 1));
 
-            // force build in this thread to avoid possible deadlock
-            project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD,
-                    new SubProgressMonitor(monitor, 3));
-
             // make sure the GWT library versions match the Vaadin JAR
             // requirements
 
             String gwtVersion = ProjectUtil
-                    .getRequiredGWTVersionForProject(jproject);
+                    .getRequiredGWTVersionForVaadinJar(targetFile.getLocation());
 
             monitor.worked(1);
-            List<String> dependencies = ProjectUtil
-                    .getRequiredGWTDependenciesForProject(jproject);
+            List<String> dependencies = VersionUtil
+                    .getRequiredGWTDependenciesForVaadinJar(targetFile
+                            .getLocation());
 
             updateGWTLibraries(jproject, gwtVersion, dependencies,
                     new SubProgressMonitor(monitor, 4));

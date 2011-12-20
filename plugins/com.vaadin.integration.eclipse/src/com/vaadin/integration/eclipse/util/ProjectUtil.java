@@ -181,7 +181,6 @@ public class ProjectUtil {
      * 
      * @param jproject
      * @return
-     * @throws IOException
      */
     public static List<String> getRequiredGWTDependenciesForProject(
             IJavaProject jproject) {
@@ -189,15 +188,32 @@ public class ProjectUtil {
             // find Vaadin JAR on the classpath
             IPath vaadinJarPath = ProjectUtil
                     .findProjectVaadinJarPath(jproject);
+            return getRequiredGWTDependenciesForVaadinJar(vaadinJarPath);
+
+        } catch (CoreException e) {
+            ErrorUtil.handleBackgroundException(IStatus.WARNING,
+                    "Failed to determine required GWT dependencies.", e);
+        }
+
+        return new ArrayList<String>();
+    }
+
+    /**
+     * Returns a list of jar files required by the GWT version used by a
+     * specified Vaadin jar.
+     * 
+     * @param vaadinJarPath
+     * @return
+     */
+    public static List<String> getRequiredGWTDependenciesForVaadinJar(
+            IPath vaadinJarPath) {
+        try {
             if (vaadinJarPath != null) {
                 return VersionUtil
                         .getRequiredGWTDependenciesForVaadinJar(vaadinJarPath);
             }
 
         } catch (IOException e) {
-            ErrorUtil.handleBackgroundException(IStatus.WARNING,
-                    "Failed to determine required GWT dependencies.", e);
-        } catch (CoreException e) {
             ErrorUtil.handleBackgroundException(IStatus.WARNING,
                     "Failed to determine required GWT dependencies.", e);
         }
