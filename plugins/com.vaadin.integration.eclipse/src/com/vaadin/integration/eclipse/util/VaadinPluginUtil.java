@@ -185,10 +185,8 @@ public class VaadinPluginUtil {
                 + "public class " + rootClass + " extends Root {\n"
                 + "\t@Override\n"
                 + "\tpublic void init(WrappedRequest request) {\n"
-                + "\t\tsetCaption(\"" + applicationName + "\");\n"
                 + "\t\tLabel label = new Label(\"Hello Vaadin user\");\n"
-                + "\t\tgetContent().addComponent(label);\n" + "\t}\n" + "\n"
-                + "}\n";
+                + "\t\taddComponent(label);\n" + "\t}\n" + "\n" + "}\n";
 
         return template;
 
