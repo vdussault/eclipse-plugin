@@ -1,11 +1,15 @@
 package com.vaadin.integration.eclipse.wizards;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.jar.Manifest;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -17,9 +21,11 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -247,6 +253,21 @@ public class DirectoryPackageWizard extends JarPackageWizard {
         directoryPackage.setElements(directoryPackageWizardPage
                 .getSelectedElementsWithoutContainedChildren());
 
+        // save the manifest so that it gets updated BEFORE being exported
+        // - otherwise the manifest at the root of the JAR would be ok but the
+        // one in WebContent/META-INF would only be updated after the export
+        try {
+            saveManifest();
+        } catch (CoreException ex) {
+            ErrorUtil.displayError("Updating the manifest failed.", ex,
+                    getShell());
+            return false;
+        } catch (IOException ex) {
+            ErrorUtil.displayError("Updating the manifest failed.", ex,
+                    getShell());
+            return false;
+        }
+
         if (!executeExportOperation(directoryPackage
                 .createJarExportRunnable(getShell()))) {
             return false;
@@ -266,6 +287,29 @@ public class DirectoryPackageWizard extends JarPackageWizard {
         directoryPackageWizardPage.finish();
 
         return true;
+    }
+
+    private void saveManifest() throws CoreException, IOException {
+        ByteArrayOutputStream manifestOutput = new ByteArrayOutputStream();
+        Manifest manifest = directoryPackage.getManifestProvider().create(
+                directoryPackage);
+        manifest.write(manifestOutput);
+        ByteArrayInputStream fileInput = new ByteArrayInputStream(
+                manifestOutput.toByteArray());
+        IFile manifestFile = directoryPackage.getManifestFile();
+        if (manifestFile.isAccessible()) {
+            if (directoryPackage.allowOverwrite()
+                    || queryDialog(
+                            "Confirm Update",
+                            Messages.format(
+                                    "Do you want to update the manifest file ''{0}'' and use it in the package?",
+                                    BasicElementLabels.getPathLabel(
+                                            manifestFile.getFullPath(), false)))) {
+                manifestFile.setContents(fileInput, true, true, null);
+            }
+        } else {
+            manifestFile.create(fileInput, true, null);
+        }
     }
 
     private boolean queryDialog(final String title, final String message) {

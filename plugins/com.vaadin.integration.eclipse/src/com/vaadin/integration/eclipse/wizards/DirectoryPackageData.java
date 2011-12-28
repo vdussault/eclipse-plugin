@@ -71,7 +71,13 @@ public class DirectoryPackageData extends JarPackageData {
 
         setManifestLocation(manifestFile.getFullPath());
 
-        setGenerateManifest(true);
+        // DirectoryManifestProvider uses this in a somewhat non-standard
+        // manner.
+        // We need to save the manifest separately (rather than letting
+        // JarFileExportOperation save it) to make sure it is included in the
+        // WebContent/META-INF of the generated JAR - otherwise, it would be
+        // updated too late.
+        setGenerateManifest(false);
         setReuseManifest(true);
         setSaveManifest(true);
 
