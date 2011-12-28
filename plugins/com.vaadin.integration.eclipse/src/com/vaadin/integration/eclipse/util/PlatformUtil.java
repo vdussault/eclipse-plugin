@@ -19,12 +19,14 @@ public class PlatformUtil {
 
     public static String getPlatform() {
         String osname = System.getProperty("os.name");
-        if (osname.toLowerCase().contains("mac")) {
-            return "mac";
+        if (osname.toLowerCase().startsWith("windows")) {
+            return "windows";
         } else if (osname.toLowerCase().contains("linux")) {
             return "linux";
+        } else if (osname.toLowerCase().contains("mac")) {
+            return "mac";
         } else {
-            return "windows";
+            return "other";
         }
 
     }
