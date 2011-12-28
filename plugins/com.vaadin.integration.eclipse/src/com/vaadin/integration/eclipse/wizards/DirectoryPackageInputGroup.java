@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -149,10 +150,17 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
             }
 
             // Select META-INF to include also everything else than the manifest
-            // by default (e.g. Directory add-on pom.xml)
+            // by default (e.g. Directory add-on pom.xml).
+            // The manifest itself is not added as it is generated and updated
+            // separately.
             IFolder metainfFolder = webContentFolder.getFolder("META-INF");
             if (metainfFolder.exists()) {
-                result.add(metainfFolder);
+                IResource[] members = metainfFolder.members();
+                for (IResource member : members) {
+                    if (!"MANIFEST.MF".equals(member.getName())) {
+                        result.add(member);
+                    }
+                }
             }
 
             return result;
@@ -180,8 +188,13 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
     public void selectProject(final IJavaProject javaProject) {
         // select a part of the project contents by default
         for (Object child : getDefaultElements(javaProject)) {
-            initialCheckTreeItem(child);
+            if (child instanceof IFile) {
+                initialCheckListItem(child);
+            } else {
+                initialCheckTreeItem(child);
+            }
         }
+
         // hide other projects in the tree
         addTreeFilter(new ViewerFilter() {
             @Override
