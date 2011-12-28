@@ -463,7 +463,7 @@ public class WidgetsetUtil {
      * @param project
      * @param monitor
      * @return String comma-separated list of widgetset module names in the
-     *         project
+     *         project, not null
      * @throws CoreException
      */
     public static String findWidgetSetsString(IJavaProject project,

@@ -258,11 +258,17 @@ public class DirectoryPackageWizardPage extends
 
         overwriteCheckbox.setSelection(directoryPackage.allowOverwrite());
 
-        implementationTitleText.setText(directoryPackage
-                .getImplementationTitle());
-        implementationVersionText.setText(directoryPackage
-                .getImplementationVersion());
-        widgetsetsText.setText(directoryPackage.getWidgetsets());
+        // SWT Text widgets do not accept null values
+        String implementationTitle = directoryPackage.getImplementationTitle();
+        implementationTitleText
+                .setText(implementationTitle != null ? implementationTitle : "");
+        String implementationVersion = directoryPackage
+                .getImplementationVersion();
+        implementationVersionText
+                .setText(implementationVersion != null ? implementationVersion
+                        : "");
+        String widgetsets = directoryPackage.getWidgetsets();
+        widgetsetsText.setText(widgetsets != null ? widgetsets : "");
     }
 
     /**
