@@ -782,12 +782,21 @@ public class VaadinPluginUtil {
         locations.remove(null);
 
         // construct classpath string
-        // TODO deprecated variable, broken - can give wrong JRE
+        // TODO should use 1.6 if GWT 2.4 (#8037)
         IRuntimeClasspathEntry systemLibsEntry = JavaRuntime
-                .newVariableRuntimeClasspathEntry(new Path(
-                        JavaRuntime.JRELIB_VARIABLE));
+                .computeJREEntry(jproject);
+        IRuntimeClasspathEntry[] systemLibsEntries = JavaRuntime
+                .resolveRuntimeClasspathEntry(systemLibsEntry, jproject);
 
-        String classPath = systemLibsEntry.getLocation();
+        String classPath = "";
+        for (IRuntimeClasspathEntry entry : systemLibsEntries) {
+            if ("".equals(classPath)) {
+                classPath = entry.getLocation();
+            } else {
+                classPath = classPath + classpathSeparator
+                        + entry.getLocation();
+            }
+        }
         for (IPath path : locations) {
             if ("".equals(classPath)) {
                 classPath = path.toPortableString();
