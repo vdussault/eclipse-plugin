@@ -7,7 +7,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.jarpackager.IJarBuilder;
+import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+import org.eclipse.swt.widgets.Shell;
 
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.WidgetsetUtil;
@@ -102,6 +104,17 @@ public class DirectoryPackageData extends JarPackageData {
     public IJarBuilder getJarBuilder() {
         IJarBuilder builder = super.getJarBuilder();
         return new DirectoryJarBuilder(builder, webcontentPath);
+    }
+
+    @Override
+    public IJarExportRunnable createJarExportRunnable(Shell parent) {
+        return new DirectoryPackageExportOperation(this, parent);
+    }
+
+    @Override
+    public IJarExportRunnable createJarExportRunnable(
+            JarPackageData[] jarPackagesData, Shell parent) {
+        return new DirectoryPackageExportOperation(jarPackagesData, parent);
     }
 
     public String getImplementationTitle() {
