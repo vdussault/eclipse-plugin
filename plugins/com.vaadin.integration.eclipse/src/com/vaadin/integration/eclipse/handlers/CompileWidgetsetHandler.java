@@ -15,13 +15,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
@@ -125,22 +122,10 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                     }
 
                     if (!compiled) {
-
-                        PlatformUI.getWorkbench().getDisplay()
-                                .asyncExec(new Runnable() {
-
-                                    public void run() {
-                                        Shell shell = PlatformUI.getWorkbench()
-                                                .getActiveWorkbenchWindow()
-                                                .getShell();
-                                        MessageDialog
-                                                .openError(shell,
-                                                        "Select widgetset",
-                                                        "Select a widgetset file (..widgetset.gwt.xml) or a Vaadin project to compile.");
-
-                                    }
-                                });
-
+                        ErrorUtil
+                                .displayErrorFromBackgroundThread(
+                                        "Select widgetset",
+                                        "Select a widgetset file (..widgetset.gwt.xml) or a Vaadin project to compile.");
                     }
                 } catch (OperationCanceledException e) {
                     // Do nothing if user cancels compilation
@@ -203,19 +188,8 @@ public class CompileWidgetsetHandler extends AbstractHandler {
     }
 
     protected void showException(final Exception e) {
-        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-
-            public void run() {
-                Shell shell = PlatformUI.getWorkbench()
-                        .getActiveWorkbenchWindow().getShell();
-
-                MessageDialog.openError(shell, "Error compiling widgetset",
-                        "Error compiling widgetset:\n" + e.getClass().getName()
-                                + " - " + e.getMessage()
-                                + "\n\nSee error log for details.");
-
-            }
-        });
-
+        ErrorUtil.displayErrorFromBackgroundThread("Error compiling widgetset",
+                "Error compiling widgetset:\n" + e.getClass().getName() + " - "
+                        + e.getMessage() + "\n\nSee error log for details.");
     }
 }
