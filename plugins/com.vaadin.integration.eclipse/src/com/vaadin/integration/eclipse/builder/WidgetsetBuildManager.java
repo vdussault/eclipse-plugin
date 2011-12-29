@@ -469,7 +469,8 @@ public class WidgetsetBuildManager {
                     widgetset = tempWidgetsets[0];
                 }
                 if (widgetset == null) {
-                    showErrorMessage("Cannot compile widgetset",
+                    ErrorUtil.displayErrorFromBackgroundThread(
+                            "Cannot compile widgetset",
                             "The project has no widgetset to compile.");
                     return;
                 }
@@ -503,11 +504,12 @@ public class WidgetsetBuildManager {
             } else {
                 // TODO ask the user, compile all the selected ones
                 // TODO queue immediately as separate tasks
-                showErrorMessage(
-                        "Select widgetset",
-                        "Multiple widgetsets in project "
-                                + project.getName()
-                                + ". Select a widgetset file (..widgetset.gwt.xml) to compile.");
+                ErrorUtil
+                        .displayWarningFromBackgroundThread(
+                                "Select widgetset",
+                                "Multiple widgetsets in project "
+                                        + project.getName()
+                                        + ". Select a widgetset file (..widgetset.gwt.xml) to compile.");
                 // for (String widgetset : widgetsets) {
                 // compileWidgetset(project, widgetset, monitor);
                 // }
@@ -585,22 +587,12 @@ public class WidgetsetBuildManager {
                 widgetsetBuildRunning.remove(key);
             }
         } else {
-            showErrorMessage("Widgetset build running",
+            ErrorUtil.displayWarningFromBackgroundThread(
+                    "Widgetset build running",
                     "A build for the widgetset " + widgetset
                             + " in the project " + project.getName()
                             + " is already running.");
         }
-    }
-
-    private static void showErrorMessage(final String title,
-            final String message) {
-        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-            public void run() {
-                Shell shell = PlatformUI.getWorkbench()
-                        .getActiveWorkbenchWindow().getShell();
-                MessageDialog.openError(shell, title, message);
-            }
-        });
     }
 
     /**

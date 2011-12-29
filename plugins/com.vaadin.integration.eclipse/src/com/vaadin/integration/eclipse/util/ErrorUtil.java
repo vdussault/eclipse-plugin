@@ -5,6 +5,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 
 import com.vaadin.integration.eclipse.VaadinPlugin;
 
@@ -98,6 +99,37 @@ public class ErrorUtil {
     public static void displayError(String message, Throwable ex, Shell shell) {
         // TODO trace if needed and report to the user
         MessageDialog.openError(shell, "Error", message);
+    }
+
+    public static void displayErrorFromBackgroundThread(final String title,
+            final String message) {
+        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+            public void run() {
+                Shell shell = PlatformUI.getWorkbench()
+                        .getActiveWorkbenchWindow().getShell();
+                MessageDialog.openError(shell, title, message);
+            }
+        });
+    }
+
+    /**
+     * Display a warning message to the user.
+     * 
+     * @param message
+     */
+    public static void displayWarning(String message, Shell shell) {
+        MessageDialog.openWarning(shell, "Warning", message);
+    }
+
+    public static void displayWarningFromBackgroundThread(final String title,
+            final String message) {
+        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+            public void run() {
+                Shell shell = PlatformUI.getWorkbench()
+                        .getActiveWorkbenchWindow().getShell();
+                MessageDialog.openWarning(shell, title, message);
+            }
+        });
     }
 
     public static CoreException newCoreException(String message, Throwable e) {

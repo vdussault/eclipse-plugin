@@ -10,6 +10,7 @@ import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -50,6 +51,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMInstall2;
+import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 import org.osgi.framework.Bundle;
@@ -698,6 +701,9 @@ public class VaadinPluginUtil {
      * accessing the server side annotations.
      * 
      * @param jproject
+     * @param vmInstall
+     *            JRE/JDK to select the system libraries to include on the class
+     *            path
      * @param includeOutputDirectories
      *            true to also include output (class file) locations on the
      *            classpath
@@ -706,8 +712,8 @@ public class VaadinPluginUtil {
      * @throws JavaModelException
      */
     public static String getProjectBaseClasspath(IJavaProject jproject,
-            boolean includeOutputDirectories) throws CoreException,
-            JavaModelException {
+            IVMInstall vmInstall, boolean includeOutputDirectories)
+            throws CoreException, JavaModelException {
         String classpathSeparator = PlatformUtil.getClasspathSeparator();
         IProject project = jproject.getProject();
 
@@ -781,13 +787,17 @@ public class VaadinPluginUtil {
         // safeguard
         locations.remove(null);
 
-        // construct classpath string
-        // TODO should use 1.6 if GWT 2.4 (#8037)
+        // get JDK libraries for the compilation classpath
+
+        IPath jreContainerPath = JavaRuntime.newJREContainerPath(vmInstall);
         IRuntimeClasspathEntry systemLibsEntry = JavaRuntime
-                .computeJREEntry(jproject);
+                .newRuntimeContainerClasspathEntry(jreContainerPath,
+                        IRuntimeClasspathEntry.STANDARD_CLASSES, jproject);
+
         IRuntimeClasspathEntry[] systemLibsEntries = JavaRuntime
                 .resolveRuntimeClasspathEntry(systemLibsEntry, jproject);
 
+        // construct classpath string
         String classPath = "";
         for (IRuntimeClasspathEntry entry : systemLibsEntries) {
             if ("".equals(classPath)) {
@@ -810,21 +820,87 @@ public class VaadinPluginUtil {
     }
 
     /**
-     * Returns the full path to the Java executable. The project JVM is used if
+     * Checks whether a VM installation is Java 1.6 or later.
+     * 
+     * @param vmInstall
+     * @return true if the VM version is 1.6 or later, false if older or unknown
+     */
+    public static boolean isJdk16(IVMInstall vmInstall) {
+        if (!(vmInstall instanceof IVMInstall2)) {
+            return false;
+        }
+        // simplified from what JavaModelUtil does
+        String version = ((IVMInstall2) vmInstall).getJavaVersion();
+        if (version == null) {
+            return false;
+        }
+        return version.startsWith(JavaCore.VERSION_1_6)
+                || version.startsWith(JavaCore.VERSION_1_7);
+    }
+
+    /**
+     * Returns the JVM install to use for a project. The project JVM is used if
      * available, the workspace default VM if none is specified for the project.
      * 
      * @param jproject
+     * @param gwtCompilation
+     *            true if used for running the GWT compiler, in which case
+     *            another JVM may be selected when using GWT 2.4 and the project
+     *            JVM is older than 1.6
+     * @return JVM installation
+     * @throws CoreException
+     */
+    public static IVMInstall getJvmInstall(IJavaProject jproject,
+            boolean gwtCompilation) throws CoreException {
+        // available VMs in the order they should be tried - may contain nulls
+        List<IVMInstall> availableVms = new ArrayList<IVMInstall>();
+        // first try the project VM
+        availableVms.add(JavaRuntime.getVMInstall(jproject));
+        // ... then Eclipse default VM
+        availableVms.add(JavaRuntime.getDefaultVMInstall());
+        // ... and finally other VMs configured in Eclipse
+        IVMInstallType[] types = JavaRuntime.getVMInstallTypes();
+        for (IVMInstallType type : types) {
+            IVMInstall[] installs = type.getVMInstalls();
+            for (IVMInstall install : installs) {
+                availableVms.add(install);
+            }
+        }
+
+        // remove nulls
+        Iterator<IVMInstall> it = availableVms.iterator();
+        while (it.hasNext()) {
+            if (it.next() == null) {
+                it.remove();
+            }
+        }
+
+        boolean needJdk16 = gwtCompilation
+                && ProjectUtil.isGwt24(jproject.getProject());
+
+        // return the first suitable VM
+        for (IVMInstall vmInstall : availableVms) {
+            if (!needJdk16 || isJdk16(vmInstall)) {
+                return vmInstall;
+            }
+        }
+
+        // as a fallback, return the project VM or Eclipse default VM even if
+        // not
+        // confirmed as the correct version
+        return availableVms.get(0);
+    }
+
+    /**
+     * Returns the full path to the Java executable of a given JVM install.
+     * 
+     * @param vmInstall
      * @return JVM executable path in platform specific format
      * @throws CoreException
      */
-    public static String getJvmExecutablePath(IJavaProject jproject)
+    public static String getJvmExecutablePath(IVMInstall vmInstall)
             throws CoreException {
         String vmName;
-        IVMInstall vmInstall = JavaRuntime.getVMInstall(jproject);
-        // this might be unnecessary
-        if (vmInstall == null) {
-            vmInstall = JavaRuntime.getDefaultVMInstall();
-        }
         File vmBinDir = new File(vmInstall.getInstallLocation(), "bin");
         // windows hack, as Eclipse can run the JVM but does not give its
         // executable name through public APIs

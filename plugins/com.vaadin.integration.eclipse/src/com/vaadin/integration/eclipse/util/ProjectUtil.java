@@ -275,6 +275,26 @@ public class ProjectUtil {
         return false;
     }
 
+    public static boolean isGwt24(IProject project) {
+        IJavaProject jproject = JavaCore.create(project);
+        if (jproject != null) {
+            try {
+                if (jproject
+                        .findType("com.google.gwt.geolocation.client.Position") != null) {
+                    return true;
+                }
+            } catch (JavaModelException e) {
+                ErrorUtil
+                        .handleBackgroundException(
+                                IStatus.WARNING,
+                                "Failed to check the GWT version used in the project, assuming 2.3 or earlier",
+                                e);
+            }
+        }
+        // default value
+        return false;
+    }
+
     /**
      * Checks which Vaadin version is in use in the project. This uses
      * {@link #getVaadinLibraryInProject(IProject, boolean)} to find the Vaadin

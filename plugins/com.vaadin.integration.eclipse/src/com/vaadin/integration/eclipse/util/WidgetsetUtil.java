@@ -41,6 +41,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jst.j2ee.web.componentcore.util.WebArtifactEdit;
 import org.eclipse.ui.console.MessageConsoleStream;
 
@@ -113,7 +115,18 @@ public class WidgetsetUtil {
 
             moduleName = moduleName.replace(".client.", ".");
 
-            String vmName = VaadinPluginUtil.getJvmExecutablePath(jproject);
+            IVMInstall vmInstall = VaadinPluginUtil.getJvmInstall(jproject,
+                    true);
+            if (!VaadinPluginUtil.isJdk16(vmInstall)
+                    && ProjectUtil.isGwt24(project)) {
+                ErrorUtil
+                        .displayWarningFromBackgroundThread(
+                                "Java6 required",
+                                "Widget set compilation requires Java6.\n"
+                                        + "The project can still use Java5 but you need to make JDK 6 available in Eclipse\n"
+                                        + "(see Preferences => Java => Installed JREs).");
+            }
+            String vmName = VaadinPluginUtil.getJvmExecutablePath(vmInstall);
             args.add(vmName);
 
             // refresh only WebContent/VAADIN/widgetsets
@@ -127,7 +140,7 @@ public class WidgetsetUtil {
 
             // construct the class path, including GWT JARs and project sources
             String classPath = VaadinPluginUtil.getProjectBaseClasspath(
-                    jproject, true);
+                    jproject, vmInstall, true);
 
             String classpathSeparator = PlatformUtil.getClasspathSeparator();
 
@@ -261,6 +274,13 @@ public class WidgetsetUtil {
                         + args);
             } else {
                 newMessageStream.println("Compiling widgetset " + moduleName);
+            }
+
+            // print warning if not using project VM (#8037)
+            if (!vmInstall.equals(JavaRuntime.getVMInstall(jproject))) {
+                newMessageStream
+                        .println("Warning: Not using project VM for GWT compilation.\n"
+                                + "When using GWT 2.4, select JRE 1.6 or later in project preferences.");
             }
 
             InputStream inputStream = exec.getInputStream();

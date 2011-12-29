@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
@@ -218,7 +219,9 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
 
             // get the project VM or the default java VM path from Eclipse
             IJavaProject jproject = JavaCore.create(project);
-            String vmName = VaadinPluginUtil.getJvmExecutablePath(jproject);
+            IVMInstall vmInstall = VaadinPluginUtil.getJvmInstall(jproject,
+                    true);
+            String vmName = VaadinPluginUtil.getJvmExecutablePath(vmInstall);
             workingCopy.setAttribute(IExternalToolConstants.ATTR_LOCATION,
                     vmName);
 
@@ -247,7 +250,7 @@ public class NewWidgetsetWizard extends Wizard implements INewWizard {
 
             // construct the class path, including GWT JARs and project sources
             String classPath = VaadinPluginUtil.getProjectBaseClasspath(
-                    jproject, false);
+                    jproject, vmInstall, false);
 
             // construct rest of the arguments for the launch
 
