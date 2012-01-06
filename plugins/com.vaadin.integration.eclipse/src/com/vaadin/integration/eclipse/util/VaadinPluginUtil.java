@@ -604,6 +604,9 @@ public class VaadinPluginUtil {
             return new IType[0];
         }
         IType superType = javaProject.findType(superClass);
+        if (superType == null) {
+            return new IType[0];
+        }
         ITypeHierarchy newTypeHierarchy = superType.newTypeHierarchy(monitor);
 
         IType[] subTypes;
@@ -629,6 +632,14 @@ public class VaadinPluginUtil {
         // find all non-binary subclasses of Application in the project
         return getSubClasses(project, VaadinPlugin.APPLICATION_CLASS_FULL_NAME,
                 true, monitor);
+    }
+
+    public static IType[] getRootClasses(IProject project,
+            IProgressMonitor monitor) throws JavaModelException {
+        // find all non-binary subclasses of Root in the project
+        // returns an empty array if Root class not found (not Vaadin 7)
+        return getSubClasses(project, VaadinPlugin.ROOT_CLASS_FULL_NAME, true,
+                monitor);
     }
 
     public static boolean isVaadinJar(IPath path) {

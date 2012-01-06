@@ -136,7 +136,7 @@ public class NewWidgetsetWizardPage extends AbstractVaadinNewTypeWizardPage {
         // note that the application list is based on application classes, not
         // web.xml
         if (applicationList != null) {
-            applicationList.update(project);
+            applicationList.update(project, false);
             // select all applications by default
             applicationList.selectAll();
 

@@ -465,6 +465,16 @@ public class ProjectUtil {
 
     }
 
+    public static boolean isVaadin7(IProject project) {
+        try {
+            String vaadinVersion = getVaadinLibraryVersion(project, true);
+            return VersionUtil.isVaadin7VersionString(vaadinVersion);
+        } catch (CoreException e) {
+            ErrorUtil.handleBackgroundException("", e);
+            return false;
+        }
+    }
+
     /**
      * Ensure the project uses the latest Vaadin facet if the project is a
      * faceted project using Vaadin. Also ensure that the project has the

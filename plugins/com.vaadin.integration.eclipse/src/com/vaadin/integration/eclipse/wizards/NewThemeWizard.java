@@ -87,6 +87,7 @@ public class NewThemeWizard extends Wizard implements INewWizard {
     public boolean performFinish() {
         // these need to be accessed in the SWT UI thread
         final String thmeName = page.getThemeName();
+        // TODO also handle Roots?
         final List<IType> appClassesToModify = page
                 .getApplicationClassesToModify();
         IRunnableWithProgress op = new IRunnableWithProgress() {
@@ -154,6 +155,7 @@ public class NewThemeWizard extends Wizard implements INewWizard {
         }
 
         // update selected application classes
+        // TODO also handle Roots?
         modifiedJavaFiles = new ArrayList<IFile>();
         for (IType app : appClassesToModify) {
             // should not happen
