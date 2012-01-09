@@ -24,6 +24,7 @@ import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
 import com.vaadin.integration.eclipse.IVaadinFacetInstallDataModelProperties;
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
+import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.VersionUtil;
 import com.vaadin.integration.eclipse.util.data.LocalVaadinVersion;
@@ -169,13 +170,13 @@ public class VaadinFacetInstallDataModelProvider extends
      * @return
      */
     private String getApplicationClassSuffix() {
-        String suffix = "Application";
+        String suffix = VaadinPlugin.APPLICATION_CLASS_NAME;
         Object versionObject = getProperty(VAADIN_VERSION);
         if (null != versionObject && !"".equals(versionObject)) {
             boolean useRoot = VersionUtil.isVaadin7VersionString(String
                     .valueOf(versionObject));
             if (useRoot) {
-                suffix = "Root";
+                suffix = VaadinPlugin.ROOT_CLASS_NAME;
             }
         }
         return suffix;
@@ -213,17 +214,21 @@ public class VaadinFacetInstallDataModelProvider extends
                 if (null != classNameObject) {
                     String className = classNameObject.toString();
                     if (useRoot) {
-                        if (className.endsWith("Application")) {
-                            className = className.substring(0,
-                                    className.lastIndexOf("Application"))
-                                    + "Root";
+                        if (className
+                                .endsWith(VaadinPlugin.APPLICATION_CLASS_NAME)) {
+                            className = className
+                                    .substring(
+                                            0,
+                                            className
+                                                    .lastIndexOf(VaadinPlugin.APPLICATION_CLASS_NAME))
+                                    + VaadinPlugin.ROOT_CLASS_NAME;
                             setProperty(APPLICATION_CLASS, className);
                         }
                     } else {
-                        if (className.endsWith("Root")) {
-                            className = className.substring(0,
-                                    className.lastIndexOf("Root"))
-                                    + "Application";
+                        if (className.endsWith(VaadinPlugin.ROOT_CLASS_NAME)) {
+                            className = className.substring(0, className
+                                    .lastIndexOf(VaadinPlugin.ROOT_CLASS_NAME))
+                                    + VaadinPlugin.APPLICATION_CLASS_NAME;
                             setProperty(APPLICATION_CLASS, className);
                         }
                     }
