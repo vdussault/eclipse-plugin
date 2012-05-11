@@ -604,7 +604,7 @@ public class WidgetsetUtil {
         boolean result = false;
         try {
             IProgressMonitor monitor = new NullProgressMonitor();
-            if (!ProjectUtil.isVaadin62(project)) {
+            if (ProjectUtil.getVaadinVersion(project) < 6.2) {
                 return false;
             }
 

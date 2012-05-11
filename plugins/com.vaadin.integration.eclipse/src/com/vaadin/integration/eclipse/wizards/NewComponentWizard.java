@@ -132,7 +132,7 @@ public class NewComponentWizard extends Wizard implements INewWizard {
         try {
 
             TEMPLATE template = page.getTemplate();
-            if (template.hasClientWidget()) {
+            if (template.hasClientTemplates()) {
                 ProjectDependencyManager.ensureGWTLibraries(page.getProject(),
                         new SubProgressMonitor(monitor, 5));
 
@@ -158,7 +158,8 @@ public class NewComponentWizard extends Wizard implements INewWizard {
             IProgressMonitor monitor) throws CoreException {
         // we know that a client side widget should be built
         String widgetSetName;
-        if (template.isVaadin62()) {
+        if (!template.isSuitableFor(6)) {
+            // 6.2+
             // Create the widgetset if it did not exist. This way, the user can
             // immediately move the widgetset package instead of needing to
             // compile widgetset first; the package is determined based on the
@@ -178,7 +179,8 @@ public class NewComponentWizard extends Wizard implements INewWizard {
                     .getPackageFragmentRoot();
             IType widgetSet = null;
             final String packageName;
-            if (template.isVaadin62()) {
+            if (!template.isSuitableFor(6)) {
+                // 6.2+
                 packageName = widgetSetName.replaceAll("\\.[^\\.]+$",
                         ".client.ui");
             } else {
@@ -202,7 +204,7 @@ public class NewComponentWizard extends Wizard implements INewWizard {
 
             String iComponentStub = VaadinPluginUtil
                     .readTextFromTemplate("component/"
-                            + template.getClientTemplate() + ".txt");
+                            + template.getClientTemplates() + ".txt");
 
             String clientSidePrefix = VaadinPlugin.VAADIN_CLIENT_SIDE_CLASS_PREFIX;
             final String simpleName = clientSidePrefix + typeName;
@@ -229,7 +231,7 @@ public class NewComponentWizard extends Wizard implements INewWizard {
             clientSideJavaFile = (IFile) clientSideClass
                     .getCorrespondingResource();
 
-            if (!template.isVaadin62()) {
+            if (!template.isSuitableFor(6.2)) {
                 // if old style widgetset,
                 // modify widgetset to include newly created class
 

@@ -451,6 +451,7 @@ public class ProjectUtil {
      * @param project
      * @return
      */
+    /*-
     public static boolean isVaadin62(IProject project) {
         IPath findProjectVaadinJarPath;
         try {
@@ -472,6 +473,26 @@ public class ProjectUtil {
         } catch (CoreException e) {
             ErrorUtil.handleBackgroundException("", e);
             return false;
+        }
+    }
+    -*/
+
+    public static double getVaadinVersion(IProject project) {
+        try {
+            String vaadinVersion = getVaadinLibraryVersion(project, true);
+            // return VersionUtil.isVaadin7VersionString(vaadinVersion);
+            String versionString = vaadinVersion.substring(0,
+                    vaadinVersion.lastIndexOf("."));
+
+            return Double.parseDouble(versionString);
+
+            // TODO indicate to user if this fails -> unknown version
+        } catch (CoreException e) {
+            ErrorUtil.handleBackgroundException("", e);
+            return Double.MAX_VALUE;
+        } catch (NumberFormatException e) {
+            ErrorUtil.handleBackgroundException("", e);
+            return Double.MAX_VALUE;
         }
     }
 
