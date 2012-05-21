@@ -1,0 +1,23 @@
+<%@ jet class="StateTemplate"
+		package="com.vaadin.integration.eclipse.templates.v7"
+		imports="com.vaadin.integration.eclipse.templates.*"
+		skeleton="../javagenerator.skeleton" %>
+<% typeName = componentName + "State"; %>
+<% target =  widgetsetPackage + ".client." + componentName.toLowerCase(); %>
+<% fileName = typeName + ".java"; %>
+package <%= target %>;
+
+public class <%= typeName %> extends <%= stateExtends %> {
+
+	// TODO example state
+    private String text;
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+}

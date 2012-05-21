@@ -1,0 +1,31 @@
+/*
+ * JET GENERATED do not edit!
+ * The source templates are in the templates folder (note: not package).
+ *
+ * The JET source templates can be edited. They are then transformed into java
+ * template classes by the JET plugin. To use the generated java templates, no 
+ * dependencies are required.
+ */
+public class CLASS implements Template {   
+    private String target = null;
+    private String fileName = null;
+    private String typeName = null;
+	
+	public String getTarget() {
+		return target;
+	}
+ 
+ 	public String getFileName() {
+ 		return fileName;
+ 	}
+ 	
+ 	public String getTypeName() {
+ 		return typeName;
+ 	}
+ 
+   public String generate(String componentName, String componentPackage, 
+   			String componentExtends, String stateExtends, String widgetsetPackage, TEMPLATES t) {
+     return "";
+   }
+   
+ }

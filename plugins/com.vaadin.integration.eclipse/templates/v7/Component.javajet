@@ -1,0 +1,60 @@
+<%@ jet class="ComponentTemplate"
+		package="com.vaadin.integration.eclipse.templates.v7"
+		imports="com.vaadin.integration.eclipse.templates.*"
+		skeleton="../javagenerator.skeleton" %>
+<% typeName = componentName; %>
+<% target =  componentPackage; %>
+<% fileName = typeName + ".java"; %>
+<% String clientPackage = widgetsetPackage + ".client." + componentName.toLowerCase(); %>
+package <%= target %>;
+
+<% if (t.hasClientRpc()) { %>
+import <%= clientPackage %>.<%= typeName %>ClientRpc;
+<% } %>
+<% if (t.hasServerRpc()) { %>
+import <%= clientPackage %>.<%= typeName %>ServerRpc;
+import com.vaadin.terminal.gwt.client.MouseEventDetails;
+<% } %>
+<% if (t.hasState()) { %>
+import <%= clientPackage %>.<%= typeName %>State;
+<% } %>
+
+public class <%= typeName %> extends <%= componentExtends %> {
+
+<% if (t.hasServerRpc()) { %>
+    private <%= typeName %>ServerRpc rpc = new <%= typeName %>ServerRpc() {
+        private int clickCount = 0;
+        
+        public void clicked(MouseEventDetails mouseDetails) {
+ <% if (t.hasClientRpc()) { %>
+            // nag every 5:th click using RPC
+            if (++clickCount % 5 == 0) {
+                getRpcProxy(<%= typeName %>ClientRpc.class).alert(
+                        "Ok, that's enough!");
+            }
+ <% } %>
+ <% if (t.hasState()) { %>
+            // update shared state
+            getState().setText("You have clicked " + clickCount + " times");
+            requestRepaint();
+        }
+    };
+ <% } %>  
+<% } %>
+
+    public <%= typeName %>() {
+<% if (t.hasState()) { %>
+        getState().setText("This is <%= componentName %>");
+<% } %>
+<% if (t.hasServerRpc()) { %>
+        registerRpc(rpc);
+<% } %>
+    }
+
+<% if (t.hasState()) { %>
+    @Override
+    public <%= typeName %>State getState() {
+        return (<%= typeName %>State) super.getState();
+    }
+<% } %>
+}

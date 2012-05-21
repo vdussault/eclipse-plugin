@@ -730,13 +730,19 @@ public class WidgetsetUtil {
          * one that has shortest package name. Add "WidgetSet" to that.
          */
 
-        IType[] applicationClasses = VaadinPluginUtil.getApplicationClasses(
+        IType[] prospectClasses = VaadinPluginUtil.getApplicationClasses(
                 project.getProject(), monitor);
+        if (prospectClasses.length == 0) {
+            // No application classes in project, try roots
+            prospectClasses = VaadinPluginUtil.getRootClasses(
+                    project.getProject(), monitor);
+        }
+
         if (defaultPackage == null) {
             String shortestPackagename = null;
             IType appWithShortestPackageName = null;
-            for (int i = 0; i < applicationClasses.length; i++) {
-                IType appclass = applicationClasses[i];
+            for (int i = 0; i < prospectClasses.length; i++) {
+                IType appclass = prospectClasses[i];
                 String packagename = appclass.getPackageFragment().toString();
                 if (shortestPackagename == null
                         || packagename.length() < shortestPackagename.length()) {
@@ -792,7 +798,7 @@ public class WidgetsetUtil {
             } else {
                 try {
                     WebXmlUtil.setWidgetSet(artifact, fullyQualifiedName,
-                            Arrays.asList(applicationClasses));
+                            Arrays.asList(prospectClasses));
                     artifact.saveIfNecessary(null);
                 } finally {
                     artifact.dispose();

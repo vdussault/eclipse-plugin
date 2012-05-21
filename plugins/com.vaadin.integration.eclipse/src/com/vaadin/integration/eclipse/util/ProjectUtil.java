@@ -480,9 +480,14 @@ public class ProjectUtil {
     public static double getVaadinVersion(IProject project) {
         try {
             String vaadinVersion = getVaadinLibraryVersion(project, true);
-            // return VersionUtil.isVaadin7VersionString(vaadinVersion);
+
+            if (vaadinVersion == null) {
+                // Yeah... Probably 6.0, but...
+                return Double.MIN_VALUE;
+            }
+
             String versionString = vaadinVersion.substring(0,
-                    vaadinVersion.lastIndexOf("."));
+                    vaadinVersion.indexOf(".", vaadinVersion.indexOf(".") + 1));
 
             return Double.parseDouble(versionString);
 

@@ -1,0 +1,102 @@
+<%@ jet class="ConnectorTemplate"
+		package="com.vaadin.integration.eclipse.templates.v7"
+		imports="com.vaadin.integration.eclipse.templates.*"
+		skeleton="../javagenerator.skeleton" %>
+<% typeName = componentName + "Connector"; %>
+<% target =  widgetsetPackage + ".client." + componentName.toLowerCase(); %>
+<% fileName = typeName + ".java"; %>
+<% String widgetName = (t.hasWidget()? componentName + "Widget" : "Label"); %>
+<% String stateName = componentName + "State"; %>
+<% String serverRpcName = componentName + "ServerRpc"; %>
+<% String clientRpcName = componentName + "ClientRpc"; %>
+package <%= target %>;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Widget;
+
+import com.vaadin.terminal.gwt.client.ui.AbstractComponentConnector;
+import com.vaadin.terminal.gwt.client.ui.Connect;
+
+import <%= componentPackage %>.<%= componentName %>;
+<% if (t.hasWidget()) { %>
+import <%= target + "." + widgetName %>;
+<% } else { %>
+import com.google.gwt.user.client.ui.Label;
+<% } %>
+<% if (t.hasServerRpc()) { %>
+import <%= target %>.<%= serverRpcName %>;
+import com.vaadin.terminal.gwt.client.communication.RpcProxy;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.vaadin.terminal.gwt.client.MouseEventDetails;
+import com.vaadin.terminal.gwt.client.MouseEventDetailsBuilder;
+<% } %>
+<% if (t.hasClientRpc()) { %>
+import <%= target %>.<%= clientRpcName %>;
+<% } %>
+<% if (t.hasState()) { %>
+import <%= target %>.<%= stateName %>;
+import com.vaadin.terminal.gwt.client.communication.StateChangeEvent;
+<% } %>
+
+@Connect(<%= componentName %>.class)
+public class <%= typeName %> extends AbstractComponentConnector {
+
+<% if (t.hasServerRpc()) { %>
+    <%= serverRpcName %> rpc = RpcProxy
+            .create(<%= serverRpcName %>.class, this);
+<% } %>
+	
+    public <%= typeName %>() {
+<% if (t.hasClientRpc()) { %>    
+        registerRpc(<%= clientRpcName %>.class, new <%= clientRpcName %>() {
+            public void alert(String message) {
+            	// TODO Do something useful
+                Window.alert(message);
+            }
+        });
+<% } %>
+<% if (t.hasServerRpc()) { %>
+
+		// TODO ServerRpc usage example, do something useful instead
+        getWidget().addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                final MouseEventDetails mouseDetails = MouseEventDetailsBuilder
+                        .buildMouseEventDetails(event.getNativeEvent(),
+                                getWidget().getElement());
+                rpc.clicked(mouseDetails);
+            }
+        });
+<% } %>
+
+    }
+
+    @Override
+    protected Widget createWidget() {
+        return GWT.create(<%= widgetName %>.class);
+    }
+
+    @Override
+    public <%= widgetName %> getWidget() {
+        return (<%= widgetName %>) super.getWidget();
+    }
+
+<% if (t.hasState()) { %>
+    @Override
+    public <%= stateName %> getState() {
+        return (<%= stateName %>) super.getState();
+    }
+
+    @Override
+    public void onStateChanged(StateChangeEvent stateChangeEvent) {
+        super.onStateChanged(stateChangeEvent);
+		
+		// TODO do something useful
+        final String text = getState().getText();
+        getWidget().setText(text);
+    }
+<% } %>
+
+}
+

@@ -10,12 +10,14 @@ public class VaadinPlugin extends AbstractUIPlugin {
     public static final String PLUGIN_ID = "com.vaadin.integration.eclipse";
 
     public static final String VAADIN_PACKAGE_PREFIX = "com.vaadin.";
+    public static final String VAADIN_UI_PACKAGE_PREFIX = VAADIN_PACKAGE_PREFIX
+            + "ui.";
     public static final String APPLICATION_CLASS_NAME = "Application";
     public static final String APPLICATION_CLASS_FULL_NAME = VAADIN_PACKAGE_PREFIX
             + APPLICATION_CLASS_NAME;
     public static final String ROOT_CLASS_NAME = "Root";
-    public static final String ROOT_CLASS_FULL_NAME = VAADIN_PACKAGE_PREFIX
-            + APPLICATION_CLASS_NAME;
+    public static final String ROOT_CLASS_FULL_NAME = VAADIN_UI_PACKAGE_PREFIX
+            + ROOT_CLASS_NAME;
 
     public static final String ID_COMPILE_WS_APP = "compilews";
 

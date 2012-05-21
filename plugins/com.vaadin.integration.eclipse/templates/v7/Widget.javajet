@@ -1,0 +1,24 @@
+<%@ jet class="WidgetTemplate"
+		package="com.vaadin.integration.eclipse.templates.v7"
+		imports="com.vaadin.integration.eclipse.templates.*"
+		skeleton="../javagenerator.skeleton" %>
+<% typeName = componentName + "Widget"; %>
+<% target =  widgetsetPackage + ".client." + componentName.toLowerCase(); %>
+<% fileName = typeName + ".java"; %>
+package <%= target %>;
+
+import com.google.gwt.user.client.ui.Label;
+
+// TODO extend any GWT Widget
+public class <%= typeName %> extends Label {
+
+    public static final String CLASSNAME = "<%= componentName.toLowerCase() %>";
+
+    public <%= typeName %>() {
+
+        // setText("<%= componentName %> sets the text via <%= componentName %>Connector using <%= componentName %>State");
+        setStyleName(CLASSNAME);
+
+    }
+
+}

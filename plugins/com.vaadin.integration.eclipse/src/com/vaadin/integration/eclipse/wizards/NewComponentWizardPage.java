@@ -1,15 +1,16 @@
 package com.vaadin.integration.eclipse.wizards;
 
-import java.io.IOException;
+import java.util.Arrays;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogPage;
@@ -26,6 +27,7 @@ import org.eclipse.swt.widgets.Label;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
+import com.vaadin.integration.eclipse.templates.TEMPLATES;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
@@ -41,91 +43,14 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
 
     private String widgetsetName;
 
-    private ICompilationUnit createdClientSideClass;
+    // private ICompilationUnit createdClientSideClass;
 
     private double projectVersion; // maj.min
 
     private Combo templateCombo;
     private Label templateDescriptionLabel;
 
-    private TEMPLATE currentTemplate;
-
-    /**
-     * Component template to use.
-     * 
-     * The titles are shown in combo boxes and are used to identify the
-     * templates (together with vaadin62). The first suitable template is
-     * selected by default.
-     */
-    public enum TEMPLATE {
-        // templates for pre-6.2 versions
-        BASIC_TK5_V6("Clean", "Simple client-side and server-side component",
-                new String[] { "widget_basic_tk5_v6" }, 0, 6.2), //
-        SERVER_ONLY_TK5_V6("Server-side only",
-                "Server-side component only, no client-side widget", null, 0,
-                6.2), //
-        // templates for Vaadin 6.2 and rest of 6 series
-        COMMUNICATION_V62(
-                "Simple",
-                "Simple client-side and server-side component with client-server communication",
-                new String[] { "widget_communication_v62" }, 6.2, 7), //
-        BASIC_V62("Clean", "Simple client-side and server-side component",
-                new String[] { "widget_basic_v62" }, 6.2, 7), //
-        SERVER_ONLY_V62("Server-side only",
-                "Server-side component only, no client-side widget", null, 6.2,
-                7),
-        // templates for 7
-        FULL_FLEDGED(
-                "Full fleded",
-                "Server-side & client-side with shared state and RPC, including custom widget",
-                new String[] { "widget_basic_v7", "connector_full_v7" }, 7,
-                Double.MAX_VALUE), //
-        CONNECTOR_ONLY("Connector only",
-                "Server-side component and client-side connector only",
-                new String[] { "connector_basic_v7" }, 7, Double.MAX_VALUE);
-
-        // title shown in combo box
-        private final String title;
-        // somewhat longer description
-        private final String description;
-        // file name of the client-side template or null is no client-side class
-        private final String[] clientTemplates;
-        // minversion inclusive, maxversion exclusive
-        private final double minVersion;
-        private final double maxVersion;
-
-        // TODO add serverCuTemplate, serverMethodTemplates,
-        // serverFieldTemplates, serverImports etc.
-
-        private TEMPLATE(String title, String description, String[] templates,
-                double minVersion, double maxVersion) {
-            this.title = title;
-            this.description = description;
-            clientTemplates = templates;
-            this.minVersion = minVersion;
-            this.maxVersion = maxVersion;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public String[] getClientTemplates() {
-            return clientTemplates;
-        }
-
-        public boolean hasClientTemplates() {
-            return clientTemplates != null;
-        }
-
-        public boolean isSuitableFor(double version) {
-            return version >= minVersion && version < maxVersion;
-        }
-    };
+    private TEMPLATES currentTemplate;
 
     /**
      * Constructor for Component wizard page.
@@ -158,14 +83,18 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
         }
 
         try {
-            // Detect a package where an Application lies in as a default
-            // package
-            IType[] applications = VaadinPluginUtil.getApplicationClasses(
-                    project, null);
-            IType projectApplication = null;
-            if (applications.length > 0) {
-                projectApplication = applications[0];
-                IPackageFragment packageFragment = projectApplication
+            // Detect a package where an Application or Root lies in as a
+            // default package
+            IType projectApplicationOrRoot = null;
+            IType[] prospects = VaadinPluginUtil.getApplicationClasses(project,
+                    null);
+            if (prospects.length == 0) {
+                prospects = VaadinPluginUtil.getRootClasses(project, null);
+            }
+
+            if (prospects.length > 0) {
+                projectApplicationOrRoot = prospects[0];
+                IPackageFragment packageFragment = projectApplicationOrRoot
                         .getPackageFragment();
                 setPackageFragment(packageFragment, true);
             } else {
@@ -267,7 +196,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
         Label l = new Label(composite, SWT.NULL);
         l.setText("Template:");
         templateCombo = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
-        for (TEMPLATE template : TEMPLATE.values()) {
+        for (TEMPLATES template : TEMPLATES.values()) {
             if (template.isSuitableFor(projectVersion)) {
                 templateCombo.add(template.getTitle());
                 templateCombo.setData(template.getTitle(), template);
@@ -281,7 +210,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
             }
 
             public void widgetSelected(SelectionEvent e) {
-                selectTemplate((TEMPLATE) templateCombo.getData(templateCombo
+                selectTemplate((TEMPLATES) templateCombo.getData(templateCombo
                         .getText()));
             }
         });
@@ -308,11 +237,11 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
             }
         });
 
-        selectTemplate((TEMPLATE) templateCombo
-                .getData(templateCombo.getText()));
+        selectTemplate((TEMPLATES) templateCombo.getData(templateCombo
+                .getText()));
     }
 
-    protected void selectTemplate(TEMPLATE template) {
+    protected void selectTemplate(TEMPLATES template) {
         currentTemplate = template;
 
         templateDescriptionLabel.setText(template.getDescription());
@@ -362,50 +291,17 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
         }
 
         if (currentTemplate.hasClientTemplates()) {
-            for (String templateName : currentTemplate.getClientTemplates()) {
+            for (Class templateClass : currentTemplate.getClientTemplates()) {
                 // template prefix for server-side methods
-                String templateBase = "component/" + templateName;
+                // String templateBase = "component/" + templateName;
 
-                try {
-                    if (currentTemplate.hasClientTemplates()) {
-                        imports.addImport("java.util.Map");
-                        imports.addImport(prefix + "terminal.PaintException");
-                        imports.addImport(prefix + "terminal.PaintTarget");
-                    }
-
-                    if (TEMPLATE.COMMUNICATION_V62 == currentTemplate) {
-                        // server-side fields
-                        type.createField(
-                                "\tprivate String message = \"Click here.\";\n",
-                                null, false, monitor);
-                        type.createField("\tprivate int clicks = 0;\n", null,
-                                false, monitor);
-
-                        String paintContentMethod = VaadinPluginUtil
-                                .readTextFromTemplate(templateBase
-                                        + "_server_paintContent.txt");
-                        type.createMethod(paintContentMethod, null, false,
-                                monitor);
-
-                        String changeVariablesMethod = VaadinPluginUtil
-                                .readTextFromTemplate(templateBase
-                                        + "_server_changeVariables.txt");
-                        type.createMethod(changeVariablesMethod, null, false,
-                                monitor);
-
-                    } else if (currentTemplate.hasClientTemplates()) {
-                        String paintContentMethod = VaadinPluginUtil
-                                .readTextFromTemplate(templateBase
-                                        + "_server_paintContent.txt");
-                        type.createMethod(paintContentMethod, null, false,
-                                monitor);
-                    }
-                } catch (IOException e) {
-                    // handle exception - should not happen as templates are
-                    // inside the plugin
-                    ErrorUtil.handleBackgroundException(
-                            "Could not find method templates in plugin", e);
+                // try {
+                if (currentTemplate.hasClientTemplates()) {
+                    imports.addImport("java.util.Map");
+                    imports.addImport(prefix + "terminal.PaintException");
+                    imports.addImport(prefix + "terminal.PaintTarget");
                 }
+
             }
         }
     }
@@ -414,32 +310,8 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
         return widgetsetName;
     }
 
-    public TEMPLATE getTemplate() {
+    public TEMPLATES getTemplate() {
         return currentTemplate;
-    }
-
-    @Override
-    protected String constructCUContent(ICompilationUnit cu,
-            String typeContent, String lineDelimiter) throws CoreException {
-        if (currentTemplate.isSuitableFor(6.2)
-                && currentTemplate.hasClientTemplates()) {
-            // add the ClientWidget annotation to the server side class
-            IType widgetType = createdClientSideClass.getTypes()[0];
-            String fullyQualifiedName = widgetType.getFullyQualifiedName();
-            typeContent = "@com.vaadin.ui.ClientWidget(" + fullyQualifiedName
-                    + ".class)\n" + typeContent;
-
-            // Server side class javadoc
-            String javadoc = "/**\n" + " * Server side component for the "
-                    + widgetType.getElementName() + " widget.\n" + " */\n";
-            typeContent = javadoc + typeContent;
-        }
-        return super.constructCUContent(cu, typeContent, lineDelimiter);
-    }
-
-    // this must be called before constructCUContent()
-    public void setCreatedClientSideClass(ICompilationUnit clientSideClass) {
-        createdClientSideClass = clientSideClass;
     }
 
     @Override
@@ -453,9 +325,54 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
             System.arraycopy(status, 0, newStatus, 0, status.length);
             newStatus[newStatus.length - 1] = new Status(IStatus.ERROR,
                     VaadinPlugin.PLUGIN_ID, "No widgetset in project.");
-            return newStatus;
+            status = newStatus;
         }
+
+        // see if the selected superclass implements Component
+        String sc = getSuperClass();
+        boolean found = false;
+        IJavaProject proj = getJavaProject();
+        if (proj == null) {
+            // no project
+            // TODO this really screws everything, find a better way...
+            return status;
+        }
+        while (!found && sc != null && !"".equals(sc)) {
+            IType type = null;
+            try {
+                type = getJavaProject().findType(sc);
+            } catch (JavaModelException e) {
+                // you're making up types, are you not?
+                break;
+            }
+            if (type == null || !type.exists()) {
+                // you're making up types, are you not?
+                break;
+            }
+            try {
+                String[] interfaces = type.getSuperInterfaceNames();
+                found = interfaces != null
+                        && Arrays.binarySearch(interfaces,
+                                "com.vaadin.ui.Component") >= 0;
+            } catch (JavaModelException e) {
+                // whatever, let's try upwards anyway
+            }
+            try {
+                sc = type.getSuperclassName();
+            } catch (JavaModelException e) {
+                // no good
+                break;
+            }
+        }
+        if (!found) {
+            IStatus[] newStatus = new IStatus[status.length + 1];
+            System.arraycopy(status, 0, newStatus, 0, status.length);
+            newStatus[newStatus.length - 1] = new Status(IStatus.ERROR,
+                    VaadinPlugin.PLUGIN_ID,
+                    "Superclass must be a com.vaadin.ui.Component");
+            status = newStatus;
+        }
+
         return status;
     }
-
 }

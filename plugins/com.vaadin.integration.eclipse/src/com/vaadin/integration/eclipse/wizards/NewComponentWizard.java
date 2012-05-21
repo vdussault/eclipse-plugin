@@ -1,7 +1,7 @@
 package com.vaadin.integration.eclipse.wizards;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -10,14 +10,16 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -54,19 +56,20 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
-import com.vaadin.integration.eclipse.VaadinPlugin;
+import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
+import com.vaadin.integration.eclipse.templates.TEMPLATES;
+import com.vaadin.integration.eclipse.templates.Template;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.ProjectDependencyManager;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
-import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.util.WidgetsetUtil;
-import com.vaadin.integration.eclipse.wizards.NewComponentWizardPage.TEMPLATE;
 
 public class NewComponentWizard extends Wizard implements INewWizard {
     private NewComponentWizardPage page;
     private ISelection selection;
-    private IFile widgetSetJavaFile;
-    private IFile clientSideJavaFile;
+
+    // created files, will be opened in the IDE
+    private List<IFile> createdFiles = new LinkedList<IFile>();
 
     /**
      * Constructor for new Component wizard.
@@ -80,7 +83,6 @@ public class NewComponentWizard extends Wizard implements INewWizard {
     /**
      * Adding the page to the wizard.
      */
-
     @Override
     public void addPages() {
         IProject project = ProjectUtil.getProject(selection);
@@ -124,37 +126,33 @@ public class NewComponentWizard extends Wizard implements INewWizard {
      * or just replace its contents, and open the editor on the newly created
      * file.
      */
-
     private void doFinish(IProgressMonitor monitor) throws CoreException {
         // create a sample file
         monitor.beginTask("Creating widget", 10);
 
-        try {
+        TEMPLATES template = page.getTemplate();
+        if (template.hasClientTemplates()) {
+            ProjectDependencyManager.ensureGWTLibraries(page.getProject(),
+                    new SubProgressMonitor(monitor, 5));
 
-            TEMPLATE template = page.getTemplate();
-            if (template.hasClientTemplates()) {
-                ProjectDependencyManager.ensureGWTLibraries(page.getProject(),
-                        new SubProgressMonitor(monitor, 5));
+            buildClientSideClass(template, monitor);
+            monitor.worked(1);
 
-                buildClientSideClass(template, monitor);
-                monitor.worked(1);
+        }
 
-            }
+        openFiles();
+        monitor.worked(1);
 
-            // let TypeWizardPage do the actual widget class creation
-            page.createType(monitor);
-            monitor.worked(2);
-
-            openFiles();
-            monitor.worked(2);
-
-        } catch (InterruptedException e) {
-            ErrorUtil.displayError("Failed to create widget", e, getShell());
+        // Trigger widgetset compilation dialog
+        IProject project = page.getProject();
+        if (WidgetsetUtil.isWidgetsetDirty(project)) {
+            WidgetsetBuildManager.runWidgetSetBuildTool(project, false,
+                    new NullProgressMonitor());
         }
 
     }
 
-    private void buildClientSideClass(TEMPLATE template,
+    private void buildClientSideClass(TEMPLATES template,
             IProgressMonitor monitor) throws CoreException {
         // we know that a client side widget should be built
         String widgetSetName;
@@ -170,94 +168,95 @@ public class NewComponentWizard extends Wizard implements INewWizard {
         } else {
             widgetSetName = page.getWidgetSetName();
         }
+
         IJavaProject javaProject = page.getJavaProject();
-
         String typeName = page.getTypeName();
-
         try {
             IPackageFragmentRoot packageFragmentRoot = page
                     .getPackageFragmentRoot();
             IType widgetSet = null;
             final String packageName;
             if (!template.isSuitableFor(6)) {
-                // 6.2+
-                packageName = widgetSetName.replaceAll("\\.[^\\.]+$",
-                        ".client.ui");
+                // 6.2+ (remove typename)
+                packageName = widgetSetName.replaceAll("\\.[^\\.]+$", "");
             } else {
                 widgetSet = javaProject.findType(widgetSetName);
-
                 if (widgetSet == null) {
                     throw ErrorUtil.newCoreException("No widgetset selected",
                             null);
                 }
-
                 IPackageFragment packageFragment = widgetSet
                         .getPackageFragment();
-                packageName = packageFragment.getElementName() + ".ui";
-
+                packageName = packageFragment.getElementName(); // + ".ui";
             }
 
-            IPackageFragment uiPackage = packageFragmentRoot
-                    .createPackageFragment(packageName, true, null);
+            // Server-side component location, e.g com.example.MyComponent
+            String componentPackage = page.getPackageFragment()
+                    .getElementName();
 
-            String vaadinPackagePrefix = VaadinPlugin.VAADIN_PACKAGE_PREFIX;
+            // Server-side component extends, e.g
+            // com.vaadin.ui.AbstractComponent
+            String componentExtends = page.getSuperClass();
 
-            String iComponentStub = VaadinPluginUtil
-                    .readTextFromTemplate("component/"
-                            + template.getClientTemplates() + ".txt");
-
-            String clientSidePrefix = VaadinPlugin.VAADIN_CLIENT_SIDE_CLASS_PREFIX;
-            final String simpleName = clientSidePrefix + typeName;
-
-            iComponentStub = iComponentStub.replaceAll("STUB_CLASSNAME",
-                    simpleName);
-
-            iComponentStub = iComponentStub.replaceAll("STUB_PACKAGE",
-                    packageName);
-
-            iComponentStub = iComponentStub.replaceAll("STUB_VAADIN_PREFIX",
-                    vaadinPackagePrefix);
-
-            iComponentStub = iComponentStub.replaceAll(
-                    "STUB_CLIENT_SIDE_PREFIX", clientSidePrefix.toLowerCase());
-
-            iComponentStub = iComponentStub.replaceAll("STUB_TAGNAME",
-                    typeName.toLowerCase());
-
-            final ICompilationUnit clientSideClass = uiPackage
-                    .createCompilationUnit(simpleName + ".java",
-                            iComponentStub, false, null);
-            page.setCreatedClientSideClass(clientSideClass);
-            clientSideJavaFile = (IFile) clientSideClass
-                    .getCorrespondingResource();
-
-            if (!template.isSuitableFor(6.2)) {
-                // if old style widgetset,
-                // modify widgetset to include newly created class
-
-                updateWidgetsetClass(monitor, widgetSet, packageName,
-                        simpleName);
-            } else {
-                // the widgetset compiler (generator) takes care of this
+            // Figure what State should extend, e.g
+            // com.vaadin.terminal.gwt.client.ComponentState
+            String stateExtends = null;
+            if (template.hasState()) {
+                IType extType = javaProject.findType(componentExtends);
+                IMethod getStateMethod = extType.getMethod("getState", null);
+                while (!getStateMethod.exists()) {
+                    String parentName = extType.getSuperclassName();
+                    if (parentName == null) {
+                        break;
+                    }
+                    extType = javaProject.findType(parentName);
+                    getStateMethod = extType.getMethod("getState", null);
+                }
+                if (getStateMethod.exists()) {
+                    stateExtends = getStateMethod.getReturnType();
+                    stateExtends = Signature.toString(stateExtends);
+                } else {
+                    stateExtends = "com.vaadin.terminal.gwt.client.ComponentState";
+                }
             }
 
-            // refresh subtree
-            if (uiPackage.getParent() != null
-                    && uiPackage.getParent().getParent() != null) {
-                IJavaElement toRefresh = uiPackage.getParent().getParent();
-                toRefresh.getResource().refreshLocal(IResource.DEPTH_INFINITE,
-                        monitor);
-            } else {
-                packageFragmentRoot.getResource().refreshLocal(
-                        IResource.DEPTH_INFINITE, monitor);
+            // run all templates
+            for (Class<Template> c : template.getClientTemplates()) {
+                Template t = (Template) c.newInstance();
+                String src = t.generate(typeName, componentPackage,
+                        componentExtends, stateExtends, packageName, template);
+
+                IPackageFragment targetPackage = packageFragmentRoot
+                        .createPackageFragment(t.getTarget(), true, null);
+                final ICompilationUnit clientSideClass = targetPackage
+                        .createCompilationUnit(t.getFileName(), src, false,
+                                null);
+
+                createdFiles.add((IFile) clientSideClass
+                        .getCorrespondingResource());
             }
+            if (template.isSuitableFor(6.0) && template.hasWidget()) {
+                // 6.0 requires widgetset class to be updated, after 6.2
+                // this is handled by the compiler.
+                // NOTE the name of the created client-side widget is 'guessed'
+                // here! Not likely to be changed, but if you do...
+                updateWidgetsetClass(monitor, widgetSet, packageName + ".ui",
+                        "V" + typeName);
+            }
+
+            // refresh whole thing, as we could have created stuff anywhere
+            packageFragmentRoot.getResource().refreshLocal(
+                    IResource.DEPTH_INFINITE, monitor);
 
         } catch (JavaModelException e) {
             throw ErrorUtil.newCoreException(
                     "Failed to create client side class", e);
-        } catch (IOException e) {
-            throw ErrorUtil.newCoreException(
-                    "Failed to create client side class", e);
+        } catch (InstantiationException e) {
+            throw ErrorUtil.newCoreException("Failed to instantiate template",
+                    e);
+        } catch (IllegalAccessException e) {
+            throw ErrorUtil.newCoreException("IllegalAccess (plugin problem)",
+                    e);
         }
 
     }
@@ -271,8 +270,8 @@ public class NewComponentWizard extends Wizard implements INewWizard {
 
             compilationUnit = widgetSet.getCompilationUnit();
 
-            widgetSetJavaFile = (IFile) compilationUnit
-                    .getCorrespondingResource();
+            createdFiles
+                    .add((IFile) compilationUnit.getCorrespondingResource());
 
             final String source = compilationUnit.getSource();
             Document document = new Document(source);
@@ -432,7 +431,7 @@ public class NewComponentWizard extends Wizard implements INewWizard {
     }
 
     /**
-     * Opens component and optionally client side stub java files
+     * Opens created files in the IDE
      */
     private void openFiles() {
         getShell().getDisplay().asyncExec(new Runnable() {
@@ -440,29 +439,10 @@ public class NewComponentWizard extends Wizard implements INewWizard {
                 IWorkbenchPage wbPage = PlatformUI.getWorkbench()
                         .getActiveWorkbenchWindow().getActivePage();
                 try {
-                    // open client side stub
-                    if (clientSideJavaFile != null) {
-                        IDE.openEditor(wbPage, clientSideJavaFile);
-                    }
-
-                    // open widget set
-                    if (widgetSetJavaFile != null) {
-                        IDE.openEditor(wbPage, widgetSetJavaFile);
-                    }
-
-                    // open server side component class
-                    IType type = page.getCreatedType();
-                    if (type != null) {
-                        ICompilationUnit compilationUnit = type
-                                .getCompilationUnit();
-                        IFile javaFile = (IFile) compilationUnit
-                                .getCorrespondingResource();
-                        IDE.openEditor(wbPage, javaFile, true);
+                    for (IFile file : createdFiles) {
+                        IDE.openEditor(wbPage, file);
                     }
                 } catch (PartInitException e) {
-                    ErrorUtil.handleBackgroundException(IStatus.WARNING,
-                            "Failed to open created files in editor", e);
-                } catch (JavaModelException e) {
                     ErrorUtil.handleBackgroundException(IStatus.WARNING,
                             "Failed to open created files in editor", e);
                 }

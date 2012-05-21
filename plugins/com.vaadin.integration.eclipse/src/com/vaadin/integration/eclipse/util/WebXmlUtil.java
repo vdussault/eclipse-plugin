@@ -297,14 +297,26 @@ public class WebXmlUtil {
      */
     private static String getVaadinServletClass(WebApp webApp, Servlet servlet) {
         if (webApp.getJ2EEVersionID() >= J2EEVersionConstants.J2EE_1_4_ID) {
+            // application
             ParamValue value = getInitParameter_2_4(servlet,
                     VAADIN_APPLICATION_CLASS_PARAMETER);
             if (value != null) {
                 return value.getValue();
             }
+            // root
+            value = getInitParameter_2_4(servlet, VAADIN_ROOT_CLASS_PARAMETER);
+            if (value != null) {
+                return value.getValue();
+            }
         } else {
+            // application
             InitParam value = getInitParameter_2_3(servlet,
                     VAADIN_APPLICATION_CLASS_PARAMETER);
+            if (value != null) {
+                return value.getParamValue();
+            }
+            // root
+            value = getInitParameter_2_3(servlet, VAADIN_ROOT_CLASS_PARAMETER);
             if (value != null) {
                 return value.getParamValue();
             }
