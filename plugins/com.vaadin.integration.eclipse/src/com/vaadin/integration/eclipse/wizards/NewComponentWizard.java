@@ -43,7 +43,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.text.edits.MalformedTreeException;
@@ -66,7 +65,7 @@ import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 
 public class NewComponentWizard extends Wizard implements INewWizard {
     private NewComponentWizardPage page;
-    private ISelection selection;
+    private IStructuredSelection selection;
 
     // created files, will be opened in the IDE
     private List<IFile> createdFiles = new LinkedList<IFile>();
@@ -86,7 +85,7 @@ public class NewComponentWizard extends Wizard implements INewWizard {
     @Override
     public void addPages() {
         IProject project = ProjectUtil.getProject(selection);
-        page = new NewComponentWizardPage(project);
+        page = new NewComponentWizardPage(project, selection);
         addPage(page);
     }
 

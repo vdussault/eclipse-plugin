@@ -7,13 +7,16 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogPage;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -52,12 +55,15 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
 
     private TEMPLATES currentTemplate;
 
+    private IStructuredSelection selection;
+
     /**
      * Constructor for Component wizard page.
      * 
      * @param pageName
      */
-    public NewComponentWizardPage(IProject project) {
+    public NewComponentWizardPage(IProject project,
+            IStructuredSelection selection) {
         super("componentwizard", project);
         setTitle("New Component wizard");
         setDescription("This wizard creates a new Vaadin widget.");
@@ -65,6 +71,15 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
         setTypeName("MyComponent", true);
         setSuperClass(VaadinPlugin.VAADIN_PACKAGE_PREFIX
                 + "ui.AbstractComponent", true);
+
+        this.selection = selection;
+    }
+
+    @Override
+    public void setPackageFragmentRoot(IPackageFragmentRoot root,
+            boolean canBeModified) {
+        // TODO Auto-generated method stub
+        super.setPackageFragmentRoot(root, canBeModified);
     }
 
     // this is called by setPackageFragmentRoot
@@ -83,24 +98,34 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
         }
 
         try {
-            // Detect a package where an Application or Root lies in as a
-            // default package
-            IType projectApplicationOrRoot = null;
-            IType[] prospects = VaadinPluginUtil.getApplicationClasses(project,
-                    null);
-            if (prospects.length == 0) {
-                prospects = VaadinPluginUtil.getRootClasses(project, null);
+            IJavaElement elem = getInitialJavaElement(selection);
+            while (elem != null
+                    && elem.getElementType() != IJavaElement.PACKAGE_FRAGMENT) {
+                elem = elem.getParent();
             }
-
-            if (prospects.length > 0) {
-                projectApplicationOrRoot = prospects[0];
-                IPackageFragment packageFragment = projectApplicationOrRoot
-                        .getPackageFragment();
-                setPackageFragment(packageFragment, true);
+            if (elem != null) {
+                // must be package
+                setPackageFragment((IPackageFragment) elem, true);
             } else {
-                // if there is no application, reset the fields of the page
-                setPackageFragment(null, true);
-                // but continue and possibly set up the rest later
+                // Detect a package where an Application or Root lies in as a
+                // default package
+                IType projectApplicationOrRoot = null;
+                IType[] prospects = VaadinPluginUtil.getApplicationClasses(
+                        project, null);
+                if (prospects.length == 0) {
+                    prospects = VaadinPluginUtil.getRootClasses(project, null);
+                }
+
+                if (prospects.length > 0) {
+                    projectApplicationOrRoot = prospects[0];
+                    IPackageFragment packageFragment = projectApplicationOrRoot
+                            .getPackageFragment();
+                    setPackageFragment(packageFragment, true);
+                } else {
+                    // if there is no application, reset the fields of the page
+                    setPackageFragment(null, true);
+                    // but continue and possibly set up the rest later
+                }
             }
 
             setTypeName("MyComponent", true);
