@@ -409,7 +409,8 @@ public class VaadinPluginUtil {
     /**
      * Returns the first gwt user jar defined in projects classpath.
      * 
-     * If not set, a gwt jar file provided by plugin is returned.
+     * If not set, a gwt jar file provided by plugin is returned, or null if
+     * none specified by Vaadin JAR.
      */
     public static IPath getGWTUserJarPath(IJavaProject jproject)
             throws CoreException {
@@ -445,7 +446,11 @@ public class VaadinPluginUtil {
 
         String gwtVersion = ProjectUtil
                 .getRequiredGWTVersionForProject(jproject);
-        return LocalFileManager.getLocalGwtUserJar(gwtVersion);
+        if (gwtVersion == null) {
+            return null;
+        } else {
+            return LocalFileManager.getLocalGwtUserJar(gwtVersion);
+        }
     }
 
     public static Path getPathToTemplateFile(String path) throws IOException {
@@ -738,14 +743,20 @@ public class VaadinPluginUtil {
                 jproject.getOutputLocation()));
 
         // key libraries
-        IRuntimeClasspathEntry gwtdev = JavaRuntime
-                .newArchiveRuntimeClasspathEntry(ProjectDependencyManager
-                        .getGWTDevJarPath(jproject));
-        otherLocations.add(getRawLocation(project, gwtdev.getPath()));
+        IPath gwtDevJarPath = ProjectDependencyManager
+                .getGWTDevJarPath(jproject);
+        if (gwtDevJarPath != null) {
+            IRuntimeClasspathEntry gwtdev = JavaRuntime
+                    .newArchiveRuntimeClasspathEntry(gwtDevJarPath);
+            otherLocations.add(getRawLocation(project, gwtdev.getPath()));
+        }
 
-        IRuntimeClasspathEntry gwtuser = JavaRuntime
-                .newArchiveRuntimeClasspathEntry(getGWTUserJarPath(jproject));
-        otherLocations.add(getRawLocation(project, gwtuser.getPath()));
+        IPath gwtUserJarPath = getGWTUserJarPath(jproject);
+        if (gwtUserJarPath != null) {
+            IRuntimeClasspathEntry gwtuser = JavaRuntime
+                    .newArchiveRuntimeClasspathEntry(gwtUserJarPath);
+            otherLocations.add(getRawLocation(project, gwtuser.getPath()));
+        }
 
         IPath vaadinJarPath = ProjectUtil.findProjectVaadinJarPath(jproject);
         if (vaadinJarPath == null) {
@@ -1054,11 +1065,17 @@ public class VaadinPluginUtil {
             List<String> classPath = new ArrayList<String>();
 
             // GWT libraries should come first
-            classPath.add(JavaRuntime.newArchiveRuntimeClasspathEntry(
-                    ProjectDependencyManager.getGWTDevJarPath(jproject))
-                    .getMemento());
-            classPath.add(JavaRuntime.newArchiveRuntimeClasspathEntry(
-                    getGWTUserJarPath(jproject)).getMemento());
+            IPath gwtDevJarPath = ProjectDependencyManager
+                    .getGWTDevJarPath(jproject);
+            if (gwtDevJarPath != null) {
+                classPath.add(JavaRuntime.newArchiveRuntimeClasspathEntry(
+                        gwtDevJarPath).getMemento());
+            }
+            IPath gwtUserJarPath = getGWTUserJarPath(jproject);
+            if (gwtUserJarPath != null) {
+                classPath.add(JavaRuntime.newArchiveRuntimeClasspathEntry(
+                        gwtUserJarPath).getMemento());
+            }
 
             // default classpath reference, instead of "exploding"
             // JavaRuntime.computeUnresolvedRuntimeClasspath()

@@ -234,7 +234,7 @@ public class ProjectUtil {
                     "Failed to determine the GWT library version to use.", ex);
         }
 
-        // if no information exists, default to 2.0.4
+        // did not find Vaadin JAR, default to 2.0.4
         return DEFAULT_GWT_VERSION;
     }
 
@@ -244,16 +244,14 @@ public class ProjectUtil {
             if (vaadinJarPath != null) {
                 String gwtVersion = VersionUtil
                         .getRequiredGWTVersionForVaadinJar(vaadinJarPath);
-                if (gwtVersion != null) {
-                    return gwtVersion;
-                }
+                return gwtVersion;
             }
         } catch (IOException ex) {
             ErrorUtil.handleBackgroundException(IStatus.WARNING,
                     "Failed to determine the GWT library version to use.", ex);
         }
-        // if no information exists, default to 2.0.4
-        return DEFAULT_GWT_VERSION;
+        // if no information exists, default to none
+        return null;
     }
 
     public static boolean isGwt20(IProject project) {

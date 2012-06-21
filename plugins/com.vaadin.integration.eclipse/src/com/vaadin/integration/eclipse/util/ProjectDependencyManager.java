@@ -243,13 +243,17 @@ public class ProjectDependencyManager {
             String gwtVersion = ProjectUtil
                     .getRequiredGWTVersionForVaadinJar(targetFile.getLocation());
 
-            monitor.worked(1);
-            List<String> dependencies = VersionUtil
-                    .getRequiredGWTDependenciesForVaadinJar(targetFile
-                            .getLocation());
+            if (gwtVersion != null) {
+                monitor.worked(1);
+                List<String> dependencies = VersionUtil
+                        .getRequiredGWTDependenciesForVaadinJar(targetFile
+                                .getLocation());
 
-            updateGWTLibraries(jproject, gwtVersion, dependencies,
-                    new SubProgressMonitor(monitor, 4));
+                updateGWTLibraries(jproject, gwtVersion, dependencies,
+                        new SubProgressMonitor(monitor, 4));
+            } else {
+                monitor.worked(5);
+            }
         } catch (Exception e) {
             throw ErrorUtil.newCoreException(
                     "Failed to add Vaadin jar to project", e);
@@ -331,12 +335,16 @@ public class ProjectDependencyManager {
                         String gwtVersion = ProjectUtil
                                 .getRequiredGWTVersionForProject(jproject);
 
-                        monitor.worked(1);
-                        List<String> gwtDependencies = ProjectUtil
-                                .getRequiredGWTDependenciesForProject(jproject);
-                        updateGWTLibraries(jproject, gwtVersion,
-                                gwtDependencies, new SubProgressMonitor(
-                                        monitor, 1));
+                        if (gwtVersion != null) {
+                            monitor.worked(1);
+                            List<String> gwtDependencies = ProjectUtil
+                                    .getRequiredGWTDependenciesForProject(jproject);
+                            updateGWTLibraries(jproject, gwtVersion,
+                                    gwtDependencies, new SubProgressMonitor(
+                                            monitor, 1));
+                        } else {
+                            monitor.worked(2);
+                        }
 
                     } finally {
                         WidgetsetBuildManager
@@ -563,7 +571,8 @@ public class ProjectDependencyManager {
     /**
      * Returns the first gwt dev jar defined in project classpath.
      * 
-     * If not set, a gwt jar file provided by plugin is returned.
+     * If not set, a gwt jar file provided by plugin is returned, or null if
+     * none specified by Vaadin JAR.
      */
     public static IPath getGWTDevJarPath(IJavaProject jproject)
             throws CoreException {
@@ -597,7 +606,11 @@ public class ProjectDependencyManager {
 
         String gwtVersion = ProjectUtil
                 .getRequiredGWTVersionForProject(jproject);
-        return LocalFileManager.getLocalGwtDevJar(gwtVersion);
+        if (gwtVersion == null) {
+            return null;
+        } else {
+            return LocalFileManager.getLocalGwtDevJar(gwtVersion);
+        }
     }
 
 }
