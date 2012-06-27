@@ -61,7 +61,11 @@ public class PreferenceUtil {
      * @return
      */
     public boolean isWidgetsetCompilationSuspended() {
-        return prefStore.getBoolean(PREFERENCES_WIDGETSET_SUSPENDED);
+        if (!prefStore.contains(PREFERENCES_WIDGETSET_SUSPENDED)) {
+            return true;
+        } else {
+            return prefStore.getBoolean(PREFERENCES_WIDGETSET_SUSPENDED);
+        }
     }
 
     /**
@@ -80,7 +84,7 @@ public class PreferenceUtil {
 
     public boolean isWidgetsetCompilationVerboseMode() {
         if (!prefStore.contains(PREFERENCES_WIDGETSET_VERBOSE)) {
-            return false;
+            return true;
         } else {
             return prefStore.getBoolean(PREFERENCES_WIDGETSET_VERBOSE);
         }
