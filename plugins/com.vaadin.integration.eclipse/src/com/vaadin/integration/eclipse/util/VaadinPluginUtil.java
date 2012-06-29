@@ -1109,4 +1109,128 @@ public class VaadinPluginUtil {
         }
     }
 
+    public static boolean isSuperDevModeSupported(IProject project) {
+        // find code server class
+        IJavaProject javaProject = JavaCore.create(project);
+        if (javaProject == null) {
+            return false;
+        }
+        try {
+            IType codeServerType = javaProject
+                    .findType(VaadinPlugin.GWT_CODE_SERVER_CLASS);
+            return codeServerType != null;
+        } catch (JavaModelException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Find Java launch configuration for GWT SuperDevMode, create it if
+     * missing.
+     * 
+     * @param project
+     * @return the {@link ILaunchConfiguration} created/found launch
+     *         configuration or null if none
+     */
+    public static ILaunchConfiguration createSuperDevModeLaunch(IProject project) {
+        if (project == null) {
+            return null;
+        }
+
+        ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+
+        ILaunchConfigurationType type = manager
+                .getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
+
+        try {
+            IJavaProject jproject = JavaCore.create(project);
+
+            String launchName = "SuperDevMode code server for "
+                    + project.getName();
+
+            // find and return existing launch, if any
+            ILaunchConfiguration[] launchConfigurations = manager
+                    .getLaunchConfigurations();
+            for (ILaunchConfiguration launchConfiguration : launchConfigurations) {
+                if (launchName.equals(launchConfiguration.getName())) {
+                    // is the launch in the same project?
+                    String launchProject = launchConfiguration
+                            .getAttribute(
+                                    IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+                                    "");
+                    if (project.getName().equals(launchProject)) {
+                        ErrorUtil
+                                .logInfo("SuperDevMode launch already exists for the project");
+                        return launchConfiguration;
+                    }
+                }
+            }
+
+            // create a new launch configuration
+
+            ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(
+                    project, launchName);
+
+            String mainClass = "com.google.gwt.dev.codeserver.CodeServer";
+
+            workingCopy.setAttribute(
+                    IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,
+                    mainClass);
+
+            workingCopy.setAttribute(
+                    IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+                    project.getName());
+
+            IPath location = project.getLocation();
+            workingCopy.setAttribute(
+                    IJavaLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY,
+                    location.toOSString());
+
+            String arguments = WidgetsetUtil.getConfiguredWidgetSet(jproject);
+            workingCopy.setAttribute(
+                    IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
+                    arguments);
+
+            String vmargs = "-Xmx512M -XX:MaxPermSize=256M";
+            workingCopy
+                    .setAttribute(
+                            IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
+                            vmargs);
+
+            // construct the launch classpath
+
+            List<String> classPath = new ArrayList<String>();
+
+            // default classpath reference, instead of "exploding"
+            // JavaRuntime.computeUnresolvedRuntimeClasspath()
+            classPath.add(JavaRuntime.newDefaultProjectClasspathEntry(jproject)
+                    .getMemento());
+
+            // add source paths on the classpath
+            for (IClasspathEntry entry : jproject.getRawClasspath()) {
+                if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+                    IRuntimeClasspathEntry source = JavaRuntime
+                            .newArchiveRuntimeClasspathEntry(entry.getPath());
+                    classPath.add(source.getMemento());
+                }
+            }
+
+            workingCopy
+                    .setAttribute(
+                            IJavaLaunchConfigurationConstants.ATTR_CLASSPATH,
+                            classPath);
+            workingCopy.setAttribute(
+                    IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH,
+                    false);
+
+            return workingCopy.doSave();
+
+        } catch (CoreException e) {
+            ErrorUtil.handleBackgroundException(
+                    "Failed to find or create SuperDevMode launch for project "
+                            + project.getName(), e);
+            return null;
+        }
+    }
+
 }

@@ -26,6 +26,7 @@ public class WidgetsetParametersComposite extends Composite {
     private Button suspendAutomaticBuilds;
     private Button verboseCompilation;
     private Button createDevelopmentModeLaunchButton;
+    private Button createSuperDevelopmentModeLaunchButton;
 
     private IProject project = null;
 
@@ -69,6 +70,11 @@ public class WidgetsetParametersComposite extends Composite {
 
         String parallelism = preferences.getWidgetsetCompilationParallelism();
         parallelismCombo.setText(parallelism);
+
+        boolean superDevModeSupported = VaadinPluginUtil
+                .isSuperDevModeSupported(project);
+        createSuperDevelopmentModeLaunchButton
+                .setEnabled(superDevModeSupported);
     }
 
     private void setWidgetsetManagedByPlugin(boolean enabled) {
@@ -93,6 +99,9 @@ public class WidgetsetParametersComposite extends Composite {
         if (createDevelopmentModeLaunchButton != null) {
             createDevelopmentModeLaunchButton.setEnabled(enabled);
         }
+        if (createSuperDevelopmentModeLaunchButton != null) {
+            createSuperDevelopmentModeLaunchButton.setEnabled(enabled);
+        }
     }
 
     public Composite createContents() {
@@ -101,6 +110,7 @@ public class WidgetsetParametersComposite extends Composite {
 
         createOptionsComposite(this);
         createHostedModeComposite(this);
+        createSuperDevModeComposite(this);
         createInstructionsComposite(this);
 
         return this;
@@ -172,8 +182,36 @@ public class WidgetsetParametersComposite extends Composite {
     }
 
     /**
-     * Hosted mode (both normal and OOPHM) launch configuration and
-     * instructions.
+     * SuperDevMode launch configuration and instructions.
+     */
+    private void createSuperDevModeComposite(Composite parent) {
+        Composite hosted = new Composite(parent, SWT.NULL);
+        hosted.setLayout(new GridLayout(2, false));
+        hosted.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+
+        // hosted mode launch creation button on the right
+        createSuperDevelopmentModeLaunchButton = new Button(hosted, SWT.NULL);
+        createSuperDevelopmentModeLaunchButton
+                .setText("Create SuperDevMode launch");
+        createSuperDevelopmentModeLaunchButton.setLayoutData(new GridData(
+                SWT.RIGHT, SWT.BEGINNING, true, false));
+        createSuperDevelopmentModeLaunchButton
+                .addSelectionListener(new SelectionAdapter() {
+                    @Override
+                    public void widgetSelected(SelectionEvent e) {
+                        VaadinPluginUtil.createSuperDevModeLaunch(project);
+                        // TODO add <set-configuration-property
+                        // name="devModeRedirectEnabled" value="true" /> to
+                        // widgetset or give instructions
+
+                        // need to set as dirty to recompile it once
+                        WidgetsetUtil.setWidgetsetDirty(project, true);
+                    }
+                });
+    }
+
+    /**
+     * Hosted mode launch configuration and instructions.
      */
     private void createHostedModeComposite(Composite parent) {
         Composite hosted = new Composite(parent, SWT.NULL);
