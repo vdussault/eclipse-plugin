@@ -111,10 +111,6 @@ public class WidgetsetUtil {
             monitor.subTask("Preparing to compile widgetset " + moduleName
                     + " in project " + project.getName());
 
-            ArrayList<String> args = new ArrayList<String>();
-
-            moduleName = moduleName.replace(".client.", ".");
-
             IVMInstall vmInstall = VaadinPluginUtil.getJvmInstall(jproject,
                     true);
             if (!VaadinPluginUtil.isJdk16(vmInstall)
@@ -126,8 +122,6 @@ public class WidgetsetUtil {
                                         + "The project can still use Java5 but you need to make JDK 6 available in Eclipse\n"
                                         + "(see Preferences => Java => Installed JREs).");
             }
-            String vmName = VaadinPluginUtil.getJvmExecutablePath(vmInstall);
-            args.add(vmName);
 
             // refresh only WebContent/VAADIN/widgetsets
             final IFolder wsDir = ProjectUtil.getWebContentFolder(project)
@@ -138,77 +132,53 @@ public class WidgetsetUtil {
             VaadinPluginUtil.createFolders(wsDir, new SubProgressMonitor(
                     monitor, 1));
 
-            // construct the class path, including GWT JARs and project sources
-            String classPath = VaadinPluginUtil.getProjectBaseClasspath(
-                    jproject, vmInstall, true);
+            ArrayList<String> args = buildCommonArgs(jproject, vmInstall);
 
-            String classpathSeparator = PlatformUtil.getClasspathSeparator();
+            // TODO run com.vaadin.terminal.gwt.widgetsetutils.WidgetSetBuilder
+            // and com.google.gwt.dev.Compiler separately and directly if Java
+            // 6, do not use WidgetsetCompiler in that case
 
-            // add widgetset JARs
-            Collection<IPath> widgetpackagets = getAvailableVaadinWidgetsetPackages(jproject);
-            IPath vaadinJarPath = ProjectUtil
-                    .findProjectVaadinJarPath(jproject);
-            for (IPath file2 : widgetpackagets) {
-                if (!file2.equals(vaadinJarPath)) {
-                    classPath = classPath + classpathSeparator
-                            + file2.toString();
-                }
-            }
-
-            // construct rest of the arguments for the launch
-
-            args.add("-Djava.awt.headless=true");
-            args.add("-Xss8M");
-            args.add("-Xmx512M");
-            args.add("-XX:MaxPermSize=512M");
-
-            if (PlatformUtil.getPlatform().equals("mac")) {
-                args.add("-XstartOnFirstThread");
-            }
-
-            args.add("-classpath");
-            // args.add(classPath.replaceAll(" ", "\\ "));
-            args.add(classPath);
-
+            ArrayList<String> compilerArgs = new ArrayList<String>(args);
             String compilerClass = "com.vaadin.tools.WidgetsetCompiler";
-            args.add(compilerClass);
+            compilerArgs.add(compilerClass);
 
-            args.add("-out");
+            compilerArgs.add("-out");
             IPath projectRelativePath = wsDir.getProjectRelativePath();
-            args.add(projectRelativePath.toString());
+            compilerArgs.add(projectRelativePath.toString());
 
             String style = preferences.getWidgetsetCompilationStyle();
             if ("DRAFT".equals(style)) {
-                args.add("-style");
-                args.add("PRETTY");
-                args.add("-draftCompile");
+                compilerArgs.add("-style");
+                compilerArgs.add("PRETTY");
+                compilerArgs.add("-draftCompile");
             } else if (!"OBF".equals(style)) {
-                args.add("-style");
-                args.add(style);
+                compilerArgs.add("-style");
+                compilerArgs.add(style);
             }
 
             String parallelism = preferences
                     .getWidgetsetCompilationParallelism();
             if ("".equals(parallelism)) {
-                args.add("-localWorkers");
-                args.add("" + Runtime.getRuntime().availableProcessors());
+                compilerArgs.add("-localWorkers");
+                compilerArgs.add(""
+                        + Runtime.getRuntime().availableProcessors());
             } else {
-                args.add("-localWorkers");
-                args.add(parallelism);
+                compilerArgs.add("-localWorkers");
+                compilerArgs.add(parallelism);
             }
 
             if (verbose) {
-                args.add("-logLevel");
-                args.add("INFO");
+                compilerArgs.add("-logLevel");
+                compilerArgs.add("INFO");
             } else {
-                args.add("-logLevel");
-                args.add("WARN");
+                compilerArgs.add("-logLevel");
+                compilerArgs.add("WARN");
             }
 
-            args.add(moduleName);
+            compilerArgs.add(moduleName);
 
-            final String[] argsStr = new String[args.size()];
-            args.toArray(argsStr);
+            final String[] argsStr = new String[compilerArgs.size()];
+            compilerArgs.toArray(argsStr);
 
             ProcessBuilder b = new ProcessBuilder(argsStr);
 
@@ -271,7 +241,7 @@ public class WidgetsetUtil {
             newMessageStream.println();
             if (verbose) {
                 newMessageStream.println("Executing compiler with parameters "
-                        + args);
+                        + compilerArgs);
             } else {
                 newMessageStream.println("Compiling widgetset " + moduleName);
             }
@@ -336,6 +306,45 @@ public class WidgetsetUtil {
             console.setCompilationProcess(null);
 
         }
+    }
+
+    private static ArrayList<String> buildCommonArgs(IJavaProject jproject,
+            IVMInstall vmInstall) throws CoreException, JavaModelException {
+        ArrayList<String> args = new ArrayList<String>();
+
+        String vmName = VaadinPluginUtil.getJvmExecutablePath(vmInstall);
+        args.add(vmName);
+
+        // construct the class path, including GWT JARs and project sources
+        String classPath = VaadinPluginUtil.getProjectBaseClasspath(jproject,
+                vmInstall, true);
+
+        String classpathSeparator = PlatformUtil.getClasspathSeparator();
+
+        // add widgetset JARs
+        Collection<IPath> widgetpackagets = getAvailableVaadinWidgetsetPackages(jproject);
+        IPath vaadinJarPath = ProjectUtil.findProjectVaadinJarPath(jproject);
+        for (IPath file2 : widgetpackagets) {
+            if (!file2.equals(vaadinJarPath)) {
+                classPath = classPath + classpathSeparator + file2.toString();
+            }
+        }
+
+        // construct rest of the arguments for the launch
+
+        args.add("-Djava.awt.headless=true");
+        args.add("-Xss8M");
+        args.add("-Xmx512M");
+        args.add("-XX:MaxPermSize=512M");
+
+        if (PlatformUtil.getPlatform().equals("mac")) {
+            args.add("-XstartOnFirstThread");
+        }
+
+        args.add("-classpath");
+        // args.add(classPath.replaceAll(" ", "\\ "));
+        args.add(classPath);
+        return args;
     }
 
     /**
