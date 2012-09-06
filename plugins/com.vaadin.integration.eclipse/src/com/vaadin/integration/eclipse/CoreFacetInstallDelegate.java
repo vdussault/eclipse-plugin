@@ -79,7 +79,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
             // No version was specified on the configuration page. Use the
             // newest local.
             localVaadinVersion = LocalFileManager
-                    .getNewestLocalVaadinJarVersion();
+                    .getNewestLocalVaadinVersion();
         }
         monitor.worked(1);
 
@@ -98,11 +98,11 @@ public class CoreFacetInstallDelegate implements IDelegate,
             // Vaadin itself to make sure the latest version is on the cached
             // list.
             DownloadManager.flushCache();
-            DownloadManager.downloadVaadinJar(latestVaadinVersion,
+            DownloadManager.downloadVaadin(latestVaadinVersion,
                     new SubProgressMonitor(monitor, 2));
 
             localVaadinVersion = LocalFileManager
-                    .getNewestLocalVaadinJarVersion();
+                    .getNewestLocalVaadinVersion();
         } else {
             monitor.worked(3);
         }

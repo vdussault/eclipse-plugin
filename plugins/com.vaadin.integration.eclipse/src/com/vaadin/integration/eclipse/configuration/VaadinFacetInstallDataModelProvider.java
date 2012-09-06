@@ -144,7 +144,7 @@ public class VaadinFacetInstallDataModelProvider extends
         } else if (propertyName.equals(VAADIN_VERSION)) {
             try {
                 LocalVaadinVersion latestLocal = LocalFileManager
-                        .getNewestLocalVaadinJarVersion();
+                        .getNewestLocalVaadinVersion();
                 return (latestLocal != null) ? latestLocal.getVersionNumber()
                         : null;
             } catch (CoreException ex) {
@@ -339,7 +339,7 @@ public class VaadinFacetInstallDataModelProvider extends
     private List<String> getVaadinVersions() throws CoreException {
         List<String> versions = new ArrayList<String>();
         for (LocalVaadinVersion version : LocalFileManager
-                .getLocalVaadinJarVersions()) {
+                .getLocalVaadinVersions()) {
             versions.add(version.getVersionNumber());
         }
         return versions;

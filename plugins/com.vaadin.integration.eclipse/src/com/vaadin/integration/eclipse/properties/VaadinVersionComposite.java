@@ -1,6 +1,5 @@
 package com.vaadin.integration.eclipse.properties;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -26,7 +25,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.AbstractElementListSelectionDialog;
@@ -147,8 +145,7 @@ public class VaadinVersionComposite extends Composite {
                         .getAvailableVersions(!development);
                 // Equals and hasCode implementation in
                 // AbstractVaadinVersion enables us to do this
-                available.removeAll(LocalFileManager
-                        .getLocalVaadinJarVersions());
+                available.removeAll(LocalFileManager.getLocalVaadinVersions());
 
                 DownloadableVaadinVersion[] versions = available
                         .toArray(new DownloadableVaadinVersion[0]);
@@ -310,31 +307,6 @@ public class VaadinVersionComposite extends Composite {
                 GridData.BEGINNING, true, false));
     }
 
-    /**
-     * Helper that opens the directory chooser dialog.
-     * 
-     * @param startingDirectory
-     *            The directory the dialog will open in.
-     * @return File File or <code>null</code>.
-     */
-    private File getDirectory(File startingDirectory) {
-
-        DirectoryDialog fileDialog = new DirectoryDialog(getShell(), SWT.OPEN
-                | SWT.SHEET);
-        if (startingDirectory != null) {
-            fileDialog.setFilterPath(startingDirectory.getPath());
-        }
-        String dir = fileDialog.open();
-        if (dir != null) {
-            dir = dir.trim();
-            if (dir.length() > 0) {
-                return new File(dir);
-            }
-        }
-
-        return null;
-    }
-
     private void updateVersionCombo() {
         versionCombo.setEnabled(true);
         downloadButton.setEnabled(true);
@@ -346,7 +318,7 @@ public class VaadinVersionComposite extends Composite {
             versionCombo.add("");
             versionMap.clear();
             for (LocalVaadinVersion version : LocalFileManager
-                    .getLocalVaadinJarVersions()) {
+                    .getLocalVaadinVersions()) {
                 versionMap.put(version.getVersionNumber(), version);
                 versionCombo.add(version.getVersionNumber());
             }
@@ -358,6 +330,7 @@ public class VaadinVersionComposite extends Composite {
                     return;
                 }
 
+                // TODO should use getVaadinLibraryVersion()
                 IPath vaadinLibrary = ProjectUtil.getVaadinLibraryInProject(
                         project, true);
                 if (vaadinLibrary == null) {
@@ -377,6 +350,7 @@ public class VaadinVersionComposite extends Composite {
                 // might have been removed from the local store for instance
                 // when Eclipse was upgraded.
 
+                // TODO this might be problematic with multi-JAR packaging
                 LocalVaadinVersion projectVaadinVersion = new LocalVaadinVersion(
                         FileType.VAADIN_RELEASE, currentVaadinVersionString,
                         vaadinLibrary);
@@ -427,7 +401,7 @@ public class VaadinVersionComposite extends Composite {
                         public void run(IProgressMonitor monitor)
                                 throws InvocationTargetException {
                             try {
-                                DownloadManager.downloadVaadinJar(
+                                DownloadManager.downloadVaadin(
                                         version.getVersionNumber(), monitor);
                             } catch (CoreException e) {
                                 throw new InvocationTargetException(e);
@@ -527,7 +501,7 @@ public class VaadinVersionComposite extends Composite {
     protected void selectLatestLocalVersion() {
         try {
             LocalVaadinVersion newestLocalVaadinVersion = LocalFileManager
-                    .getNewestLocalVaadinJarVersion();
+                    .getNewestLocalVaadinVersion();
             if (newestLocalVaadinVersion != null) {
                 versionCombo.setText(newestLocalVaadinVersion
                         .getVersionNumber());

@@ -80,7 +80,7 @@ public final class NightlyUpgradeJob extends Job {
             DownloadableVaadinVersion newVersion, IProgressMonitor monitor)
             throws CoreException {
         // download version (if not already downloaded)
-        DownloadManager.downloadVaadinJar(newVersion.getVersionNumber(),
+        DownloadManager.downloadVaadin(newVersion.getVersionNumber(),
                 new SubProgressMonitor(monitor, 3));
 
         // upgrade

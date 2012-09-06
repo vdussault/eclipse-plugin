@@ -209,12 +209,12 @@ public class ProjectDependencyManager {
      * exception is thrown.
      * 
      * @param jproject
-     * @param vaadinJarVersion
+     * @param vaadinVersion
      * @param monitor
      * @throws CoreException
      */
     private static void addVaadinLibrary(IJavaProject jproject,
-            LocalVaadinVersion vaadinJarVersion, IProgressMonitor monitor)
+            LocalVaadinVersion vaadinVersion, IProgressMonitor monitor)
             throws CoreException {
 
         if (monitor == null) {
@@ -229,8 +229,8 @@ public class ProjectDependencyManager {
             if (!lib.exists()) {
                 VaadinPluginUtil.createFolders(lib, monitor);
             }
-            IFile targetFile = lib.getFile(vaadinJarVersion.getJarFilename());
-            IPath sourceFile = vaadinJarVersion.getJarFile();
+            IFile targetFile = lib.getFile(vaadinVersion.getJarFilename());
+            IPath sourceFile = vaadinVersion.getJarFile();
             VaadinPluginUtil.copyPluginFileToProject(sourceFile, targetFile);
 
             // refresh project
@@ -270,7 +270,7 @@ public class ProjectDependencyManager {
      * @param currentJar
      * @throws CoreException
      */
-    public static void removeVaadinLibrary(IJavaProject jproject,
+    private static void removeVaadinLibrary(IJavaProject jproject,
             IPath currentJar) throws CoreException {
         try {
             IProject project = jproject.getProject();

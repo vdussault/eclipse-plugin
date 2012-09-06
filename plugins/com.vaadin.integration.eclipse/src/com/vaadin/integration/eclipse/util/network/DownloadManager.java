@@ -207,7 +207,7 @@ public class DownloadManager {
      * @param subProgressMonitor
      * @throws CoreException
      */
-    public static void downloadVaadinJar(String versionNumber,
+    public static void downloadVaadin(String versionNumber,
             IProgressMonitor subProgressMonitor) throws CoreException {
         List<DownloadableVaadinVersion> versions = getAvailableVersions(false);
         DownloadableVaadinVersion downloadableVersion = null;

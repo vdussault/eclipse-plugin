@@ -219,17 +219,17 @@ public class LocalFileManager {
     }
 
     /**
-     * Returns the version for the newest, locally available Vaadin jar. If no
-     * local jar is found, null is returned.
+     * Returns the version for the newest locally available (cached) Vaadin
+     * version. If no local JARs are found in the cache, null is returned.
      * 
      * @return
      * @throws CoreException
      */
     // TODO official versions only?
-    public static LocalVaadinVersion getNewestLocalVaadinJarVersion()
+    public static LocalVaadinVersion getNewestLocalVaadinVersion()
             throws CoreException {
         try {
-            List<LocalVaadinVersion> versions = getLocalVaadinJarVersions();
+            List<LocalVaadinVersion> versions = getLocalVaadinVersions();
             if (versions.size() > 0) {
                 return versions.get(0);
             } else {
@@ -245,15 +245,15 @@ public class LocalFileManager {
     // }
 
     /**
-     * Returns the versions for all the locally available Vaadin jars, sorted
+     * Returns the versions for all the locally cached Vaadin versions, sorted
      * with the latest version first.
      * 
-     * If no local jar is found, an empty List is returned.
+     * If no locally cached version is found, an empty List is returned.
      * 
      * @return
      * @throws CoreException
      */
-    public static List<LocalVaadinVersion> getLocalVaadinJarVersions()
+    public static List<LocalVaadinVersion> getLocalVaadinVersions()
             throws CoreException {
         NumberFormatter nf = new NumberFormatter(new DecimalFormat("000"));
 
@@ -343,7 +343,7 @@ public class LocalFileManager {
             // optimization - no need to get the list
             return null;
         }
-        List<LocalVaadinVersion> versions = getLocalVaadinJarVersions();
+        List<LocalVaadinVersion> versions = getLocalVaadinVersions();
         for (LocalVaadinVersion version : versions) {
             if (version.getVersionNumber().equals(versionString)) {
                 return version;
