@@ -180,13 +180,12 @@ public class VaadinPluginUtil {
 
     }
 
-    public static String createRootClassSource(String packageName,
-            String applicationName, String rootClass, String vaadinPackagePrefix) {
+    public static String createUiClassSource(String packageName,
+            String applicationName, String uiClass, String vaadinPackagePrefix) {
         String template = "package " + packageName + ";\n\n" + "import "
-                + vaadinPackagePrefix + "ui.*;\n" + "import "
-                + vaadinPackagePrefix + "terminal.WrappedRequest;\n\n"
-                + "public class " + rootClass + " extends Root {\n"
-                + "\t@Override\n"
+                + vaadinPackagePrefix + "server.WrappedRequest;\n" + "import "
+                + vaadinPackagePrefix + "ui.*;\n\n" + "public class " + uiClass
+                + " extends UI {\n" + "\t@Override\n"
                 + "\tpublic void init(WrappedRequest request) {\n"
                 + "\t\tLabel label = new Label(\"Hello Vaadin user\");\n"
                 + "\t\taddComponent(label);\n" + "\t}\n" + "\n" + "}\n";
@@ -639,11 +638,11 @@ public class VaadinPluginUtil {
                 true, monitor);
     }
 
-    public static IType[] getRootClasses(IProject project,
+    public static IType[] getUiClasses(IProject project,
             IProgressMonitor monitor) throws JavaModelException {
-        // find all non-binary subclasses of Root in the project
-        // returns an empty array if Root class not found (not Vaadin 7)
-        return getSubClasses(project, VaadinPlugin.ROOT_CLASS_FULL_NAME, true,
+        // find all non-binary subclasses of UI in the project
+        // returns an empty array if UI class not found (not Vaadin 7)
+        return getSubClasses(project, VaadinPlugin.UI_CLASS_FULL_NAME, true,
                 monitor);
     }
 

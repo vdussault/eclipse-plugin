@@ -28,7 +28,7 @@ public class ComponentTemplate implements Template {
   protected final String TEXT_5 = "ClientRpc;";
   protected final String TEXT_6 = NL + "import ";
   protected final String TEXT_7 = ".";
-  protected final String TEXT_8 = "ServerRpc;" + NL + "import com.vaadin.terminal.gwt.client.MouseEventDetails;";
+  protected final String TEXT_8 = "ServerRpc;" + NL + "import com.vaadin.shared.MouseEventDetails;";
   protected final String TEXT_9 = NL + "import ";
   protected final String TEXT_10 = ".";
   protected final String TEXT_11 = "State;";

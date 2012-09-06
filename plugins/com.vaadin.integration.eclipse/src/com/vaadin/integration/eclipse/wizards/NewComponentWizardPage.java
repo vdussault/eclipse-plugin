@@ -107,18 +107,18 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
                 // must be package
                 setPackageFragment((IPackageFragment) elem, true);
             } else {
-                // Detect a package where an Application or Root lies in as a
+                // Detect a package where an Application or UI lies in as a
                 // default package
-                IType projectApplicationOrRoot = null;
+                IType projectApplicationOrUI = null;
                 IType[] prospects = VaadinPluginUtil.getApplicationClasses(
                         project, null);
                 if (prospects.length == 0) {
-                    prospects = VaadinPluginUtil.getRootClasses(project, null);
+                    prospects = VaadinPluginUtil.getUiClasses(project, null);
                 }
 
                 if (prospects.length > 0) {
-                    projectApplicationOrRoot = prospects[0];
-                    IPackageFragment packageFragment = projectApplicationOrRoot
+                    projectApplicationOrUI = prospects[0];
+                    IPackageFragment packageFragment = projectApplicationOrUI
                             .getPackageFragment();
                     setPackageFragment(packageFragment, true);
                 } else {

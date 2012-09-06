@@ -164,8 +164,8 @@ public class VaadinFacetInstallDataModelProvider extends
     }
 
     /**
-     * Returns "Application" (for Vaadin 6 or unknown) or "Root" (for other
-     * Vaadin versions - 7 or higher).
+     * Returns "Application" (for Vaadin 6 or unknown) or "UI" (for other Vaadin
+     * versions - 7 or higher).
      * 
      * @return
      */
@@ -173,10 +173,10 @@ public class VaadinFacetInstallDataModelProvider extends
         String suffix = VaadinPlugin.APPLICATION_CLASS_NAME;
         Object versionObject = getProperty(VAADIN_VERSION);
         if (null != versionObject && !"".equals(versionObject)) {
-            boolean useRoot = VersionUtil.isVaadin7VersionString(String
+            boolean useUi = VersionUtil.isVaadin7VersionString(String
                     .valueOf(versionObject));
-            if (useRoot) {
-                suffix = VaadinPlugin.ROOT_CLASS_NAME;
+            if (useUi) {
+                suffix = VaadinPlugin.UI_CLASS_NAME;
             }
         }
         return suffix;
@@ -194,6 +194,8 @@ public class VaadinFacetInstallDataModelProvider extends
         }
         // notify of valid values change
         if (VAADIN_VERSION.equals(propertyName)) {
+            // TODO for Vaadin 7, portlet 1.0 is not supported
+
             if (!vaadinVersions.contains(propertyValue)) {
                 try {
                     vaadinVersions = getVaadinVersions();
@@ -206,14 +208,14 @@ public class VaadinFacetInstallDataModelProvider extends
                             "Failed to update Vaadin version list", e);
                 }
             }
-            // update application class name (*Application/*Root) if necessary
+            // update application class name (*Application/*UI) if necessary
             if (null != propertyValue && !"".equals(propertyValue)) {
-                boolean useRoot = VersionUtil.isVaadin7VersionString(String
+                boolean useUi = VersionUtil.isVaadin7VersionString(String
                         .valueOf(propertyValue));
                 Object classNameObject = getProperty(APPLICATION_CLASS);
                 if (null != classNameObject) {
                     String className = classNameObject.toString();
-                    if (useRoot) {
+                    if (useUi) {
                         if (className
                                 .endsWith(VaadinPlugin.APPLICATION_CLASS_NAME)) {
                             className = className
@@ -221,13 +223,13 @@ public class VaadinFacetInstallDataModelProvider extends
                                             0,
                                             className
                                                     .lastIndexOf(VaadinPlugin.APPLICATION_CLASS_NAME))
-                                    + VaadinPlugin.ROOT_CLASS_NAME;
+                                    + VaadinPlugin.UI_CLASS_NAME;
                             setProperty(APPLICATION_CLASS, className);
                         }
                     } else {
-                        if (className.endsWith(VaadinPlugin.ROOT_CLASS_NAME)) {
+                        if (className.endsWith(VaadinPlugin.UI_CLASS_NAME)) {
                             className = className.substring(0, className
-                                    .lastIndexOf(VaadinPlugin.ROOT_CLASS_NAME))
+                                    .lastIndexOf(VaadinPlugin.UI_CLASS_NAME))
                                     + VaadinPlugin.APPLICATION_CLASS_NAME;
                             setProperty(APPLICATION_CLASS, className);
                         }
@@ -235,6 +237,8 @@ public class VaadinFacetInstallDataModelProvider extends
                 }
             }
         } else if (PORTLET_VERSION.equals(propertyName)) {
+            // TODO for Vaadin 7, portlet 1.0 is not supported
+
             if (PORTLET_VERSION20.equals(propertyValue)
                     && !PROJECT_TYPE_PORTLET20
                             .equals(getProperty(VAADIN_PROJECT_TYPE))) {

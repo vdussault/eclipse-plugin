@@ -22,7 +22,7 @@ public class ConnectorTemplate implements Template {
 
   public final String NL = nl == null ? (System.getProperties().getProperty("line.separator")) : nl;
   protected final String TEXT_1 = "package ";
-  protected final String TEXT_2 = ";" + NL + "" + NL + "import com.google.gwt.core.client.GWT;" + NL + "import com.google.gwt.user.client.Window;" + NL + "import com.google.gwt.user.client.ui.Widget;" + NL + "" + NL + "import com.vaadin.terminal.gwt.client.ui.AbstractComponentConnector;" + NL + "import com.vaadin.terminal.gwt.client.ui.Connect;" + NL + "" + NL + "import ";
+  protected final String TEXT_2 = ";" + NL + "" + NL + "import com.google.gwt.core.client.GWT;" + NL + "import com.google.gwt.user.client.Window;" + NL + "import com.google.gwt.user.client.ui.Widget;" + NL + "" + NL + "import com.vaadin.client.ui.AbstractComponentConnector;" + NL + "import com.vaadin.shared.ui.Connect;" + NL + "" + NL + "import ";
   protected final String TEXT_3 = ".";
   protected final String TEXT_4 = ";";
   protected final String TEXT_5 = NL + "import ";
@@ -30,13 +30,13 @@ public class ConnectorTemplate implements Template {
   protected final String TEXT_7 = NL + "import com.google.gwt.user.client.ui.Label;";
   protected final String TEXT_8 = NL + "import ";
   protected final String TEXT_9 = ".";
-  protected final String TEXT_10 = ";" + NL + "import com.vaadin.terminal.gwt.client.communication.RpcProxy;" + NL + "import com.google.gwt.event.dom.client.ClickEvent;" + NL + "import com.google.gwt.event.dom.client.ClickHandler;" + NL + "import com.vaadin.terminal.gwt.client.MouseEventDetails;" + NL + "import com.vaadin.terminal.gwt.client.MouseEventDetailsBuilder;";
+  protected final String TEXT_10 = ";" + NL + "import com.vaadin.client.communication.RpcProxy;" + NL + "import com.google.gwt.event.dom.client.ClickEvent;" + NL + "import com.google.gwt.event.dom.client.ClickHandler;" + NL + "import com.vaadin.shared.MouseEventDetails;" + NL + "import com.vaadin.client.MouseEventDetailsBuilder;";
   protected final String TEXT_11 = NL + "import ";
   protected final String TEXT_12 = ".";
   protected final String TEXT_13 = ";";
   protected final String TEXT_14 = NL + "import ";
   protected final String TEXT_15 = ".";
-  protected final String TEXT_16 = ";" + NL + "import com.vaadin.terminal.gwt.client.communication.StateChangeEvent;";
+  protected final String TEXT_16 = ";" + NL + "import com.vaadin.client.communication.StateChangeEvent;";
   protected final String TEXT_17 = NL + NL + "@Connect(";
   protected final String TEXT_18 = ".class)" + NL + "public class ";
   protected final String TEXT_19 = " extends AbstractComponentConnector {" + NL;

@@ -15,8 +15,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 
-import com.vaadin.terminal.gwt.client.ui.AbstractComponentConnector;
-import com.vaadin.terminal.gwt.client.ui.Connect;
+import com.vaadin.client.ui.AbstractComponentConnector;
+import com.vaadin.shared.ui.Connect;
 
 import <%= componentPackage %>.<%= componentName %>;
 <% if (t.hasWidget()) { %>
@@ -26,18 +26,18 @@ import com.google.gwt.user.client.ui.Label;
 <% } %>
 <% if (t.hasServerRpc()) { %>
 import <%= target %>.<%= serverRpcName %>;
-import com.vaadin.terminal.gwt.client.communication.RpcProxy;
+import com.vaadin.client.communication.RpcProxy;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.vaadin.terminal.gwt.client.MouseEventDetails;
-import com.vaadin.terminal.gwt.client.MouseEventDetailsBuilder;
+import com.vaadin.shared.MouseEventDetails;
+import com.vaadin.client.MouseEventDetailsBuilder;
 <% } %>
 <% if (t.hasClientRpc()) { %>
 import <%= target %>.<%= clientRpcName %>;
 <% } %>
 <% if (t.hasState()) { %>
 import <%= target %>.<%= stateName %>;
-import com.vaadin.terminal.gwt.client.communication.StateChangeEvent;
+import com.vaadin.client.communication.StateChangeEvent;
 <% } %>
 
 @Connect(<%= componentName %>.class)

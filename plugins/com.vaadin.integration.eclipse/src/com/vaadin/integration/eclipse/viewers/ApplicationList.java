@@ -24,7 +24,7 @@ import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 
 /**
  * List of Vaadin Application classes that supports multiple selection. For
- * Vaadin 7, also lists Root classes.
+ * Vaadin 7, also lists UI classes.
  */
 public class ApplicationList extends Composite {
 
@@ -48,15 +48,15 @@ public class ApplicationList extends Composite {
         viewer.setInput(new IType[0]);
     }
 
-    public void update(IProject project, boolean includeRoots) {
+    public void update(IProject project, boolean includeUis) {
         // update application list
         IType[] applications = getApplications(project);
         IType[] input = applications;
-        if (includeRoots) {
-            IType[] roots = getRoots(project);
-            input = new IType[applications.length + roots.length];
+        if (includeUis) {
+            IType[] uis = getUis(project);
+            input = new IType[applications.length + uis.length];
             System.arraycopy(applications, 0, input, 0, applications.length);
-            System.arraycopy(roots, 0, input, applications.length, roots.length);
+            System.arraycopy(uis, 0, input, applications.length, uis.length);
         }
         viewer.setInput(input);
     }
@@ -100,18 +100,18 @@ public class ApplicationList extends Composite {
         return applications;
     }
 
-    private IType[] getRoots(IProject project) {
+    private IType[] getUis(IProject project) {
         IType[] applications = new IType[0];
         try {
             // no progress monitor
-            applications = VaadinPluginUtil.getRootClasses(project, null);
+            applications = VaadinPluginUtil.getUiClasses(project, null);
         } catch (JavaModelException e) {
             // do not list the applications to modify
             // TODO should this be displayed?
             // ErrorUtil.displayError(
             // "Failed to list Application classes in the project", e);
             ErrorUtil.handleBackgroundException(IStatus.WARNING,
-                    "Failed to list the Root classes in the project", e);
+                    "Failed to list the UI classes in the project", e);
         }
 
         return applications;

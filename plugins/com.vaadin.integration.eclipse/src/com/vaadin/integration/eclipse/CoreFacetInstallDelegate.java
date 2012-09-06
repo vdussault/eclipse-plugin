@@ -141,7 +141,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
             // existing project or if the user has chosen not to create them
             // when creating the project (e.g. SVN checkout)
             if (model.getBooleanProperty(CREATE_ARTIFACTS)) {
-                // Name of Application (Vaadin 6) or Root (Vaadin 7) class
+                // Name of Application (Vaadin 6) or UI (Vaadin 7) class
                 String applicationClass = model
                         .getStringProperty(APPLICATION_CLASS);
                 String applicationPackage = model
@@ -170,17 +170,30 @@ public class CoreFacetInstallDelegate implements IDelegate,
 
                 // special case as the Vaadin JAR is not yet in the classpath
                 String vaadinPackagePrefix = VaadinPlugin.VAADIN_PACKAGE_PREFIX;
+                String servletClassName;
+                String portletClassName = null;
 
-                if (VersionUtil.isVaadin7(localVaadinVersion)) {
-                    // Vaadin 7 or newer: create a Root instead of an
+                boolean vaadin7 = VersionUtil.isVaadin7(localVaadinVersion);
+                if (vaadin7) {
+                    // Vaadin 7 or newer: create a UI instead of an
                     // application
-                    String rootCode = VaadinPluginUtil.createRootClassSource(
+                    String uiCode = VaadinPluginUtil.createUiClassSource(
                             applicationPackage, applicationName,
                             applicationClass, vaadinPackagePrefix);
 
                     /* Create the application class if it does not exist */
                     appPackage.createCompilationUnit(applicationFileName,
-                            rootCode, false, monitor);
+                            uiCode, false, monitor);
+
+                    servletClassName = vaadinPackagePrefix
+                            + (gaeProject ? WebXmlUtil.VAADIN7_GAE_SERVLET_CLASS
+                                    : WebXmlUtil.VAADIN7_SERVLET_CLASS);
+
+                    if (createPortlet) {
+                        // Vaadin 7 only supports portlet 2.0
+                        portletClassName = vaadinPackagePrefix
+                                + WebXmlUtil.VAADIN7_PORTLET2_CLASS;
+                    }
                 } else {
                     // Vaadin 6: create an Application class
                     String applicationCode = VaadinPluginUtil
@@ -191,6 +204,20 @@ public class CoreFacetInstallDelegate implements IDelegate,
                     /* Create the application class if it does not exist */
                     appPackage.createCompilationUnit(applicationFileName,
                             applicationCode, false, monitor);
+
+                    servletClassName = vaadinPackagePrefix
+                            + (gaeProject ? WebXmlUtil.VAADIN_GAE_SERVLET_CLASS
+                                    : WebXmlUtil.VAADIN_SERVLET_CLASS);
+
+                    if (createPortlet) {
+                        if (PORTLET_VERSION20.equals(portletVersion)) {
+                            portletClassName = vaadinPackagePrefix
+                                    + WebXmlUtil.VAADIN_PORTLET2_CLASS;
+                        } else {
+                            portletClassName = vaadinPackagePrefix
+                                    + WebXmlUtil.VAADIN_PORTLET_CLASS;
+                        }
+                    }
                 }
 
                 /* Update web.xml */
@@ -203,15 +230,11 @@ public class CoreFacetInstallDelegate implements IDelegate,
                     if (createPortlet) {
                         servletPath = "/" + servletName + servletPath;
                     }
-                    String servletClassName = vaadinPackagePrefix
-                            + (gaeProject ? WebXmlUtil.VAADIN_GAE_SERVLET_CLASS
-                                    : WebXmlUtil.VAADIN_SERVLET_CLASS);
-                    // For Vaadin 7, use a Root instead of an Application
+                    // For Vaadin 7, use a UI instead of an Application
                     WebXmlUtil.addServlet(artifact.getWebApp(),
                             applicationName, applicationPackage + "."
                                     + applicationClass, servletPath,
-                            servletClassName, createPortlet,
-                            VersionUtil.isVaadin7(localVaadinVersion));
+                            servletClassName, createPortlet, vaadin7);
                     WebXmlUtil.addContextParameter(artifact.getWebApp(),
                             VAADIN_PRODUCTION_MODE, "false",
                             VAADIN_PRODUCTION_MODE_DESCRIPTION);
@@ -228,28 +251,17 @@ public class CoreFacetInstallDelegate implements IDelegate,
                     String portletTitle = model
                             .getStringProperty(PORTLET_TITLE);
                     String category = "Vaadin";
+                    String portletApplicationName = null;
                     if (PORTLET_VERSION20.equals(portletVersion)) {
-                        PortletConfigurationUtil
-                                .addPortlet(
-                                        project,
-                                        applicationPackage + "."
-                                                + applicationClass,
-                                        vaadinPackagePrefix
-                                                + "terminal.gwt.server.ApplicationPortlet2",
-                                        portletName, portletTitle, category,
-                                        portletVersion, VersionUtil
-                                                .isVaadin7(localVaadinVersion));
+                        portletApplicationName = applicationPackage + "."
+                                + applicationClass;
                     } else {
-                        PortletConfigurationUtil
-                                .addPortlet(
-                                        project,
-                                        servletName,
-                                        vaadinPackagePrefix
-                                                + "terminal.gwt.server.ApplicationPortlet",
-                                        portletName, portletTitle, category,
-                                        portletVersion, VersionUtil
-                                                .isVaadin7(localVaadinVersion));
+                        portletApplicationName = servletName;
                     }
+                    PortletConfigurationUtil.addPortlet(project,
+                            portletApplicationName, portletClassName,
+                            portletName, portletTitle, category,
+                            portletVersion, vaadin7);
                 }
 
                 // create appengine-web.xml

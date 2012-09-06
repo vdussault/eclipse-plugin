@@ -742,8 +742,8 @@ public class WidgetsetUtil {
         IType[] prospectClasses = VaadinPluginUtil.getApplicationClasses(
                 project.getProject(), monitor);
         if (prospectClasses.length == 0) {
-            // No application classes in project, try roots
-            prospectClasses = VaadinPluginUtil.getRootClasses(
+            // No application classes in project, try UIs
+            prospectClasses = VaadinPluginUtil.getUiClasses(
                     project.getProject(), monitor);
         }
 

@@ -26,8 +26,17 @@ public class WebXmlUtil {
 
     public static final String VAADIN_SERVLET_CLASS = "terminal.gwt.server.ApplicationServlet";
     public static final String VAADIN_GAE_SERVLET_CLASS = "terminal.gwt.server.GAEApplicationServlet";
+    public static final String VAADIN_PORTLET_CLASS = "terminal.gwt.server.ApplicationPortlet";
+    public static final String VAADIN_PORTLET2_CLASS = "terminal.gwt.server.ApplicationPortlet2";
+
     public static final String VAADIN_APPLICATION_CLASS_PARAMETER = "application";
-    public static final String VAADIN_ROOT_CLASS_PARAMETER = "root";
+
+    public static final String VAADIN7_SERVLET_CLASS = "server.VaadinServlet";
+    public static final String VAADIN7_GAE_SERVLET_CLASS = "server.GAEVaadinServlet";
+    public static final String VAADIN7_PORTLET2_CLASS = "server.VaadinPortlet";
+
+    public static final String VAADIN_UI_CLASS_PARAMETER = "UI";
+
     public static final String VAADIN_WIDGETSET_PARAMETER = "widgetset";
 
     /**
@@ -36,19 +45,18 @@ public class WebXmlUtil {
      * @param artifact
      * @param applicationName
      * @param applicationClass
-     *            application or root class name
+     *            application or ui class name
      * @param urlPattern
      * @param servletClassName
      * @param addVaadinMapping
-     * @param rootMapping
-     *            true to create a Root mapping (Vaadin 7) instead of an
+     * @param uiMapping
+     *            true to create a UI mapping (Vaadin 7) instead of an
      *            Application mapping
      */
     @SuppressWarnings("unchecked")
     public static void addServlet(WebApp webApp, String applicationName,
             String applicationClass, String urlPattern,
-            String servletClassName, boolean addVaadinMapping,
-            boolean rootMapping) {
+            String servletClassName, boolean addVaadinMapping, boolean uiMapping) {
 
         /* Create servlet type compatible with Vaadin */
         ServletType servletType = WebapplicationFactory.eINSTANCE
@@ -60,11 +68,10 @@ public class WebXmlUtil {
         servlet.setServletName(applicationName);
         servlet.setWebType(servletType);
 
-        if (rootMapping) {
-            // Vaadin 7 Root instead of a Vaadin 6 Application
-            addServletInitParameter(webApp, servlet,
-                    VAADIN_ROOT_CLASS_PARAMETER, applicationClass,
-                    "Vaadin root class to use");
+        if (uiMapping) {
+            // Vaadin 7 UI instead of a Vaadin 6 Application
+            addServletInitParameter(webApp, servlet, VAADIN_UI_CLASS_PARAMETER,
+                    applicationClass, "Vaadin UI class to use");
         } else {
             // Vaadin 6 Application
             addServletInitParameter(webApp, servlet,
@@ -303,8 +310,8 @@ public class WebXmlUtil {
             if (value != null) {
                 return value.getValue();
             }
-            // root
-            value = getInitParameter_2_4(servlet, VAADIN_ROOT_CLASS_PARAMETER);
+            // UI
+            value = getInitParameter_2_4(servlet, VAADIN_UI_CLASS_PARAMETER);
             if (value != null) {
                 return value.getValue();
             }
@@ -315,8 +322,8 @@ public class WebXmlUtil {
             if (value != null) {
                 return value.getParamValue();
             }
-            // root
-            value = getInitParameter_2_3(servlet, VAADIN_ROOT_CLASS_PARAMETER);
+            // UI
+            value = getInitParameter_2_3(servlet, VAADIN_UI_CLASS_PARAMETER);
             if (value != null) {
                 return value.getParamValue();
             }

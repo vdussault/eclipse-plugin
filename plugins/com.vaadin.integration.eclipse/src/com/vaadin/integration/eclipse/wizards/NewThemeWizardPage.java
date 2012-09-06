@@ -151,7 +151,7 @@ public class NewThemeWizardPage extends WizardPage {
 
             // update application list
             // TODO for now, not setting the theme automatically for Vaadin 7
-            // Roots - use ProjectUtil.isVaadin7(project) when supported
+            // UIs - use ProjectUtil.isVaadin7(project) when supported
             applicationList.update(project, false);
             // select all applications by default
             applicationList.selectAll();
@@ -210,7 +210,7 @@ public class NewThemeWizardPage extends WizardPage {
     }
 
     public java.util.List<IType> getApplicationClassesToModify() {
-        // TODO Roots also?
+        // TODO UIs also?
         return applicationList.getSelectedApplications();
     }
 }

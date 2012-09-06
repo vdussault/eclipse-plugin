@@ -7,7 +7,7 @@
 <% fileName = typeName + ".java"; %>
 package <%= target %>;
 
-import com.vaadin.terminal.gwt.client.communication.ClientRpc;
+import com.vaadin.shared.communication.ClientRpc;
 
 public interface <%= typeName %> extends ClientRpc {
 
