@@ -6,10 +6,12 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.j2ee.web.componentcore.util.WebArtifactEdit;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
@@ -78,8 +80,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
         } else {
             // No version was specified on the configuration page. Use the
             // newest local.
-            localVaadinVersion = LocalFileManager
-                    .getNewestLocalVaadinVersion();
+            localVaadinVersion = LocalFileManager.getNewestLocalVaadinVersion();
         }
         monitor.worked(1);
 
@@ -101,8 +102,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
             DownloadManager.downloadVaadin(latestVaadinVersion,
                     new SubProgressMonitor(monitor, 2));
 
-            localVaadinVersion = LocalFileManager
-                    .getNewestLocalVaadinVersion();
+            localVaadinVersion = LocalFileManager.getNewestLocalVaadinVersion();
         } else {
             monitor.worked(3);
         }
@@ -134,9 +134,12 @@ public class CoreFacetInstallDelegate implements IDelegate,
             monitor.subTask("Installing libraries");
 
             /* Copy Vaadin JAR to project's WEB-INF/lib folder */
-            ProjectDependencyManager.ensureVaadinLibraries(project,
-                    localVaadinVersion, new SubProgressMonitor(monitor, 5));
-
+            boolean vaadin7 = VersionUtil.isVaadin7(localVaadinVersion);
+            if (!vaadin7) {
+                // Vaadin 7 uses Ivy for dependencies
+                ProjectDependencyManager.ensureVaadinLibraries(project,
+                        localVaadinVersion, new SubProgressMonitor(monitor, 5));
+            }
             // do not create project artifacts if adding the facet to an
             // existing project or if the user has chosen not to create them
             // when creating the project (e.g. SVN checkout)
@@ -173,7 +176,6 @@ public class CoreFacetInstallDelegate implements IDelegate,
                 String servletClassName;
                 String portletClassName = null;
 
-                boolean vaadin7 = VersionUtil.isVaadin7(localVaadinVersion);
                 if (vaadin7) {
                     // Vaadin 7 or newer: create a UI instead of an
                     // application
@@ -194,6 +196,8 @@ public class CoreFacetInstallDelegate implements IDelegate,
                         portletClassName = vaadinPackagePrefix
                                 + WebXmlUtil.VAADIN7_PORTLET2_CLASS;
                     }
+
+                    setupIvy(jProject, monitor);
                 } else {
                     // Vaadin 6: create an Application class
                     String applicationCode = VaadinPluginUtil
@@ -283,6 +287,51 @@ public class CoreFacetInstallDelegate implements IDelegate,
         } finally {
             monitor.done();
         }
+
+    }
+
+    private void setupIvy(IJavaProject jProject, IProgressMonitor monitor)
+            throws CoreException {
+        VaadinPluginUtil.ensureFileFromTemplate(jProject, "ivy.xml",
+                "ivy/ivy.xml");
+        VaadinPluginUtil.ensureFileFromTemplate(jProject, "ivysettings.xml",
+                "ivy/ivysettings.xml");
+
+        // new ClasspathEntry(
+        // IClasspathEntry.CPE_CONTAINER,);
+        // new ClassPathContainer(parent, entry)
+        // IClasspathAttribute[] deployAttributes = new IClasspathAttribute[] {
+        // new ClasspathAttribute(
+        // "org.eclipse.jst.component.dependency", "/WEB-INF/lib") };
+        // String params =
+        // "project=v7proj&ivyXmlPath=ivy.xml&confs=default&ivySettingsPath=${workspace_loc:v7proj/ivysettings.xml}&loadSettingsOnDemand=false&propertyFiles=";
+        // IvyClasspathContainer icc = new IvyClasspathContainer(jProject,
+        // new Path(IvyClasspathContainer.CONTAINER_ID + "/?" + params),
+        // new IClasspathEntry[] {}, deployAttributes);
+        // icc.getConf().getIvySettingsSetup()
+        // .setIvySettingsPath("ivysettings.xml");
+        // icc.getConf().setIvyXmlPath("ivy.xml");
+        // ArrayList<String> confs = new ArrayList<String>();
+        // confs.add("default");
+        // icc.getConf().setConfs(confs);
+        // icc
+        // addRawClassPathEntries(jProject, monitor, icc.getClasspathEntries());
+
+    }
+
+    private void addRawClassPathEntries(IJavaProject jProject,
+            IProgressMonitor monitor, IClasspathEntry... classpathEntries)
+            throws JavaModelException {
+        IClasspathEntry[] oldClassPath = jProject.getRawClasspath();
+        IClasspathEntry[] newClassPath = new IClasspathEntry[oldClassPath.length
+                + classpathEntries.length];
+        for (int i = 0; i < oldClassPath.length; i++) {
+            newClassPath[i] = oldClassPath[i];
+        }
+        for (int i = oldClassPath.length; i < newClassPath.length; i++) {
+            newClassPath[i] = classpathEntries[i - oldClassPath.length];
+        }
+        jProject.setRawClasspath(newClassPath, monitor);
 
     }
 }
