@@ -1232,4 +1232,12 @@ public class VaadinPluginUtil {
         }
     }
 
+    public static void ensureFileFromTemplate(IJavaProject jProject,
+            String locationInProject, String locationInTemplate)
+            throws CoreException {
+        IProject p = jProject.getProject();
+        IFile projectLocation = p.getFile(locationInProject);
+        ensureFileFromTemplate(projectLocation, locationInTemplate);
+
+    }
 }
