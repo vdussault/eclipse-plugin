@@ -23,7 +23,7 @@ public class VersionUtil {
 
     private static final String GWT_VERSION_DEPENDENCIES_ATTRIBUTE = "GWT-Version-Dependencies";
     private static final String VAADIN_VERSION_PATTERN = "([0-9]*)\\.([0-9])\\.(.+)";
-    public static final String VAADIN_JAR_REGEXP = "^vaadin-"
+    public static final String VAADIN_JAR_REGEXP = "^vaadin-(server-)?"
             + VAADIN_VERSION_PATTERN + "\\.jar$";
 
     /**
@@ -119,7 +119,9 @@ public class VersionUtil {
         }
         Attributes attr = manifest.getMainAttributes();
         String bundleName = attr.getValue("Bundle-Name");
-        if (bundleName != null && bundleName.equals("Vaadin")) {
+        if (bundleName != null
+                && (bundleName.equals("Vaadin") || bundleName
+                        .startsWith("vaadin-"))) {
             return attr.getValue(versionAttribute);
         }
 

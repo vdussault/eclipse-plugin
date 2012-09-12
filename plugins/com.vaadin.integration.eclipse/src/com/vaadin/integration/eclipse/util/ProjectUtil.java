@@ -176,6 +176,21 @@ public class ProjectUtil {
     }
 
     /**
+     * Find the Vaadin UI type for a project or null if none found.
+     * 
+     * @param jproject
+     * @return
+     * @throws JavaModelException
+     */
+    public static IType findVaadinUiType(IJavaProject jproject)
+            throws JavaModelException {
+        if (jproject == null) {
+            return null;
+        }
+        return jproject.findType(VaadinPlugin.UI_CLASS_FULL_NAME);
+    }
+
+    /**
      * Returns a list of jar files required by the GWT version used by the
      * Vaadin jar in the project.
      * 
@@ -372,6 +387,10 @@ public class ProjectUtil {
             throws CoreException {
         IJavaElement type;
         type = ProjectUtil.findVaadinApplicationType(javaProject);
+        if (null == type) {
+            // try UI if Vaadin 7
+            type = ProjectUtil.findVaadinUiType(javaProject);
+        }
 
         while (type != null && type.getParent() != null) {
             if (type instanceof IPackageFragmentRoot) {
@@ -463,17 +482,19 @@ public class ProjectUtil {
                 && WidgetsetUtil.isWidgetsetPackage(findProjectVaadinJarPath);
 
     }
+    -*/
 
     public static boolean isVaadin7(IProject project) {
         try {
-            String vaadinVersion = getVaadinLibraryVersion(project, true);
-            return VersionUtil.isVaadin7VersionString(vaadinVersion);
+            // String vaadinVersion = getVaadinLibraryVersion(project, true);
+            // return VersionUtil.isVaadin7VersionString(vaadinVersion);
+            IType uiType = findVaadinUiType(JavaCore.create(project));
+            return (null != uiType);
         } catch (CoreException e) {
             ErrorUtil.handleBackgroundException("", e);
             return false;
         }
     }
-    -*/
 
     public static double getVaadinVersion(IProject project) {
         try {
