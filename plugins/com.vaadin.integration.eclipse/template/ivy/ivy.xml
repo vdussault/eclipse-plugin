@@ -15,8 +15,7 @@
 			conf="default->default" />
 
 		<!-- Vaadin themes -->
-		<dependency org="com.vaadin" name="vaadin-themes-compiled"
-			rev="7.0-SNAPSHOT" />
+		<dependency org="com.vaadin" name="vaadin-themes" rev="7.0-SNAPSHOT" />
 
 		<!-- Precompiled DefaultWidgetSet -->
 		<dependency org="com.vaadin" name="vaadin-client-compiled"
