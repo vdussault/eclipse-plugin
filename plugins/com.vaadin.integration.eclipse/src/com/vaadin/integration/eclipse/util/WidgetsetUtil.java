@@ -322,11 +322,12 @@ public class WidgetsetUtil {
         String classpathSeparator = PlatformUtil.getClasspathSeparator();
 
         // add widgetset JARs
-        Collection<IPath> widgetpackagets = getAvailableVaadinWidgetsetPackages(jproject);
-        IPath vaadinJarPath = ProjectUtil.findProjectVaadinJarPath(jproject);
-        for (IPath file2 : widgetpackagets) {
-            if (!file2.equals(vaadinJarPath)) {
-                classPath = classPath + classpathSeparator + file2.toString();
+        Collection<IPath> widgetpackages = getAvailableVaadinWidgetsetPackages(jproject);
+        for (IPath file2 : widgetpackages) {
+            // this filters out Vaadin JAR(s) already added to the classpath
+            String jarName = file2.toString();
+            if (!classPath.contains(jarName)) {
+                classPath = classPath + classpathSeparator + jarName;
             }
         }
 

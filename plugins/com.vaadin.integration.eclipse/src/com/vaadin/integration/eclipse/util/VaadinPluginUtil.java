@@ -29,6 +29,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -39,6 +40,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.ui.RefreshTab;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -54,6 +56,9 @@ import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 import org.osgi.framework.Bundle;
 
@@ -741,29 +746,44 @@ public class VaadinPluginUtil {
         outputLocations.add(getRawLocation(project,
                 jproject.getOutputLocation()));
 
-        // key libraries
-        IPath gwtDevJarPath = ProjectDependencyManager
-                .getGWTDevJarPath(jproject);
-        if (gwtDevJarPath != null) {
-            IRuntimeClasspathEntry gwtdev = JavaRuntime
-                    .newArchiveRuntimeClasspathEntry(gwtDevJarPath);
-            otherLocations.add(getRawLocation(project, gwtdev.getPath()));
-        }
+        if (ProjectUtil.isVaadin7(project)) {
+            // relevant Vaadin 7 JARs
+            for (IClasspathEntry classPathEntry : jproject
+                    .getResolvedClasspath(true)) {
+                if (classPathEntry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
+                    IPath path = classPathEntry.getPath();
+                    if (path.lastSegment().startsWith("vaadin-")) {
+                        otherLocations.add(getRawLocation(project, path));
+                    }
+                }
+            }
+        } else {
+            // key libraries
+            IPath gwtDevJarPath = ProjectDependencyManager
+                    .getGWTDevJarPath(jproject);
+            if (gwtDevJarPath != null) {
+                IRuntimeClasspathEntry gwtdev = JavaRuntime
+                        .newArchiveRuntimeClasspathEntry(gwtDevJarPath);
+                otherLocations.add(getRawLocation(project, gwtdev.getPath()));
+            }
 
-        IPath gwtUserJarPath = getGWTUserJarPath(jproject);
-        if (gwtUserJarPath != null) {
-            IRuntimeClasspathEntry gwtuser = JavaRuntime
-                    .newArchiveRuntimeClasspathEntry(gwtUserJarPath);
-            otherLocations.add(getRawLocation(project, gwtuser.getPath()));
-        }
+            IPath gwtUserJarPath = getGWTUserJarPath(jproject);
+            if (gwtUserJarPath != null) {
+                IRuntimeClasspathEntry gwtuser = JavaRuntime
+                        .newArchiveRuntimeClasspathEntry(gwtUserJarPath);
+                otherLocations.add(getRawLocation(project, gwtuser.getPath()));
+            }
 
-        IPath vaadinJarPath = ProjectUtil.findProjectVaadinJarPath(jproject);
-        if (vaadinJarPath == null) {
-            throw ErrorUtil.newCoreException("Vaadin JAR could not be found");
+            IPath vaadinJarPath = ProjectUtil
+                    .findProjectVaadinJarPath(jproject);
+            if (vaadinJarPath == null) {
+                throw ErrorUtil
+                        .newCoreException("Vaadin JAR could not be found");
+            }
+            IRuntimeClasspathEntry vaadinJar = JavaRuntime
+                    .newArchiveRuntimeClasspathEntry(vaadinJarPath);
+            otherLocations.add(getRawLocation(project, vaadinJar.getPath()));
         }
-        IRuntimeClasspathEntry vaadinJar = JavaRuntime
-                .newArchiveRuntimeClasspathEntry(vaadinJarPath);
-        otherLocations.add(getRawLocation(project, vaadinJar.getPath()));
 
         // iterate over build path and classify its components
         // only source locations and their output directories (if any) are used
@@ -786,7 +806,8 @@ public class VaadinPluginUtil {
                 // otherLocations.add(rawLocation);
                 // } else if (classPathEntry) {
             } else if (classPathEntry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
-                // Include gwt dependencies aswell
+                // Include gwt dependencies as well
+                // TODO fix for Vaadin 7
                 if (ProjectUtil.isGWTDependency(jproject,
                         classPathEntry.getPath())) {
                     otherLocations.add(getRawLocation(project,
@@ -1124,6 +1145,121 @@ public class VaadinPluginUtil {
     }
 
     /**
+     * Create either an external launch configuration that builds a widgetset
+     * and refreshes the build target directory in the workspace
+     * 
+     * @param project
+     * @param widgetsetType
+     * @param compileWidgetset
+     *            true to run the launch after creating it
+     * @param monitor
+     * @throws CoreException
+     */
+    @SuppressWarnings("deprecation")
+    public static ILaunchConfiguration createCompileWidgetsetLaunch(
+            IProject project, String launchName, String moduleName,
+            boolean compileWidgetset, IProgressMonitor monitor)
+            throws CoreException {
+
+        if (project == null) {
+            return null;
+        }
+
+        ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+
+        // TODO should this be some other type of launch?
+        ILaunchConfigurationType type = manager
+                .getLaunchConfigurationType(IExternalToolConstants.ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE);
+
+        // find and return existing launch, if any
+        ILaunchConfiguration[] launchConfigurations = manager
+                .getLaunchConfigurations();
+        for (ILaunchConfiguration launchConfiguration : launchConfigurations) {
+            if (launchName.equals(launchConfiguration.getName())) {
+                // is the launch in the same project?
+                String launchProject = launchConfiguration
+                        .getAttribute(
+                                IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+                                "");
+                if (project.getName().equals(launchProject)) {
+                    ErrorUtil.logInfo(launchName
+                            + " launch already exists for the project");
+                    if (compileWidgetset) {
+                        launchConfiguration.launch(ILaunchManager.RUN_MODE,
+                                null);
+                    }
+                    return launchConfiguration;
+                }
+            }
+        }
+
+        ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(project,
+                launchName);
+
+        // get the project VM or the default java VM path from Eclipse
+        IJavaProject jproject = JavaCore.create(project);
+        IVMInstall vmInstall = VaadinPluginUtil.getJvmInstall(jproject, true);
+        String vmName = VaadinPluginUtil.getJvmExecutablePath(vmInstall);
+        workingCopy.setAttribute(IExternalToolConstants.ATTR_LOCATION, vmName);
+
+        // refresh only WebContent/VAADIN/widgetsets
+        IWorkingSetManager workingSetManager = PlatformUI.getWorkbench()
+                .getWorkingSetManager();
+        IFolder wsDir = ProjectUtil.getWebContentFolder(project)
+                .getFolder(VaadinPlugin.VAADIN_RESOURCE_DIRECTORY)
+                .getFolder("widgetsets");
+
+        // refresh this requires that the directory exists
+        VaadinPluginUtil.createFolders(wsDir, monitor);
+
+        IWorkingSet workingSet = workingSetManager.createWorkingSet(
+                "launchConfigurationWorkingSet", new IAdaptable[] { wsDir });
+        workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_SCOPE,
+                RefreshTab.getRefreshAttribute(workingSet));
+        // alternatively, could refresh the whole project
+        // workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_SCOPE,
+        // "${project}");
+
+        workingCopy.setAttribute(IExternalToolConstants.ATTR_WORKING_DIRECTORY,
+                "${project_loc:/" + project.getName() + "}");
+
+        // construct the class path, including GWT JARs and project sources
+        String classPath = VaadinPluginUtil.getProjectBaseClasspath(jproject,
+                vmInstall, false);
+
+        // construct rest of the arguments for the launch
+
+        moduleName = moduleName.replace(".client.", ".");
+
+        String vmargs = "-Djava.awt.headless=true -Xss8M  -Xmx512M -XX:MaxPermSize=512M";
+        if (PlatformUtil.getPlatform().equals("mac")) {
+            vmargs += " -XstartOnFirstThread";
+        }
+
+        String compilerClass = VaadinPlugin.GWT_COMPILER_CLASS;
+
+        String wsDirString = wsDir.getProjectRelativePath().toPortableString();
+        String arguments = vmargs + " -classpath \"" + classPath + "\" "
+                + compilerClass + " -out " + wsDirString
+                + " -style OBF -localWorkers "
+                + Runtime.getRuntime().availableProcessors()
+                + " -logLevel INFO " + moduleName;
+
+        workingCopy.setAttribute(IExternalToolConstants.ATTR_TOOL_ARGUMENTS,
+                arguments);
+
+        // save the launch
+        ILaunchConfiguration conf = workingCopy.doSave();
+
+        if (compileWidgetset) {
+            conf.launch(ILaunchManager.RUN_MODE, null);
+        }
+
+        return conf;
+
+    }
+
+    /**
      * Find Java launch configuration for GWT SuperDevMode, create it if
      * missing.
      * 
@@ -1132,6 +1268,44 @@ public class VaadinPluginUtil {
      *         configuration or null if none
      */
     public static ILaunchConfiguration createSuperDevModeLaunch(IProject project) {
+        try {
+            return createClientCompilerLaunch(project,
+                    "SuperDevMode code server",
+                    "com.google.gwt.dev.codeserver.CodeServer", "");
+        } catch (CoreException e) {
+            ErrorUtil.handleBackgroundException(
+                    "Failed to find or create SuperDevMode launch for project "
+                            + project.getName(), e);
+            return null;
+        }
+    }
+
+    // TODO currently not used - alternative to external launch
+    // public static ILaunchConfiguration createCompileWidgetsetLaunch(
+    // IProject project) {
+    // try {
+    // final IFolder wsDir = ProjectUtil.getWebContentFolder(project)
+    // .getFolder(VaadinPlugin.VAADIN_RESOURCE_DIRECTORY)
+    // .getFolder("widgetsets");
+    // IPath projectRelativePath = wsDir.getProjectRelativePath();
+    // String outputDir = projectRelativePath.toString();
+    //
+    // return createClientCompilerLaunch(project, "Compile widgetset",
+    // "com.vaadin.tools.WidgetsetCompiler", "-out " + outputDir
+    // + " -style OBF -localWorkers "
+    // + Runtime.getRuntime().availableProcessors()
+    // + " -logLevel INFO");
+    // } catch (CoreException e) {
+    // ErrorUtil.handleBackgroundException(
+    // "Failed to find or create compile widgetset launch for project "
+    // + project.getName(), e);
+    // return null;
+    // }
+    // }
+
+    protected static ILaunchConfiguration createClientCompilerLaunch(
+            IProject project, String launchTypeName, String mainClass,
+            String arguments) throws CoreException {
         if (project == null) {
             return null;
         }
@@ -1141,95 +1315,99 @@ public class VaadinPluginUtil {
         ILaunchConfigurationType type = manager
                 .getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
 
-        try {
-            IJavaProject jproject = JavaCore.create(project);
+        IJavaProject jproject = JavaCore.create(project);
 
-            String launchName = "SuperDevMode code server for "
-                    + project.getName();
+        String launchName = launchTypeName + " for " + project.getName();
 
-            // find and return existing launch, if any
-            ILaunchConfiguration[] launchConfigurations = manager
-                    .getLaunchConfigurations();
-            for (ILaunchConfiguration launchConfiguration : launchConfigurations) {
-                if (launchName.equals(launchConfiguration.getName())) {
-                    // is the launch in the same project?
-                    String launchProject = launchConfiguration
-                            .getAttribute(
-                                    IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
-                                    "");
-                    if (project.getName().equals(launchProject)) {
-                        ErrorUtil
-                                .logInfo("SuperDevMode launch already exists for the project");
-                        return launchConfiguration;
-                    }
+        // find and return existing launch, if any
+        ILaunchConfiguration[] launchConfigurations = manager
+                .getLaunchConfigurations();
+        for (ILaunchConfiguration launchConfiguration : launchConfigurations) {
+            if (launchName.equals(launchConfiguration.getName())) {
+                // is the launch in the same project?
+                String launchProject = launchConfiguration
+                        .getAttribute(
+                                IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+                                "");
+                if (project.getName().equals(launchProject)) {
+                    ErrorUtil.logInfo(launchTypeName
+                            + " launch already exists for the project");
+                    return launchConfiguration;
                 }
             }
-
-            // create a new launch configuration
-
-            ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(
-                    project, launchName);
-
-            String mainClass = "com.google.gwt.dev.codeserver.CodeServer";
-
-            workingCopy.setAttribute(
-                    IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,
-                    mainClass);
-
-            workingCopy.setAttribute(
-                    IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
-                    project.getName());
-
-            IPath location = project.getLocation();
-            workingCopy.setAttribute(
-                    IJavaLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY,
-                    location.toOSString());
-
-            String arguments = WidgetsetUtil.getConfiguredWidgetSet(jproject);
-            workingCopy.setAttribute(
-                    IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
-                    arguments);
-
-            String vmargs = "-Xmx512M -XX:MaxPermSize=256M";
-            workingCopy
-                    .setAttribute(
-                            IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
-                            vmargs);
-
-            // construct the launch classpath
-
-            List<String> classPath = new ArrayList<String>();
-
-            // default classpath reference, instead of "exploding"
-            // JavaRuntime.computeUnresolvedRuntimeClasspath()
-            classPath.add(JavaRuntime.newDefaultProjectClasspathEntry(jproject)
-                    .getMemento());
-
-            // add source paths on the classpath
-            for (IClasspathEntry entry : jproject.getRawClasspath()) {
-                if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-                    IRuntimeClasspathEntry source = JavaRuntime
-                            .newArchiveRuntimeClasspathEntry(entry.getPath());
-                    classPath.add(source.getMemento());
-                }
-            }
-
-            workingCopy
-                    .setAttribute(
-                            IJavaLaunchConfigurationConstants.ATTR_CLASSPATH,
-                            classPath);
-            workingCopy.setAttribute(
-                    IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH,
-                    false);
-
-            return workingCopy.doSave();
-
-        } catch (CoreException e) {
-            ErrorUtil.handleBackgroundException(
-                    "Failed to find or create SuperDevMode launch for project "
-                            + project.getName(), e);
-            return null;
         }
+
+        // create a new launch configuration
+
+        ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(project,
+                launchName);
+
+        // TODO implement this
+        // IVMInstall vmInstall = VaadinPluginUtil.getJvmInstall(jproject,
+        // true);
+        // if (!VaadinPluginUtil.isJdk16(vmInstall)
+        // && ProjectUtil.isGwt24(project)) {
+        // ErrorUtil
+        // .displayWarningFromBackgroundThread(
+        // "Java6 required",
+        // "Widget set compilation requires Java6.\n"
+        // +
+        // "The project can still use Java5 but you need to make JDK 6 available in Eclipse\n"
+        // + "(see Preferences => Java => Installed JREs).");
+        // }
+        // workingCopy.setAttribute(
+        // IJavaLaunchConfigurationConstants.ATTR_VM_INSTALL_NAME,
+        // vmInstall.getName());
+
+        workingCopy.setAttribute(
+                IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,
+                mainClass);
+
+        workingCopy.setAttribute(
+                IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+                project.getName());
+
+        IPath location = project.getLocation();
+        workingCopy.setAttribute(
+                IJavaLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY,
+                location.toOSString());
+
+        String widgetsetName = WidgetsetUtil.getConfiguredWidgetSet(jproject);
+        workingCopy.setAttribute(
+                IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
+                arguments + " " + widgetsetName);
+
+        String vmargs = "-Xss8M -Xmx512M -XX:MaxPermSize=512M";
+        workingCopy.setAttribute(
+                IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, vmargs);
+
+        // construct the launch classpath
+
+        List<String> classPath = new ArrayList<String>();
+
+        // default classpath reference, instead of "exploding"
+        // JavaRuntime.computeUnresolvedRuntimeClasspath()
+        classPath.add(JavaRuntime.newDefaultProjectClasspathEntry(jproject)
+                .getMemento());
+
+        // add source paths on the classpath
+        for (IClasspathEntry entry : jproject.getRawClasspath()) {
+            if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+                IRuntimeClasspathEntry source = JavaRuntime
+                        .newArchiveRuntimeClasspathEntry(entry.getPath());
+                classPath.add(source.getMemento());
+            }
+        }
+
+        workingCopy.setAttribute(
+                IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classPath);
+        workingCopy
+                .setAttribute(
+                        IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH,
+                        false);
+
+        return workingCopy.doSave();
+
     }
 
     public static void ensureFileFromTemplate(IJavaProject jProject,
