@@ -244,7 +244,7 @@ public class WebXmlUtil {
             Servlet servlet = (Servlet) o;
 
             // update selected applications only
-            if (appNames.contains(getVaadinServletClass(root, servlet))) {
+            if (appNames.contains(getVaadinApplicationOrUiClass(root, servlet))) {
                 addOrUpdateServletInitParameter(root, servlet,
                         VAADIN_WIDGETSET_PARAMETER, widgetsetname,
                         "Application widgetset");
@@ -271,7 +271,7 @@ public class WebXmlUtil {
         for (Object o : servlets) {
             Servlet servlet = (Servlet) o;
 
-            String appName = getVaadinServletClass(root, servlet);
+            String appName = getVaadinApplicationOrUiClass(root, servlet);
             if (appName != null) {
                 String widgetset = null;
                 if (root.getJ2EEVersionID() >= J2EEVersionConstants.J2EE_1_4_ID) {
@@ -295,14 +295,15 @@ public class WebXmlUtil {
     }
 
     /**
-     * Checks if the servlet is an Vaadin application servlet and returns its
-     * class name or null if not a Vaadin application.
+     * Checks if the servlet has an application or UI init parameter and returns
+     * the application or UI class name or null if not a Vaadin application.
      * 
      * @param webApp
      * @param servlet
      * @return
      */
-    private static String getVaadinServletClass(WebApp webApp, Servlet servlet) {
+    private static String getVaadinApplicationOrUiClass(WebApp webApp,
+            Servlet servlet) {
         if (webApp.getJ2EEVersionID() >= J2EEVersionConstants.J2EE_1_4_ID) {
             // application
             ParamValue value = getInitParameter_2_4(servlet,
@@ -312,6 +313,7 @@ public class WebXmlUtil {
             }
             // UI
             value = getInitParameter_2_4(servlet, VAADIN_UI_CLASS_PARAMETER);
+            // TODO also support lower case
             if (value != null) {
                 return value.getValue();
             }
@@ -324,6 +326,7 @@ public class WebXmlUtil {
             }
             // UI
             value = getInitParameter_2_3(servlet, VAADIN_UI_CLASS_PARAMETER);
+            // TODO also support lower case
             if (value != null) {
                 return value.getParamValue();
             }
