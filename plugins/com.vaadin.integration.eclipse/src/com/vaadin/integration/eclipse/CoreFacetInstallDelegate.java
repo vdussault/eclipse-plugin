@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.ClasspathAttribute;
 import org.eclipse.jst.j2ee.web.componentcore.util.WebArtifactEdit;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
@@ -346,17 +347,17 @@ public class CoreFacetInstallDelegate implements IDelegate,
         // IvyClasspathContainerState state = new
         // IvyClasspathContainerState(conf);
 
-        // TODO deployment configuration
-        // IClasspathAttribute[] deployAttributes = new IClasspathAttribute[] {
-        // new ClasspathAttribute(
-        // "org.eclipse.jst.component.dependency", "/WEB-INF/lib") };
+        // deployment configuration
+        IClasspathAttribute[] deployAttributes = new IClasspathAttribute[] { new ClasspathAttribute(
+                "org.eclipse.jst.component.dependency", "/WEB-INF/lib") };
 
         // entry
         IPath path = IvyClasspathContainerConfAdapter.getPath(conf);
-        IClasspathAttribute[] atts = conf.getAttributes();
+        // empty for the newly created classpath entry
+        // IClasspathAttribute[] atts = conf.getAttributes();
         boolean exported = false;
-        IClasspathEntry entry = JavaCore.newContainerEntry(path, null, atts,
-                exported);
+        IClasspathEntry entry = JavaCore.newContainerEntry(path, null,
+                deployAttributes, exported);
 
         try {
             IvyClasspathContainer ivycp = new IvyClasspathContainer(project,
