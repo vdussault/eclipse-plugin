@@ -1,11 +1,24 @@
 package com.vaadin.integration.eclipse;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
+import org.apache.ivyde.eclipse.cpcontainer.IvyClasspathContainer;
+import org.apache.ivyde.eclipse.cpcontainer.IvyClasspathContainerConfAdapter;
+import org.apache.ivyde.eclipse.cpcontainer.IvyClasspathContainerConfiguration;
+import org.apache.ivyde.eclipse.cpcontainer.SettingsSetup;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -297,41 +310,69 @@ public class CoreFacetInstallDelegate implements IDelegate,
         VaadinPluginUtil.ensureFileFromTemplate(jProject, "ivysettings.xml",
                 "ivy/ivysettings.xml");
 
-        // new ClasspathEntry(
-        // IClasspathEntry.CPE_CONTAINER,);
-        // new ClassPathContainer(parent, entry)
+        // Vaadin 7: automatically add Ivy to project, configure and add
+        // classpath entry
+        setupIvyClasspath(jProject);
+    }
+
+    /**
+     * Use ivy.xml and ivysettings.xml at project root to create and add a new
+     * classpath entry.
+     * 
+     * @param project
+     *            the project for which an Ivy classpath entry should be created
+     */
+    private void setupIvyClasspath(IJavaProject project) {
+        // basic configuration
+        IvyClasspathContainerConfiguration conf = new IvyClasspathContainerConfiguration(
+                project, "ivy.xml", true);
+
+        // use all configurations in ivy.xml
+        conf.setConfs(new ArrayList(Collections.singletonList("default")));
+
+        // if there is an ivysettings.xml file at the root of the project,
+        // configure the container to use it
+        if (project != null) {
+            IResource settings = project.getProject().findMember(
+                    new Path("ivysettings.xml"));
+            if (settings != null) {
+                conf.setSettingsProjectSpecific(true);
+                SettingsSetup setup = new SettingsSetup();
+                setup.setIvySettingsPath("${workspace_loc:"
+                        + project.getElementName() + "/ivysettings.xml}");
+                conf.setIvySettingsSetup(setup);
+            }
+        }
+        // IvyClasspathContainerState state = new
+        // IvyClasspathContainerState(conf);
+
+        // TODO deployment configuration
         // IClasspathAttribute[] deployAttributes = new IClasspathAttribute[] {
         // new ClasspathAttribute(
         // "org.eclipse.jst.component.dependency", "/WEB-INF/lib") };
-        // String params =
-        // "project=v7proj&ivyXmlPath=ivy.xml&confs=default&ivySettingsPath=${workspace_loc:v7proj/ivysettings.xml}&loadSettingsOnDemand=false&propertyFiles=";
-        // IvyClasspathContainer icc = new IvyClasspathContainer(jProject,
-        // new Path(IvyClasspathContainer.CONTAINER_ID + "/?" + params),
-        // new IClasspathEntry[] {}, deployAttributes);
-        // icc.getConf().getIvySettingsSetup()
-        // .setIvySettingsPath("ivysettings.xml");
-        // icc.getConf().setIvyXmlPath("ivy.xml");
-        // ArrayList<String> confs = new ArrayList<String>();
-        // confs.add("default");
-        // icc.getConf().setConfs(confs);
-        // icc
-        // addRawClassPathEntries(jProject, monitor, icc.getClasspathEntries());
 
-    }
+        // entry
+        IPath path = IvyClasspathContainerConfAdapter.getPath(conf);
+        IClasspathAttribute[] atts = conf.getAttributes();
+        boolean exported = false;
+        IClasspathEntry entry = JavaCore.newContainerEntry(path, null, atts,
+                exported);
 
-    private void addRawClassPathEntries(IJavaProject jProject,
-            IProgressMonitor monitor, IClasspathEntry... classpathEntries)
-            throws JavaModelException {
-        IClasspathEntry[] oldClassPath = jProject.getRawClasspath();
-        IClasspathEntry[] newClassPath = new IClasspathEntry[oldClassPath.length
-                + classpathEntries.length];
-        for (int i = 0; i < oldClassPath.length; i++) {
-            newClassPath[i] = oldClassPath[i];
+        try {
+            IvyClasspathContainer ivycp = new IvyClasspathContainer(project,
+                    path, new IClasspathEntry[0], new IClasspathAttribute[0]);
+            JavaCore.setClasspathContainer(path,
+                    new IJavaProject[] { project },
+                    new IClasspathContainer[] { ivycp }, null);
+            IClasspathEntry[] entries = project.getRawClasspath();
+            List newEntries = new ArrayList(Arrays.asList(entries));
+            newEntries.add(entry);
+            entries = (IClasspathEntry[]) newEntries
+                    .toArray(new IClasspathEntry[newEntries.size()]);
+            project.setRawClasspath(entries, project.getOutputLocation(), null);
+            ivycp.launchResolve(false, null);
+        } catch (JavaModelException e) {
+            ErrorUtil.handleBackgroundException(e);
         }
-        for (int i = oldClassPath.length; i < newClassPath.length; i++) {
-            newClassPath[i] = classpathEntries[i - oldClassPath.length];
-        }
-        jProject.setRawClasspath(newClassPath, monitor);
-
     }
 }
