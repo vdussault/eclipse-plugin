@@ -211,10 +211,10 @@ public class VaadinPluginUtil {
     public static String createUiClassSource(String packageName,
             String applicationName, String uiClass, String vaadinPackagePrefix) {
         String template = "package " + packageName + ";\n\n" + "import "
-                + vaadinPackagePrefix + "server.WrappedRequest;\n" + "import "
+                + vaadinPackagePrefix + "server.VaadinRequest;\n" + "import "
                 + vaadinPackagePrefix + "ui.*;\n\n" + "public class " + uiClass
                 + " extends UI {\n" + "\t@Override\n"
-                + "\tpublic void init(WrappedRequest request) {\n"
+                + "\tpublic void init(VaadinRequest request) {\n"
                 + "\t\tLabel label = new Label(\"Hello Vaadin user\");\n"
                 + "\t\taddComponent(label);\n" + "\t}\n" + "\n" + "}\n";
 
