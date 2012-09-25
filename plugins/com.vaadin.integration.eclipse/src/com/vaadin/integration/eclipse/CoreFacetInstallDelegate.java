@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ivyde.eclipse.cpcontainer.IvyClasspathContainer;
 import org.apache.ivyde.eclipse.cpcontainer.IvyClasspathContainerConfAdapter;
@@ -43,7 +44,9 @@ import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.util.VersionUtil;
 import com.vaadin.integration.eclipse.util.WebXmlUtil;
 import com.vaadin.integration.eclipse.util.WidgetsetUtil;
+import com.vaadin.integration.eclipse.util.data.AbstractVaadinVersion;
 import com.vaadin.integration.eclipse.util.data.LocalVaadinVersion;
+import com.vaadin.integration.eclipse.util.data.MavenVaadinVersion;
 import com.vaadin.integration.eclipse.util.files.LocalFileManager;
 import com.vaadin.integration.eclipse.util.network.DownloadManager;
 
@@ -72,7 +75,8 @@ public class CoreFacetInstallDelegate implements IDelegate,
         boolean useLatestNightly = model.getBooleanProperty(USE_LATEST_NIGHTLY);
 
         // Reference to the local Vaadin JAR that we should use
-        LocalVaadinVersion localVaadinVersion = null;
+        // TODO final Vaadin 7 support
+        AbstractVaadinVersion vaadinVersion = null;
 
         /*
          * Find the latest local version. If the model has a Vaadin version
@@ -83,22 +87,26 @@ public class CoreFacetInstallDelegate implements IDelegate,
                 && model.getProperty(VAADIN_VERSION) != null) {
             // A version was specified on the configuration page - use that
             String versionString = model.getStringProperty(VAADIN_VERSION);
-            try {
-                localVaadinVersion = LocalFileManager
-                        .getLocalVaadinVersion(versionString);
-            } catch (CoreException ex) {
-                throw ErrorUtil.newCoreException(
-                        "Failed to use the requested Vaadin version ("
-                                + versionString + ")", ex);
+            if (VersionUtil.isVaadin7VersionString(versionString)) {
+                vaadinVersion = new MavenVaadinVersion(versionString);
+            } else {
+                try {
+                    vaadinVersion = LocalFileManager
+                            .getLocalVaadinVersion(versionString);
+                } catch (CoreException ex) {
+                    throw ErrorUtil.newCoreException(
+                            "Failed to use the requested Vaadin version ("
+                                    + versionString + ")", ex);
+                }
             }
         } else {
             // No version was specified on the configuration page. Use the
             // newest local.
-            localVaadinVersion = LocalFileManager.getNewestLocalVaadinVersion();
+            vaadinVersion = LocalFileManager.getNewestLocalVaadinVersion();
         }
         monitor.worked(1);
 
-        if (localVaadinVersion == null) {
+        if (vaadinVersion == null) {
             /*
              * No Vaadin jar has been fetched - we must fetch one before
              * continuing.
@@ -116,7 +124,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
             DownloadManager.downloadVaadin(latestVaadinVersion,
                     new SubProgressMonitor(monitor, 2));
 
-            localVaadinVersion = LocalFileManager.getNewestLocalVaadinVersion();
+            vaadinVersion = LocalFileManager.getNewestLocalVaadinVersion();
         } else {
             monitor.worked(3);
         }
@@ -148,11 +156,12 @@ public class CoreFacetInstallDelegate implements IDelegate,
             monitor.subTask("Installing libraries");
 
             /* Copy Vaadin JAR to project's WEB-INF/lib folder */
-            boolean vaadin7 = VersionUtil.isVaadin7(localVaadinVersion);
-            if (!vaadin7) {
+            boolean vaadin7 = VersionUtil.isVaadin7(vaadinVersion);
+            if (!vaadin7 && vaadinVersion instanceof LocalVaadinVersion) {
                 // Vaadin 7 uses Ivy for dependencies
                 ProjectDependencyManager.ensureVaadinLibraries(project,
-                        localVaadinVersion, new SubProgressMonitor(monitor, 5));
+                        (LocalVaadinVersion) vaadinVersion,
+                        new SubProgressMonitor(monitor, 5));
             }
             // do not create project artifacts if adding the facet to an
             // existing project or if the user has chosen not to create them
@@ -211,7 +220,10 @@ public class CoreFacetInstallDelegate implements IDelegate,
                                 + WebXmlUtil.VAADIN7_PORTLET2_CLASS;
                     }
 
-                    setupIvy(jProject, monitor);
+                    if (vaadinVersion instanceof MavenVaadinVersion) {
+                        setupIvy(jProject, (MavenVaadinVersion) vaadinVersion,
+                                monitor);
+                    }
                 } else {
                     // Vaadin 6: create an Application class
                     String applicationCode = VaadinPluginUtil
@@ -304,10 +316,13 @@ public class CoreFacetInstallDelegate implements IDelegate,
 
     }
 
-    private void setupIvy(IJavaProject jProject, IProgressMonitor monitor)
-            throws CoreException {
+    private void setupIvy(IJavaProject jProject, MavenVaadinVersion version,
+            IProgressMonitor monitor) throws CoreException {
+        Map<String, String> substitutions = Collections.singletonMap(
+                "VAADIN_VERSION", version.getVersionNumber());
         VaadinPluginUtil.ensureFileFromTemplate(jProject, "ivy.xml",
-                "ivy/ivy.xml");
+                "ivy/ivy.xml", substitutions);
+
         VaadinPluginUtil.ensureFileFromTemplate(jProject, "ivysettings.xml",
                 "ivy/ivysettings.xml");
 

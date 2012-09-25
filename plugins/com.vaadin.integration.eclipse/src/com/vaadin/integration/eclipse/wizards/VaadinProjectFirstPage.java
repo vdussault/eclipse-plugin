@@ -105,6 +105,7 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
         final VaadinVersionComposite versionComposite = new VaadinVersionComposite(
                 group, SWT.NULL);
         versionComposite.createContents();
+        versionComposite.setAllowVaadin7(true);
 
         versionComposite.setNewProject();
 

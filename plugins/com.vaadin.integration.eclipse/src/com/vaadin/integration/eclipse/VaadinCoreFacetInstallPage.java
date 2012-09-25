@@ -166,6 +166,7 @@ public class VaadinCoreFacetInstallPage extends J2EEModuleFacetInstallPage
         final VaadinVersionComposite versionComposite = new VaadinVersionComposite(
                 versionGroup, SWT.NULL);
         versionComposite.createContents();
+        versionComposite.setAllowVaadin7(true);
 
         // this is used both in project creation and in adding a facet
         // afterwards, so e.g. the master DM property may not be set or may not

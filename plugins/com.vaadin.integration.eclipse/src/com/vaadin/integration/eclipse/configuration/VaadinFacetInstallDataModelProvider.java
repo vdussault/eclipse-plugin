@@ -27,7 +27,9 @@ import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.VersionUtil;
+import com.vaadin.integration.eclipse.util.data.AbstractVaadinVersion;
 import com.vaadin.integration.eclipse.util.data.LocalVaadinVersion;
+import com.vaadin.integration.eclipse.util.data.MavenVaadinVersion;
 import com.vaadin.integration.eclipse.util.files.LocalFileManager;
 
 /**
@@ -143,7 +145,9 @@ public class VaadinFacetInstallDataModelProvider extends
             return Boolean.FALSE;
         } else if (propertyName.equals(VAADIN_VERSION)) {
             try {
-                LocalVaadinVersion latestLocal = LocalFileManager
+                // TODO in the future, use Vaadin 7 final as the default
+                // version?
+                AbstractVaadinVersion latestLocal = LocalFileManager
                         .getNewestLocalVaadinVersion();
                 return (latestLocal != null) ? latestLocal.getVersionNumber()
                         : null;
@@ -338,6 +342,10 @@ public class VaadinFacetInstallDataModelProvider extends
 
     private List<String> getVaadinVersions() throws CoreException {
         List<String> versions = new ArrayList<String>();
+        // Vaadin 7
+        versions.add(MavenVaadinVersion.VAADIN_7_BETA_VERSION_STRING);
+        versions.add(MavenVaadinVersion.VAADIN_7_SNAPSHOT_VERSION_STRING);
+        // other (already downloaded) versions
         for (LocalVaadinVersion version : LocalFileManager
                 .getLocalVaadinVersions()) {
             versions.add(version.getVersionNumber());

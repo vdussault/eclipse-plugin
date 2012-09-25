@@ -10,9 +10,11 @@ import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
@@ -97,6 +99,23 @@ public class VaadinPluginUtil {
      */
     public static IFile ensureFileFromTemplate(IFile file, String template)
             throws CoreException {
+        return ensureFileFromTemplate(file, template,
+                Collections.<String, String> emptyMap());
+    }
+
+    /**
+     * Create a configuration file from a template if it does not exist.
+     * 
+     * @param file
+     *            the file to create from template
+     * @param template
+     * @param substitutions
+     *            strings (regex) to replace in the template and their
+     *            replacement values, not null
+     * @throws CoreException
+     */
+    public static IFile ensureFileFromTemplate(IFile file, String template,
+            Map<String, String> substitutions) throws CoreException {
 
         try {
             if (file.exists()) {
@@ -104,6 +123,10 @@ public class VaadinPluginUtil {
             }
 
             String stub = VaadinPluginUtil.readTextFromTemplate(template);
+
+            for (Map.Entry<String, String> entry : substitutions.entrySet()) {
+                stub = stub.replaceAll(entry.getKey(), entry.getValue());
+            }
 
             ByteArrayInputStream stubstream = new ByteArrayInputStream(
                     stub.getBytes());
@@ -1413,9 +1436,16 @@ public class VaadinPluginUtil {
     public static void ensureFileFromTemplate(IJavaProject jProject,
             String locationInProject, String locationInTemplate)
             throws CoreException {
+        ensureFileFromTemplate(jProject, locationInProject, locationInTemplate,
+                Collections.<String, String> emptyMap());
+    }
+
+    public static void ensureFileFromTemplate(IJavaProject jProject,
+            String locationInProject, String locationInTemplate,
+            Map<String, String> substitutions) throws CoreException {
         IProject p = jProject.getProject();
         IFile projectLocation = p.getFile(locationInProject);
-        ensureFileFromTemplate(projectLocation, locationInTemplate);
-
+        ensureFileFromTemplate(projectLocation, locationInTemplate,
+                substitutions);
     }
 }

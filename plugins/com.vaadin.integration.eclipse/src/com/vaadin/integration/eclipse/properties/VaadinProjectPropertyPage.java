@@ -31,7 +31,9 @@ import com.vaadin.integration.eclipse.util.PreferenceUtil;
 import com.vaadin.integration.eclipse.util.ProjectDependencyManager;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.WidgetsetUtil;
+import com.vaadin.integration.eclipse.util.data.AbstractVaadinVersion;
 import com.vaadin.integration.eclipse.util.data.LocalVaadinVersion;
+import com.vaadin.integration.eclipse.util.data.MavenVaadinVersion;
 
 /**
  * Property page grouping Vaadin related project properties.
@@ -117,14 +119,20 @@ public class VaadinProjectPropertyPage extends PropertyPage {
 
         try {
             if (isVersionChanged()) {
-                final LocalVaadinVersion selectedVaadinVersion = vaadinVersionComposite
+                final AbstractVaadinVersion selectedVaadinVersion = vaadinVersionComposite
                         .getSelectedVersion();
 
                 if (selectedVaadinVersion != null) {
                     ProjectUtil.ensureVaadinFacetAndNature(project);
                 }
-                boolean versionUpdated = updateProjectVaadinJar(project,
-                        selectedVaadinVersion);
+                boolean versionUpdated = false;
+                if (selectedVaadinVersion instanceof LocalVaadinVersion) {
+                    versionUpdated = updateProjectVaadinJar(project,
+                            (LocalVaadinVersion) selectedVaadinVersion);
+                } else if (selectedVaadinVersion instanceof MavenVaadinVersion) {
+                    // TODO add support for upgrading a project to Vaadin 7 or
+                    // changing Vaadin 7 version in project Ivy configuration
+                }
                 if (versionUpdated) {
                     widgetsetDirty = true;
 

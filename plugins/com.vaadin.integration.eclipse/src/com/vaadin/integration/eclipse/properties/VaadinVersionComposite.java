@@ -37,6 +37,7 @@ import com.vaadin.integration.eclipse.util.VersionUtil;
 import com.vaadin.integration.eclipse.util.data.AbstractVaadinVersion;
 import com.vaadin.integration.eclipse.util.data.DownloadableVaadinVersion;
 import com.vaadin.integration.eclipse.util.data.LocalVaadinVersion;
+import com.vaadin.integration.eclipse.util.data.MavenVaadinVersion;
 import com.vaadin.integration.eclipse.util.files.LocalFileManager;
 import com.vaadin.integration.eclipse.util.files.LocalFileManager.FileType;
 import com.vaadin.integration.eclipse.util.network.DownloadManager;
@@ -48,11 +49,14 @@ import com.vaadin.integration.eclipse.util.network.DownloadManager;
 public class VaadinVersionComposite extends Composite {
 
     private Combo versionCombo;
-    private Map<String, LocalVaadinVersion> versionMap = new HashMap<String, LocalVaadinVersion>();
+    // Local or Maven versions
+    private Map<String, AbstractVaadinVersion> versionMap = new HashMap<String, AbstractVaadinVersion>();
     private Button downloadButton;
     private IProject project = null;
     private VersionSelectionChangeListener versionSelectionListener;
     private Button latestNightlyCheckbox;
+    // by default, do not allow selecting Vaadin 7 versions
+    private boolean allowVaadin7 = false;
 
     private static class DownloadVaadinDialog extends
             AbstractElementListSelectionDialog {
@@ -249,7 +253,7 @@ public class VaadinVersionComposite extends Composite {
                 .setText("Use latest nightly build (in same branch)");
         latestNightlyCheckbox.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent event) {
                 boolean enabled;
                 if (null == project) {
                     enabled = true;
@@ -262,6 +266,28 @@ public class VaadinVersionComposite extends Composite {
                     // set preference on commit, not here
 
                     // TODO progress monitoring?
+
+                    try {
+                        IPath vaadinLibrary = ProjectUtil
+                                .getVaadinLibraryInProject(project, true);
+                        if (vaadinLibrary != null) {
+                            // do not allow changes for Vaadin 7
+                            if (ProjectUtil.isVaadin7(project)) {
+                                // updateVersionCombo() disables the checkbox
+                                return;
+                            }
+                            // do not allow changes of a Vaadin version
+                            // outside the project
+                            if (!ProjectUtil
+                                    .isInProject(project, vaadinLibrary)) {
+                                return;
+                            }
+                        }
+                    } catch (CoreException e) {
+                        ErrorUtil.handleBackgroundException(e);
+                        // TODO show error message and return or let the user
+                        // continue? normally this should not happen
+                    }
 
                     // download latest nightly in the branch immediately -
                     // actual upgrade of project takes place when applying
@@ -310,6 +336,7 @@ public class VaadinVersionComposite extends Composite {
     private void updateVersionCombo() {
         versionCombo.setEnabled(true);
         downloadButton.setEnabled(true);
+        latestNightlyCheckbox.setEnabled(true);
         try {
 
             versionCombo.removeAll();
@@ -324,6 +351,26 @@ public class VaadinVersionComposite extends Composite {
             }
             versionCombo.setText("");
 
+            // hard coded Vaadin 7 beta and snapshot versions
+            if (allowVaadin7) {
+                AbstractVaadinVersion vaadin7BetaVersion = MavenVaadinVersion.VAADIN_7_BETA_VERSION;
+                String beta7String = vaadin7BetaVersion.getVersionNumber();
+                versionMap.put(beta7String, vaadin7BetaVersion);
+                // Add the string to the combo box as second (or third) item
+                // after optional project Vaadin version and "" - project
+                // version added below
+                versionCombo.add(beta7String, 1);
+
+                AbstractVaadinVersion vaadin7SnapshotVersion = MavenVaadinVersion.VAADIN_7_SNAPSHOT_VERSION;
+                String snapshot7String = vaadin7SnapshotVersion
+                        .getVersionNumber();
+                versionMap.put(snapshot7String, vaadin7SnapshotVersion);
+                // Add the string to the combo box as third (or fourth) item
+                // after optional project Vaadin version and "" - project
+                // version added below
+                versionCombo.add(snapshot7String, 2);
+            }
+
             try {
                 // select current version (if any)
                 if (project == null) {
@@ -337,20 +384,25 @@ public class VaadinVersionComposite extends Composite {
                     return;
                 }
 
+                // is the Vaadin JAR actually inside the project?
+                boolean vaadinInProject = ProjectUtil.isInProject(project,
+                        vaadinLibrary);
+
                 String currentVaadinVersionString = VersionUtil
                         .getVaadinVersionFromJar(vaadinLibrary);
                 if (currentVaadinVersionString == null) {
                     return;
                 }
 
-                // There is a version of the Vaadin jar in the project. It might
-                // be in WEB-INF/lib or somewhere else on the classpath.
+                // There is a version of the Vaadin jar for the project. It
+                // might be in WEB-INF/lib or somewhere else on the classpath.
 
                 // Ensure the version is listed, it might be a custom jar or it
                 // might have been removed from the local store for instance
                 // when Eclipse was upgraded.
 
-                // TODO this might be problematic with multi-JAR packaging
+                // TODO should this take dependency versions into account
+                // differently
                 LocalVaadinVersion projectVaadinVersion = new LocalVaadinVersion(
                         FileType.VAADIN_RELEASE, currentVaadinVersionString,
                         vaadinLibrary);
@@ -365,12 +417,14 @@ public class VaadinVersionComposite extends Composite {
                 versionCombo.add(comboboxString, 0);
                 versionCombo.setText(comboboxString);
 
-                if (!ProjectUtil.isInProject(project, vaadinLibrary)) {
+                if (!vaadinInProject) {
                     // If the Vaadin JAR is outside the project we just
                     // show it to the user. We really do not want to delete
                     // files outside the project anyway.
                     versionCombo.setEnabled(false);
                     downloadButton.setEnabled(false);
+                    latestNightlyCheckbox.setSelection(false);
+                    latestNightlyCheckbox.setEnabled(false);
                 }
             } catch (CoreException ce) {
                 // ignore if cannot select current version
@@ -439,6 +493,27 @@ public class VaadinVersionComposite extends Composite {
     }
 
     /**
+     * Allow selection of Vaadin 7 versions or not.
+     * 
+     * Note that if not allowed, a Vaadin 7 version already in the project is
+     * displayed but cannot be changed and the composite is disabled in that
+     * case.
+     * 
+     * Note that this API may change in future versions if support for changing
+     * the major version of Vaadin in a project is implemented.
+     * 
+     * @param allow
+     *            true to enable selection of Vaadin 7 versions
+     */
+    public void setAllowVaadin7(boolean allowVaadin7) {
+        this.allowVaadin7 = allowVaadin7;
+        if (versionCombo != null) {
+            // refresh everything
+            updateView();
+        }
+    }
+
+    /**
      * This method exists only to enable automatic synchronization with a model.
      * For other purposes, use {@link #isUseLatestNightly()}.
      * 
@@ -457,8 +532,8 @@ public class VaadinVersionComposite extends Composite {
         return latestNightlyCheckbox.getSelection();
     }
 
-    public LocalVaadinVersion getSelectedVersion() {
-        LocalVaadinVersion newVaadinVersion = versionMap.get(versionCombo
+    public AbstractVaadinVersion getSelectedVersion() {
+        AbstractVaadinVersion newVaadinVersion = versionMap.get(versionCombo
                 .getText());
         if ("".equals(newVaadinVersion)) {
             newVaadinVersion = null;
@@ -490,6 +565,8 @@ public class VaadinVersionComposite extends Composite {
     protected void updateView() {
         updateVersionCombo();
 
+        // TODO Vaadin 7: how to display? based on whether a snapshot is
+        // selected?
         if (null != project) {
             latestNightlyCheckbox.setSelection(PreferenceUtil.get(project)
                     .isUsingLatestNightly());
