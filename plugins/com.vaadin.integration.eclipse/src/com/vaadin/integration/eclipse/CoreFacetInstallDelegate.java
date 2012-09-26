@@ -327,8 +327,15 @@ public class CoreFacetInstallDelegate implements IDelegate,
                 "ivy/ivysettings.xml");
 
         // Vaadin 7: automatically add Ivy to project, configure and add
-        // classpath entry
-        setupIvyClasspath(jProject);
+        // classpath entries
+
+        // deployment configuration
+        IClasspathAttribute[] deployAttributes = new IClasspathAttribute[] { new ClasspathAttribute(
+                "org.eclipse.jst.component.dependency", "/WEB-INF/lib") };
+
+        setupIvyClasspath(jProject, "default", deployAttributes);
+        setupIvyClasspath(jProject, "widgetset-compile",
+                new IClasspathAttribute[0]);
     }
 
     /**
@@ -338,13 +345,15 @@ public class CoreFacetInstallDelegate implements IDelegate,
      * @param project
      *            the project for which an Ivy classpath entry should be created
      */
-    private void setupIvyClasspath(IJavaProject project) {
+    private void setupIvyClasspath(IJavaProject project,
+            String configurationName, IClasspathAttribute[] attributes) {
         // basic configuration
         IvyClasspathContainerConfiguration conf = new IvyClasspathContainerConfiguration(
                 project, "ivy.xml", true);
 
         // use all configurations in ivy.xml
-        conf.setConfs(new ArrayList(Collections.singletonList("default")));
+        conf.setConfs(new ArrayList(Collections
+                .singletonList(configurationName)));
 
         // if there is an ivysettings.xml file at the root of the project,
         // configure the container to use it
@@ -359,12 +368,6 @@ public class CoreFacetInstallDelegate implements IDelegate,
                 conf.setIvySettingsSetup(setup);
             }
         }
-        // IvyClasspathContainerState state = new
-        // IvyClasspathContainerState(conf);
-
-        // deployment configuration
-        IClasspathAttribute[] deployAttributes = new IClasspathAttribute[] { new ClasspathAttribute(
-                "org.eclipse.jst.component.dependency", "/WEB-INF/lib") };
 
         // entry
         IPath path = IvyClasspathContainerConfAdapter.getPath(conf);
@@ -372,7 +375,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
         // IClasspathAttribute[] atts = conf.getAttributes();
         boolean exported = false;
         IClasspathEntry entry = JavaCore.newContainerEntry(path, null,
-                deployAttributes, exported);
+                attributes, exported);
 
         try {
             IvyClasspathContainer ivycp = new IvyClasspathContainer(project,
