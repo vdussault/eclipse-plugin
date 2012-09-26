@@ -11,7 +11,7 @@ import com.vaadin.shared.communication.ClientRpc;
 
 public interface <%= typeName %> extends ClientRpc {
 
-	// TODO example API
+    // TODO example API
     public void alert(String message);
 
 }

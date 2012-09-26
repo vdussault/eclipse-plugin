@@ -35,17 +35,13 @@ public class <%= typeName %> extends <%= componentExtends %> {
  <% } %>
  <% if (t.hasState()) { %>
             // update shared state
-            getState().setText("You have clicked " + clickCount + " times");
-            requestRepaint();
+            getState().text = "You have clicked " + clickCount + " times";
         }
     };
  <% } %>  
 <% } %>
 
     public <%= typeName %>() {
-<% if (t.hasState()) { %>
-        getState().setText("This is <%= componentName %>");
-<% } %>
 <% if (t.hasServerRpc()) { %>
         registerRpc(rpc);
 <% } %>

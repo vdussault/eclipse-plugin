@@ -9,15 +9,7 @@ package <%= target %>;
 
 public class <%= typeName %> extends <%= stateExtends %> {
 
-	// TODO example state
-    private String text;
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
+    // TODO example state
+    public String text = "This is <%= componentName %>";
 
 }

@@ -93,7 +93,7 @@ public class <%= typeName %> extends AbstractComponentConnector {
         super.onStateChanged(stateChangeEvent);
 		
 		// TODO do something useful
-        final String text = getState().getText();
+        final String text = getState().text;
         getWidget().setText(text);
     }
 <% } %>

@@ -12,7 +12,7 @@ import com.vaadin.shared.communication.ServerRpc;
 
 public interface <%= typeName %> extends ServerRpc {
 
-	// TODO example API
+    // TODO example API
     public void clicked(MouseEventDetails mouseDetails);
 
 }
