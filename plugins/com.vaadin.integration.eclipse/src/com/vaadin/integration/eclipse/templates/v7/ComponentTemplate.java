@@ -40,19 +40,17 @@ public class ComponentTemplate implements Template {
   protected final String TEXT_17 = "ServerRpc() {" + NL + "        private int clickCount = 0;" + NL + "        " + NL + "        public void clicked(MouseEventDetails mouseDetails) {";
   protected final String TEXT_18 = NL + "            // nag every 5:th click using RPC" + NL + "            if (++clickCount % 5 == 0) {" + NL + "                getRpcProxy(";
   protected final String TEXT_19 = "ClientRpc.class).alert(" + NL + "                        \"Ok, that's enough!\");" + NL + "            }";
-  protected final String TEXT_20 = NL + "            // update shared state" + NL + "            getState().setText(\"You have clicked \" + clickCount + \" times\");" + NL + "            requestRepaint();" + NL + "        }" + NL + "    };";
+  protected final String TEXT_20 = NL + "            // update shared state" + NL + "            getState().text = \"You have clicked \" + clickCount + \" times\";" + NL + "        }" + NL + "    };";
   protected final String TEXT_21 = "  ";
   protected final String TEXT_22 = NL + NL + "    public ";
   protected final String TEXT_23 = "() {";
-  protected final String TEXT_24 = NL + "        getState().setText(\"This is ";
-  protected final String TEXT_25 = "\");";
-  protected final String TEXT_26 = NL + "        registerRpc(rpc);";
-  protected final String TEXT_27 = NL + "    }" + NL;
-  protected final String TEXT_28 = NL + "    @Override" + NL + "    public ";
-  protected final String TEXT_29 = "State getState() {" + NL + "        return (";
-  protected final String TEXT_30 = "State) super.getState();" + NL + "    }";
-  protected final String TEXT_31 = NL + "}";
-  protected final String TEXT_32 = NL;
+  protected final String TEXT_24 = NL + "        registerRpc(rpc);";
+  protected final String TEXT_25 = NL + "    }" + NL;
+  protected final String TEXT_26 = NL + "    @Override" + NL + "    public ";
+  protected final String TEXT_27 = "State getState() {" + NL + "        return (";
+  protected final String TEXT_28 = "State) super.getState();" + NL + "    }";
+  protected final String TEXT_29 = NL + "}";
+  protected final String TEXT_30 = NL;
 
     private String target = null;
     private String fileName = null;
@@ -126,24 +124,19 @@ public class ComponentTemplate implements Template {
     stringBuffer.append(TEXT_22);
     stringBuffer.append( typeName );
     stringBuffer.append(TEXT_23);
-     if (t.hasState()) { 
-    stringBuffer.append(TEXT_24);
-    stringBuffer.append( componentName );
-    stringBuffer.append(TEXT_25);
-     } 
      if (t.hasServerRpc()) { 
-    stringBuffer.append(TEXT_26);
+    stringBuffer.append(TEXT_24);
      } 
-    stringBuffer.append(TEXT_27);
+    stringBuffer.append(TEXT_25);
      if (t.hasState()) { 
+    stringBuffer.append(TEXT_26);
+    stringBuffer.append( typeName );
+    stringBuffer.append(TEXT_27);
+    stringBuffer.append( typeName );
     stringBuffer.append(TEXT_28);
-    stringBuffer.append( typeName );
-    stringBuffer.append(TEXT_29);
-    stringBuffer.append( typeName );
-    stringBuffer.append(TEXT_30);
      } 
-    stringBuffer.append(TEXT_31);
-    stringBuffer.append(TEXT_32);
+    stringBuffer.append(TEXT_29);
+    stringBuffer.append(TEXT_30);
     return stringBuffer.toString();
   }
 }

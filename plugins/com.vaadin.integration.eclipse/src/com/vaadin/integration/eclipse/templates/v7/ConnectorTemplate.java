@@ -55,7 +55,7 @@ public class ConnectorTemplate implements Template {
   protected final String TEXT_32 = ") super.getWidget();" + NL + "    }" + NL;
   protected final String TEXT_33 = NL + "    @Override" + NL + "    public ";
   protected final String TEXT_34 = " getState() {" + NL + "        return (";
-  protected final String TEXT_35 = ") super.getState();" + NL + "    }" + NL + "" + NL + "    @Override" + NL + "    public void onStateChanged(StateChangeEvent stateChangeEvent) {" + NL + "        super.onStateChanged(stateChangeEvent);" + NL + "\t\t" + NL + "\t\t// TODO do something useful" + NL + "        final String text = getState().getText();" + NL + "        getWidget().setText(text);" + NL + "    }";
+  protected final String TEXT_35 = ") super.getState();" + NL + "    }" + NL + "" + NL + "    @Override" + NL + "    public void onStateChanged(StateChangeEvent stateChangeEvent) {" + NL + "        super.onStateChanged(stateChangeEvent);" + NL + "\t\t" + NL + "\t\t// TODO do something useful" + NL + "        final String text = getState().text;" + NL + "        getWidget().setText(text);" + NL + "    }";
   protected final String TEXT_36 = NL + NL + "}" + NL;
   protected final String TEXT_37 = NL;
 
