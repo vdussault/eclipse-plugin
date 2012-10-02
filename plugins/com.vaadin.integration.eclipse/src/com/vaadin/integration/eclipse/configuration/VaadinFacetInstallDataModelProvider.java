@@ -31,6 +31,7 @@ import com.vaadin.integration.eclipse.util.data.AbstractVaadinVersion;
 import com.vaadin.integration.eclipse.util.data.LocalVaadinVersion;
 import com.vaadin.integration.eclipse.util.data.MavenVaadinVersion;
 import com.vaadin.integration.eclipse.util.files.LocalFileManager;
+import com.vaadin.integration.eclipse.util.network.MavenVersionManager;
 
 /**
  * This data model provider is used whenever installing the Vaadin facet to a
@@ -343,8 +344,10 @@ public class VaadinFacetInstallDataModelProvider extends
     private List<String> getVaadinVersions() throws CoreException {
         List<String> versions = new ArrayList<String>();
         // Vaadin 7
-        versions.add(MavenVaadinVersion.VAADIN_7_BETA_VERSION_STRING);
-        versions.add(MavenVaadinVersion.VAADIN_7_SNAPSHOT_VERSION_STRING);
+        for (MavenVaadinVersion version : MavenVersionManager
+                .getAvailableVersions(false)) {
+            versions.add(version.getVersionNumber());
+        }
         // other (already downloaded) versions
         for (LocalVaadinVersion version : LocalFileManager
                 .getLocalVaadinVersions()) {

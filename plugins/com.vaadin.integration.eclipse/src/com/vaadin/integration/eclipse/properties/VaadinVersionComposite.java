@@ -41,6 +41,7 @@ import com.vaadin.integration.eclipse.util.data.MavenVaadinVersion;
 import com.vaadin.integration.eclipse.util.files.LocalFileManager;
 import com.vaadin.integration.eclipse.util.files.LocalFileManager.FileType;
 import com.vaadin.integration.eclipse.util.network.DownloadManager;
+import com.vaadin.integration.eclipse.util.network.MavenVersionManager;
 
 /**
  * Project property page for selecting an Vaadin version and updating the JAR in
@@ -344,32 +345,22 @@ public class VaadinVersionComposite extends Composite {
             // project
             versionCombo.add("");
             versionMap.clear();
+
+            // hard coded Vaadin 7 beta and snapshot versions
+            if (allowVaadin7) {
+                for (MavenVaadinVersion version : MavenVersionManager
+                        .getAvailableVersions(false)) {
+                    versionMap.put(version.getVersionNumber(), version);
+                    versionCombo.add(version.getVersionNumber());
+                }
+            }
+
             for (LocalVaadinVersion version : LocalFileManager
                     .getLocalVaadinVersions()) {
                 versionMap.put(version.getVersionNumber(), version);
                 versionCombo.add(version.getVersionNumber());
             }
             versionCombo.setText("");
-
-            // hard coded Vaadin 7 beta and snapshot versions
-            if (allowVaadin7) {
-                AbstractVaadinVersion vaadin7BetaVersion = MavenVaadinVersion.VAADIN_7_BETA_VERSION;
-                String beta7String = vaadin7BetaVersion.getVersionNumber();
-                versionMap.put(beta7String, vaadin7BetaVersion);
-                // Add the string to the combo box as second (or third) item
-                // after optional project Vaadin version and "" - project
-                // version added below
-                versionCombo.add(beta7String, 1);
-
-                AbstractVaadinVersion vaadin7SnapshotVersion = MavenVaadinVersion.VAADIN_7_SNAPSHOT_VERSION;
-                String snapshot7String = vaadin7SnapshotVersion
-                        .getVersionNumber();
-                versionMap.put(snapshot7String, vaadin7SnapshotVersion);
-                // Add the string to the combo box as third (or fourth) item
-                // after optional project Vaadin version and "" - project
-                // version added below
-                versionCombo.add(snapshot7String, 2);
-            }
 
             try {
                 // select current version (if any)

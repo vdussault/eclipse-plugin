@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.LegacyUtil;
+import com.vaadin.integration.eclipse.util.VersionUtil;
 import com.vaadin.integration.eclipse.util.data.DownloadableVaadinVersion;
 import com.vaadin.integration.eclipse.util.files.LocalFileManager;
 import com.vaadin.integration.eclipse.util.files.LocalFileManager.FileType;
@@ -66,7 +67,7 @@ public class DownloadManager {
      *             Thrown if there was a network problem or a problem with the
      *             URL
      */
-    private static String downloadURL(String url) throws IOException {
+    static String downloadURL(String url) throws IOException {
         return IOUtils.toString(getDownloadStream(url));
     }
 
@@ -191,6 +192,10 @@ public class DownloadManager {
 
             FileType type = FileType.getVaadinReleaseType(data[0]);
             String versionNumber = data[1];
+            // Vaadin 7 only via dependency management - see MavenVersionManager
+            if (VersionUtil.isVaadin7VersionString(versionNumber)) {
+                continue;
+            }
             String downloadUrl = data[2];
             DownloadableVaadinVersion vaadinVersion = new DownloadableVaadinVersion(
                     versionNumber, type, downloadUrl);
