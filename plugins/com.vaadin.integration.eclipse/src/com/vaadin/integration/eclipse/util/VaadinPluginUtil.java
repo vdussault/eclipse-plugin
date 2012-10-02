@@ -31,7 +31,6 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -42,7 +41,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.ui.RefreshTab;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -58,9 +56,6 @@ import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
-import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.IWorkingSetManager;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 import org.osgi.framework.Bundle;
 
@@ -1165,121 +1160,6 @@ public class VaadinPluginUtil {
         } catch (JavaModelException e) {
             return false;
         }
-    }
-
-    /**
-     * Create either an external launch configuration that builds a widgetset
-     * and refreshes the build target directory in the workspace
-     * 
-     * @param project
-     * @param widgetsetType
-     * @param compileWidgetset
-     *            true to run the launch after creating it
-     * @param monitor
-     * @throws CoreException
-     */
-    @SuppressWarnings("deprecation")
-    public static ILaunchConfiguration createCompileWidgetsetLaunch(
-            IProject project, String launchName, String moduleName,
-            boolean compileWidgetset, IProgressMonitor monitor)
-            throws CoreException {
-
-        if (project == null) {
-            return null;
-        }
-
-        ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
-
-        // TODO should this be some other type of launch?
-        ILaunchConfigurationType type = manager
-                .getLaunchConfigurationType(IExternalToolConstants.ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE);
-
-        // find and return existing launch, if any
-        ILaunchConfiguration[] launchConfigurations = manager
-                .getLaunchConfigurations();
-        for (ILaunchConfiguration launchConfiguration : launchConfigurations) {
-            if (launchName.equals(launchConfiguration.getName())) {
-                // is the launch in the same project?
-                String launchProject = launchConfiguration
-                        .getAttribute(
-                                IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
-                                "");
-                if (project.getName().equals(launchProject)) {
-                    ErrorUtil.logInfo(launchName
-                            + " launch already exists for the project");
-                    if (compileWidgetset) {
-                        launchConfiguration.launch(ILaunchManager.RUN_MODE,
-                                null);
-                    }
-                    return launchConfiguration;
-                }
-            }
-        }
-
-        ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(project,
-                launchName);
-
-        // get the project VM or the default java VM path from Eclipse
-        IJavaProject jproject = JavaCore.create(project);
-        IVMInstall vmInstall = VaadinPluginUtil.getJvmInstall(jproject, true);
-        String vmName = VaadinPluginUtil.getJvmExecutablePath(vmInstall);
-        workingCopy.setAttribute(IExternalToolConstants.ATTR_LOCATION, vmName);
-
-        // refresh only WebContent/VAADIN/widgetsets
-        IWorkingSetManager workingSetManager = PlatformUI.getWorkbench()
-                .getWorkingSetManager();
-        IFolder wsDir = ProjectUtil.getWebContentFolder(project)
-                .getFolder(VaadinPlugin.VAADIN_RESOURCE_DIRECTORY)
-                .getFolder("widgetsets");
-
-        // refresh this requires that the directory exists
-        VaadinPluginUtil.createFolders(wsDir, monitor);
-
-        IWorkingSet workingSet = workingSetManager.createWorkingSet(
-                "launchConfigurationWorkingSet", new IAdaptable[] { wsDir });
-        workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_SCOPE,
-                RefreshTab.getRefreshAttribute(workingSet));
-        // alternatively, could refresh the whole project
-        // workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_SCOPE,
-        // "${project}");
-
-        workingCopy.setAttribute(IExternalToolConstants.ATTR_WORKING_DIRECTORY,
-                "${project_loc:/" + project.getName() + "}");
-
-        // construct the class path, including GWT JARs and project sources
-        String classPath = VaadinPluginUtil.getProjectBaseClasspath(jproject,
-                vmInstall, false);
-
-        // construct rest of the arguments for the launch
-
-        moduleName = moduleName.replace(".client.", ".");
-
-        String vmargs = "-Djava.awt.headless=true -Xss8M  -Xmx512M -XX:MaxPermSize=512M";
-        if (PlatformUtil.getPlatform().equals("mac")) {
-            vmargs += " -XstartOnFirstThread";
-        }
-
-        String compilerClass = VaadinPlugin.GWT_COMPILER_CLASS;
-
-        String wsDirString = wsDir.getProjectRelativePath().toPortableString();
-        String arguments = vmargs + " -classpath \"" + classPath + "\" "
-                + compilerClass + " -out " + wsDirString
-                + " -style OBF -localWorkers "
-                + Runtime.getRuntime().availableProcessors()
-                + " -logLevel INFO " + moduleName;
-
-        workingCopy.setAttribute(IExternalToolConstants.ATTR_TOOL_ARGUMENTS,
-                arguments);
-
-        // save the launch
-        ILaunchConfiguration conf = workingCopy.doSave();
-
-        if (compileWidgetset) {
-            conf.launch(ILaunchManager.RUN_MODE, null);
-        }
-
-        return conf;
-
     }
 
     /**

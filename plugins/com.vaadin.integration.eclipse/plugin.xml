@@ -165,13 +165,6 @@
       </wizard>
       <wizard
             category="com.vaadin"
-            class="com.vaadin.integration.eclipse.wizards.NewWidgetsetWizard"
-            icon="icons/new-widgetset-16.png"
-            id="com.vaadin.integration.eclipse.wizards.NewWidgetsetWizard"
-            name="Vaadin Widgetset (for Vaadin 6.1 and older)">
-      </wizard>
-      <wizard
-            category="com.vaadin"
             class="com.vaadin.integration.eclipse.wizards.NewComponentWizard"
             icon="icons/new-widget-16.png"
             id="com.vaadin.integration.eclipse.wizards.NewComponentWizard"
