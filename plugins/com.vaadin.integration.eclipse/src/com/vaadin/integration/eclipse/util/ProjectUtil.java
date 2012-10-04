@@ -529,8 +529,7 @@ public class ProjectUtil {
      *            The target project
      */
     public static void ensureVaadinFacetAndNature(IProject project) {
-        VaadinFacetUtils.upgradeFacet(project,
-                VaadinFacetUtils.VAADIN_FACET_CURRENT);
+        VaadinFacetUtils.fixFacetVersion(project);
         if (WidgetsetUtil.isWidgetsetManagedByPlugin(project)) {
             WidgetsetUtil.ensureWidgetsetNature(project);
         }

@@ -16,6 +16,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wst.common.componentcore.datamodel.properties.IFacetDataModelProperties;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.internal.FacetedProjectWorkingCopy;
 
 import com.vaadin.integration.eclipse.properties.VaadinVersionComposite;
@@ -166,7 +167,12 @@ public class VaadinCoreFacetInstallPage extends J2EEModuleFacetInstallPage
         final VaadinVersionComposite versionComposite = new VaadinVersionComposite(
                 versionGroup, SWT.NULL);
         versionComposite.createContents();
-        versionComposite.setAllowVaadin7(true);
+        // is this Vaadin 7 facet version or not?
+        IProjectFacetVersion facetVersion = (IProjectFacetVersion) model
+                .getProperty(IFacetDataModelProperties.FACET_VERSION);
+        boolean isVaadin7Facet = VaadinFacetUtils.VAADIN_70
+                .equals(facetVersion);
+        versionComposite.setSelectVaadin7(isVaadin7Facet);
 
         // this is used both in project creation and in adding a facet
         // afterwards, so e.g. the master DM property may not be set or may not

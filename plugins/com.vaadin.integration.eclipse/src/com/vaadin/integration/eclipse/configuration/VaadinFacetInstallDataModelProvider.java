@@ -16,6 +16,7 @@ import org.eclipse.jst.j2ee.internal.plugin.J2EEPreferences;
 import org.eclipse.jst.j2ee.project.facet.IJ2EEFacetConstants;
 import org.eclipse.jst.j2ee.project.facet.J2EEModuleFacetInstallDataModelProvider;
 import org.eclipse.jst.j2ee.web.project.facet.IWebFacetInstallDataModelProperties;
+import org.eclipse.wst.common.componentcore.datamodel.properties.IFacetDataModelProperties;
 import org.eclipse.wst.common.componentcore.datamodel.properties.IFacetProjectCreationDataModelProperties;
 import org.eclipse.wst.common.componentcore.datamodel.properties.IFacetProjectCreationDataModelProperties.FacetDataModelMap;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelPropertyDescriptor;
@@ -51,9 +52,13 @@ public class VaadinFacetInstallDataModelProvider extends
     public static final String PROJECT_TYPE_PORTLET10 = "Old portlet (Portlet 1.0)";
 
     // allowed project types in display order, default first
-    public static final String[] PROJECT_TYPES = new String[] {
+    public static final String[] PROJECT_TYPES_VAADIN6 = new String[] {
             PROJECT_TYPE_SERVLET, PROJECT_TYPE_GAE, PROJECT_TYPE_PORTLET20,
             PROJECT_TYPE_PORTLET10 };
+
+    // allowed project types in display order, default first
+    public static final String[] PROJECT_TYPES_VAADIN7 = new String[] {
+            PROJECT_TYPE_SERVLET, PROJECT_TYPE_GAE, PROJECT_TYPE_PORTLET20 };
 
     private static final String BASE_PACKAGE_NAME = "com.example";
 
@@ -146,12 +151,20 @@ public class VaadinFacetInstallDataModelProvider extends
             return Boolean.FALSE;
         } else if (propertyName.equals(VAADIN_VERSION)) {
             try {
-                // TODO in the future, use Vaadin 7 final as the default
-                // version?
-                AbstractVaadinVersion latestLocal = LocalFileManager
-                        .getNewestLocalVaadinVersion();
-                return (latestLocal != null) ? latestLocal.getVersionNumber()
-                        : null;
+                if (isVaadin7Facet()) {
+                    // Vaadin 7: use the latest available version
+                    // TODO in the future, only release versions by default
+                    List<MavenVaadinVersion> versions = MavenVersionManager
+                            .getAvailableVersions(false);
+                    return !versions.isEmpty() ? versions.get(0)
+                            .getVersionNumber() : null;
+                } else {
+                    // Vaadin 6: use the latest already downloaded version
+                    AbstractVaadinVersion latestLocal = LocalFileManager
+                            .getNewestLocalVaadinVersion();
+                    return (latestLocal != null) ? latestLocal
+                            .getVersionNumber() : null;
+                }
             } catch (CoreException ex) {
                 ErrorUtil
                         .handleBackgroundException(
@@ -169,6 +182,30 @@ public class VaadinFacetInstallDataModelProvider extends
     }
 
     /**
+     * Check if the currently selected project facet is Vaadin 7.
+     * 
+     * @return true if Vaadin 7, false for earlier versions
+     */
+    private boolean isVaadin7Facet() {
+        IProjectFacetVersion facetVersion = (IProjectFacetVersion) getProperty(IFacetDataModelProperties.FACET_VERSION);
+        return VaadinFacetUtils.VAADIN_70.equals(facetVersion);
+    }
+
+    /**
+     * Check if the currently selected version is Vaadin 7.
+     * 
+     * @return true if Vaadin 7, false for earlier versions
+     */
+    private boolean isVaadin7Version() {
+        Object versionObject = getProperty(VAADIN_VERSION);
+        if (null != versionObject && !"".equals(versionObject)) {
+            return VersionUtil.isVaadin7VersionString(String
+                    .valueOf(versionObject));
+        }
+        return isVaadin7Facet();
+    }
+
+    /**
      * Returns "Application" (for Vaadin 6 or unknown) or "UI" (for other Vaadin
      * versions - 7 or higher).
      * 
@@ -176,13 +213,8 @@ public class VaadinFacetInstallDataModelProvider extends
      */
     private String getApplicationClassSuffix() {
         String suffix = VaadinPlugin.APPLICATION_CLASS_NAME;
-        Object versionObject = getProperty(VAADIN_VERSION);
-        if (null != versionObject && !"".equals(versionObject)) {
-            boolean useUi = VersionUtil.isVaadin7VersionString(String
-                    .valueOf(versionObject));
-            if (useUi) {
-                suffix = VaadinPlugin.UI_CLASS_NAME;
-            }
+        if (isVaadin7Version()) {
+            suffix = VaadinPlugin.UI_CLASS_NAME;
         }
         return suffix;
     }
@@ -191,17 +223,17 @@ public class VaadinFacetInstallDataModelProvider extends
     public boolean propertySet(String propertyName, Object propertyValue) {
         if (FACET_PROJECT_NAME.equals(propertyName)) {
             // re-compute application name, class and package
-            resetProperty(APPLICATION_NAME, DEFAULT_APPLICATION_NAME);
-            resetProperty(APPLICATION_PACKAGE, DEFAULT_APPLICATION_PACKAGE);
-            resetProperty(APPLICATION_CLASS, DEFAULT_APPLICATION_CLASS_PREFIX
-                    + getApplicationClassSuffix());
-            resetProperty(PORTLET_TITLE, null);
+            resetProperty(APPLICATION_NAME);
+            resetProperty(APPLICATION_PACKAGE);
+            resetProperty(APPLICATION_CLASS);
+            resetProperty(PORTLET_TITLE);
         }
         // notify of valid values change
-        if (VAADIN_VERSION.equals(propertyName)) {
-            // TODO for Vaadin 7, portlet 1.0 is not supported
-
-            if (!vaadinVersions.contains(propertyValue)) {
+        if (IFacetDataModelProperties.FACET_VERSION.equals(propertyName)) {
+            resetProperty(VAADIN_VERSION);
+        } else if (VAADIN_VERSION.equals(propertyName)) {
+            if (null == vaadinVersions
+                    || !vaadinVersions.contains(propertyValue)) {
                 try {
                     vaadinVersions = getVaadinVersions();
                     model.notifyPropertyChange(propertyName,
@@ -215,12 +247,12 @@ public class VaadinFacetInstallDataModelProvider extends
             }
             // update application class name (*Application/*UI) if necessary
             if (null != propertyValue && !"".equals(propertyValue)) {
-                boolean useUi = VersionUtil.isVaadin7VersionString(String
-                        .valueOf(propertyValue));
+                boolean isVaadin7Version = VersionUtil
+                        .isVaadin7VersionString(String.valueOf(propertyValue));
                 Object classNameObject = getProperty(APPLICATION_CLASS);
                 if (null != classNameObject) {
                     String className = classNameObject.toString();
-                    if (useUi) {
+                    if (isVaadin7Version) {
                         if (className
                                 .endsWith(VaadinPlugin.APPLICATION_CLASS_NAME)) {
                             className = className
@@ -240,9 +272,23 @@ public class VaadinFacetInstallDataModelProvider extends
                         }
                     }
                 }
+
+                // for Vaadin 7, portlet 1.0 is not supported
+                if (isVaadin7Version
+                        && PORTLET_VERSION20
+                                .equals(getProperty(PORTLET_VERSION))) {
+                    setProperty(PORTLET_VERSION, PORTLET_VERSION20);
+
+                    // notify about a change of enablement for sub-properties
+                    model.notifyPropertyChange(PORTLET_TITLE,
+                            IDataModel.ENABLE_CHG);
+                }
             }
         } else if (PORTLET_VERSION.equals(propertyName)) {
-            // TODO for Vaadin 7, portlet 1.0 is not supported
+            // for Vaadin 7, portlet 1.0 is not supported
+            if (isVaadin7Version() && PORTLET_VERSION10.equals(propertyValue)) {
+                propertyValue = PORTLET_VERSION20;
+            }
 
             if (PORTLET_VERSION20.equals(propertyValue)
                     && !PROJECT_TYPE_PORTLET20
@@ -314,6 +360,9 @@ public class VaadinFacetInstallDataModelProvider extends
                         .equals(getStringProperty(PORTLET_VERSION))) {
             return false;
         }
+        if (USE_LATEST_NIGHTLY.equals(propertyName)) {
+            return !isVaadin7Facet();
+        }
         return super.isPropertyEnabled(propertyName);
     }
 
@@ -358,11 +407,15 @@ public class VaadinFacetInstallDataModelProvider extends
 
     @Override
     protected int convertFacetVersionToJ2EEVersion(IProjectFacetVersion version) {
-        return J2EEVersionUtil.convertVersionStringToInt(version
-                .getVersionString());
+        if (VaadinFacetUtils.VAADIN_70.equals(version)) {
+            // TODO higher default?
+            return J2EEVersionUtil.convertVersionStringToInt("1.4");
+        } else {
+            return J2EEVersionUtil.convertVersionStringToInt("1.4");
+        }
     }
 
-    private void resetProperty(String property, String defaultValue) {
+    private void resetProperty(String property) {
         // TODO would be more complicated to "freeze" modifications when the
         // user touches the field
         setProperty(property, getDefaultProperty(property));

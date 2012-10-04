@@ -64,8 +64,7 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                         if (obj instanceof IFile) {
                             IFile file = (IFile) obj;
                             IProject project = file.getProject();
-                            VaadinFacetUtils.upgradeFacet(project,
-                                    VaadinFacetUtils.VAADIN_FACET_CURRENT);
+                            VaadinFacetUtils.fixFacetVersion(project);
                             if (WidgetsetUtil
                                     .isWidgetsetManagedByPlugin(project)) {
                                 WidgetsetUtil.ensureWidgetsetNature(project);
@@ -78,10 +77,8 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                             if (project == null) {
                                 IFile file = getFileForEditor(activeEditor);
                                 if (file != null && file.exists()) {
-                                    VaadinFacetUtils
-                                            .upgradeFacet(
-                                                    file.getProject(),
-                                                    VaadinFacetUtils.VAADIN_FACET_CURRENT);
+                                    VaadinFacetUtils.fixFacetVersion(file
+                                            .getProject());
                                     if (WidgetsetUtil
                                             .isWidgetsetManagedByPlugin(file
                                                     .getProject())) {
@@ -97,8 +94,7 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                                 }
                             } else if (VaadinFacetUtils
                                     .isVaadinProject(project)) {
-                                VaadinFacetUtils.upgradeFacet(project,
-                                        VaadinFacetUtils.VAADIN_FACET_CURRENT);
+                                VaadinFacetUtils.fixFacetVersion(project);
                                 if (WidgetsetUtil
                                         .isWidgetsetManagedByPlugin(project)) {
                                     WidgetsetUtil

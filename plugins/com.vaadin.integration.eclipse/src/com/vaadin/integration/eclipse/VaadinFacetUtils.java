@@ -12,15 +12,22 @@ import com.vaadin.integration.eclipse.util.ErrorUtil;
 
 public class VaadinFacetUtils {
     public static final String VAADIN_FACET_ID = "com.vaadin.integration.eclipse.core";
-    public static final String VAADIN_PROJECT_DEFAULT_PRESET_ID = "com.vaadin.integration.eclipse.preset15";
+    public static final String VAADIN6_PROJECT_DEFAULT_PRESET_ID = "com.vaadin.integration.eclipse.preset15";
+    public static final String VAADIN7_PROJECT_DEFAULT_PRESET_ID = "com.vaadin.integration.eclipse.presetv7j16s24";
 
     public static final IProjectFacet VAADIN_FACET = ProjectFacetsManager
             .getProjectFacet(VAADIN_FACET_ID);
+    // Do not enable this! Strange things will happen if you define a facet
+    // version that is not in plugin.xml and we don't want this to be selectable
+    // anymore.
+    public static final String VAADIN_01_STRING = "0.1";
     // public static final IProjectFacetVersion VAADIN_01 = VAADIN_FACET
-    // .getVersion("0.1");
+    // .getVersion(VAADIN_01_STRING);
     public static final IProjectFacetVersion VAADIN_10 = VAADIN_FACET
             .getVersion("1.0");
-    public static final IProjectFacetVersion VAADIN_FACET_CURRENT = VAADIN_10;
+    public static final IProjectFacetVersion VAADIN_70 = VAADIN_FACET
+            .getVersion("7.0");
+    public static final IProjectFacetVersion VAADIN_FACET_CURRENT = VAADIN_70;
 
     /**
      * Check whether a project has the Vaadin project nature.
@@ -43,29 +50,31 @@ public class VaadinFacetUtils {
     }
 
     /**
-     * Upgrade/change the Vaadin facet to the given version. If the project does
-     * not have the Vaadin facet, nothing is modified.
+     * Upgrade the Vaadin facet from version 0.1 to 1.0. If the project does not
+     * have the Vaadin facet or has a newer facet version, nothing is modified.
+     * 
+     * @see CoreFacetVersionChangeDelegate
      * 
      * @param project
-     *            the project to upgrade
-     * @param version
-     *            the new (exact) Vaadin facet version to use
+     *            the project to upgrade if necessary
      */
-    public static void upgradeFacet(IProject project,
-            IProjectFacetVersion version) {
+    public static void fixFacetVersion(IProject project) {
         if (!isVaadinProject(project)) {
             return;
         }
 
         try {
             IFacetedProject fproj = ProjectFacetsManager.create(project);
-            if (fproj == null || !fproj.hasProjectFacet(VAADIN_FACET)
-                    || fproj.hasProjectFacet(version)) {
+            if (fproj == null
+                    || !fproj.hasProjectFacet(VAADIN_FACET)
+                    || !VAADIN_01_STRING.equals(fproj.getInstalledVersion(
+                            VAADIN_FACET).getVersionString())) {
                 return;
             }
+
             // upgrade facet version
             IFacetedProjectWorkingCopy workingCopy = fproj.createWorkingCopy();
-            workingCopy.changeProjectFacetVersion(version);
+            workingCopy.changeProjectFacetVersion(VAADIN_10);
             workingCopy.commitChanges(null);
         } catch (CoreException e) {
             ErrorUtil.handleBackgroundException(e);

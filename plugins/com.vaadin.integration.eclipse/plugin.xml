@@ -26,6 +26,22 @@
          </and>
          </constraint>
       </project-facet-version>
+      <project-facet-version
+            facet="com.vaadin.integration.eclipse.core"
+            version="7.0">
+         <constraint>
+         <and>
+            <requires
+                  facet="jst.java"
+                  version="[6.0">
+         </requires>
+         <requires
+                  facet="jst.web"
+                  version="[2.4">
+         </requires>
+         </and>
+         </constraint>
+      </project-facet-version>
       <action
             facet="com.vaadin.integration.eclipse.core"
             id="com.vaadin.integration.eclipse.core-install"
@@ -53,8 +69,14 @@
                class="com.vaadin.integration.eclipse.CoreFacetVersionChangeDelegate">
          </delegate>
       </action>
-      <template id="template.vaadin">
-         <label>Vaadin Project</label>
+      <template id="template.vaadin6">
+         <label>Vaadin 6 Project</label>
+         <fixed facet="jst.java"/>
+         <fixed facet="jst.web"/>
+         <fixed facet="com.vaadin.integration.eclipse.core"/>
+      </template>
+      <template id="template.vaadin7">
+         <label>Vaadin 7 Project</label>
          <fixed facet="jst.java"/>
          <fixed facet="jst.web"/>
          <fixed facet="com.vaadin.integration.eclipse.core"/>
@@ -62,25 +84,40 @@
    </extension>
    <extension point="org.eclipse.wst.common.project.facet.core.presets">
       <static-preset id="com.vaadin.integration.eclipse.preset15" extends="default.configuration">
-         <label>Vaadin, Java 5, Servlet 2.4</label>
+         <label>Vaadin 6, Java 5, Servlet 2.4</label>
          <description>Vaadin project running on Java 5.0, Servlet 2.4.</description>
          <facet id="jst.java" version="5.0"/>
          <facet id="jst.web" version="2.4"/>
          <facet id="com.vaadin.integration.eclipse.core" version="1.0"/>
       </static-preset>
       <static-preset id="com.vaadin.integration.eclipse.preset16s24" extends="default.configuration">
-         <label>Vaadin, Java 6, Servlet 2.4</label>
+         <label>Vaadin 6, Java 6, Servlet 2.4</label>
          <description>Vaadin project running on Java 6.0, Servlet 2.4 .</description>
          <facet id="jst.java" version="6.0"/>
          <facet id="jst.web" version="2.4"/>
          <facet id="com.vaadin.integration.eclipse.core" version="1.0"/>
       </static-preset>
       <static-preset id="com.vaadin.integration.eclipse.preset16s30" extends="default.configuration">
-         <label>Vaadin, Java 6, Servlet 3.0</label>
+         <label>Vaadin 6, Java 6, Servlet 3.0</label>
          <description>Vaadin project running on Java 6.0, Servlet 3.0 .</description>
          <facet id="jst.java" version="6.0"/>
          <facet id="jst.web" version="3.0"/>
          <facet id="com.vaadin.integration.eclipse.core" version="1.0"/>
+      </static-preset>
+      <!-- TODO use dynamic presets -->
+      <static-preset id="com.vaadin.integration.eclipse.presetv7j16s24" extends="default.configuration">
+         <label>Vaadin 7, Java 6, Servlet 2.4</label>
+         <description>Vaadin project running on Java 6.0, Servlet 2.4 .</description>
+         <facet id="jst.java" version="6.0"/>
+         <facet id="jst.web" version="2.4"/>
+         <facet id="com.vaadin.integration.eclipse.core" version="7.0"/>
+      </static-preset>
+      <static-preset id="com.vaadin.integration.eclipse.presetv7j16s30" extends="default.configuration">
+         <label>Vaadin 7, Java 6, Servlet 3.0</label>
+         <description>Vaadin project running on Java 6.0, Servlet 3.0 .</description>
+         <facet id="jst.java" version="6.0"/>
+         <facet id="jst.web" version="3.0"/>
+         <facet id="com.vaadin.integration.eclipse.core" version="7.0"/>
       </static-preset>
    </extension>
    <extension
@@ -110,18 +147,35 @@
             id="com.vaadin">
       </category>
       <wizard
-            name="Vaadin Project"
+            name="Vaadin 6 Project"
             icon="icons/new-project-16.png"
             category="com.vaadin"
             project="true"
             finalPerspective="org.eclipse.jst.j2ee.J2EEPerspective"
-            id="com.vaadin.integration.eclipse.wizards.VaadinProjectWizard">
-         <class class="com.vaadin.integration.eclipse.wizards.VaadinProjectWizard">
+            id="com.vaadin.integration.eclipse.wizards.Vaadin6ProjectWizard">
+         <class class="com.vaadin.integration.eclipse.wizards.Vaadin6ProjectWizard">
             <parameter name="javaeeproject" value="true"/>
             <parameter name="menuIndex" value="25" />
          </class>
          <description>
-            Create a Vaadin project.
+            Create a Vaadin 6.x project.
+         </description>
+         <selection
+               class="org.eclipse.core.resources.IResource" />
+      </wizard>
+      <wizard
+            name="Vaadin 7 Project"
+            icon="icons/new-project-16.png"
+            category="com.vaadin"
+            project="true"
+            finalPerspective="org.eclipse.jst.j2ee.J2EEPerspective"
+            id="com.vaadin.integration.eclipse.wizards.Vaadin7ProjectWizard">
+         <class class="com.vaadin.integration.eclipse.wizards.Vaadin7ProjectWizard">
+            <parameter name="javaeeproject" value="true"/>
+            <parameter name="menuIndex" value="25" />
+         </class>
+         <description>
+            Create a Vaadin 7.x project.
          </description>
          <selection
                class="org.eclipse.core.resources.IResource" />
@@ -131,12 +185,16 @@
     <extension
        point="org.eclipse.ui.perspectiveExtensions">
        <perspectiveExtension targetID="org.eclipse.jst.j2ee.J2EEPerspective">
-          <newWizardShortcut id="com.vaadin.integration.eclipse.wizards.VaadinProjectWizard"/>
+          <newWizardShortcut id="com.vaadin.integration.eclipse.wizards.Vaadin6ProjectWizard"/>
+          <newWizardShortcut id="com.vaadin.integration.eclipse.wizards.Vaadin7ProjectWizard"/>
        </perspectiveExtension>
     </extension>
 	<!-- This is required to have the New Vaadin Project in the project explorer top-level menu -->
     <extension point="org.eclipse.ui.navigator.navigatorContent">
-       <commonWizard type="new" wizardId="com.vaadin.integration.eclipse.wizards.VaadinProjectWizard" menuGroupId="org.eclipse.jst.j2ee.ui.newProjects">
+       <commonWizard type="new" wizardId="com.vaadin.integration.eclipse.wizards.Vaadin6ProjectWizard" menuGroupId="org.eclipse.jst.j2ee.ui.newProjects">
+          <enablement></enablement>
+       </commonWizard>
+       <commonWizard type="new" wizardId="com.vaadin.integration.eclipse.wizards.Vaadin7ProjectWizard" menuGroupId="org.eclipse.jst.j2ee.ui.newProjects">
           <enablement></enablement>
        </commonWizard>
     </extension>

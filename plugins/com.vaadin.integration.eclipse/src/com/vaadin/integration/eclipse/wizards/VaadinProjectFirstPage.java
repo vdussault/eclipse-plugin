@@ -15,8 +15,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.wst.common.componentcore.datamodel.properties.IFacetDataModelProperties;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.frameworks.internal.datamodel.ui.DataModelSynchHelper;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
 import com.vaadin.integration.eclipse.IVaadinFacetInstallDataModelProperties;
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
@@ -59,7 +61,7 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
         top.setLayoutData(new GridData(GridData.FILL_BOTH));
         createProjectGroup(top);
         createServerTargetComposite(top);
-        createPrimaryFacetComposite(top);
+        // createPrimaryFacetComposite(top);
         createPresetPanel(top);
 
         // Vaadin key settings on the first page
@@ -69,6 +71,20 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
         // JAVA_WORKING_SET });
 
         return top;
+    }
+
+    @Override
+    public IProjectFacetVersion getPrimaryFacetVersion() {
+        // overriding this method is needed when primary facet composite is not
+        // added
+
+        // get from data model if set there, use 7.0 as default
+        IProjectFacetVersion facetVersion = (IProjectFacetVersion) model
+                .getProperty(IFacetDataModelProperties.FACET_VERSION);
+
+        // TODO this first returns V7 for a New V6 project wizard???
+        return (facetVersion != null) ? facetVersion
+                : VaadinFacetUtils.VAADIN_70;
     }
 
     // this is partly duplicated in VaadinCoreFacetInstallPage
@@ -93,7 +109,17 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
 
         projectTypeCombo = new Combo(group, SWT.READ_ONLY);
         projectTypeCombo.setLayoutData(gdhfill());
-        for (String projectType : VaadinFacetInstallDataModelProvider.PROJECT_TYPES) {
+        // Vaadin 6 vs 7 depending on facet version
+        String[] projectTypes;
+        // TODO at this point, getPrimaryFacetVersion() may return an incorrect
+        // value
+        // if (VaadinFacetUtils.VAADIN_70.equals(getPrimaryFacetVersion())) {
+        // projectTypes =
+        // VaadinFacetInstallDataModelProvider.PROJECT_TYPES_VAADIN7;
+        // } else {
+        projectTypes = VaadinFacetInstallDataModelProvider.PROJECT_TYPES_VAADIN6;
+        // }
+        for (String projectType : projectTypes) {
             projectTypeCombo.add(projectType);
         }
         // first item is the default item
@@ -105,7 +131,8 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
         final VaadinVersionComposite versionComposite = new VaadinVersionComposite(
                 group, SWT.NULL);
         versionComposite.createContents();
-        versionComposite.setAllowVaadin7(true);
+        versionComposite.setSelectVaadin7(VaadinFacetUtils.VAADIN_70
+                .equals(getPrimaryFacetVersion()));
 
         versionComposite.setNewProject();
 

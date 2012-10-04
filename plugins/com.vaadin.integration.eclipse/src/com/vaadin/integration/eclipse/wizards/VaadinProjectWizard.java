@@ -4,7 +4,6 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jst.servlet.ui.project.facet.WebProjectWizard;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
-import org.eclipse.wst.common.project.facet.core.IFacetedProjectTemplate;
 import org.eclipse.wst.common.project.facet.core.IFacetedProjectWorkingCopy;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
@@ -23,31 +22,30 @@ import com.vaadin.integration.eclipse.util.ErrorUtil;
  * This is really just a customized and pre-configured version of the standard
  * dynamic web project creation wizard.
  */
-public class VaadinProjectWizard extends WebProjectWizard {
+public abstract class VaadinProjectWizard extends WebProjectWizard {
     public VaadinProjectWizard(IDataModel model) {
         super(model);
-        setWindowTitle("New Vaadin Project");
+        setWindowTitle(getProjectTypeTitle());
     }
 
     public VaadinProjectWizard() {
         super();
-        setWindowTitle("New Vaadin Project");
+        setWindowTitle(getProjectTypeTitle());
     }
+
+    protected abstract String getProjectTypeTitle();
 
     @Override
     protected IDataModel createDataModel() {
         try {
+            ProjectFacetsManager
+                    .getProjectFacet(VaadinFacetUtils.VAADIN_FACET_ID);
             return DataModelFactory
                     .createDataModel(new VaadinProjectCreationDataModelProvider());
         } catch (Exception e) {
             ErrorUtil.handleBackgroundException(e);
             return null;
         }
-    }
-
-    @Override
-    protected IFacetedProjectTemplate getTemplate() {
-        return ProjectFacetsManager.getTemplate("template.vaadin"); //$NON-NLS-1$
     }
 
     @Override
@@ -61,7 +59,9 @@ public class VaadinProjectWizard extends WebProjectWizard {
 
         // select the Vaadin preset configuration by default
         final IFacetedProjectWorkingCopy dm = getFacetedProjectWorkingCopy();
-        dm.setSelectedPreset(VaadinFacetUtils.VAADIN_PROJECT_DEFAULT_PRESET_ID);
+        dm.setSelectedPreset(getDefaultPreset());
     }
+
+    protected abstract String getDefaultPreset();
 
 }

@@ -57,7 +57,7 @@ public class VaadinVersionComposite extends Composite {
     private VersionSelectionChangeListener versionSelectionListener;
     private Button latestNightlyCheckbox;
     // by default, do not allow selecting Vaadin 7 versions
-    private boolean allowVaadin7 = false;
+    private boolean selectVaadin7 = false;
 
     private static class DownloadVaadinDialog extends
             AbstractElementListSelectionDialog {
@@ -332,12 +332,15 @@ public class VaadinVersionComposite extends Composite {
         });
         latestNightlyCheckbox.setLayoutData(new GridData(GridData.FILL,
                 GridData.BEGINNING, true, false));
+        // Note that this can also be modified by the data model provider
+        latestNightlyCheckbox.setEnabled(!selectVaadin7);
     }
 
     private void updateVersionCombo() {
         versionCombo.setEnabled(true);
-        downloadButton.setEnabled(true);
-        latestNightlyCheckbox.setEnabled(true);
+        downloadButton.setEnabled(!selectVaadin7);
+        // Note that this can also be modified by the data model provider
+        latestNightlyCheckbox.setEnabled(!selectVaadin7);
         try {
 
             versionCombo.removeAll();
@@ -346,19 +349,19 @@ public class VaadinVersionComposite extends Composite {
             versionCombo.add("");
             versionMap.clear();
 
-            // hard coded Vaadin 7 beta and snapshot versions
-            if (allowVaadin7) {
+            // Vaadin 7 (dependency management) or older versions
+            if (selectVaadin7) {
                 for (MavenVaadinVersion version : MavenVersionManager
                         .getAvailableVersions(false)) {
                     versionMap.put(version.getVersionNumber(), version);
                     versionCombo.add(version.getVersionNumber());
                 }
-            }
-
-            for (LocalVaadinVersion version : LocalFileManager
-                    .getLocalVaadinVersions()) {
-                versionMap.put(version.getVersionNumber(), version);
-                versionCombo.add(version.getVersionNumber());
+            } else {
+                for (LocalVaadinVersion version : LocalFileManager
+                        .getLocalVaadinVersions()) {
+                    versionMap.put(version.getVersionNumber(), version);
+                    versionCombo.add(version.getVersionNumber());
+                }
             }
             versionCombo.setText("");
 
@@ -484,20 +487,18 @@ public class VaadinVersionComposite extends Composite {
     }
 
     /**
-     * Allow selection of Vaadin 7 versions or not.
+     * Allow selection of Vaadin 7 versions (dependency management) or other
+     * (Vaadin 6) versions.
      * 
      * Note that if not allowed, a Vaadin 7 version already in the project is
      * displayed but cannot be changed and the composite is disabled in that
      * case.
      * 
-     * Note that this API may change in future versions if support for changing
-     * the major version of Vaadin in a project is implemented.
-     * 
-     * @param allow
-     *            true to enable selection of Vaadin 7 versions
+     * @param selectVaadin7
+     *            true to select Vaadin 7 versions
      */
-    public void setAllowVaadin7(boolean allowVaadin7) {
-        this.allowVaadin7 = allowVaadin7;
+    public void setSelectVaadin7(boolean selectVaadin7) {
+        this.selectVaadin7 = selectVaadin7;
         if (versionCombo != null) {
             // refresh everything
             updateView();
