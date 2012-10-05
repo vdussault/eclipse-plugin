@@ -19,7 +19,8 @@
     <!-- <set-property name="user.agent" value="gecko1_8"/> -->
     
     <!--
-     To enable SuperDevMode, uncomment this line.
+     To enable SuperDevMode, uncomment this line and use the
+     Super Dev Mode for Vaadin 6 add-on.
      
      SuperDevMode enables debugging of the client side of a Vaadin
      application using the JavaScript debugger of a browser. Java code is
@@ -27,14 +28,8 @@
      that support source maps (currently Chrome, implementation under work
      for Firefox).
      
-     After uncommenting this property, compile the widgetset once and then
-     start the SuperDevMode server process in parallel with your normal
-     server. Then add the command line parameter ?superdevmode to your
-     application URL. Vaadin Eclipse plug-in can create a launch for the
-     SuperDevMode server (Project Properties... -> Vaadin). 
-     
-     See https://vaadin.com/wiki/-/wiki/Main/Using%20SuperDevMode for more
-     information and instructions.
+     See https://vaadin.com/directory#addon/super-dev-mode-for-vaadin-6 for
+     more information and instructions.
     -->
     <!-- <set-configuration-property name="devModeRedirectEnabled" value="true" /> -->
 
