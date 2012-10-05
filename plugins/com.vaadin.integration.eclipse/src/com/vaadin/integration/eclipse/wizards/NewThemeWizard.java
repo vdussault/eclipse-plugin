@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -99,8 +100,6 @@ public class NewThemeWizard extends Wizard implements INewWizard {
                     doFinish(themeName, appOrUiClassesToModify, monitor);
                 } catch (CoreException e) {
                     throw new InvocationTargetException(e);
-                } finally {
-                    monitor.done();
                 }
             }
         };
@@ -126,72 +125,91 @@ public class NewThemeWizard extends Wizard implements INewWizard {
             List<IType> appOrUiClassesToModify, IProgressMonitor monitor)
             throws CoreException {
         // create a sample file
-        monitor.beginTask("Creating " + themeName, 2);
-        IProject project = page.getProject();
+        try {
+            monitor.beginTask("Creating " + themeName,
+                    3 + 3 * appOrUiClassesToModify.size());
+            IProject project = page.getProject();
 
-        final IFile file = createTheme(project, themeName, monitor);
+            final IFile file = createTheme(project, themeName,
+                    new SubProgressMonitor(monitor, 1));
 
-        // update selected application/UI classes
-        modifiedJavaFiles = new ArrayList<IFile>();
-        for (IType app : appOrUiClassesToModify) {
-            if (null == app) {
-                // should not happen
-                continue;
-            }
-            // TODO is this a UI class or an application class? check
-            // supertypes?
-            boolean isUi = false;
-            if (isUi) {
-                modifyUiForTheme(project, app, themeName, monitor);
-            } else {
-                modifyApplicationForTheme(project, app, themeName, monitor);
-            }
-        }
-
-        monitor.worked(1);
-        monitor.setTaskName("Opening file for editing...");
-        getShell().getDisplay().asyncExec(new Runnable() {
-            public void run() {
-                IWorkbenchPage page = PlatformUI.getWorkbench()
-                        .getActiveWorkbenchWindow().getActivePage();
-                try {
-                    IDE.openEditor(page, file, true);
-                    for (IFile file : modifiedJavaFiles) {
-                        IDE.openEditor(page, file);
-                    }
-                } catch (PartInitException e) {
+            monitor.setTaskName("Modifying Java file(s) to use theme...");
+            // update selected application/UI classes
+            modifiedJavaFiles = new ArrayList<IFile>();
+            for (IType appOrUi : appOrUiClassesToModify) {
+                if (null == appOrUi) {
+                    // should not happen
+                    monitor.worked(3);
+                    continue;
+                }
+                // TODO is this a UI class or an application class? check
+                // supertypes?
+                boolean isUi = false;
+                if (isUi) {
+                    modifyUiForTheme(project, appOrUi, themeName,
+                            new SubProgressMonitor(monitor, 3));
+                } else {
+                    modifyApplicationForTheme(project, appOrUi, themeName,
+                            new SubProgressMonitor(monitor, 3));
                 }
             }
-        });
-        monitor.worked(1);
+
+            monitor.worked(1);
+            monitor.setTaskName("Opening file(s) for editing...");
+            getShell().getDisplay().asyncExec(new Runnable() {
+                public void run() {
+                    IWorkbenchPage page = PlatformUI.getWorkbench()
+                            .getActiveWorkbenchWindow().getActivePage();
+                    try {
+                        IDE.openEditor(page, file, true);
+                        for (IFile file : modifiedJavaFiles) {
+                            IDE.openEditor(page, file);
+                        }
+                    } catch (PartInitException e) {
+                    }
+                }
+            });
+            monitor.worked(1);
+        } finally {
+            monitor.done();
+        }
     }
 
     private IFile createTheme(IProject project, final String themeName,
             IProgressMonitor monitor) throws CoreException {
-        String directory = VaadinPlugin.VAADIN_RESOURCE_DIRECTORY;
-
-        IFolder folder = ProjectUtil.getWebContentFolder(project).getFolder(
-                directory);
-        if (!folder.exists()) {
-            folder.create(true, false, monitor);
-        }
-        folder = ProjectUtil.getWebContentFolder(project).getFolder(directory)
-                .getFolder("themes");
-        if (!folder.exists()) {
-            folder.create(true, false, monitor);
-        }
-        folder = folder.getFolder(themeName);
-        if (folder.exists()) {
-            throw ErrorUtil.newCoreException("Theme already exists", null);
-        } else {
-            folder.create(true, false, monitor);
-        }
-        final IFile file = folder.getFile(new Path("styles.css"));
+        IFile file;
         try {
-            InputStream stream = openContentStream(VaadinPlugin.VAADIN_DEFAULT_THEME);
-            file.create(stream, true, monitor);
-            stream.close();
-        } catch (IOException e) {
+            // very short operations so if some skipped, handled by
+            // monitor.done()
+            monitor.beginTask("Creating theme " + themeName, 4);
+
+            String directory = VaadinPlugin.VAADIN_RESOURCE_DIRECTORY;
+
+            IFolder folder = ProjectUtil.getWebContentFolder(project)
+                    .getFolder(directory);
+            if (!folder.exists()) {
+                folder.create(true, false, new SubProgressMonitor(monitor, 1));
+            }
+            folder = ProjectUtil.getWebContentFolder(project)
+                    .getFolder(directory).getFolder("themes");
+            if (!folder.exists()) {
+                folder.create(true, false, new SubProgressMonitor(monitor, 1));
+            }
+            folder = folder.getFolder(themeName);
+            if (folder.exists()) {
+                throw ErrorUtil.newCoreException("Theme already exists", null);
+            } else {
+                folder.create(true, false, new SubProgressMonitor(monitor, 1));
+            }
+            file = folder.getFile(new Path("styles.css"));
+            try {
+                InputStream stream = openContentStream(VaadinPlugin.VAADIN_DEFAULT_THEME);
+                file.create(stream, true, new SubProgressMonitor(monitor, 1));
+                stream.close();
+            } catch (IOException e) {
+            }
+        } finally {
+            monitor.done();
         }
 
         return file;
@@ -201,101 +219,114 @@ public class NewThemeWizard extends Wizard implements INewWizard {
     private void modifyApplicationForTheme(IProject project, IType app,
             final String themeName, IProgressMonitor monitor)
             throws JavaModelException {
-        ICompilationUnit compilationUnit = app.getCompilationUnit();
+        try {
+            monitor.beginTask("Modifying application class", 2);
 
-        IFile javaFile = (IFile) compilationUnit.getCorrespondingResource();
-        if (javaFile != null) {
-            modifiedJavaFiles.add(javaFile);
-        }
+            ICompilationUnit compilationUnit = app.getCompilationUnit();
 
-        String source = compilationUnit.getSource();
-        Document document = new Document(source);
+            IFile javaFile = (IFile) compilationUnit.getCorrespondingResource();
+            if (javaFile != null) {
+                modifiedJavaFiles.add(javaFile);
+            }
 
-        compilationUnit.becomeWorkingCopy(monitor);
-        IMethod method = app.getMethod("init", new String[] {});
-        if (method != null) {
-            ASTParser parser = ASTParser.newParser(AST.JLS3);
-            parser.setSource(compilationUnit);
-            parser.setResolveBindings(true);
-            CompilationUnit astRoot = (CompilationUnit) parser
-                    .createAST(monitor);
+            String source = compilationUnit.getSource();
+            Document document = new Document(source);
 
-            astRoot.recordModifications();
-            final AST ast = astRoot.getAST();
+            compilationUnit
+                    .becomeWorkingCopy(new SubProgressMonitor(monitor, 1));
+            IMethod method = app.getMethod("init", new String[] {});
+            if (method != null) {
+                ASTParser parser = ASTParser.newParser(AST.JLS3);
+                parser.setSource(compilationUnit);
+                parser.setResolveBindings(true);
+                CompilationUnit astRoot = (CompilationUnit) parser
+                        .createAST(new SubProgressMonitor(monitor, 1));
 
-            setThemeMethod = null;
+                astRoot.recordModifications();
+                final AST ast = astRoot.getAST();
 
-            astRoot.accept(new ASTVisitor() {
-                @Override
-                public boolean visit(MethodInvocation node) {
-                    String name = node.getName().toString();
-                    if (name.equals("setTheme")) {
-                        // found an existing setTheme call
-                        setThemeMethod = node;
-                    }
-                    return super.visit(node);
-                }
-            });
+                setThemeMethod = null;
 
-            final StringLiteral themeString = ast.newStringLiteral();
-            themeString.setLiteralValue(themeName);
-
-            if (setThemeMethod != null) {
-                // UPDATE existing
-                setThemeMethod.arguments().clear();
-                setThemeMethod.arguments().add(themeString);
-            } else {
-                // ADD setTheme method
                 astRoot.accept(new ASTVisitor() {
                     @Override
-                    public boolean visit(MethodDeclaration node) {
+                    public boolean visit(MethodInvocation node) {
                         String name = node.getName().toString();
-                        if (name.equals("init")) {
-                            Block body = node.getBody();
-                            MethodInvocation setThemeInvocation = ast
-                                    .newMethodInvocation();
-                            setThemeInvocation.setName(ast
-                                    .newSimpleName("setTheme"));
-                            setThemeInvocation.arguments().add(themeString);
-                            ExpressionStatement es = ast
-                                    .newExpressionStatement(setThemeInvocation);
-
-                            body.statements().add(es);
+                        if (name.equals("setTheme")) {
+                            // found an existing setTheme call
+                            setThemeMethod = node;
                         }
                         return super.visit(node);
                     }
                 });
-            }
 
-            TextEdit rewrite = astRoot.rewrite(document, compilationUnit
-                    .getJavaProject().getOptions(true));
-            try {
-                rewrite.apply(document);
-            } catch (MalformedTreeException e) {
-                ErrorUtil.handleBackgroundException(IStatus.WARNING,
-                        "Failed to set the theme in the application class "
-                                + app.getFullyQualifiedName(), e);
-            } catch (BadLocationException e) {
-                ErrorUtil.handleBackgroundException(IStatus.WARNING,
-                        "Failed to set the theme in the application class "
-                                + app.getFullyQualifiedName(), e);
+                final StringLiteral themeString = ast.newStringLiteral();
+                themeString.setLiteralValue(themeName);
+
+                if (setThemeMethod != null) {
+                    // UPDATE existing
+                    setThemeMethod.arguments().clear();
+                    setThemeMethod.arguments().add(themeString);
+                } else {
+                    // ADD setTheme method
+                    astRoot.accept(new ASTVisitor() {
+                        @Override
+                        public boolean visit(MethodDeclaration node) {
+                            String name = node.getName().toString();
+                            if (name.equals("init")) {
+                                Block body = node.getBody();
+                                MethodInvocation setThemeInvocation = ast
+                                        .newMethodInvocation();
+                                setThemeInvocation.setName(ast
+                                        .newSimpleName("setTheme"));
+                                setThemeInvocation.arguments().add(themeString);
+                                ExpressionStatement es = ast
+                                        .newExpressionStatement(setThemeInvocation);
+
+                                body.statements().add(es);
+                            }
+                            return super.visit(node);
+                        }
+                    });
+                }
+
+                TextEdit rewrite = astRoot.rewrite(document, compilationUnit
+                        .getJavaProject().getOptions(true));
+                try {
+                    rewrite.apply(document);
+                } catch (MalformedTreeException e) {
+                    ErrorUtil.handleBackgroundException(IStatus.WARNING,
+                            "Failed to set the theme in the application class "
+                                    + app.getFullyQualifiedName(), e);
+                } catch (BadLocationException e) {
+                    ErrorUtil.handleBackgroundException(IStatus.WARNING,
+                            "Failed to set the theme in the application class "
+                                    + app.getFullyQualifiedName(), e);
+                }
+                String newSource = document.get();
+                compilationUnit.getBuffer().setContents(newSource);
             }
-            String newSource = document.get();
-            compilationUnit.getBuffer().setContents(newSource);
+        } finally {
+            monitor.done();
         }
     }
 
     private void modifyUiForTheme(IProject project, IType ui,
             final String themeName, IProgressMonitor monitor)
             throws JavaModelException {
-        ICompilationUnit compilationUnit = ui.getCompilationUnit();
+        try {
+            monitor.beginTask("Modifying UI class", 1);
 
-        IFile javaFile = (IFile) compilationUnit.getCorrespondingResource();
-        if (javaFile != null) {
-            modifiedJavaFiles.add(javaFile);
+            ICompilationUnit compilationUnit = ui.getCompilationUnit();
+
+            IFile javaFile = (IFile) compilationUnit.getCorrespondingResource();
+            if (javaFile != null) {
+                modifiedJavaFiles.add(javaFile);
+            }
+
+            // TODO implement #8236
+        } finally {
+            monitor.done();
         }
-
-        // TODO implement #8236
     }
 
     /**
