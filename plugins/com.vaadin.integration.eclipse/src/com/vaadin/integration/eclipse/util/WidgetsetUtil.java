@@ -823,8 +823,10 @@ public class WidgetsetUtil {
                     if (fragment.getResource() instanceof IFolder) {
                         IFolder wsFolder = (IFolder) fragment.getResource();
                         IFile file = wsFolder.getFile(wsName + ".gwt.xml");
-                        VaadinPluginUtil.ensureFileFromTemplate(file,
-                                "widgetsetxmlstub2.txt");
+                        String template = ProjectUtil.isVaadin7(project
+                                .getProject()) ? "widgetsetxmlstub7.txt"
+                                : "widgetsetxmlstub6.txt";
+                        VaadinPluginUtil.ensureFileFromTemplate(file, template);
 
                         // mark the created widgetset as dirty
                         WidgetsetUtil.setWidgetsetDirty(project.getProject(),
