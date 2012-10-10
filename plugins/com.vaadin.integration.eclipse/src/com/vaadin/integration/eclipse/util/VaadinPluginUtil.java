@@ -23,6 +23,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.ivyde.eclipse.cpcontainer.IvyClasspathContainer;
+import org.apache.ivyde.eclipse.cpcontainer.IvyClasspathContainerConfiguration;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -764,12 +766,38 @@ public class VaadinPluginUtil {
         outputLocations.add(getRawLocation(project,
                 jproject.getOutputLocation()));
 
-        if (ProjectUtil.isVaadin7(project)) {
+        boolean vaadin7 = ProjectUtil.isVaadin7(project);
+        if (vaadin7) {
             // relevant Vaadin 7 JARs
-            for (IClasspathEntry classPathEntry : jproject
-                    .getResolvedClasspath(true)) {
-                if (classPathEntry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
-                    IPath path = classPathEntry.getPath();
+            // to ensure all widgetset compile dependencies are first, use raw
+            // classpath instead of jproject.getResolvedClasspath(true)
+            for (IClasspathEntry rawClassPathEntry : jproject.getRawClasspath()) {
+                if (rawClassPathEntry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+                    // first add all dependencies from Ivy configuration
+                    // widgetset-compile
+                    IClasspathContainer classpathContainer = JavaCore
+                            .getClasspathContainer(rawClassPathEntry.getPath(),
+                                    jproject);
+                    if (classpathContainer instanceof IvyClasspathContainer) {
+                        IvyClasspathContainerConfiguration conf = ((IvyClasspathContainer) classpathContainer)
+                                .getConf();
+                        for (Object confName : conf.getConfs()) {
+                            if ("widgetset-compile".equals(confName)) {
+                                // add entry early only if correct Ivy conf -
+                                // other classpath entries get added later
+                                for (IClasspathEntry entry : classpathContainer
+                                        .getClasspathEntries()) {
+                                    otherLocations.add(getRawLocation(project,
+                                            entry.getPath()));
+                                }
+                            }
+                        }
+                    }
+                } else if (rawClassPathEntry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
+                    IClasspathEntry resolvedClasspathEntry = JavaCore
+                            .getResolvedClasspathEntry(rawClassPathEntry);
+                    IPath path = resolvedClasspathEntry.getPath();
+                    // might be a Vaadin JAR directly in the project
                     if (path.lastSegment().startsWith("vaadin-")) {
                         otherLocations.add(getRawLocation(project, path));
                     }
@@ -826,8 +854,9 @@ public class VaadinPluginUtil {
             } else if (classPathEntry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
                 // Include gwt dependencies as well
                 // TODO fix for Vaadin 7
-                if (ProjectUtil.isGWTDependency(jproject,
-                        classPathEntry.getPath())) {
+                if (vaadin7
+                        || ProjectUtil.isGWTDependency(jproject,
+                                classPathEntry.getPath())) {
                     otherLocations.add(getRawLocation(project,
                             classPathEntry.getPath()));
                 }
