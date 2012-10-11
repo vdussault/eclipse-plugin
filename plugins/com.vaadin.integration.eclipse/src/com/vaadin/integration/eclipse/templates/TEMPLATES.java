@@ -14,20 +14,6 @@ import com.vaadin.integration.eclipse.templates.v7.WidgetTemplate;
  * (together with vaadin62). The first suitable template is selected by default.
  */
 public enum TEMPLATES {
-    // templates for pre-6.2 versions
-    BASIC_TK5_V6(
-            "Clean",
-            "Simple client-side and server-side component",
-            new Class[] {
-                    com.vaadin.integration.eclipse.templates.v60.ComponentTemplate.class,
-                    com.vaadin.integration.eclipse.templates.v60.VComponentTemplate.class },
-            0, 6.2, true, false, false, false), //
-    SERVER_ONLY_TK5_V6(
-            "Server-side only",
-            "Server-side component only, no client-side widget",
-            new Class[] { com.vaadin.integration.eclipse.templates.v60.ComponentTemplate.class },
-            0, 6.2, false, false, false, false), //
-
     // templates for Vaadin 6.2 and rest of 6 series
     COMMUNICATION_V62(
             "Simple",
@@ -87,7 +73,7 @@ public enum TEMPLATES {
             boolean hasState, boolean hasClientRpc, boolean hasServerRpc) {
         this.title = title;
         this.description = description;
-        this.jetTemplates = templates;
+        jetTemplates = templates;
         this.minVersion = minVersion;
         this.maxVersion = maxVersion;
 
