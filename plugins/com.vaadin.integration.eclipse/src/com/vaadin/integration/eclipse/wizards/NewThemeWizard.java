@@ -16,8 +16,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -25,9 +28,14 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.BadLocationException;
@@ -60,6 +68,8 @@ public class NewThemeWizard extends Wizard implements INewWizard {
     private NewThemeWizardPage page;
     private ISelection selection;
     private MethodInvocation setThemeMethod;
+    // TODO might need to support also NormalAnnotation in the future
+    private SingleMemberAnnotation themeAnnotation;
     private List<IFile> modifiedJavaFiles;
 
     /**
@@ -127,7 +137,7 @@ public class NewThemeWizard extends Wizard implements INewWizard {
         // create a sample file
         try {
             monitor.beginTask("Creating " + themeName,
-                    3 + 3 * appOrUiClassesToModify.size());
+                    3 + 5 * appOrUiClassesToModify.size());
             IProject project = page.getProject();
 
             final IFile file = createTheme(project, themeName,
@@ -142,9 +152,17 @@ public class NewThemeWizard extends Wizard implements INewWizard {
                     monitor.worked(3);
                     continue;
                 }
-                // TODO is this a UI class or an application class? check
-                // supertypes?
+                // is this a UI class or an application class?
                 boolean isUi = false;
+                IJavaProject jproject = JavaCore.create(project);
+                IType uiType = jproject
+                        .findType(VaadinPlugin.UI_CLASS_FULL_NAME);
+                if (uiType != null) {
+                    ITypeHierarchy typeHierarchy = appOrUi
+                            .newTypeHierarchy(new SubProgressMonitor(monitor, 2));
+                    isUi = typeHierarchy.contains(uiType);
+                }
+
                 if (isUi) {
                     modifyUiForTheme(project, appOrUi, themeName,
                             new SubProgressMonitor(monitor, 3));
@@ -310,11 +328,12 @@ public class NewThemeWizard extends Wizard implements INewWizard {
         }
     }
 
-    private void modifyUiForTheme(IProject project, IType ui,
+    private void modifyUiForTheme(IProject project, final IType ui,
             final String themeName, IProgressMonitor monitor)
             throws JavaModelException {
         try {
-            monitor.beginTask("Modifying UI class", 1);
+
+            monitor.beginTask("Modifying UI class", 5);
 
             ICompilationUnit compilationUnit = ui.getCompilationUnit();
 
@@ -323,7 +342,129 @@ public class NewThemeWizard extends Wizard implements INewWizard {
                 modifiedJavaFiles.add(javaFile);
             }
 
-            // TODO implement #8236
+            String source = compilationUnit.getSource();
+            Document document = new Document(source);
+
+            compilationUnit
+                    .becomeWorkingCopy(new SubProgressMonitor(monitor, 1));
+
+            try {
+                ASTParser parser = ASTParser.newParser(AST.JLS3);
+                parser.setSource(compilationUnit);
+                parser.setResolveBindings(true);
+                CompilationUnit astRoot = (CompilationUnit) parser
+                        .createAST(new SubProgressMonitor(monitor, 1));
+
+                astRoot.recordModifications();
+                final AST ast = astRoot.getAST();
+
+                themeAnnotation = null;
+
+                astRoot.accept(new ASTVisitor() {
+
+                    @Override
+                    public boolean visit(SingleMemberAnnotation annotation) {
+                        ITypeBinding binding = annotation.resolveTypeBinding();
+                        String fullyQualifiedName = binding.getQualifiedName();
+                        if (VaadinPlugin.THEME_ANNOTATION_FULL_NAME
+                                .equals(fullyQualifiedName)) {
+                            themeAnnotation = annotation;
+                            return false;
+                        }
+                        return super.visit(annotation);
+                    }
+
+                    // Only look at top-level annotations
+                    // TODO might be suboptimal if does not stop traversal early
+
+                    @Override
+                    public boolean visit(Block node) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean visit(MethodDeclaration node) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean visit(FieldDeclaration node) {
+                        return false;
+                    }
+                });
+
+                final StringLiteral themeString = ast.newStringLiteral();
+                themeString.setLiteralValue(themeName);
+
+                final ImportRewrite importRewrite = ImportRewrite.create(
+                        astRoot, true);
+
+                if (themeAnnotation != null) {
+                    // UPDATE existing
+                    themeAnnotation.setValue(themeString);
+                } else {
+                    // ADD Theme annotation
+                    astRoot.accept(new ASTVisitor() {
+                        @SuppressWarnings("unchecked")
+                        @Override
+                        public boolean visit(TypeDeclaration node) {
+                            // find the UI class and add @Theme annotation
+                            ITypeBinding binding = node.resolveBinding();
+                            if (ui.getFullyQualifiedName().equals(
+                                    binding.getQualifiedName())) {
+                                themeAnnotation = ast
+                                        .newSingleMemberAnnotation();
+                                importRewrite
+                                        .addImport(VaadinPlugin.THEME_ANNOTATION_FULL_NAME);
+                                themeAnnotation.setTypeName(ast
+                                        .newName(VaadinPlugin.THEME_ANNOTATION_NAME));
+                                themeAnnotation.setValue(themeString);
+                                node.modifiers().add(0, themeAnnotation);
+                            }
+                            return super.visit(node);
+                        }
+                    });
+                }
+
+                TextEdit rewrite = astRoot.rewrite(document, compilationUnit
+                        .getJavaProject().getOptions(true));
+                try {
+                    rewrite.apply(document);
+
+                    // rewrite imports (after the body rewrite, modifies earlier
+                    // part)
+                    TextEdit rewriteImports = importRewrite
+                            .rewriteImports(new SubProgressMonitor(monitor, 1));
+                    rewriteImports.apply(document);
+                } catch (MalformedTreeException e) {
+                    ErrorUtil.handleBackgroundException(
+                            IStatus.WARNING,
+                            "Failed to set the theme in the UI class "
+                                    + ui.getFullyQualifiedName(), e);
+                } catch (BadLocationException e) {
+                    ErrorUtil.handleBackgroundException(
+                            IStatus.WARNING,
+                            "Failed to set the theme in the UI class "
+                                    + ui.getFullyQualifiedName(), e);
+                } catch (CoreException e) {
+                    ErrorUtil.handleBackgroundException(
+                            IStatus.WARNING,
+                            "Failed to update imports in the UI class "
+                                    + ui.getFullyQualifiedName(), e);
+                }
+                String newSource = document.get();
+                compilationUnit.getBuffer().setContents(newSource);
+
+                // reconcile changes with other modifications to the same
+                // compilation unit
+                compilationUnit.reconcile(ICompilationUnit.NO_AST, false, null,
+                        new SubProgressMonitor(monitor, 1));
+
+                compilationUnit.commitWorkingCopy(false,
+                        new SubProgressMonitor(monitor, 1));
+            } finally {
+                compilationUnit.discardWorkingCopy();
+            }
         } finally {
             monitor.done();
         }

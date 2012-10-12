@@ -19,6 +19,13 @@ public class VaadinPlugin extends AbstractUIPlugin {
     public static final String UI_CLASS_FULL_NAME = VAADIN_UI_PACKAGE_PREFIX
             + UI_CLASS_NAME;
 
+    public static final String VAADIN_ANNOTATIONS_PACKAGE_PREFIX = VAADIN_PACKAGE_PREFIX
+            + "annotations.";
+
+    public static final String THEME_ANNOTATION_NAME = "Theme";
+    public static final String THEME_ANNOTATION_FULL_NAME = VAADIN_ANNOTATIONS_PACKAGE_PREFIX
+            + THEME_ANNOTATION_NAME;
+
     public static final String ID_COMPILE_WS_APP = "compilews";
 
     public static final String VAADIN_CLIENT_SIDE_CLASS_PREFIX = "V";
