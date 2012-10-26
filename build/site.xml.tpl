@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<site>
+<site associateSitesURL="associateSites.xml">
    <description url="http://vaadin.com/eclipse/">
       Update site for Vaadin.
    </description>

@@ -41,6 +41,8 @@
 			<arg value="site.xml.tpl"/>
 			<arg value="${update-site.dir}/features"/>
 		</java>
+		<!-- copy also the associate sites file -->
+		<copy file="associateSites.xml" todir="${update-site.dir}"/>
 	</target>
 
 	<target name="publish-nightly" depends="create-update-site,site.xml, nightly-teamcity-publish">
@@ -60,6 +62,7 @@
 			<arg value="-B" />
 			<arg value="-r" />
 			<arg value="${update-site.dir}/site.xml" />
+			<arg value="${update-site.dir}/associateSites.xml" />
 			<arg value="${update-site.dir}/features" />
 			<arg value="${update-site.dir}/plugins" />
 			<arg value="${nightly.publish}" />
