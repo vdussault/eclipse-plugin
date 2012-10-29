@@ -1,15 +1,26 @@
 package com.vaadin.integration.eclipse;
 
+import java.util.List;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
-import org.eclipse.wst.common.project.facet.core.IFacetedProjectWorkingCopy;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
+import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
+import com.vaadin.integration.eclipse.util.ProjectDependencyManager;
+import com.vaadin.integration.eclipse.util.ProjectUtil;
+import com.vaadin.integration.eclipse.util.data.MavenVaadinVersion;
+import com.vaadin.integration.eclipse.util.network.MavenVersionManager;
 
 public class CoreFacetVersionChangeDelegate implements IDelegate {
 
@@ -47,10 +58,70 @@ public class CoreFacetVersionChangeDelegate implements IDelegate {
     private static void upgradeToVaadin7(IProject project,
             IProjectFacetVersion fv, Object cfg, IProgressMonitor monitor)
             throws CoreException {
-        // TODO 1.0 to 7.0 => upgrade: add ivy configuration, remove old JARs
-        // from classpath
-        throw ErrorUtil
-                .newCoreException("Upgrading the Vaadin facet is not yet supported");
+        // 1.0 to 7.0 upgrade:
+        // - remove old JARs from classpath (Vaadin and GWT)
+        // - remove Vaadin JAR
+        // - add ivy configuration
+
+        try {
+            monitor.beginTask("Upgrading Vaadin facet", 4);
+
+            MavenVaadinVersion vaadinVersion = null;
+            if (cfg instanceof IDataModel) {
+                IDataModel model = (IDataModel) cfg;
+                if (model
+                        .isPropertySet(CoreFacetInstallDelegate.VAADIN_VERSION)) {
+                    // A version was specified on the configuration page - use
+                    // that
+                    String versionString = model
+                            .getStringProperty(CoreFacetInstallDelegate.VAADIN_VERSION);
+                    vaadinVersion = new MavenVaadinVersion(versionString);
+                }
+            }
+            if (null == vaadinVersion) {
+                List<MavenVaadinVersion> availableVersions = MavenVersionManager
+                        .getAvailableVersions(false);
+                if (null == availableVersions || availableVersions.size() == 0) {
+                    // need a Vaadin version to upgrade to
+                    throw ErrorUtil
+                            .newCoreException("Upgrading the Vaadin facet failed: no Vaadin version found for Ivy");
+                }
+                vaadinVersion = availableVersions.get(0);
+            }
+
+            IJavaProject jproject = JavaCore.create(project);
+            WidgetsetBuildManager.internalSuspendWidgetsetBuilds(project);
+            try {
+                // remove GWT JARs from the classpath
+                ProjectDependencyManager.removeGWTFromClasspath(jproject,
+                        new SubProgressMonitor(monitor, 1));
+
+                // remove old Vaadin JAR
+                IPath currentJar = ProjectUtil.getVaadinLibraryInProject(
+                        project, true);
+                // remove the Vaadin JAR and its classpath entry (if any)
+                if (currentJar != null) {
+                    ProjectDependencyManager.removeVaadinLibrary(jproject,
+                            currentJar);
+                }
+                monitor.worked(1);
+
+                // add Ivy dependency management
+                CoreFacetInstallDelegate.setupIvy(jproject, vaadinVersion,
+                        new SubProgressMonitor(monitor, 2));
+            } catch (CoreException e) {
+                throw ErrorUtil.newCoreException(
+                        "Failed to update Vaadin facet version for project "
+                                + project.getName(), e);
+            } finally {
+                WidgetsetBuildManager.internalResumeWidgetsetBuilds(project);
+                // widgetset will not compile here so no point in trying
+            }
+
+            // TODO update launches etc?
+        } finally {
+            monitor.done();
+        }
     }
 
     /**
@@ -87,11 +158,6 @@ public class CoreFacetVersionChangeDelegate implements IDelegate {
                 && VaadinFacetUtils.VAADIN_70.equals(currentVersion)) {
             downgradeToVaadin6(project, version, cfg, monitor);
         }
-
-        // upgrade facet version
-        IFacetedProjectWorkingCopy workingCopy = fproj.createWorkingCopy();
-        workingCopy.changeProjectFacetVersion(version);
-        workingCopy.commitChanges(null);
     }
 
 }

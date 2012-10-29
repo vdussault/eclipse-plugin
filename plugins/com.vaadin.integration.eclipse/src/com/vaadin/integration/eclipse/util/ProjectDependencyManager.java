@@ -270,7 +270,7 @@ public class ProjectDependencyManager {
      * @param currentJar
      * @throws CoreException
      */
-    private static void removeVaadinLibrary(IJavaProject jproject,
+    public static void removeVaadinLibrary(IJavaProject jproject,
             IPath currentJar) throws CoreException {
         try {
             IProject project = jproject.getProject();
@@ -502,6 +502,54 @@ public class ProjectDependencyManager {
             } catch (JavaModelException e) {
                 throw ErrorUtil.newCoreException("addGWTLibraries failed", e);
             }
+        } finally {
+            monitor.done();
+        }
+
+    }
+
+    /**
+     * Remove GWT libraries from a project build path.
+     * 
+     * @param jproject
+     * @param monitor
+     * @throws CoreException
+     */
+    public static void removeGWTFromClasspath(IJavaProject jproject,
+            IProgressMonitor monitor) throws CoreException {
+        if (monitor == null) {
+            monitor = new NullProgressMonitor();
+        }
+        try {
+            monitor.beginTask("Removing GWT libraries", 1);
+
+            IClasspathEntry[] rawClasspath = jproject.getRawClasspath();
+            List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
+            for (IClasspathEntry entry : rawClasspath) {
+                boolean add = true;
+                // Skip GWT and dependencies, copy the rest
+                IPath p = entry.getResolvedEntry().getPath();
+                if ("gwt-dev.jar".equals(p.lastSegment())
+                        || "gwt-user.jar".equals(p.lastSegment())
+                        || ProjectUtil.isGWTDependency(jproject, p)) {
+                    add = false;
+                }
+                if (add) {
+                    entries.add(entry);
+                }
+            }
+
+            IClasspathEntry[] entryArray = entries
+                    .toArray(new IClasspathEntry[entries.size()]);
+            jproject.setRawClasspath(entryArray, null);
+
+            monitor.worked(1);
+
+            // TODO update classpaths also in launches
+
+        } catch (JavaModelException e) {
+            throw ErrorUtil
+                    .newCoreException("removeGWTFromClasspath failed", e);
         } finally {
             monitor.done();
         }

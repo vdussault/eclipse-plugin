@@ -316,8 +316,9 @@ public class CoreFacetInstallDelegate implements IDelegate,
 
     }
 
-    private void setupIvy(IJavaProject jProject, MavenVaadinVersion version,
-            IProgressMonitor monitor) throws CoreException {
+    public static void setupIvy(IJavaProject jProject,
+            MavenVaadinVersion version, IProgressMonitor monitor)
+            throws CoreException {
         Map<String, String> substitutions = Collections.singletonMap(
                 "VAADIN_VERSION", version.getVersionNumber());
         VaadinPluginUtil.ensureFileFromTemplate(jProject, "ivy.xml",
@@ -345,7 +346,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
      * @param project
      *            the project for which an Ivy classpath entry should be created
      */
-    private void setupIvyClasspath(IJavaProject project,
+    private static void setupIvyClasspath(IJavaProject project,
             String configurationName, IClasspathAttribute[] attributes) {
         // basic configuration
         IvyClasspathContainerConfiguration conf = new IvyClasspathContainerConfiguration(
