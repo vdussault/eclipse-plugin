@@ -138,6 +138,7 @@ public class VaadinCoreFacetInstallPage extends J2EEModuleFacetInstallPage
 
         applicationCreatePortletCombo = new Combo(portletGroup, SWT.DROP_DOWN
                 | SWT.READ_ONLY);
+        // TODO Vaadin 7: no portlet 1.0
         applicationCreatePortletCombo.setItems(new String[] {
                 PORTLET_VERSION_NONE, PORTLET_VERSION20, PORTLET_VERSION10 });
         applicationCreatePortletCombo.setLayoutData(gdhfill());
@@ -163,16 +164,16 @@ public class VaadinCoreFacetInstallPage extends J2EEModuleFacetInstallPage
         versionGroup.setText("Vaadin Version");
         versionGroup.setLayout(new GridLayout(1, false));
 
-        // Vaadin version selection
-        final VaadinVersionComposite versionComposite = new VaadinVersionComposite(
-                versionGroup, SWT.NULL);
-        versionComposite.createContents();
         // is this Vaadin 7 facet version or not?
         IProjectFacetVersion facetVersion = (IProjectFacetVersion) model
                 .getProperty(IFacetDataModelProperties.FACET_VERSION);
         boolean isVaadin7Facet = VaadinFacetUtils.VAADIN_70
                 .equals(facetVersion);
-        versionComposite.setSelectVaadin7(isVaadin7Facet);
+        // Vaadin version selection
+        final VaadinVersionComposite versionComposite = new VaadinVersionComposite(
+                versionGroup, SWT.NULL);
+        versionComposite.createContents();
+        versionComposite.setUseDependencyManagement(isVaadin7Facet);
 
         // this is used both in project creation and in adding a facet
         // afterwards, so e.g. the master DM property may not be set or may not

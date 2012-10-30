@@ -285,8 +285,10 @@ public class VaadinProjectPropertyPage extends PropertyPage {
         group.setText("Vaadin");
         group.setLayout(new GridLayout(1, false));
 
+        // no dependency management support here
         vaadinVersionComposite = new VaadinVersionComposite(group, SWT.NULL);
         vaadinVersionComposite.createContents();
+        vaadinVersionComposite.setUseDependencyManagement(false);
         vaadinVersionComposite
                 .setVersionSelectionListener(new VersionSelectionChangeListener() {
 

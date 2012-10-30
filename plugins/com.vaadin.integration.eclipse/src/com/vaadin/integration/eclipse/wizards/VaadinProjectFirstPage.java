@@ -16,7 +16,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.wst.common.componentcore.datamodel.properties.IFacetDataModelProperties;
+import org.eclipse.wst.common.frameworks.datamodel.DataModelEvent;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
+import org.eclipse.wst.common.frameworks.datamodel.IDataModelListener;
 import org.eclipse.wst.common.frameworks.internal.datamodel.ui.DataModelSynchHelper;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
@@ -131,7 +133,7 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
         final VaadinVersionComposite versionComposite = new VaadinVersionComposite(
                 group, SWT.NULL);
         versionComposite.createContents();
-        versionComposite.setSelectVaadin7(VaadinFacetUtils.VAADIN_70
+        versionComposite.setUseDependencyManagement(VaadinFacetUtils.VAADIN_70
                 .equals(getPrimaryFacetVersion()));
 
         versionComposite.setNewProject();
@@ -142,6 +144,17 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
         synchHelper.synchCheckbox(
                 versionComposite.getUseLatestNightlyCheckbox(),
                 USE_LATEST_NIGHTLY, new Control[] {});
+        // update Vaadin 6/7
+        vaadinFacetDataModel.addListener(new IDataModelListener() {
+            public void propertyChanged(DataModelEvent event) {
+                if (IFacetDataModelProperties.FACET_VERSION.equals(event
+                        .getPropertyName())) {
+                    versionComposite
+                            .setUseDependencyManagement(VaadinFacetUtils.VAADIN_70
+                                    .equals(getPrimaryFacetVersion()));
+                }
+            }
+        });
 
         return group;
     }
