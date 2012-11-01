@@ -338,10 +338,6 @@ public class WidgetsetUtil {
         args.add("-Xmx512M");
         args.add("-XX:MaxPermSize=512M");
 
-        if (PlatformUtil.getPlatform().equals("mac")) {
-            args.add("-XstartOnFirstThread");
-        }
-
         args.add("-classpath");
         // args.add(classPath.replaceAll(" ", "\\ "));
         args.add(classPath);
