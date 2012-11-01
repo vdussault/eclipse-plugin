@@ -273,7 +273,10 @@ public class ProjectUtil {
         IJavaProject jproject = JavaCore.create(project);
         if (jproject != null) {
             try {
-                if (jproject.findType("com.google.gwt.dev.DevMode") != null) {
+                // with Vaadin 7, DevMode might not be on the project classpath
+                // but there isGwt24() should return true
+                if (jproject.findType("com.google.gwt.dev.DevMode") != null
+                        || isGwt24(project)) {
                     return true;
                 }
             } catch (JavaModelException e) {
