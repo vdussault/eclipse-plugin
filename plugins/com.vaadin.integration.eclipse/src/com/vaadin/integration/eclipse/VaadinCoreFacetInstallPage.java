@@ -138,9 +138,8 @@ public class VaadinCoreFacetInstallPage extends J2EEModuleFacetInstallPage
 
         applicationCreatePortletCombo = new Combo(portletGroup, SWT.DROP_DOWN
                 | SWT.READ_ONLY);
-        // TODO Vaadin 7: no portlet 1.0
-        applicationCreatePortletCombo.setItems(new String[] {
-                PORTLET_VERSION_NONE, PORTLET_VERSION20, PORTLET_VERSION10 });
+        // contents initialized based on facet version by
+        // VaadinFacetInstallDataModelProvider.getValidPropertyDescriptors()
         applicationCreatePortletCombo.setLayoutData(gdhfill());
         synchHelper.synchCombo(applicationCreatePortletCombo, PORTLET_VERSION,
                 null);

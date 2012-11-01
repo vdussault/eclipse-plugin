@@ -231,6 +231,11 @@ public class VaadinFacetInstallDataModelProvider extends
         // notify of valid values change
         if (IFacetDataModelProperties.FACET_VERSION.equals(propertyName)) {
             resetProperty(VAADIN_VERSION);
+
+            model.notifyPropertyChange(PORTLET_VERSION,
+                    IDataModel.VALID_VALUES_CHG);
+            model.notifyPropertyChange(VAADIN_PROJECT_TYPE,
+                    IDataModel.VALID_VALUES_CHG);
         } else if (VAADIN_VERSION.equals(propertyName)) {
             if (null == vaadinVersions
                     || !vaadinVersions.contains(propertyValue)) {
@@ -331,6 +336,10 @@ public class VaadinFacetInstallDataModelProvider extends
         // obtain the master model which has links to other facet models
         IDataModel masterModel = (IDataModel) model
                 .getProperty(MASTER_PROJECT_DM);
+        if (null == masterModel) {
+            // installing facet in an existing project
+            return;
+        }
         FacetDataModelMap map = (FacetDataModelMap) masterModel
                 .getProperty(IFacetProjectCreationDataModelProperties.FACET_DM_MAP);
 
@@ -385,6 +394,24 @@ public class VaadinFacetInstallDataModelProvider extends
             }
             return DataModelPropertyDescriptor.createDescriptors(vaadinVersions
                     .toArray());
+        } else if (VAADIN_PROJECT_TYPE.equals(propertyName)) {
+            if (isVaadin7Facet()) {
+                return DataModelPropertyDescriptor
+                        .createDescriptors(VaadinFacetInstallDataModelProvider.PROJECT_TYPES_VAADIN7);
+            } else {
+                return DataModelPropertyDescriptor
+                        .createDescriptors(VaadinFacetInstallDataModelProvider.PROJECT_TYPES_VAADIN6);
+            }
+        } else if (PORTLET_VERSION.equals(propertyName)) {
+            if (isVaadin7Facet()) {
+                return DataModelPropertyDescriptor
+                        .createDescriptors(new String[] { PORTLET_VERSION_NONE,
+                                PORTLET_VERSION20 });
+            } else {
+                return DataModelPropertyDescriptor
+                        .createDescriptors(new String[] { PORTLET_VERSION_NONE,
+                                PORTLET_VERSION20, PORTLET_VERSION10 });
+            }
         } else {
             return super.getValidPropertyDescriptors(propertyName);
         }

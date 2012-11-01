@@ -24,7 +24,6 @@ import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
 import com.vaadin.integration.eclipse.IVaadinFacetInstallDataModelProperties;
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
-import com.vaadin.integration.eclipse.configuration.VaadinFacetInstallDataModelProvider;
 import com.vaadin.integration.eclipse.properties.VaadinVersionComposite;
 
 /**
@@ -111,21 +110,8 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
 
         projectTypeCombo = new Combo(group, SWT.READ_ONLY);
         projectTypeCombo.setLayoutData(gdhfill());
-        // Vaadin 6 vs 7 depending on facet version
-        String[] projectTypes;
-        // TODO at this point, getPrimaryFacetVersion() may return an incorrect
-        // value
-        // if (VaadinFacetUtils.VAADIN_70.equals(getPrimaryFacetVersion())) {
-        // projectTypes =
-        // VaadinFacetInstallDataModelProvider.PROJECT_TYPES_VAADIN7;
-        // } else {
-        projectTypes = VaadinFacetInstallDataModelProvider.PROJECT_TYPES_VAADIN6;
-        // }
-        for (String projectType : projectTypes) {
-            projectTypeCombo.add(projectType);
-        }
-        // first item is the default item
-        projectTypeCombo.select(0);
+        // contents initialized depending on facet version by
+        // VaadinFacetInstallDataModelProvider.getValidPropertyDescriptors()
         vaadinFacetSynchHelper.synchCombo(projectTypeCombo,
                 VAADIN_PROJECT_TYPE, new Control[] { label });
 
