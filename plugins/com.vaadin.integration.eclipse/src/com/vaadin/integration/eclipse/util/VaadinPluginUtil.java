@@ -213,7 +213,7 @@ public class VaadinPluginUtil {
                 + " extends UI {\n" + "\t@Override\n"
                 + "\tpublic void init(VaadinRequest request) {\n"
                 + "\t\tLabel label = new Label(\"Hello Vaadin user\");\n"
-                + "\t\taddComponent(label);\n" + "\t}\n" + "\n" + "}\n";
+                + "\t\tsetContent(label);\n" + "\t}\n" + "\n" + "}\n";
 
         return template;
 
