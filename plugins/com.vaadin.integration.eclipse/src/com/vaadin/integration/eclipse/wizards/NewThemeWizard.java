@@ -140,7 +140,11 @@ public class NewThemeWizard extends Wizard implements INewWizard {
                     3 + 5 * appOrUiClassesToModify.size());
             IProject project = page.getProject();
 
-            final IFile file = createTheme(project, themeName,
+            IJavaProject jproject = JavaCore.create(project);
+            IType uiType = jproject.findType(VaadinPlugin.UI_CLASS_FULL_NAME);
+            boolean scssTheme = uiType != null;
+
+            final IFile[] files = createTheme(project, themeName, scssTheme,
                     new SubProgressMonitor(monitor, 1));
 
             monitor.setTaskName("Modifying Java file(s) to use theme...");
@@ -154,9 +158,6 @@ public class NewThemeWizard extends Wizard implements INewWizard {
                 }
                 // is this a UI class or an application class?
                 boolean isUi = false;
-                IJavaProject jproject = JavaCore.create(project);
-                IType uiType = jproject
-                        .findType(VaadinPlugin.UI_CLASS_FULL_NAME);
                 if (uiType != null) {
                     ITypeHierarchy typeHierarchy = appOrUi
                             .newTypeHierarchy(new SubProgressMonitor(monitor, 2));
@@ -179,7 +180,9 @@ public class NewThemeWizard extends Wizard implements INewWizard {
                     IWorkbenchPage page = PlatformUI.getWorkbench()
                             .getActiveWorkbenchWindow().getActivePage();
                     try {
-                        IDE.openEditor(page, file, true);
+                        for (IFile file : files) {
+                            IDE.openEditor(page, file, true);
+                        }
                         for (IFile file : modifiedJavaFiles) {
                             IDE.openEditor(page, file);
                         }
@@ -193,13 +196,12 @@ public class NewThemeWizard extends Wizard implements INewWizard {
         }
     }
 
-    private IFile createTheme(IProject project, final String themeName,
-            IProgressMonitor monitor) throws CoreException {
-        IFile file;
+    private IFile[] createTheme(IProject project, final String themeName,
+            boolean scssTheme, IProgressMonitor monitor) throws CoreException {
         try {
             // very short operations so if some skipped, handled by
             // monitor.done()
-            monitor.beginTask("Creating theme " + themeName, 4);
+            monitor.beginTask("Creating theme " + themeName, 5);
 
             String directory = VaadinPlugin.VAADIN_RESOURCE_DIRECTORY;
 
@@ -219,18 +221,42 @@ public class NewThemeWizard extends Wizard implements INewWizard {
             } else {
                 folder.create(true, false, new SubProgressMonitor(monitor, 1));
             }
-            file = folder.getFile(new Path("styles.css"));
-            try {
-                InputStream stream = openContentStream(VaadinPlugin.VAADIN_DEFAULT_THEME);
-                file.create(stream, true, new SubProgressMonitor(monitor, 1));
-                stream.close();
-            } catch (IOException e) {
+            if (scssTheme) {
+                IFile stylesFile = folder.getFile(new Path("styles.scss"));
+                IFile themeFile = folder.getFile(new Path(themeName + ".scss"));
+                try {
+                    String stylesContent = getScssStylesContent(themeName,
+                            VaadinPlugin.VAADIN_DEFAULT_THEME);
+                    InputStream stream = openStringStream(stylesContent);
+                    stylesFile.create(stream, true, new SubProgressMonitor(
+                            monitor, 1));
+                    stream.close();
+
+                    String themeContent = getScssThemeContent(themeName,
+                            VaadinPlugin.VAADIN_DEFAULT_THEME);
+                    stream = openStringStream(themeContent);
+                    themeFile.create(stream, true, new SubProgressMonitor(
+                            monitor, 1));
+                    stream.close();
+                } catch (IOException e) {
+                }
+                return new IFile[] { stylesFile, themeFile };
+            } else {
+                IFile file = folder.getFile(new Path("styles.css"));
+                String cssContent = getCssContent(themeName,
+                        VaadinPlugin.VAADIN_DEFAULT_THEME);
+                InputStream stream = openStringStream(cssContent);
+                try {
+                    file.create(stream, true,
+                            new SubProgressMonitor(monitor, 2));
+                    stream.close();
+                } catch (IOException e) {
+                }
+                return new IFile[] { file };
             }
         } finally {
             monitor.done();
         }
-
-        return file;
     }
 
     @SuppressWarnings("unchecked")
@@ -470,13 +496,50 @@ public class NewThemeWizard extends Wizard implements INewWizard {
         }
     }
 
+    private InputStream openStringStream(String contents) {
+        return new ByteArrayInputStream(contents.getBytes());
+    }
+
     /**
      * We will initialize file contents with a sample text.
      */
+    private String getCssContent(String themeName, String baseTheme) {
+        return "@import url(../" + baseTheme + "/styles.css);\n\n";
+    }
 
-    private InputStream openContentStream(String baseTheme) {
-        String contents = "@import url(../" + baseTheme + "/styles.css);\n\n";
-        return new ByteArrayInputStream(contents.getBytes());
+    /**
+     * We will initialize file contents with a sample text.
+     */
+    private String getScssStylesContent(String themeName, String baseTheme) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("@import \"" + themeName + ".scss\";\n\n");
+        sb.append("/* This file prefixes all rules with the theme name to avoid causing conflicts with other themes. */\n");
+        sb.append("/* The actual styles should be defined in " + themeName
+                + ".scss */\n");
+        sb.append("." + themeName + " {\n");
+        sb.append("  @include " + themeName + ";\n");
+        sb.append("}\n");
+        return sb.toString();
+    }
+
+    /**
+     * We will initialize file contents with a sample text.
+     */
+    private String getScssThemeContent(String themeName, String baseTheme) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("/* Import the " + baseTheme + " theme.*/\n");
+        sb.append("/* This only allows us to use the mixins defined in it and does not add any styles by itself. */\n");
+        sb.append("@import \"../" + baseTheme + "/" + baseTheme
+                + ".scss\";\n\n");
+        sb.append("/* This contains all of your theme.*/\n");
+        sb.append("/* If somebody wants to extend the theme she will include this mixin. */\n");
+        sb.append("@mixin " + themeName + " {\n");
+        sb.append("  /* Include all the styles from the " + baseTheme
+                + " theme */\n");
+        sb.append("  @include " + baseTheme + ";\n\n");
+        sb.append("  /* Insert your theme rules here */\n");
+        sb.append("}\n");
+        return sb.toString();
     }
 
     /**
