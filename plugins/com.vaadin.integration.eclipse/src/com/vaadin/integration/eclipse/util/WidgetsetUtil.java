@@ -142,9 +142,15 @@ public class WidgetsetUtil {
             String compilerClass = "com.vaadin.tools.WidgetsetCompiler";
             compilerArgs.add(compilerClass);
 
-            compilerArgs.add("-out");
-            IPath projectRelativePath = wsDir.getProjectRelativePath();
-            compilerArgs.add(projectRelativePath.toString());
+            if (jproject.findType(VaadinPlugin.GWT_OLD_COMPILER_CLASS) == null) {
+                compilerArgs.add("-war");
+                IPath projectRelativePath = wsDir.getProjectRelativePath();
+                compilerArgs.add(projectRelativePath.toString());
+            } else {
+                compilerArgs.add("-out");
+                IPath projectRelativePath = wsDir.getProjectRelativePath();
+                compilerArgs.add(projectRelativePath.toString());
+            }
 
             String style = preferences.getWidgetsetCompilationStyle();
             if ("DRAFT".equals(style)) {

@@ -38,6 +38,8 @@ public class VaadinPlugin extends AbstractUIPlugin {
 
     public static final String GWT_CODE_SERVER_CLASS = "com.google.gwt.dev.codeserver.CodeServer";
 
+    public static final String GWT_OLD_COMPILER_CLASS = "com.google.gwt.dev.GWTCompiler";
+
     private static VaadinPlugin instance = null;
 
     private NightlyBuildUpdater nightlyBuildUpdater;
