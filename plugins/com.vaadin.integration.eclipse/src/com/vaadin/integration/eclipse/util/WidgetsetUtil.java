@@ -1,6 +1,7 @@
 package com.vaadin.integration.eclipse.util;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,6 +17,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -123,16 +125,28 @@ public class WidgetsetUtil {
                                         + "(see Preferences => Java => Installed JREs).");
             }
 
+            boolean useNewGwtCompiler = jproject
+                    .findType(VaadinPlugin.GWT_OLD_COMPILER_CLASS) == null;
+
             // refresh only WebContent/VAADIN/widgetsets
             final IFolder wsDir = ProjectUtil.getWebContentFolder(project)
                     .getFolder(VaadinPlugin.VAADIN_RESOURCE_DIRECTORY)
                     .getFolder("widgetsets");
+
+            File tempDir = null;
+            File baseDir = new File(System.getProperty("java.io.tmpdir"));
+            tempDir = new File(baseDir, "widgetset_" + moduleName
+                    + UUID.randomUUID().toString());
 
             // refresh this requires that the directory exists
             VaadinPluginUtil.createFolders(wsDir, new SubProgressMonitor(
                     monitor, 1));
 
             ArrayList<String> args = buildCommonArgs(jproject, vmInstall);
+
+            if (useNewGwtCompiler) {
+                args.add("-Dgwt.persistentunitcachedir=" + tempDir);
+            }
 
             // TODO run com.vaadin.terminal.gwt.widgetsetutils.WidgetSetBuilder
             // and com.google.gwt.dev.Compiler separately and directly if Java
@@ -142,10 +156,22 @@ public class WidgetsetUtil {
             String compilerClass = "com.vaadin.tools.WidgetsetCompiler";
             compilerArgs.add(compilerClass);
 
-            if (jproject.findType(VaadinPlugin.GWT_OLD_COMPILER_CLASS) == null) {
+            if (useNewGwtCompiler) {
                 compilerArgs.add("-war");
                 IPath projectRelativePath = wsDir.getProjectRelativePath();
                 compilerArgs.add(projectRelativePath.toString());
+
+                if (!tempDir.mkdirs()) {
+                    throw ErrorUtil
+                            .newCoreException("Could not create temporary directory "
+                                    + tempDir);
+                }
+
+                compilerArgs.add("-deploy");
+                compilerArgs.add(tempDir.getAbsolutePath());
+
+                compilerArgs.add("-extra");
+                compilerArgs.add(tempDir.getAbsolutePath());
             } else {
                 compilerArgs.add("-out");
                 IPath projectRelativePath = wsDir.getProjectRelativePath();
@@ -285,6 +311,10 @@ public class WidgetsetUtil {
                 deployDir.refreshLocal(0, new SubProgressMonitor(monitor, 1));
                 deployDir.delete(true, null);
 
+                if (tempDir != null && tempDir.exists()) {
+                    deleteFolder(tempDir);
+                }
+
                 // Refresh the workspace so the new widgetset is visible
                 wsDir.refreshLocal(IResource.DEPTH_INFINITE,
                         new SubProgressMonitor(monitor, 1));
@@ -312,6 +342,21 @@ public class WidgetsetUtil {
             console.setCompilationProcess(null);
 
         }
+    }
+
+    public static void deleteFolder(File folder) {
+        File[] files = folder.listFiles();
+        // some JVMs return null for empty dirs
+        if (files != null) {
+            for (File f : files) {
+                if (f.isDirectory()) {
+                    deleteFolder(f);
+                } else {
+                    f.delete();
+                }
+            }
+        }
+        folder.delete();
     }
 
     private static ArrayList<String> buildCommonArgs(IJavaProject jproject,
