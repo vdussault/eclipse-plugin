@@ -162,12 +162,39 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
                 }
             }
 
+            updateTemplateCombo();
+
         } catch (CoreException e1) {
             ErrorUtil
                     .handleBackgroundException(
                             IStatus.WARNING,
                             "Failed to select the project in the New Widget wizard",
                             e1);
+        }
+    }
+
+    private void updateTemplateCombo() {
+        if (templateCombo != null) {
+            templateCombo.removeAll();
+            for (TEMPLATES template : TEMPLATES.values()) {
+                if (template.isSuitableFor(projectVersion)) {
+                    templateCombo.add(template.getTitle());
+                    templateCombo.setData(template.getTitle(), template);
+                }
+            }
+            templateCombo.addSelectionListener(new SelectionListener() {
+
+                public void widgetDefaultSelected(SelectionEvent e) {
+                    // NOP
+                }
+
+                public void widgetSelected(SelectionEvent e) {
+                    selectTemplate((TEMPLATES) templateCombo
+                            .getData(templateCombo.getText()));
+                }
+            });
+
+            templateCombo.select(0);
         }
     }
 
@@ -221,24 +248,6 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
         Label l = new Label(composite, SWT.NULL);
         l.setText("Template:");
         templateCombo = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
-        for (TEMPLATES template : TEMPLATES.values()) {
-            if (template.isSuitableFor(projectVersion)) {
-                templateCombo.add(template.getTitle());
-                templateCombo.setData(template.getTitle(), template);
-            }
-        }
-        templateCombo.select(0);
-        templateCombo.addSelectionListener(new SelectionListener() {
-
-            public void widgetDefaultSelected(SelectionEvent e) {
-                // NOP
-            }
-
-            public void widgetSelected(SelectionEvent e) {
-                selectTemplate((TEMPLATES) templateCombo.getData(templateCombo
-                        .getText()));
-            }
-        });
 
         DialogField.createEmptySpace(composite, columns - 2);
 
@@ -262,8 +271,7 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
             }
         });
 
-        selectTemplate((TEMPLATES) templateCombo.getData(templateCombo
-                .getText()));
+        updateTemplateCombo();
     }
 
     protected void selectTemplate(TEMPLATES template) {
