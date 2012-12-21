@@ -229,7 +229,7 @@ public class LocalFileManager {
     public static LocalVaadinVersion getNewestLocalVaadinVersion()
             throws CoreException {
         try {
-            List<LocalVaadinVersion> versions = getLocalVaadinVersions();
+            List<LocalVaadinVersion> versions = getLocalVaadinVersions(false);
             if (versions.size() > 0) {
                 return versions.get(0);
             } else {
@@ -250,11 +250,14 @@ public class LocalFileManager {
      * 
      * If no locally cached version is found, an empty List is returned.
      * 
+     * @param includeEarlyVaadin7
+     *            if true, single-JAR early Vaadin 7 alphas and betas are also
+     *            listed.
      * @return
      * @throws CoreException
      */
-    public static List<LocalVaadinVersion> getLocalVaadinVersions()
-            throws CoreException {
+    public static List<LocalVaadinVersion> getLocalVaadinVersions(
+            boolean includeEarlyVaadin7) throws CoreException {
         NumberFormatter nf = new NumberFormatter(new DecimalFormat("000"));
 
         // the key is only used internally for sorting
@@ -279,6 +282,9 @@ public class LocalFileManager {
                     if (m.matches()) {
                         try {
                             int major = Integer.parseInt(m.group(1));
+                            if (major > 6 && !includeEarlyVaadin7) {
+                                continue;
+                            }
                             int minor = Integer.parseInt(m.group(2));
                             // the third component may be other than an int
                             String revision = m.group(3);
@@ -343,7 +349,7 @@ public class LocalFileManager {
             // optimization - no need to get the list
             return null;
         }
-        List<LocalVaadinVersion> versions = getLocalVaadinVersions();
+        List<LocalVaadinVersion> versions = getLocalVaadinVersions(true);
         for (LocalVaadinVersion version : versions) {
             if (version.getVersionNumber().equals(versionString)) {
                 return version;

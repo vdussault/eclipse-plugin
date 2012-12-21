@@ -150,7 +150,8 @@ public class VaadinVersionComposite extends Composite {
                         .getAvailableVersions(!development);
                 // Equals and hasCode implementation in
                 // AbstractVaadinVersion enables us to do this
-                available.removeAll(LocalFileManager.getLocalVaadinVersions());
+                available.removeAll(LocalFileManager
+                        .getLocalVaadinVersions(true));
 
                 DownloadableVaadinVersion[] versions = available
                         .toArray(new DownloadableVaadinVersion[0]);
@@ -368,7 +369,7 @@ public class VaadinVersionComposite extends Composite {
                 }
             } else {
                 for (LocalVaadinVersion version : LocalFileManager
-                        .getLocalVaadinVersions()) {
+                        .getLocalVaadinVersions(false)) {
                     versionMap.put(version.getVersionNumber(), version);
                     versionCombo.add(version.getVersionNumber());
                 }

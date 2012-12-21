@@ -426,7 +426,7 @@ public class VaadinFacetInstallDataModelProvider extends
         }
         // other (already downloaded) versions
         for (LocalVaadinVersion version : LocalFileManager
-                .getLocalVaadinVersions()) {
+                .getLocalVaadinVersions(false)) {
             versions.add(version.getVersionNumber());
         }
         return versions;
