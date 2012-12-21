@@ -195,6 +195,8 @@ public class NewComponentWizardPage extends AbstractVaadinNewTypeWizardPage {
             });
 
             templateCombo.select(0);
+            selectTemplate((TEMPLATES) templateCombo.getData(templateCombo
+                    .getText()));
         }
     }
 
