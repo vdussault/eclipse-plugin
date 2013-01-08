@@ -62,6 +62,7 @@ import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 import org.osgi.framework.Bundle;
 
 import com.vaadin.integration.eclipse.VaadinPlugin;
+import com.vaadin.integration.eclipse.templates.v62.ApplicationTemplate;
 import com.vaadin.integration.eclipse.templates.v7.UITemplate;
 import com.vaadin.integration.eclipse.util.files.LocalFileManager;
 
@@ -190,21 +191,18 @@ public class VaadinPluginUtil {
 
     public static String createApplicationClassSource(String packageName,
             String applicationName, String applicationClass,
-            String vaadinPackagePrefix) {
-        // TODO should be converted to use a javajet template
-        String template = "package " + packageName + ";\n\n" + "import "
-                + vaadinPackagePrefix + "Application;\n" + "import "
-                + vaadinPackagePrefix + "ui.*;\n\n" + "public class "
-                + applicationClass + " extends Application {\n"
-                + "\t@Override\n" + "\tpublic void init() {\n"
-                + "\t\tWindow mainWindow = new Window(\"" + applicationName
-                + "\");\n"
-                + "\t\tLabel label = new Label(\"Hello Vaadin user\");\n"
-                + "\t\tmainWindow.addComponent(label);\n"
-                + "\t\tsetMainWindow(mainWindow);\n" + "\t}\n" + "\n" + "}\n";
-
-        return template;
-
+            String vaadinPackagePrefix) throws CoreException {
+        try {
+            ApplicationTemplate t = ApplicationTemplate.class.newInstance();
+            String src = t.generate(packageName, applicationName,
+                    applicationClass);
+            return src;
+        } catch (Exception e) {
+            ErrorUtil.handleBackgroundException(
+                    "Could not create Application class from template", e);
+            throw ErrorUtil.newCoreException(
+                    "Could not create Application class from template", e);
+        }
     }
 
     public static String createUiClassSource(String packageName,

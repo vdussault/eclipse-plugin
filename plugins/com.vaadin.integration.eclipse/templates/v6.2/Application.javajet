@@ -1,0 +1,24 @@
+<%@ jet class="ApplicationTemplate"
+		package="com.vaadin.integration.eclipse.templates.v62"
+		imports="com.vaadin.integration.eclipse.templates.*"
+		skeleton="../javaapplicationgenerator.skeleton" %>
+package <%= applicationPackage %>;
+
+import com.vaadin.Application;
+import com.vaadin.ui.*;
+
+/**
+ * Main application class.
+ */
+public class <%= uiOrApplicationClass %> extends Application {
+ 
+    @Override
+    public void init() {
+        Window mainWindow = new Window("<%= applicationName %>");
+        Label label = new Label("Hello Vaadin user");
+        mainWindow.addComponent(label);
+        setMainWindow(mainWindow);
+    }
+
+}
+
