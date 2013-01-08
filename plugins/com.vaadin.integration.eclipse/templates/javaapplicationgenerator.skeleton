@@ -1,0 +1,14 @@
+/*
+ * JET GENERATED do not edit!
+ * The source templates are in the templates folder (note: not package).
+ *
+ * The JET source templates can be edited. They are then transformed into java
+ * template classes by the JET plugin. To use the generated java templates, no 
+ * dependencies are required.
+ */
+public class CLASS {   
+    public String generate(String applicationPackage, String applicationName,
+        String uiOrApplicationClass) {
+        return "";
+    }
+}

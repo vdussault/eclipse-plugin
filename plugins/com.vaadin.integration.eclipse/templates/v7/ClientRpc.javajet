@@ -1,7 +1,7 @@
 <%@ jet class="ClientRpcTemplate"
 		package="com.vaadin.integration.eclipse.templates.v7"
 		imports="com.vaadin.integration.eclipse.templates.*"
-		skeleton="../javagenerator.skeleton" %>
+		skeleton="../javacomponentgenerator.skeleton" %>
 <% typeName = componentName + "ClientRpc"; %>
 <% target =  widgetsetPackage + ".client." + componentName.toLowerCase(); %>
 <% fileName = typeName + ".java"; %>

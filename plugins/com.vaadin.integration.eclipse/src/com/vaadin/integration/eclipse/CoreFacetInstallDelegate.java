@@ -204,7 +204,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
                     // application
                     String uiCode = VaadinPluginUtil.createUiClassSource(
                             applicationPackage, applicationName,
-                            applicationClass, vaadinPackagePrefix);
+                            applicationClass);
 
                     /* Create the application class if it does not exist */
                     appPackage.createCompilationUnit(applicationFileName,
@@ -308,8 +308,10 @@ public class CoreFacetInstallDelegate implements IDelegate,
             }
             monitor.worked(1);
         } catch (Exception e) {
-            throw ErrorUtil.newCoreException(
-                    "Vaadin libraries installation failed", e);
+            throw ErrorUtil
+                    .newCoreException(
+                            "Vaadin libraries installation or project template creation failed",
+                            e);
         } finally {
             monitor.done();
         }

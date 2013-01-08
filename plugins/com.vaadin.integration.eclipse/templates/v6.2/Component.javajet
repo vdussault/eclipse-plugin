@@ -1,7 +1,7 @@
 <%@ jet class="ComponentTemplate"
 		package="com.vaadin.integration.eclipse.templates.v62"
 		imports="com.vaadin.integration.eclipse.templates.*"
-		skeleton="../javagenerator.skeleton" %>
+		skeleton="../javacomponentgenerator.skeleton" %>
 <% typeName = componentName; %>
 <% target =  componentPackage; %>
 <% fileName = typeName + ".java"; %>
