@@ -28,6 +28,7 @@ permissions and limitations under the License.
 
    <url>
       <update label="Vaadin Update Site" url="http://vaadin.com/eclipse/"/>
+      <discovery label="IvyDE" url="http://www.apache.org/dist/ant/ivyde/updatesite"/>
    </url>
 
    <requires>
