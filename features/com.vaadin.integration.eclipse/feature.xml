@@ -30,12 +30,6 @@ permissions and limitations under the License.
       <update label="Vaadin Update Site" url="http://vaadin.com/eclipse/"/>
    </url>
 
-   <includes
-         id="org.apache.ivyde.feature"
-         version="0.0.0"
-         name="IvyDE"
-         search-location="self"/>
-
    <requires>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.wst.common.project.facet.core"/>
