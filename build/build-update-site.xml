@@ -16,16 +16,24 @@
 	<fail unless="checkout.dir.ok" message="Checkout dir '${checkout.dir} does not exist" />
 	
 	<target name="create-update-site">
-		 <java jar="${eclipse.home}/plugins/${launcher}" failonerror="yes" fork="yes" maxmemory="512m">
-                        <arg value="-application" />
-                        <arg value="org.eclipse.equinox.p2.publisher.FeaturesAndBundlesPublisher" />
-                        <arg value="-metadataRepository" />
-                        <arg value="file:${update-site.dir}" />
-                        <arg value="-artifactRepository" />
-                        <arg value="file:${update-site.dir}" />
-                        <arg value="-source" />
-                        <arg value="${checkout.dir}" />
+		<java jar="${eclipse.home}/plugins/${launcher}" failonerror="yes" fork="yes" maxmemory="512m">
+			<arg value="-application" />
+			<arg value="org.eclipse.equinox.p2.publisher.FeaturesAndBundlesPublisher" />
+			<arg value="-metadataRepository" />
+			<arg value="file:${update-site.dir}" />
+			<arg value="-artifactRepository" />
+			<arg value="file:${update-site.dir}" />
+			<arg value="-source" />
+			<arg value="${checkout.dir}" />
 			<arg value="-publishArtifacts" />
+		</java>
+		<java jar="${eclipse.home}/plugins/${launcher}" failonerror="yes" fork="yes" maxmemory="512m">
+			<arg value="-application" />
+			<arg value="org.eclipse.equinox.p2.publisher.CategoryPublisher" />
+			<arg value="-metadataRepository" />
+			<arg value="file:${update-site.dir}" />
+			<arg value="-categoryDefinition" />
+			<arg value="file:${update-site.dir}/category.xml" />
 		</java>
 		<copy file="associateSites.xml" todir="${update-site.dir}"/>
 	</target>
