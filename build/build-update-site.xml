@@ -27,25 +27,10 @@
                         <arg value="${checkout.dir}" />
 			<arg value="-publishArtifacts" />
 		</java>
-	</target>
-
-	<target name="site.xml" > <!--depends="create-update-site">-->
-		<javac source="1.5" target="1.5" destdir="." encoding="UTF-8" debug="true">
-			<src path="."/>
-			<include name="CreateSiteXml.java"/>
-		</javac>
-		<java classname="CreateSiteXml" failonerror="yes" fork="no" output="${update-site.dir}/site.xml">
-			<classpath>
-				<pathelement location="." />
-			</classpath>
-			<arg value="site.xml.tpl"/>
-			<arg value="${update-site.dir}/features"/>
-		</java>
-		<!-- copy also the associate sites file -->
 		<copy file="associateSites.xml" todir="${update-site.dir}"/>
 	</target>
 
-	<target name="publish-nightly" depends="create-update-site,site.xml, nightly-teamcity-publish">
+	<target name="publish-nightly" depends="create-update-site,nightly-teamcity-publish">
 		<fail unless="nightly.publish" message="The nightly.publish property must be defined." />
 		<echo>Publish target: ${nightly.publish}</echo>
 		<!-- Publish to the update site. -->
@@ -61,7 +46,8 @@
 		<exec executable="scp" searchpath="true" resultproperty="nightly.install.scp.result">
 			<arg value="-B" />
 			<arg value="-r" />
-			<arg value="${update-site.dir}/site.xml" />
+			<arg value="${update-site.dir}/content.xml" />
+			<arg value="${update-site.dir}/artifacts.xml" />
 			<arg value="${update-site.dir}/associateSites.xml" />
 			<arg value="${update-site.dir}/features" />
 			<arg value="${update-site.dir}/plugins" />
