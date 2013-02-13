@@ -74,8 +74,6 @@ public abstract class VaadinProjectWizard extends WebProjectWizard {
 
     @Override
     protected void postPerformFinish() throws InvocationTargetException {
-        super.postPerformFinish();
-
         // Ivy resolving might take a while the first time, info about this.
         // Popup can be (globally) disabled by the user.
 
@@ -104,10 +102,10 @@ public abstract class VaadinProjectWizard extends WebProjectWizard {
                 try {
                     prefs.flush();
                 } catch (BackingStoreException e) {
-                    // TODO report this in some better way?
-                    e.printStackTrace();
+                    ErrorUtil.handleBackgroundException(e);
                 }
             }
         }
+        super.postPerformFinish();
     }
 }
