@@ -23,6 +23,19 @@ public class PreferenceUtil {
         return new PreferenceUtil(project);
     }
 
+    /*
+     * "Global" pref keys, referenced from elsewhere. (Project scoped keys
+     * follow later.)
+     */
+
+    // true when Ivy resolving info popup is disabled
+    public static final String PREFERENCES_IVYINFO_DISABLED = VaadinPlugin.PLUGIN_ID
+            + "." + "IvyInformationDisabled";
+
+    /*
+     * Project scoped keys
+     */
+
     // "true"/"false"/missing - if missing, check if >1 widgetset exists
     private static final String PREFERENCES_WIDGETSET_DIRTY = VaadinPlugin.PLUGIN_ID
             + "." + "widgetsetDirty";

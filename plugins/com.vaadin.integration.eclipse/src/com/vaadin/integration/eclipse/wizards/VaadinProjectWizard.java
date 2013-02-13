@@ -1,5 +1,10 @@
 package com.vaadin.integration.eclipse.wizards;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jst.servlet.ui.project.facet.WebProjectWizard;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
@@ -7,10 +12,13 @@ import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IFacetedProjectWorkingCopy;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
+import org.osgi.service.prefs.BackingStoreException;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
+import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.configuration.VaadinProjectCreationDataModelProvider;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
+import com.vaadin.integration.eclipse.util.PreferenceUtil;
 
 /**
  * Vaadin top level project creation wizard.
@@ -64,4 +72,42 @@ public abstract class VaadinProjectWizard extends WebProjectWizard {
 
     protected abstract String getDefaultPreset();
 
+    @Override
+    protected void postPerformFinish() throws InvocationTargetException {
+        super.postPerformFinish();
+
+        // Ivy resolving might take a while the first time, info about this.
+        // Popup can be (globally) disabled by the user.
+
+        // InstanceScope = separate for each workspace.
+        // (ConfigurationScope would be shared between workspaces)
+        IEclipsePreferences prefs = InstanceScope.INSTANCE
+                .getNode(VaadinPlugin.PLUGIN_ID);
+        if (!prefs.getBoolean(PreferenceUtil.PREFERENCES_IVYINFO_DISABLED,
+                false)) {
+            // MDWT should be able to save prefs, but this did not seem to work,
+            // so we do it 'manually'.
+            MessageDialogWithToggle d = MessageDialogWithToggle
+                    .openInformation(
+                            getShell(),
+                            "Resolving dependencies",
+                            "Vaadin jars and dependencies are automatically resolved and downloaded."
+                                    + "\n\nIf the selected version is not already on your system, "
+                                    + "this process might take several minutes."
+                                    + " During this time your project will not compile."
+                                    + "\n\nYou can follow the progress in the status bar (IvyDE resolve).",
+                            "Don't show this message again", false, null, null);
+
+            if (d.getToggleState()) {
+                prefs.putBoolean(PreferenceUtil.PREFERENCES_IVYINFO_DISABLED,
+                        true);
+                try {
+                    prefs.flush();
+                } catch (BackingStoreException e) {
+                    // TODO report this in some better way?
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 }
