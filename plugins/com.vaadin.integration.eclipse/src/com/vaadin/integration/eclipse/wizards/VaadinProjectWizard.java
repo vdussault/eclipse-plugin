@@ -79,7 +79,7 @@ public abstract class VaadinProjectWizard extends WebProjectWizard {
 
         // InstanceScope = separate for each workspace.
         // (ConfigurationScope would be shared between workspaces)
-        IEclipsePreferences prefs = InstanceScope.INSTANCE
+        IEclipsePreferences prefs = new InstanceScope()
                 .getNode(VaadinPlugin.PLUGIN_ID);
         if (!prefs.getBoolean(PreferenceUtil.PREFERENCES_IVYINFO_DISABLED,
                 false)) {
