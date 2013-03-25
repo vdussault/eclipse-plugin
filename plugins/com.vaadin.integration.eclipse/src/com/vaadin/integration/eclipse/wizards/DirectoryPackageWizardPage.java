@@ -52,6 +52,7 @@ public class DirectoryPackageWizardPage extends
     private Text implementationTitleText;
     private Text implementationVersionText;
     private Text widgetsetsText;
+    private Text stylesheetsText;
 
     private IStructuredSelection initialSelection;
 
@@ -221,8 +222,22 @@ public class DirectoryPackageWizardPage extends
         widgetsetsText.setLayoutData(gdhfill());
         widgetsetsText.addListener(SWT.Modify, this);
 
+
         label = new Label(manifestGroup, SWT.NONE);
         label.setText("    Comma separated list of widgetsets included in the add-on. Refers to the GWT xml files (.gwt.xml).");
+        gd = new GridData(SWT.LEFT, SWT.TOP, true, false);
+        gd.horizontalSpan = 2;
+        label.setLayoutData(gd);
+
+        label = new Label(manifestGroup, SWT.NONE);
+        label.setText("Stylesheets:");
+
+        stylesheetsText = new Text(manifestGroup, SWT.BORDER);
+        stylesheetsText.setLayoutData(gdhfill());
+        stylesheetsText.addListener(SWT.Modify, this);
+
+        label = new Label(manifestGroup, SWT.NONE);
+        label.setText("    Comma separated list of stylesheets included in the add-on. (e.g. my-theme/my-mixin.scss)");
         gd = new GridData(SWT.LEFT, SWT.TOP, true, false);
         gd.horizontalSpan = 2;
         label.setLayoutData(gd);
@@ -242,6 +257,7 @@ public class DirectoryPackageWizardPage extends
         directoryPackage.setImplementationVersion(implementationVersionText
                 .getText());
         directoryPackage.setWidgetsets(widgetsetsText.getText());
+        directoryPackage.setStylesheets(stylesheetsText.getText());
 
         super.updateModel();
 
@@ -269,6 +285,9 @@ public class DirectoryPackageWizardPage extends
                         : "");
         String widgetsets = directoryPackage.getWidgetsets();
         widgetsetsText.setText(widgetsets != null ? widgetsets : "");
+
+        String stylesheets = directoryPackage.getStylesheets();
+        stylesheetsText.setText(stylesheets != null ? stylesheets : "");
     }
 
     /**

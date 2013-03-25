@@ -23,6 +23,7 @@ public class DirectoryManifestProvider extends ManifestProvider {
     public static final String MANIFEST_IMPLEMENTATION_VERSION = "Implementation-Version";
 
     public static final String MANIFEST_VAADIN_WIDGETSETS = "Vaadin-Widgetsets";
+    public static final String MANIFEST_VAADIN_STYLESHEETS = "Vaadin-Stylesheets";
 
     /**
      * Load and update an existing manifest or generate one if none exists.
@@ -57,6 +58,15 @@ public class DirectoryManifestProvider extends ManifestProvider {
                 attributes.remove(new Attributes.Name(
                         MANIFEST_VAADIN_WIDGETSETS));
             }
+
+            if (directoryPackage.getStylesheets() != null
+                    && !"".equals(directoryPackage.getStylesheets().trim())) {
+                attributes.putValue(MANIFEST_VAADIN_STYLESHEETS,
+                        directoryPackage.getStylesheets());
+            } else {
+                attributes.remove(new Attributes.Name(
+                        MANIFEST_VAADIN_STYLESHEETS));
+            }
         }
         return manifest;
     }
@@ -84,6 +94,8 @@ public class DirectoryManifestProvider extends ManifestProvider {
                     .getValue(MANIFEST_IMPLEMENTATION_VERSION));
             directoryPackage.setWidgetsets(attributes
                     .getValue(MANIFEST_VAADIN_WIDGETSETS));
+            directoryPackage.setStylesheets(attributes
+                    .getValue(MANIFEST_VAADIN_STYLESHEETS));
         } finally {
             if (stream != null) {
                 stream.close();

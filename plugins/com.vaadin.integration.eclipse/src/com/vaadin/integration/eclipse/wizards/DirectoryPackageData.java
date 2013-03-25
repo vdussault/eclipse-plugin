@@ -12,6 +12,7 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 import org.eclipse.swt.widgets.Shell;
 
 import com.vaadin.integration.eclipse.util.ProjectUtil;
+import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 
 /**
@@ -26,7 +27,9 @@ public class DirectoryPackageData extends JarPackageData {
     private String implementationVersion;
 
     // TODO Vaadin widgetsets for the addon - better typing?
-    private String widgetsets;
+    private String widgetsets;    
+    private String stylesheets;
+    
     /**
      * Project relative path to the webcontent directory, to be skipped as a
      * prefix when exporting JARs.
@@ -98,6 +101,10 @@ public class DirectoryPackageData extends JarPackageData {
         if (getWidgetsets() == null) {
             setWidgetsets(WidgetsetUtil.findWidgetSetsString(jproject, null));
         }
+
+        if (getStylesheets() == null) {
+            setStylesheets(VaadinPluginUtil.findStylesheetsString(jproject));
+        }
     }
 
     @Override
@@ -141,4 +148,11 @@ public class DirectoryPackageData extends JarPackageData {
         return widgetsets;
     }
 
+    public String getStylesheets() {
+        return stylesheets;
+    }
+
+    public void setStylesheets(String stylesheets) {
+        this.stylesheets = stylesheets;
+    }
 }

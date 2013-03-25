@@ -1357,4 +1357,33 @@ public class VaadinPluginUtil {
         ensureFileFromTemplate(projectLocation, locationInTemplate,
                 substitutions);
     }
+
+    public static String findStylesheetsString(IJavaProject jProject)
+            throws CoreException {
+
+        IFolder themesDir = ProjectUtil
+                .getWebContentFolder(jProject.getProject())
+                .getFolder(VaadinPlugin.VAADIN_RESOURCE_DIRECTORY)
+                .getFolder("themes");
+
+        StringBuilder stylesheets = new StringBuilder();
+        for (IResource theme : themesDir.members()) {
+            if (theme instanceof IFolder) {
+                IFolder themeFolder = (IFolder) theme;
+                for (IResource file : themeFolder.members()) {
+                    if (file.getFileExtension().toLowerCase().equals("scss")
+                            || file.getFileExtension().toLowerCase()
+                                    .equals("css")) {
+                        if (stylesheets.length() > 0) {
+                            stylesheets.append(",");
+                        }
+                        stylesheets.append(themeFolder.getName() + "/"
+                                + file.getName());
+                    }
+                }
+            }
+        }
+
+        return stylesheets.toString();
+    }
 }
