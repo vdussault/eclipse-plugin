@@ -565,14 +565,6 @@ public class NewThemeWizard extends Wizard implements INewWizard {
         return sb.toString();
     }
 
-    private String getScssAddonsContent(String themeName, String baseTheme) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("Dummy file");
-
-        return sb.toString();
-    }
-
     /**
      * We will accept the selection in the workbench to see if we can initialize
      * from it.
