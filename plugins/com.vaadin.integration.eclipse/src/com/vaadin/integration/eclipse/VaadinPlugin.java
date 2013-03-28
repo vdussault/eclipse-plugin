@@ -26,6 +26,8 @@ public class VaadinPlugin extends AbstractUIPlugin {
     public static final String THEME_ANNOTATION_FULL_NAME = VAADIN_ANNOTATIONS_PACKAGE_PREFIX
             + THEME_ANNOTATION_NAME;
 
+    public static final String THEME_ADDON_IMPORTS = "addons.scss";
+
     public static final String ID_COMPILE_WS_APP = "compilews";
 
     public static final String VAADIN_CLIENT_SIDE_CLASS_PREFIX = "V";
@@ -39,6 +41,8 @@ public class VaadinPlugin extends AbstractUIPlugin {
     public static final String GWT_CODE_SERVER_CLASS = "com.google.gwt.dev.codeserver.CodeServer";
 
     public static final String GWT_OLD_COMPILER_CLASS = "com.google.gwt.dev.GWTCompiler";
+
+    public static final String ADDON_IMPORTER_CLASS = "com.vaadin.server.themeutils.SASSAddonImportFileCreator";
 
     private static VaadinPlugin instance = null;
 

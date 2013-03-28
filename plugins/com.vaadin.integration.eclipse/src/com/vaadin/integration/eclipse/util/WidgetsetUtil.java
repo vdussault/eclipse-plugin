@@ -359,7 +359,7 @@ public class WidgetsetUtil {
         folder.delete();
     }
 
-    private static ArrayList<String> buildCommonArgs(IJavaProject jproject,
+    public static ArrayList<String> buildCommonArgs(IJavaProject jproject,
             IVMInstall vmInstall) throws CoreException, JavaModelException {
         ArrayList<String> args = new ArrayList<String>();
 
