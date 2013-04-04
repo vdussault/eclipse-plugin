@@ -1,7 +1,6 @@
 package com.vaadin.integration.eclipse.builder;
 
 import java.io.IOException;
-import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IFolder;
@@ -78,9 +77,6 @@ public class AddonStylesImporter {
         b.directory(projectLocation.toFile());
 
         monitor.beginTask("Creating addons.scss", 1);
-
-        b.redirectOutput(Redirect.PIPE);
-        b.redirectError(Redirect.PIPE);
 
         final Process exec = b.start();
 
