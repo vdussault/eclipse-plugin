@@ -90,16 +90,19 @@ public class VaadinFacetInstallDataModelProvider extends
             return null;
         }
         String projectName = projectNameObject.toString();
-        if (!Character.isJavaIdentifierStart(projectName.charAt(0))) {
-            // uh-oh, replace first character
-            projectName = "X" + projectName.substring(1).toLowerCase();
-        } else {
-            // uppercase first character
-            projectName = projectName.substring(0, 1).toUpperCase()
-                    + projectName.substring(1).toLowerCase();
+        if (projectName.length() > 0) {
+            if (!Character.isJavaIdentifierStart(projectName.charAt(0))) {
+                // uh-oh, replace first character
+                projectName = "X" + projectName.substring(1).toLowerCase();
+            } else {
+                // uppercase first character
+                projectName = projectName.substring(0, 1).toUpperCase()
+                        + projectName.substring(1).toLowerCase();
+            }
+            // let's normalize a little
+            projectName = projectName.replaceAll("[^A-Za-z_0-9]", "_");
         }
-        // let's normalize a little
-        projectName = projectName.replaceAll("[^A-Za-z_0-9]", "_");
+
         return projectName;
     }
 
