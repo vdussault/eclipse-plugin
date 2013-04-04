@@ -195,7 +195,7 @@ public class VaadinPluginUtil {
         try {
             ApplicationTemplate t = ApplicationTemplate.class.newInstance();
             String src = t.generate(packageName, applicationName,
-                    applicationClass);
+                    applicationClass, null);
             return src;
         } catch (Exception e) {
             ErrorUtil.handleBackgroundException(
@@ -206,10 +206,12 @@ public class VaadinPluginUtil {
     }
 
     public static String createUiClassSource(String packageName,
-            String applicationName, String uiClass) throws CoreException {
+            String applicationName, String uiClass, String uiTheme)
+            throws CoreException {
         try {
             UITemplate t = UITemplate.class.newInstance();
-            String src = t.generate(packageName, applicationName, uiClass);
+            String src = t.generate(packageName, applicationName, uiClass,
+                    uiTheme);
             return src;
         } catch (Exception e) {
             ErrorUtil.handleBackgroundException(

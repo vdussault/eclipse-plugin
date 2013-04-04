@@ -4,6 +4,9 @@
 		skeleton="../javaapplicationgenerator.skeleton" %>
 package <%= applicationPackage %>;
 
+<% if(uiTheme != null) {%>
+import com.vaadin.annotations.Theme;
+<% } %>
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -15,6 +18,9 @@ import com.vaadin.ui.VerticalLayout;
  * Main UI class
  */
 @SuppressWarnings("serial")
+<% if(uiTheme != null) {%>
+@Theme("<%= uiTheme %>")
+<% } %>
 public class <%= uiOrApplicationClass %> extends UI {
 
 	@Override

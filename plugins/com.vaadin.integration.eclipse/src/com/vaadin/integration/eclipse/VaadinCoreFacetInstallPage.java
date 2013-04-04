@@ -36,6 +36,7 @@ public class VaadinCoreFacetInstallPage extends J2EEModuleFacetInstallPage
     private Text applicationNameField;
     private Text applicationClassField;
     private Text applicationPackageField;
+    private Text applicationThemeField;
     private Combo applicationCreatePortletCombo;
     private Text portletTitleField;
 
@@ -48,7 +49,7 @@ public class VaadinCoreFacetInstallPage extends J2EEModuleFacetInstallPage
     @Override
     protected String[] getValidationPropertyNames() {
         return new String[] { APPLICATION_NAME, APPLICATION_PACKAGE,
-                APPLICATION_CLASS };
+                APPLICATION_CLASS, APPLICATION_THEME };
     }
 
     @Override
@@ -119,6 +120,15 @@ public class VaadinCoreFacetInstallPage extends J2EEModuleFacetInstallPage
         applicationClassField = new Text(applicationGroup, SWT.BORDER);
         applicationClassField.setLayoutData(gdhfill());
         synchHelper.synchText(applicationClassField, APPLICATION_CLASS,
+                new Control[] { label });
+
+        label = new Label(applicationGroup, SWT.NONE);
+        label.setLayoutData(gdhfill());
+        label.setText("Theme name:");
+
+        applicationThemeField = new Text(applicationGroup, SWT.BORDER);
+        applicationThemeField.setLayoutData(gdhfill());
+        synchHelper.synchText(applicationThemeField, APPLICATION_THEME,
                 new Control[] { label });
     }
 

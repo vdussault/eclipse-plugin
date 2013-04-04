@@ -75,6 +75,7 @@ public class VaadinFacetInstallDataModelProvider extends
         names.add(APPLICATION_NAME);
         names.add(APPLICATION_PACKAGE);
         names.add(APPLICATION_CLASS);
+        names.add(APPLICATION_THEME);
         names.add(CREATE_ARTIFACTS);
         names.add(PORTLET_VERSION);
         names.add(PORTLET_TITLE);
@@ -136,6 +137,13 @@ public class VaadinFacetInstallDataModelProvider extends
             } else {
                 return projectName + suffix;
             }
+        } else if (propertyName.equals(APPLICATION_THEME)) {
+            String projectName = getProjectName();
+            if (projectName == null) {
+                return DEFAULT_APPLICATION_NAME.toLowerCase();
+            }
+            return projectName.toLowerCase();
+
         } else if (propertyName.equals(CREATE_ARTIFACTS)) {
             // by default, do not create artifacts if the configuration page is
             // not shown (e.g. when importing a project from version control or
@@ -229,6 +237,7 @@ public class VaadinFacetInstallDataModelProvider extends
             resetProperty(APPLICATION_NAME);
             resetProperty(APPLICATION_PACKAGE);
             resetProperty(APPLICATION_CLASS);
+            resetProperty(APPLICATION_THEME);
             resetProperty(PORTLET_TITLE);
         }
         // notify of valid values change
@@ -460,6 +469,8 @@ public class VaadinFacetInstallDataModelProvider extends
             return validatePackageName(getStringProperty(APPLICATION_PACKAGE));
         } else if (name.equals(APPLICATION_CLASS)) {
             return validateTypeName(getStringProperty(APPLICATION_CLASS));
+        } else if (name.equals(APPLICATION_THEME)) {
+            return validateThemeName(getStringProperty(APPLICATION_THEME));
         }
         return super.validate(name);
     }
@@ -508,6 +519,15 @@ public class VaadinFacetInstallDataModelProvider extends
             return J2EEPlugin.newErrorStatus("Invalid application class name",
                     null);
         }
+    }
+
+    private IStatus validateThemeName(String themeName) {
+        if (themeName == null || themeName.equals("")) {
+            return J2EEPlugin
+                    .newErrorStatus("Theme name cannot be empty", null);
+        }
+
+        return OK_STATUS;
     }
 
 }

@@ -11,6 +11,7 @@ public interface IVaadinFacetInstallDataModelProperties extends
     public static final String APPLICATION_NAME = "IVaadinFacetInstallDataModelProperties.APPLICATION_NAME"; //$NON-NLS-1$
     public static final String APPLICATION_PACKAGE = "IVaadinFacetInstallDataModelProperties.APPLICATION_PACKAGE"; //$NON-NLS-1$
     public static final String APPLICATION_CLASS = "IVaadinFacetInstallDataModelProperties.APPLICATION_CLASS"; //$NON-NLS-1$
+    public static final String APPLICATION_THEME = "IVaadinFacetInstallDataModelProperties.APPLICATION_THEME"; //$NON-NLS-1$
 
     public static final String CREATE_ARTIFACTS = "IVaadinFacetInstallDataModelProperties.CREATE_ARTIFACTS"; //$NON-NLS-1$
 

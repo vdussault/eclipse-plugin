@@ -28,7 +28,7 @@ public class ApplicationTemplate {
   protected final String TEXT_5 = NL;
 
     public String generate(String applicationPackage, String applicationName,
-        String uiOrApplicationClass)
+        String uiOrApplicationClass, String uiTheme)
   {
     final StringBuffer stringBuffer = new StringBuffer();
     stringBuffer.append(TEXT_1);

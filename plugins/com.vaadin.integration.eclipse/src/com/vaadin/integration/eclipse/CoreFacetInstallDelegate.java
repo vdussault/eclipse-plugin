@@ -33,6 +33,7 @@ import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
+import com.vaadin.integration.eclipse.builder.AddonStylesBuilder;
 import com.vaadin.integration.eclipse.builder.WidgetsetNature;
 import com.vaadin.integration.eclipse.configuration.VaadinFacetInstallDataModelProvider;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
@@ -41,6 +42,7 @@ import com.vaadin.integration.eclipse.util.PortletConfigurationUtil;
 import com.vaadin.integration.eclipse.util.PreferenceUtil;
 import com.vaadin.integration.eclipse.util.ProjectDependencyManager;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
+import com.vaadin.integration.eclipse.util.ThemesUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.util.VersionUtil;
 import com.vaadin.integration.eclipse.util.WebXmlUtil;
@@ -175,6 +177,8 @@ public class CoreFacetInstallDelegate implements IDelegate,
                         .getStringProperty(APPLICATION_PACKAGE);
                 String applicationName = model
                         .getStringProperty(APPLICATION_NAME);
+                String applicationTheme = model
+                        .getStringProperty(APPLICATION_THEME);
 
                 // this is only used when "create portlet" is selected
                 // TODO better alternative? must be different from application
@@ -205,7 +209,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
                     // application
                     String uiCode = VaadinPluginUtil.createUiClassSource(
                             applicationPackage, applicationName,
-                            applicationClass);
+                            applicationClass, applicationTheme);
 
                     /* Create the application class if it does not exist */
                     appPackage.createCompilationUnit(applicationFileName,
@@ -220,6 +224,10 @@ public class CoreFacetInstallDelegate implements IDelegate,
                         portletClassName = vaadinPackagePrefix
                                 + WebXmlUtil.VAADIN7_PORTLET2_CLASS;
                     }
+
+                    /* Create theme */
+                    ThemesUtil.createTheme(jProject, applicationTheme, true,
+                            new SubProgressMonitor(monitor, 1));
 
                     if (vaadinVersion instanceof MavenVaadinVersion) {
                         setupIvy(jProject, (MavenVaadinVersion) vaadinVersion,
@@ -306,6 +314,8 @@ public class CoreFacetInstallDelegate implements IDelegate,
                         && WidgetsetUtil.isWidgetsetManagedByPlugin(project)) {
                     WidgetsetNature.addWidgetsetNature(project);
                 }
+
+                AddonStylesBuilder.addBuilder(project);
             }
             monitor.worked(1);
         } catch (Exception e) {
@@ -402,6 +412,8 @@ public class CoreFacetInstallDelegate implements IDelegate,
             if (nature == null) {
                 WidgetsetNature.addWidgetsetNature(p);
             }
+
+            AddonStylesBuilder.addBuilder(p);
 
             ivycp.launchResolve(false, null);
         } catch (JavaModelException e) {

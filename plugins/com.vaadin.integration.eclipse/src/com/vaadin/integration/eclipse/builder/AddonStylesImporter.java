@@ -9,6 +9,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IVMInstall;
 
 import com.vaadin.integration.eclipse.VaadinPlugin;
@@ -25,7 +26,9 @@ public class AddonStylesImporter {
      * @return
      *          Returns true if project supports the addon importer
      */
-    public static boolean supported(IJavaProject jproject) {
+    public static boolean supported(IProject project) {
+
+        IJavaProject jproject = JavaCore.create(project);
 
         try {
             IVMInstall vmInstall = VaadinPluginUtil.getJvmInstall(jproject,
@@ -49,11 +52,11 @@ public class AddonStylesImporter {
         return false;
     }
 
-    public static void run(IJavaProject jproject,
+    public static void run(IProject project,
             final IProgressMonitor monitor, IFolder targetDir)
             throws CoreException, IOException {
 
-        IProject project = jproject.getProject();
+        IJavaProject jproject = JavaCore.create(project);
 
         IVMInstall vmInstall = VaadinPluginUtil.getJvmInstall(jproject, true);
 

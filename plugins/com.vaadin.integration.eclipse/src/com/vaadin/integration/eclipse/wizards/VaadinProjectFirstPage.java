@@ -155,6 +155,7 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
         arrayList.add(APPLICATION_NAME);
         arrayList.add(APPLICATION_PACKAGE);
         arrayList.add(APPLICATION_CLASS);
+        arrayList.add(APPLICATION_THEME);
         arrayList.add(VAADIN_PROJECT_TYPE);
         arrayList.add(IWebFacetInstallDataModelProperties.CONTEXT_ROOT);
         // validating this leads to strange behavior for Finish button
