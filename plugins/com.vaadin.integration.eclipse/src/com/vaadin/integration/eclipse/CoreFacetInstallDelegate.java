@@ -33,7 +33,6 @@ import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
-import com.vaadin.integration.eclipse.builder.AddonStylesBuilder;
 import com.vaadin.integration.eclipse.builder.WidgetsetNature;
 import com.vaadin.integration.eclipse.configuration.VaadinFacetInstallDataModelProvider;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
@@ -315,7 +314,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
                     WidgetsetNature.addWidgetsetNature(project);
                 }
 
-                AddonStylesBuilder.addBuilder(project);
+                // AddonStylesBuilder.addBuilder(project);
             }
             monitor.worked(1);
         } catch (Exception e) {
@@ -413,7 +412,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
                 WidgetsetNature.addWidgetsetNature(p);
             }
 
-            AddonStylesBuilder.addBuilder(p);
+            // AddonStylesBuilder.addBuilder(p);
 
             ivycp.launchResolve(false, null);
         } catch (JavaModelException e) {
