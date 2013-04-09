@@ -15,7 +15,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 
 import com.vaadin.integration.eclipse.VaadinPlugin;
-import com.vaadin.integration.eclipse.builder.AddonStylesImporter;
 
 public class ThemesUtil {
 
@@ -29,8 +28,10 @@ public class ThemesUtil {
      * @return
      * @throws CoreException
      */
-    public static IFile[] createTheme(IJavaProject jproject, final String themeName,
-            boolean scssTheme, IProgressMonitor monitor) throws CoreException {
+    public static IFile[] createTheme(IJavaProject jproject,
+            final String themeName, boolean scssTheme,
+            IProgressMonitor monitor, boolean addonStylesSupported)
+            throws CoreException {
 
         IProject project = jproject.getProject();
 
@@ -44,27 +45,34 @@ public class ThemesUtil {
             IFolder folder = ProjectUtil.getWebContentFolder(project)
                     .getFolder(directory);
             if (!folder.exists()) {
-                folder.create(true, false, new SubProgressMonitor(monitor, 1));
+                folder.create(true, true, new SubProgressMonitor(monitor, 1));
+                folder.refreshLocal(IResource.DEPTH_INFINITE,
+                        new SubProgressMonitor(monitor, 1));
             }
             folder = ProjectUtil.getWebContentFolder(project)
                     .getFolder(directory).getFolder("themes");
             if (!folder.exists()) {
-                folder.create(true, false, new SubProgressMonitor(monitor, 1));
+                folder.create(true, true, new SubProgressMonitor(monitor, 1));
+                folder.refreshLocal(IResource.DEPTH_INFINITE,
+                        new SubProgressMonitor(monitor, 1));
             }
             folder = folder.getFolder(themeName);
             if (folder.exists()) {
                 throw ErrorUtil.newCoreException("Theme already exists", null);
             } else {
-                folder.create(true, false, new SubProgressMonitor(monitor, 1));
+                folder.create(true, true, new SubProgressMonitor(monitor, 1));
+                folder.refreshLocal(IResource.DEPTH_INFINITE,
+                        new SubProgressMonitor(monitor, 1));
             }
+
             if (scssTheme) {
                 IFile stylesFile = folder.getFile(new Path("styles.scss"));
                 IFile themeFile = folder.getFile(new Path(themeName + ".scss"));
 
                 try {
                     String stylesContent = ThemesUtil.getScssStylesContent(
-                            themeName,
-                            VaadinPlugin.VAADIN_DEFAULT_THEME);
+                            themeName, VaadinPlugin.VAADIN_DEFAULT_THEME,
+                            addonStylesSupported);
                     InputStream stream = openStringStream(stylesContent);
                     stylesFile.create(stream, true, new SubProgressMonitor(
                             monitor, 1));
@@ -77,34 +85,22 @@ public class ThemesUtil {
                             monitor, 1));
                     stream.close();
 
-                    if (AddonStylesImporter.supported(project)) {
-
-                        // Run the addons imported
-                        AddonStylesImporter.run(project, monitor, folder);
-
-                        // Refresh themes folder
-                        final IFolder wsDir = ProjectUtil
-                                .getWebContentFolder(project)
-                                .getFolder(
-                                        VaadinPlugin.VAADIN_RESOURCE_DIRECTORY)
-                                .getFolder("themes");
-                        wsDir.refreshLocal(IResource.DEPTH_INFINITE,
-                                new SubProgressMonitor(monitor, 1));
-                    }
-
                 } catch (IOException e) {
                 }
                 return new IFile[] { stylesFile, themeFile };
             } else {
                 IFile file = folder.getFile(new Path("styles.css"));
                 String cssContent = getCssContent(themeName,
-                        VaadinPlugin.VAADIN_DEFAULT_THEME);
+                        VaadinPlugin.VAADIN_DEFAULT_THEME, addonStylesSupported);
                 InputStream stream = openStringStream(cssContent);
                 try {
                     file.create(stream, true,
                             new SubProgressMonitor(monitor, 2));
                     stream.close();
                 } catch (IOException e) {
+                } finally {
+                    file.refreshLocal(IResource.DEPTH_INFINITE,
+                            new SubProgressMonitor(monitor, 1));
                 }
                 return new IFile[] { file };
             }
@@ -116,17 +112,27 @@ public class ThemesUtil {
     /**
      * We will initialize file contents with a sample text.
      */
-    private static String getCssContent(String themeName, String baseTheme) {
-        return "@import url(../" + baseTheme + "/styles.css);\n\n";
+    private static String getCssContent(String themeName, String baseTheme,
+            boolean supportsAddonStyles) {
+        StringBuilder sb = new StringBuilder();
+        if (supportsAddonStyles) {
+            sb.append("@import url(../" + baseTheme + "/addons.css);\n\n");
+        }
+        sb.append("@import url(../" + baseTheme + "/styles.css);\n\n");
+        return sb.toString();
     }
 
     /**
      * We will initialize file contents with a sample text.
      */
     private static String getScssStylesContent(String themeName,
-            String baseTheme) {
+            String baseTheme, boolean supportsAddonStyles) {
         StringBuilder sb = new StringBuilder();
-        sb.append("@import \"addons.scss\";\n");
+
+        if (supportsAddonStyles) {
+            sb.append("@import \"addons.scss\";\n");
+        }
+
         sb.append("@import \"" + themeName + ".scss\";\n\n");
         sb.append("/* This file prefixes all rules with the theme name to avoid causing conflicts with other themes. */\n");
         sb.append("/* The actual styles should be defined in " + themeName

@@ -33,6 +33,7 @@ import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
+import com.vaadin.integration.eclipse.builder.AddonStylesBuilder;
 import com.vaadin.integration.eclipse.builder.WidgetsetNature;
 import com.vaadin.integration.eclipse.configuration.VaadinFacetInstallDataModelProvider;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
@@ -224,9 +225,18 @@ public class CoreFacetInstallDelegate implements IDelegate,
                                 + WebXmlUtil.VAADIN7_PORTLET2_CLASS;
                     }
 
+                    // Resolve vaadin version
+                    String version = vaadinVersion.getVersionNumber()
+                            .split("-")[0];
+                    String versionNumbers[] = version.split("\\.");
+                    int major = Integer.parseInt(versionNumbers[0]);
+                    int minor = Integer.parseInt(versionNumbers[1]);
+                    boolean supportsAddonStyles = major >= 7 && minor >= 1;
+
                     /* Create theme */
                     ThemesUtil.createTheme(jProject, applicationTheme, true,
-                            new SubProgressMonitor(monitor, 1));
+                            new SubProgressMonitor(monitor, 1),
+                            supportsAddonStyles);
 
                     if (vaadinVersion instanceof MavenVaadinVersion) {
                         setupIvy(jProject, (MavenVaadinVersion) vaadinVersion,
@@ -314,7 +324,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
                     WidgetsetNature.addWidgetsetNature(project);
                 }
 
-                // AddonStylesBuilder.addBuilder(project);
+                AddonStylesBuilder.addBuilder(project);
             }
             monitor.worked(1);
         } catch (Exception e) {
@@ -412,7 +422,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
                 WidgetsetNature.addWidgetsetNature(p);
             }
 
-            // AddonStylesBuilder.addBuilder(p);
+            AddonStylesBuilder.addBuilder(p);
 
             ivycp.launchResolve(false, null);
         } catch (JavaModelException e) {

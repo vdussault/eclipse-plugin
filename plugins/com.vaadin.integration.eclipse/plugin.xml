@@ -399,6 +399,15 @@ Any metadata changes made will be stored in the project manifest.
       </builder>
    </extension>
    
+   <extension
+         id="addonStylesBuilder"
+         name="Addon Styles Builder"
+         point="org.eclipse.core.resources.builders">
+      <builder>
+         <run class="com.vaadin.integration.eclipse.builder.AddonStylesBuilder" />        
+      </builder>
+   </extension>
+   
    
    <!-- TODO make the commands/buttons/handlers so that compile widgetset is 
     "dropdown button" with all available compilable widgetsets.   -->

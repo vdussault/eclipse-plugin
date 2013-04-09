@@ -49,6 +49,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
 import com.vaadin.integration.eclipse.VaadinPlugin;
+import com.vaadin.integration.eclipse.builder.AddonStylesImporter;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.ThemesUtil;
 
@@ -140,8 +141,8 @@ public class NewThemeWizard extends Wizard implements INewWizard {
             boolean scssTheme = uiType != null;
 
             final IFile[] files = ThemesUtil.createTheme(jproject, themeName,
-                    scssTheme,
-                    new SubProgressMonitor(monitor, 1));
+                    scssTheme, new SubProgressMonitor(monitor, 1),
+                    AddonStylesImporter.supported(project));
 
             monitor.setTaskName("Modifying Java file(s) to use theme...");
             // update selected application/UI classes

@@ -9,7 +9,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.IVMInstall;
 
 import com.vaadin.integration.eclipse.VaadinPlugin;
@@ -27,26 +29,19 @@ public class AddonStylesImporter {
      *          Returns true if project supports the addon importer
      */
     public static boolean supported(IProject project) {
-
         IJavaProject jproject = JavaCore.create(project);
 
         try {
-            IVMInstall vmInstall = VaadinPluginUtil.getJvmInstall(jproject,
-                    true);
-            ArrayList<String> commonArgs = WidgetsetUtil.buildCommonArgs(
-                    jproject, vmInstall);
-            ArrayList<String> compilerArgs = new ArrayList<String>(commonArgs);
-            compilerArgs.add(VaadinPlugin.ADDON_IMPORTER_CLASS);
-
-            final String[] argsStr = new String[compilerArgs.size()];
-            compilerArgs.toArray(argsStr);
-
-            ProcessBuilder b = new ProcessBuilder(argsStr);
-
-            return b.start().waitFor() == 0;
-
-        } catch (Exception e) {
-            
+            IPackageFragment[] packages = jproject.getPackageFragments();
+            for (IPackageFragment pkg : packages) {
+                String packageName = pkg.getElementName();
+                if (packageName.equals(VaadinPlugin.ADDON_IMPORTER_PACKAGE)) {
+                    // Package only exists in 7.1
+                    return true;
+                }
+            }
+        } catch (JavaModelException e1) {
+            // Don't care, reporting feature not supported
         }
 
         return false;
