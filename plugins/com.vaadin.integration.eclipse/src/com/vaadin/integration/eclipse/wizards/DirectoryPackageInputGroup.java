@@ -74,9 +74,10 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
             @Override
             public boolean select(Viewer viewer, Object parentElement,
                     Object element) {
-                return !isContainer(element);
+                return !isContainer(element) && !isAddonStyleFile(element);
             }
         });
+
     }
 
     private boolean isContainer(Object element) {
@@ -89,6 +90,17 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
                     || type == IJavaElement.PACKAGE_FRAGMENT_ROOT;
         }
         return isContainer;
+    }
+
+    private boolean isAddonStyleFile(Object element) {
+        if (element instanceof IFile) {
+            IFile file = (IFile) element;
+            String filename = file.getName().toLowerCase();
+            if (filename.equals("addons.scss")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -213,7 +225,7 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
             final IResource resource = (IResource) element;
             if (resource.getName().charAt(0) == '.') {
                 return;
-            }
+            }       
         }
         super.setTreeChecked(element, state);
     }

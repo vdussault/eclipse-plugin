@@ -1360,6 +1360,14 @@ public class VaadinPluginUtil {
                 substitutions);
     }
 
+    /**
+     * Searches the project theme for stylesheets to add to the manifests.
+     * Ignores stylesheets which are names addons.scss
+     * 
+     * @param jProject
+     * @return
+     * @throws CoreException
+     */
     public static String findStylesheetsString(IJavaProject jProject)
             throws CoreException {
 
@@ -1373,14 +1381,16 @@ public class VaadinPluginUtil {
             if (theme instanceof IFolder) {
                 IFolder themeFolder = (IFolder) theme;
                 for (IResource file : themeFolder.members()) {
-                    if (file.getFileExtension().toLowerCase().equals("scss")
-                            || file.getFileExtension().toLowerCase()
-                                    .equals("css")) {
-                        if (stylesheets.length() > 0) {
-                            stylesheets.append(",");
+                    String extension = file.getFileExtension().toLowerCase();
+                    if (extension.equals("scss") || extension.equals("css")) {
+                        String filename = file.getName();
+                        if (!"addons.scss".equals(filename)) {
+                            if (stylesheets.length() > 0) {
+                                stylesheets.append(",");
+                            }
+                            stylesheets.append(themeFolder.getName() + "/"
+                                    + file.getName());
                         }
-                        stylesheets.append(themeFolder.getName() + "/"
-                                + file.getName());
                     }
                 }
             }
