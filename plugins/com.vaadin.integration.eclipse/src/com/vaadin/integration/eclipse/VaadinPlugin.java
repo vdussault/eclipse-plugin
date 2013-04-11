@@ -44,10 +44,7 @@ public class VaadinPlugin extends AbstractUIPlugin {
 
     public static final String GWT_OLD_COMPILER_CLASS = "com.google.gwt.dev.GWTCompiler";
 
-    public static final String ADDON_IMPORTER_PACKAGE = "com.vaadin.server.themeutils";
-
-    public static final String ADDON_IMPORTER_CLASS = ADDON_IMPORTER_PACKAGE
-            + ".SASSAddonImportFileCreator";
+    public static final String ADDON_IMPORTER_CLASS = "com.vaadin.server.themeutils.SASSAddonImportFileCreator";
 
     private static VaadinPlugin instance = null;
 

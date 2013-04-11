@@ -1180,14 +1180,29 @@ public class VaadinPluginUtil {
 
     public static boolean isSuperDevModeSupported(IProject project) {
         // find code server class
+        return isVaadinFeatureTypeSupported(VaadinPlugin.GWT_CODE_SERVER_CLASS,
+                project);
+    }
+
+    /**
+     * Checks if a feature(class) is on the workspace classpath
+     * 
+     * @param type
+     *            The class the check for
+     * @param project
+     *            The project
+     * @return True if the class is found on the classpath, otherwise false
+     */
+    public static boolean isVaadinFeatureTypeSupported(String type,
+            IProject project) {
         IJavaProject javaProject = JavaCore.create(project);
         if (javaProject == null) {
             return false;
         }
+
         try {
-            IType codeServerType = javaProject
-                    .findType(VaadinPlugin.GWT_CODE_SERVER_CLASS);
-            return codeServerType != null;
+            IType ftype = javaProject.findType(type);
+            return ftype != null;
         } catch (JavaModelException e) {
             return false;
         }
