@@ -122,14 +122,21 @@ public class VaadinCoreFacetInstallPage extends J2EEModuleFacetInstallPage
         synchHelper.synchText(applicationClassField, APPLICATION_CLASS,
                 new Control[] { label });
 
-        label = new Label(applicationGroup, SWT.NONE);
-        label.setLayoutData(gdhfill());
-        label.setText("Theme name:");
+        IProjectFacetVersion facetVersion = (IProjectFacetVersion) model
+                .getProperty(IFacetDataModelProperties.FACET_VERSION);
+        boolean isVaadin7Facet = VaadinFacetUtils.VAADIN_70
+                .equals(facetVersion);
 
-        applicationThemeField = new Text(applicationGroup, SWT.BORDER);
-        applicationThemeField.setLayoutData(gdhfill());
-        synchHelper.synchText(applicationThemeField, APPLICATION_THEME,
-                new Control[] { label });
+        if (isVaadin7Facet) {
+            label = new Label(applicationGroup, SWT.NONE);
+            label.setLayoutData(gdhfill());
+            label.setText("Theme name:");
+
+            applicationThemeField = new Text(applicationGroup, SWT.BORDER);
+            applicationThemeField.setLayoutData(gdhfill());
+            synchHelper.synchText(applicationThemeField, APPLICATION_THEME,
+                    new Control[] { label });
+        }
     }
 
     // TODO handle Liferay project type? selectable here?
