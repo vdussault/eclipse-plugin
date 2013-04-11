@@ -142,6 +142,14 @@ public class ProjectUtil {
         return (IFolder) underlying;
     }
 
+    public static IFolder getThemesFolder(IProject project)
+            throws CoreException {
+        String VAADIN = VaadinPlugin.VAADIN_RESOURCE_DIRECTORY;
+        String themes = VaadinPlugin.THEME_FOLDER_NAME;
+        return ProjectUtil.getWebContentFolder(project.getProject())
+                .getFolder(VAADIN).getFolder(themes);
+    }
+
     public static IFolder getSrcFolder(IProject project) throws CoreException {
         try {
             IJavaProject javaProject = JavaCore.create(project);

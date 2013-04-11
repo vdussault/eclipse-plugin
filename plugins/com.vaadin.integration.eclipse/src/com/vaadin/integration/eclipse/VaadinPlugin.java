@@ -26,6 +26,8 @@ public class VaadinPlugin extends AbstractUIPlugin {
     public static final String THEME_ANNOTATION_FULL_NAME = VAADIN_ANNOTATIONS_PACKAGE_PREFIX
             + THEME_ANNOTATION_NAME;
 
+    public static final String THEME_FOLDER_NAME = "themes";
+
     public static final String THEME_ADDON_IMPORTS = "addons.scss";
 
     public static final String ID_COMPILE_WS_APP = "compilews";

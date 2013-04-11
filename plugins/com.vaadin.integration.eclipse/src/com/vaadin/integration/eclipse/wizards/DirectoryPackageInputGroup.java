@@ -155,8 +155,7 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
             IFolder webContentFolder = ProjectUtil
                     .getWebContentFolder(javaProject.getProject());
 
-            IFolder themesFolder = webContentFolder.getFolder("VAADIN")
-                    .getFolder("themes");
+            IFolder themesFolder = ProjectUtil.getThemesFolder(project);
             if (themesFolder.exists()) {
                 result.add(themesFolder);
             }

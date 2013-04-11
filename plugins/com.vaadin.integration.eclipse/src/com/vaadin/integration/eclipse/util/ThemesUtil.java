@@ -49,8 +49,7 @@ public class ThemesUtil {
                 folder.refreshLocal(IResource.DEPTH_INFINITE,
                         new SubProgressMonitor(monitor, 1));
             }
-            folder = ProjectUtil.getWebContentFolder(project)
-                    .getFolder(directory).getFolder("themes");
+            folder = ProjectUtil.getThemesFolder(project);
             if (!folder.exists()) {
                 folder.create(true, true, new SubProgressMonitor(monitor, 1));
                 folder.refreshLocal(IResource.DEPTH_INFINITE,

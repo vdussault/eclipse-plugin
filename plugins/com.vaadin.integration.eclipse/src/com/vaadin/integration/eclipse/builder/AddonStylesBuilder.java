@@ -13,7 +13,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.util.ProjectUtil;
 
 public class AddonStylesBuilder extends IncrementalProjectBuilder {
@@ -25,11 +24,7 @@ public class AddonStylesBuilder extends IncrementalProjectBuilder {
             throws CoreException {
         IProject project = getProject();
         if (AddonStylesImporter.supported(project)) {
-            String directory = VaadinPlugin.VAADIN_RESOURCE_DIRECTORY;
-            IFolder themes = ProjectUtil
-                    .getWebContentFolder(getProject().getProject())
-                    .getFolder(directory).getFolder("themes");
-            
+            IFolder themes = ProjectUtil.getThemesFolder(project);
             for (IResource theme : themes.members()) {
                 IFolder themeFolder = (IFolder) theme;
                 try {
