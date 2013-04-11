@@ -225,13 +225,9 @@ public class CoreFacetInstallDelegate implements IDelegate,
                                 + WebXmlUtil.VAADIN7_PORTLET2_CLASS;
                     }
 
-                    // Resolve vaadin version
-                    String version = vaadinVersion.getVersionNumber()
-                            .split("-")[0];
-                    String versionNumbers[] = version.split("\\.");
-                    int major = Integer.parseInt(versionNumbers[0]);
-                    int minor = Integer.parseInt(versionNumbers[1]);
-                    boolean supportsAddonStyles = major >= 7 && minor >= 1;
+                    // Addon styles only supported on Vaadin 7.1 and above
+                    boolean supportsAddonStyles = VersionUtil
+                            .isVaadin71(vaadinVersion);
 
                     /* Create theme */
                     ThemesUtil.createTheme(jProject, applicationTheme, true,

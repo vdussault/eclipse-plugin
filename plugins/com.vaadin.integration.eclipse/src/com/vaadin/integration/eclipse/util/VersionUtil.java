@@ -242,6 +242,18 @@ public class VersionUtil {
     }
 
     /**
+     * Checks if the Vaadin version is 7.1 or higher.
+     * 
+     * If major or minor version cannot be determined, false is returned.
+     * 
+     * @param vaadinVersion
+     * @return
+     */
+    public static boolean isVaadin71(AbstractVaadinVersion vaadinVersion) {
+        return isVaadin7MinorVersionString(vaadinVersion.getVersionNumber(), 1);
+    }
+
+    /**
      * Checks if the Vaadin version is 7 or higher.
      * 
      * If major version cannot be determined, false is returned.
@@ -259,6 +271,23 @@ public class VersionUtil {
             int majorVersion = Integer.parseInt(majorVersionString);
             return majorVersion >= 7;
         } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private static boolean isVaadin7MinorVersionString(String vaadinVersion,
+            int minorVersion) {
+        if (null == vaadinVersion || vaadinVersion.indexOf(".") < 0) {
+            return false;
+        }
+
+        try {
+            String version = vaadinVersion.split("-")[0];
+            String versionNumbers[] = version.split("\\.");
+            int major = Integer.parseInt(versionNumbers[0]);
+            int minor = Integer.parseInt(versionNumbers[1]);
+            return major >= 7 && minor >= minorVersion;
+        } catch (Exception e) {
             return false;
         }
     }
