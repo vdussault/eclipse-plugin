@@ -84,7 +84,7 @@ public class ThemesUtil {
             } else {
                 IFile file = themeFolder.getFile(new Path("styles.css"));
                 String cssContent = getCssContent(themeName,
-                        VaadinPlugin.VAADIN_DEFAULT_THEME, addonStylesSupported);
+                        VaadinPlugin.VAADIN_DEFAULT_THEME);
                 InputStream stream = openStringStream(cssContent);
                 try {
                     file.create(stream, true,
@@ -105,12 +105,8 @@ public class ThemesUtil {
     /**
      * We will initialize file contents with a sample text.
      */
-    private static String getCssContent(String themeName, String baseTheme,
-            boolean supportsAddonStyles) {
+    private static String getCssContent(String themeName, String baseTheme) {
         StringBuilder sb = new StringBuilder();
-        if (supportsAddonStyles) {
-            sb.append("@import url(../" + baseTheme + "/addons.css);\n\n");
-        }
         sb.append("@import url(../" + baseTheme + "/styles.css);\n\n");
         return sb.toString();
     }
