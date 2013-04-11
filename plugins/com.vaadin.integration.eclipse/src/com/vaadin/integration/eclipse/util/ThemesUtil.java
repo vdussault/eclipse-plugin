@@ -40,33 +40,27 @@ public class ThemesUtil {
             // monitor.done()
             monitor.beginTask("Creating theme " + themeName, 5);
 
-            String directory = VaadinPlugin.VAADIN_RESOURCE_DIRECTORY;
+            String VAADIN = VaadinPlugin.VAADIN_RESOURCE_DIRECTORY;
+            String themes = VaadinPlugin.THEME_FOLDER_NAME;
+            IFolder webContent = ProjectUtil.getWebContentFolder(project);
 
-            IFolder folder = ProjectUtil.getWebContentFolder(project)
-                    .getFolder(directory);
-            if (!folder.exists()) {
-                folder.create(true, true, new SubProgressMonitor(monitor, 1));
-                folder.refreshLocal(IResource.DEPTH_INFINITE,
-                        new SubProgressMonitor(monitor, 1));
-            }
-            folder = ProjectUtil.getThemesFolder(project);
-            if (!folder.exists()) {
-                folder.create(true, true, new SubProgressMonitor(monitor, 1));
-                folder.refreshLocal(IResource.DEPTH_INFINITE,
-                        new SubProgressMonitor(monitor, 1));
-            }
-            folder = folder.getFolder(themeName);
-            if (folder.exists()) {
+            // Ensure theme does not already exist
+            IFolder themeFolder = webContent.getFolder(VAADIN)
+                    .getFolder(themes).getFolder(themeName);
+            if (themeFolder.exists()) {
                 throw ErrorUtil.newCoreException("Theme already exists", null);
-            } else {
-                folder.create(true, true, new SubProgressMonitor(monitor, 1));
-                folder.refreshLocal(IResource.DEPTH_INFINITE,
-                        new SubProgressMonitor(monitor, 1));
             }
+
+            // Create folders
+            themeFolder.getLocation().toFile().mkdirs();
+            webContent.refreshLocal(IResource.DEPTH_INFINITE,
+                            new SubProgressMonitor(monitor, 1));
+
 
             if (scssTheme) {
-                IFile stylesFile = folder.getFile(new Path("styles.scss"));
-                IFile themeFile = folder.getFile(new Path(themeName + ".scss"));
+                IFile stylesFile = themeFolder.getFile(new Path("styles.scss"));
+                IFile themeFile = themeFolder.getFile(new Path(themeName
+                        + ".scss"));
 
                 try {
                     String stylesContent = ThemesUtil.getScssStylesContent(
@@ -88,7 +82,7 @@ public class ThemesUtil {
                 }
                 return new IFile[] { stylesFile, themeFile };
             } else {
-                IFile file = folder.getFile(new Path("styles.css"));
+                IFile file = themeFolder.getFile(new Path("styles.css"));
                 String cssContent = getCssContent(themeName,
                         VaadinPlugin.VAADIN_DEFAULT_THEME, addonStylesSupported);
                 InputStream stream = openStringStream(cssContent);
