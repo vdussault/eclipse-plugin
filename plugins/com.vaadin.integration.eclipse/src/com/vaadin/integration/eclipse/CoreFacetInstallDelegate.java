@@ -12,7 +12,6 @@ import org.apache.ivyde.eclipse.cpcontainer.IvyClasspathContainerConfAdapter;
 import org.apache.ivyde.eclipse.cpcontainer.IvyClasspathContainerConfiguration;
 import org.apache.ivyde.eclipse.cpcontainer.SettingsSetup;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -234,6 +233,16 @@ public class CoreFacetInstallDelegate implements IDelegate,
                             new SubProgressMonitor(monitor, 1),
                             supportsAddonStyles);
 
+                    /*
+                     * NOTE! This must be done BEFORE Ivy is added so Ivy takes
+                     * it into account.
+                     */
+                    if (WidgetsetUtil.isWidgetsetManagedByPlugin(project)) {
+                        WidgetsetNature.addWidgetsetNature(project);
+                    }
+
+                    AddonStylesBuilder.addBuilder(project);
+
                     if (vaadinVersion instanceof MavenVaadinVersion) {
                         setupIvy(jProject, (MavenVaadinVersion) vaadinVersion,
                                 monitor);
@@ -408,17 +417,6 @@ public class CoreFacetInstallDelegate implements IDelegate,
             entries = (IClasspathEntry[]) newEntries
                     .toArray(new IClasspathEntry[newEntries.size()]);
             project.setRawClasspath(entries, project.getOutputLocation(), null);
-
-            // The above modifications to the project classpath will also remove
-            // any custom natures from the project.
-            // We need to re-add them here again.
-            IProject p = project.getProject();
-            IProjectNature nature = p.getNature(WidgetsetNature.NATURE_ID);
-            if (nature == null) {
-                WidgetsetNature.addWidgetsetNature(p);
-            }
-
-            AddonStylesBuilder.addBuilder(p);
 
             ivycp.launchResolve(false, null);
         } catch (JavaModelException e) {
