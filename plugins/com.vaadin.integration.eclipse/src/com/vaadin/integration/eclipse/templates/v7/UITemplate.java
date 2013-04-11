@@ -28,7 +28,7 @@ public class UITemplate {
   protected final String TEXT_5 = NL + "@Theme(\"";
   protected final String TEXT_6 = "\")";
   protected final String TEXT_7 = NL + "public class ";
-  protected final String TEXT_8 = " extends UI {" + NL + "" + NL + "\t@Override" + NL + "\tprotected void init(VaadinRequest request) {" + NL + "\t\tfinal VerticalLayout layout = new VerticalLayout();" + NL + "\t\tlayout.setMargin(true);" + NL + "\t\tsetContent(layout);" + NL + "" + NL + "\t\tButton button = new Button(\"Click Me\");" + NL + "\t\tbutton.addClickListener(new Button.ClickListener() {" + NL + "\t\t\tpublic void buttonClick(ClickEvent event) {" + NL + "\t\t\t\tlayout.addComponent(new Label(\"Thank you for clicking\"));" + NL + "\t\t\t}" + NL + "\t\t});" + NL + "\t\tlayout.addComponent(button);" + NL + "\t}" + NL + "" + NL + "}";
+  protected final String TEXT_8 = " extends UI {" + NL + "" + NL + "    @Override" + NL + "    protected void init(VaadinRequest request) {" + NL + "        final VerticalLayout layout = new VerticalLayout();" + NL + "        layout.setMargin(true);" + NL + "        setContent(layout);" + NL + "" + NL + "        Button button = new Button(\"Click Me\");" + NL + "        button.addClickListener(new Button.ClickListener() {" + NL + "            public void buttonClick(ClickEvent event) {" + NL + "                layout.addComponent(new Label(\"Thank you for clicking\"));" + NL + "            }" + NL + "        });" + NL + "        layout.addComponent(button);" + NL + "    }" + NL + "" + NL + "}";
 
     public String generate(String applicationPackage, String applicationName,
         String uiOrApplicationClass, String uiTheme)
