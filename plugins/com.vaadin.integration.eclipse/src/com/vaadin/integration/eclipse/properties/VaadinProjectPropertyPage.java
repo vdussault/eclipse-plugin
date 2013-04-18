@@ -3,11 +3,14 @@ package com.vaadin.integration.eclipse.properties;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -24,6 +27,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.dialogs.PropertyPage;
 
+import com.vaadin.integration.eclipse.builder.AddonStylesImporter;
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
 import com.vaadin.integration.eclipse.properties.VaadinVersionComposite.VersionSelectionChangeListener;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
@@ -46,6 +50,7 @@ public class VaadinProjectPropertyPage extends PropertyPage {
 
     private VaadinVersionComposite vaadinVersionComposite;
     private WidgetsetParametersComposite widgetsetComposite;
+    private ThemingParametersComposite themingComposite;
     private String projectVaadinVersionString;
     private CLabel modifiedLabel;
 
@@ -63,6 +68,10 @@ public class VaadinProjectPropertyPage extends PropertyPage {
             IProject project = getVaadinProject();
             vaadinVersionComposite.setProject(project);
             widgetsetComposite.setProject(project);
+
+            if (themingComposite != null) {
+                themingComposite.setProject(project);
+            }
 
             projectVaadinVersionString = vaadinVersionComposite
                     .getSelectedVersionString();
@@ -232,6 +241,36 @@ public class VaadinProjectPropertyPage extends PropertyPage {
 
         boolean suspended = widgetsetComposite.areWidgetsetBuildsSuspended();
         WidgetsetBuildManager.setWidgetsetBuildsSuspended(project, suspended);
+        
+        if (AddonStylesImporter.supported(project)) {
+            boolean wasSuspended = AddonStylesImporter.suspended(project);
+            suspended = themingComposite.isAddonScanningSuspended();
+            AddonStylesImporter.setSuspended(project, suspended);
+            if (wasSuspended && !suspended) {
+                try {
+                    // Trigger addon import scanning if it previously was
+                    // suspended
+                    // and now again is enabled
+                    IFolder themes = ProjectUtil.getThemesFolder(project);
+                    for (IResource theme : themes.members()) {
+                        IFolder themeFolder = (IFolder) theme;
+                        try {
+                            IProgressMonitor monitor = new NullProgressMonitor();
+                            AddonStylesImporter.run(project, monitor,
+                                    themeFolder);
+                            themeFolder.refreshLocal(IResource.DEPTH_INFINITE,
+                                    new SubProgressMonitor(monitor, 1));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                } catch (CoreException e) {
+                    ErrorUtil.handleBackgroundException(IStatus.WARNING,
+                            "Failed to update addons.scss.", e);
+                }
+            }
+        }
 
         boolean verbose = widgetsetComposite.isVerboseOutput();
         if (preferences.setWidgetsetCompilationVerboseMode(verbose)) {
@@ -303,12 +342,29 @@ public class VaadinProjectPropertyPage extends PropertyPage {
         modifiedLabel.setVisible(false);
         modifiedLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
+        try {
+            if (AddonStylesImporter.supported(getVaadinProject())) {
+
+                group = new Group(composite, SWT.NONE);
+                group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+                group.setText("Theming");
+                group.setLayout(new GridLayout(1, false));
+
+                themingComposite = new ThemingParametersComposite(group,
+                        SWT.NULL);
+                themingComposite.createContents();
+            }
+        } catch (CoreException e) {
+
+        }
+
         group = new Group(composite, SWT.NONE);
         group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         group.setText("Widgetsets");
         group.setLayout(new GridLayout(1, false));
         widgetsetComposite = new WidgetsetParametersComposite(group, SWT.NULL);
         widgetsetComposite.createContents();
+
 
         performDefaults();
 

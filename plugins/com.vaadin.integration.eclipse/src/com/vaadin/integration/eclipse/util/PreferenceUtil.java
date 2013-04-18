@@ -66,6 +66,37 @@ public class PreferenceUtil {
     private static final String PREFERENCES_USE_LATEST_NIGHTLY = VaadinPlugin.PLUGIN_ID
             + "." + "useLatestNightly";
 
+    // true to suspend scanning for addon themes and creating the addons.scss
+    // file
+    private static final String PREFERENCES_ADDON_THEME_SCANNING_SUSPENDED = VaadinPlugin.PLUGIN_ID
+            + "." + "addonThemesSuspended";
+
+    /**
+     * Checks whether scanning for addon themes has explicitly been suspended by
+     * the user
+     */
+    public boolean isAddonThemeScanningSuspended() {
+        if (!prefStore.contains(PREFERENCES_ADDON_THEME_SCANNING_SUSPENDED)) {
+            return false;
+        } else {
+            return prefStore
+                    .getBoolean(PREFERENCES_ADDON_THEME_SCANNING_SUSPENDED);
+        }
+    }
+
+    /**
+     * Suspends the addon theme scanning and so stops updating the addons.scss
+     * file with further changes
+     * 
+     * @param suspended
+     *            true if no updates to the addons.scss should be made
+     *            automatically
+     */
+    public void setAddonThemeScanningSuspended(boolean suspended) {
+        prefStore.setValue(PREFERENCES_ADDON_THEME_SCANNING_SUSPENDED,
+                suspended);
+    }
+
     /**
      * Checks whether widgetset building for a project has been suspended
      * explicitly by the user.

@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IVMInstall;
 
 import com.vaadin.integration.eclipse.VaadinPlugin;
+import com.vaadin.integration.eclipse.util.PreferenceUtil;
 import com.vaadin.integration.eclipse.util.VaadinPluginUtil;
 import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 
@@ -31,9 +32,34 @@ public class AddonStylesImporter {
                 VaadinPlugin.ADDON_IMPORTER_CLASS, project);
     }
 
+    /**
+     * Has the addons scanning explicitly been suspended by the user
+     * 
+     * @param project
+     *            The project
+     * @return True if the addon scanning should be suspended
+     */
+    public static boolean suspended(IProject project) {
+        return PreferenceUtil.get(project).isAddonThemeScanningSuspended();
+    }
+
+    /**
+     * Suspends the addon styles scanning
+     * 
+     * @param project
+     * @param suspended
+     */
+    public static void setSuspended(IProject project, boolean suspended) {
+        PreferenceUtil.get(project).setAddonThemeScanningSuspended(suspended);
+    }
+
     public static void run(IProject project,
             final IProgressMonitor monitor, IFolder targetDir)
             throws CoreException, IOException {
+
+        if (AddonStylesImporter.suspended(project)) {
+            return;
+        }
 
         IJavaProject jproject = JavaCore.create(project);
 
