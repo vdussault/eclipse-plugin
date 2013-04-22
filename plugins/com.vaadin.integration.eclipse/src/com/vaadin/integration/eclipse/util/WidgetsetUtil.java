@@ -207,6 +207,17 @@ public class WidgetsetUtil {
                 compilerArgs.add("WARN");
             }
 
+            String extraParams = preferences
+                    .getWidgetsetCompilationExtraParameters();
+            if (extraParams != null) {
+                String[] params = extraParams.split(" ");
+                for (String param : params) {
+                    if (!"".equals(param)) {
+                        compilerArgs.add(param);
+                    }
+                }
+            }
+
             compilerArgs.add(moduleName);
 
             final String[] argsStr = new String[compilerArgs.size()];

@@ -241,7 +241,7 @@ public class VaadinProjectPropertyPage extends PropertyPage {
 
         boolean suspended = widgetsetComposite.areWidgetsetBuildsSuspended();
         WidgetsetBuildManager.setWidgetsetBuildsSuspended(project, suspended);
-        
+
         if (AddonStylesImporter.supported(project)) {
             boolean wasSuspended = AddonStylesImporter.suspended(project);
             suspended = themingComposite.isAddonScanningSuspended();
@@ -284,6 +284,11 @@ public class VaadinProjectPropertyPage extends PropertyPage {
 
         String parallelism = widgetsetComposite.getParallelism();
         if (preferences.setWidgetsetCompilationParallelism(parallelism)) {
+            modifiedValues = true;
+        }
+
+        String extraParams = widgetsetComposite.getExtraParameters();
+        if (preferences.setWidgetsetCompilationExtraParameters(extraParams)) {
             modifiedValues = true;
         }
 
@@ -364,7 +369,6 @@ public class VaadinProjectPropertyPage extends PropertyPage {
         group.setLayout(new GridLayout(1, false));
         widgetsetComposite = new WidgetsetParametersComposite(group, SWT.NULL);
         widgetsetComposite.createContents();
-
 
         performDefaults();
 

@@ -57,6 +57,10 @@ public class PreferenceUtil {
     private static final String PREFERENCES_WIDGETSET_VERBOSE = VaadinPlugin.PLUGIN_ID
             + "." + "widgetsetVerbose";
 
+    // extra parameters for widgetset compilation
+    private static final String PREFERENCES_WIDGETSET_EXTRA_PARAMETERS = VaadinPlugin.PLUGIN_ID
+            + "." + "widgetsetExtraParameters";
+
     // project type flags - note that in the future, there could be multiple
     // flags set at the same time
     private static final String PREFERENCES_PROJECT_TYPE_GAE = VaadinPlugin.PLUGIN_ID
@@ -175,6 +179,28 @@ public class PreferenceUtil {
         }
         prefStore.setValue(PREFERENCES_WIDGETSET_STYLE, style);
         return !equals(oldValue, style);
+
+    }
+
+    public String getWidgetsetCompilationExtraParameters() {
+        return prefStore.getString(PREFERENCES_WIDGETSET_EXTRA_PARAMETERS);
+    }
+
+    /**
+     * Sets the extra command line parameters used in widgetset compilation.
+     * Returns true if the value was changed, false if it remained the same.
+     * 
+     * @param params
+     * @return
+     */
+    public boolean setWidgetsetCompilationExtraParameters(String params) {
+        String oldValue = prefStore
+                .getString(PREFERENCES_WIDGETSET_EXTRA_PARAMETERS);
+        if (params == null) {
+            params = "";
+        }
+        prefStore.setValue(PREFERENCES_WIDGETSET_EXTRA_PARAMETERS, params);
+        return !equals(oldValue, params);
 
     }
 

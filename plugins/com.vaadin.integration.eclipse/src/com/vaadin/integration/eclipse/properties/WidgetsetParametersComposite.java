@@ -10,6 +10,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
 import com.vaadin.integration.eclipse.util.PreferenceUtil;
@@ -25,6 +26,7 @@ public class WidgetsetParametersComposite extends Composite {
     private Combo parallelismCombo;
     private Button suspendAutomaticBuilds;
     private Button verboseCompilation;
+    private Text extraParameters;
     private Button createDevelopmentModeLaunchButton;
     private Button createSuperDevelopmentModeLaunchButton;
 
@@ -71,6 +73,10 @@ public class WidgetsetParametersComposite extends Composite {
         String parallelism = preferences.getWidgetsetCompilationParallelism();
         parallelismCombo.setText(parallelism);
 
+        String extraParams = preferences
+                .getWidgetsetCompilationExtraParameters();
+        extraParameters.setText(extraParams);
+
         boolean superDevModeSupported = VaadinPluginUtil
                 .isSuperDevModeSupported(project);
         createSuperDevelopmentModeLaunchButton
@@ -95,6 +101,9 @@ public class WidgetsetParametersComposite extends Composite {
         }
         if (verboseCompilation != null) {
             verboseCompilation.setEnabled(enabled);
+        }
+        if (extraParameters != null) {
+            extraParameters.setEnabled(enabled);
         }
         if (createDevelopmentModeLaunchButton != null) {
             createDevelopmentModeLaunchButton.setEnabled(enabled);
@@ -164,6 +173,15 @@ public class WidgetsetParametersComposite extends Composite {
         for (int i = 1; i <= 8; ++i) {
             parallelismCombo.add("" + i);
         }
+
+        // compilation style (obfuscated/pretty)
+        label = new Label(options, SWT.NULL);
+        label.setText("Additional parameters for widgetset compiler:");
+
+        extraParameters = new Text(options, SWT.SINGLE | SWT.BORDER);
+        gd = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+        gd.horizontalSpan = 2;
+        extraParameters.setLayoutData(gd);
     }
 
     private void createInstructionsComposite(Composite parent) {
@@ -282,5 +300,14 @@ public class WidgetsetParametersComposite extends Composite {
      */
     public boolean isVerboseOutput() {
         return verboseCompilation.getSelection();
+    }
+
+    /**
+     * Returns extra parameters for the widgetset compiler.
+     * 
+     * @return String extra parameters for widgetset compiler, not null
+     */
+    public String getExtraParameters() {
+        return extraParameters.getText();
     }
 }
