@@ -272,8 +272,13 @@ public class WidgetsetUtil {
             console.activate();
             newMessageStream.println();
             if (verbose) {
-                newMessageStream.println("Executing compiler with parameters "
-                        + compilerArgs);
+                newMessageStream
+                        .println("Executing compiler with command line:");
+                StringBuilder commandLine = new StringBuilder();
+                for (String arg : compilerArgs) {
+                    commandLine.append(" ").append(arg);
+                }
+                newMessageStream.println(commandLine.toString());
             } else {
                 newMessageStream.println("Compiling widgetset " + moduleName);
             }
