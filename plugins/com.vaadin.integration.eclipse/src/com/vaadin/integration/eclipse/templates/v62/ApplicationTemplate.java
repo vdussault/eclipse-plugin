@@ -23,7 +23,7 @@ public class ApplicationTemplate {
   public final String NL = nl == null ? (System.getProperties().getProperty("line.separator")) : nl;
   protected final String TEXT_1 = "package ";
   protected final String TEXT_2 = ";" + NL + "" + NL + "import com.vaadin.Application;" + NL + "import com.vaadin.ui.*;" + NL + "" + NL + "/**" + NL + " * Main application class." + NL + " */" + NL + "public class ";
-  protected final String TEXT_3 = " extends Application {" + NL + " " + NL + "    @Override" + NL + "    public void init() {" + NL + "        Window mainWindow = new Window(\"";
+  protected final String TEXT_3 = " extends Application {" + NL + "" + NL + "    @Override" + NL + "    public void init() {" + NL + "        Window mainWindow = new Window(\"";
   protected final String TEXT_4 = "\");" + NL + "        Label label = new Label(\"Hello Vaadin user\");" + NL + "        mainWindow.addComponent(label);" + NL + "        setMainWindow(mainWindow);" + NL + "    }" + NL + "" + NL + "}" + NL;
   protected final String TEXT_5 = NL;
 

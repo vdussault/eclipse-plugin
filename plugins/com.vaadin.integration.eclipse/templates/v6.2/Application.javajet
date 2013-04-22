@@ -11,7 +11,7 @@ import com.vaadin.ui.*;
  * Main application class.
  */
 public class <%= uiOrApplicationClass %> extends Application {
- 
+
     @Override
     public void init() {
         Window mainWindow = new Window("<%= applicationName %>");
