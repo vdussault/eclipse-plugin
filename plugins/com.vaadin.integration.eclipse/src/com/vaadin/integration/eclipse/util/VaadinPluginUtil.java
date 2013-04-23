@@ -1386,25 +1386,40 @@ public class VaadinPluginUtil {
     public static String findStylesheetsString(IJavaProject jProject)
             throws CoreException {
 
-        IFolder themesDir = ProjectUtil
+        IFolder defaultAddonStylesDir = ProjectUtil
                 .getWebContentFolder(jProject.getProject())
                 .getFolder(VaadinPlugin.VAADIN_RESOURCE_DIRECTORY)
-                .getFolder("themes");
+                .getFolder(VaadinPlugin.VAADIN_ADDON_THEME_DIRECTORY);
 
         StringBuilder stylesheets = new StringBuilder();
-        for (IResource theme : themesDir.members()) {
-            if (theme instanceof IFolder) {
-                IFolder themeFolder = (IFolder) theme;
-                for (IResource file : themeFolder.members()) {
-                    String extension = file.getFileExtension().toLowerCase();
-                    if (extension.equals("scss") || extension.equals("css")) {
-                        String filename = file.getName();
-                        if (!"addons.scss".equals(filename)) {
+      
+        /*
+         * Check if there exists addon themes which implements the convention
+         * that themes should be under WebContent/VAADIN/addons. If it exists,
+         * then we scan it and create sensible defaults
+         */
+        if (defaultAddonStylesDir.exists()) {
+            for (IResource theme : defaultAddonStylesDir.members()) {
+                if (theme instanceof IFolder) {
+                    IFolder themeFolder = (IFolder) theme;
+                    for (IResource file : themeFolder.members()) {
+                        String extension = file.getFileExtension()
+                                .toLowerCase();
+                        if (extension.equals("scss") || extension.equals("css")) {
                             if (stylesheets.length() > 0) {
+                                // Comma separated list
                                 stylesheets.append(",");
                             }
-                            stylesheets.append(themeFolder.getName() + "/"
-                                    + file.getName());
+
+                            String path = file.getProjectRelativePath()
+                                    .toPortableString();
+
+                            // Path should be relative to jar root
+                            path = path
+                                    .substring(path
+                                            .indexOf(VaadinPlugin.VAADIN_RESOURCE_DIRECTORY));
+
+                            stylesheets.append(path);
                         }
                     }
                 }
