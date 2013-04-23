@@ -25,14 +25,16 @@ public class AddonStylesBuilder extends IncrementalProjectBuilder {
         IProject project = getProject();
         if (AddonStylesImporter.supported(project)) {
             IFolder themes = ProjectUtil.getThemesFolder(project);
-            for (IResource theme : themes.members()) {
-                IFolder themeFolder = (IFolder) theme;
-                try {
-                    AddonStylesImporter.run(project, monitor, themeFolder);
-                    themeFolder.refreshLocal(IResource.DEPTH_INFINITE,
-                            new SubProgressMonitor(monitor, 1));
-                } catch (IOException e) {
-                    e.printStackTrace();
+            if (themes.exists()) {
+                for (IResource theme : themes.members()) {
+                    IFolder themeFolder = (IFolder) theme;
+                    try {
+                        AddonStylesImporter.run(project, monitor, themeFolder);
+                        themeFolder.refreshLocal(IResource.DEPTH_INFINITE,
+                                new SubProgressMonitor(monitor, 1));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
