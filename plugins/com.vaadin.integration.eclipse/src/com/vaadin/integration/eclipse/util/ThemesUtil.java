@@ -127,6 +127,11 @@ public class ThemesUtil {
         sb.append("/* The actual styles should be defined in " + themeName
                 + ".scss */\n");
         sb.append("." + themeName + " {\n");
+
+        if (supportsAddonStyles) {
+            sb.append("  @include addons;\n");
+        }
+
         sb.append("  @include " + themeName + ";\n");
         sb.append("}\n");
         return sb.toString();
