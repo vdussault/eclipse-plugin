@@ -3,7 +3,7 @@ package com.vaadin.integration.eclipse.background;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.mylyn.commons.ui.dialogs.AbstractNotificationPopup;
+import org.eclipse.mylyn.internal.provisional.commons.ui.AbstractNotificationPopup; 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
