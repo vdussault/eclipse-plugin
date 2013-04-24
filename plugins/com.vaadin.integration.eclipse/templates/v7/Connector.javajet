@@ -44,58 +44,58 @@ import com.vaadin.client.communication.StateChangeEvent;
 public class <%= typeName %> extends AbstractComponentConnector {
 
 <% if (t.hasServerRpc()) { %>
-    <%= serverRpcName %> rpc = RpcProxy
-            .create(<%= serverRpcName %>.class, this);
+	<%= serverRpcName %> rpc = RpcProxy
+			.create(<%= serverRpcName %>.class, this);
 <% } %>
 	
-    public <%= typeName %>() {
+	public <%= typeName %>() {
 <% if (t.hasClientRpc()) { %>    
-        registerRpc(<%= clientRpcName %>.class, new <%= clientRpcName %>() {
-            public void alert(String message) {
-            	// TODO Do something useful
-                Window.alert(message);
-            }
-        });
+		registerRpc(<%= clientRpcName %>.class, new <%= clientRpcName %>() {
+			public void alert(String message) {
+				// TODO Do something useful
+				Window.alert(message);
+			}
+		});
 <% } %>
 <% if (t.hasServerRpc()) { %>
 
 		// TODO ServerRpc usage example, do something useful instead
-        getWidget().addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                final MouseEventDetails mouseDetails = MouseEventDetailsBuilder
-                        .buildMouseEventDetails(event.getNativeEvent(),
-                                getWidget().getElement());
-                rpc.clicked(mouseDetails);
-            }
-        });
+		getWidget().addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				final MouseEventDetails mouseDetails = MouseEventDetailsBuilder
+					.buildMouseEventDetails(event.getNativeEvent(),
+								getWidget().getElement());
+				rpc.clicked(mouseDetails);
+			}
+		});
 <% } %>
 
-    }
+	}
 
-    @Override
-    protected Widget createWidget() {
-        return GWT.create(<%= widgetName %>.class);
-    }
+	@Override
+	protected Widget createWidget() {
+		return GWT.create(<%= widgetName %>.class);
+	}
 
-    @Override
-    public <%= widgetName %> getWidget() {
-        return (<%= widgetName %>) super.getWidget();
-    }
+	@Override
+	public <%= widgetName %> getWidget() {
+		return (<%= widgetName %>) super.getWidget();
+	}
 
 <% if (t.hasState()) { %>
-    @Override
-    public <%= stateName %> getState() {
-        return (<%= stateName %>) super.getState();
-    }
+	@Override
+	public <%= stateName %> getState() {
+		return (<%= stateName %>) super.getState();
+	}
 
-    @Override
-    public void onStateChanged(StateChangeEvent stateChangeEvent) {
-        super.onStateChanged(stateChangeEvent);
-		
+	@Override
+	public void onStateChanged(StateChangeEvent stateChangeEvent) {
+		super.onStateChanged(stateChangeEvent);
+
 		// TODO do something useful
-        final String text = getState().text;
-        getWidget().setText(text);
-    }
+		final String text = getState().text;
+		getWidget().setText(text);
+	}
 <% } %>
 
 }

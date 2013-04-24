@@ -12,13 +12,13 @@ import com.google.gwt.user.client.ui.Label;
 // TODO extend any GWT Widget
 public class <%= typeName %> extends Label {
 
-    public static final String CLASSNAME = "<%= componentName.toLowerCase() %>";
+	public static final String CLASSNAME = "<%= componentName.toLowerCase() %>";
 
-    public <%= typeName %>() {
+	public <%= typeName %>() {
 
-        // setText("<%= componentName %> sets the text via <%= componentName %>Connector using <%= componentName %>State");
-        setStyleName(CLASSNAME);
+		// setText("<%= componentName %> sets the text via <%= componentName %>Connector using <%= componentName %>State");
+		setStyleName(CLASSNAME);
 
-    }
+	}
 
 }

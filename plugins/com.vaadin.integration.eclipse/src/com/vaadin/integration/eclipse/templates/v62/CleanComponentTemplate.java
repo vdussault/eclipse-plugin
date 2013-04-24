@@ -26,7 +26,7 @@ public class CleanComponentTemplate implements Template {
   protected final String TEXT_3 = " widget." + NL + " */" + NL + " @com.vaadin.ui.ClientWidget(";
   protected final String TEXT_4 = ".client.ui.V";
   protected final String TEXT_5 = ".class)" + NL + "public class ";
-  protected final String TEXT_6 = " extends AbstractComponent {" + NL + " " + NL + "    @Override" + NL + "    public void paintContent(PaintTarget target) throws PaintException {" + NL + "        super.paintContent(target);" + NL + "" + NL + "    }" + NL + "" + NL + "    /**" + NL + "     * Receive and handle events and other variable changes from the client." + NL + "     * " + NL + "     * {@inheritDoc}" + NL + "     */" + NL + "    @Override" + NL + "    public void changeVariables(Object source, Map<String, Object> variables) {" + NL + "        super.changeVariables(source, variables);" + NL + "" + NL + "    }" + NL + "" + NL + "}" + NL;
+  protected final String TEXT_6 = " extends AbstractComponent {" + NL + " " + NL + "\t@Override" + NL + "\tpublic void paintContent(PaintTarget target) throws PaintException {" + NL + "\t\tsuper.paintContent(target);" + NL + "" + NL + "\t}" + NL + "" + NL + "\t/**" + NL + "\t * Receive and handle events and other variable changes from the client." + NL + "\t * " + NL + "\t * {@inheritDoc}" + NL + "\t */" + NL + "\t@Override" + NL + "\tpublic void changeVariables(Object source, Map<String, Object> variables) {" + NL + "\t\tsuper.changeVariables(source, variables);" + NL + "" + NL + "\t}" + NL + "" + NL + "}" + NL;
   protected final String TEXT_7 = NL;
 
     private String target = null;

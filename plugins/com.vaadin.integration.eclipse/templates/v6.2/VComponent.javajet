@@ -51,9 +51,9 @@ public class <%= typeName %> extends Widget implements Paintable, ClickHandler {
 		addDomHandler(this, ClickEvent.getType());
 	}
 
-    /**
-     * Called whenever an update is received from the server 
-     */
+	/**
+	 * Called whenever an update is received from the server 
+	 */
 	public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
 		// This call should be made first. 
 		// It handles sizes, captions, tooltips, etc. automatically.
@@ -80,13 +80,13 @@ public class <%= typeName %> extends Widget implements Paintable, ClickHandler {
 		
 	}
 
-    /**
-     * Called when a native click event is fired.
-     * 
-     * @param event
-     *            the {@link ClickEvent} that was fired
-     */
-     public void onClick(ClickEvent event) {
+	/**
+	 * Called when a native click event is fired.
+	 * 
+	 * @param event
+	 *            the {@link ClickEvent} that was fired
+	 */
+	public void onClick(ClickEvent event) {
 		// Send a variable change to the server side component so it knows the widget has been clicked
 		String button = "left click";
 		// The last parameter (immediate) tells that the update should be sent to the server

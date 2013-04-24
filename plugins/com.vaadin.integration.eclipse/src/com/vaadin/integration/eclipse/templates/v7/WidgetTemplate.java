@@ -23,12 +23,12 @@ public class WidgetTemplate implements Template {
   public final String NL = nl == null ? (System.getProperties().getProperty("line.separator")) : nl;
   protected final String TEXT_1 = "package ";
   protected final String TEXT_2 = ";" + NL + "" + NL + "import com.google.gwt.user.client.ui.Label;" + NL + "" + NL + "// TODO extend any GWT Widget" + NL + "public class ";
-  protected final String TEXT_3 = " extends Label {" + NL + "" + NL + "    public static final String CLASSNAME = \"";
-  protected final String TEXT_4 = "\";" + NL + "" + NL + "    public ";
-  protected final String TEXT_5 = "() {" + NL + "" + NL + "        // setText(\"";
+  protected final String TEXT_3 = " extends Label {" + NL + "" + NL + "\tpublic static final String CLASSNAME = \"";
+  protected final String TEXT_4 = "\";" + NL + "" + NL + "\tpublic ";
+  protected final String TEXT_5 = "() {" + NL + "" + NL + "\t\t// setText(\"";
   protected final String TEXT_6 = " sets the text via ";
   protected final String TEXT_7 = "Connector using ";
-  protected final String TEXT_8 = "State\");" + NL + "        setStyleName(CLASSNAME);" + NL + "" + NL + "    }" + NL + "" + NL + "}";
+  protected final String TEXT_8 = "State\");" + NL + "\t\tsetStyleName(CLASSNAME);" + NL + "" + NL + "\t}" + NL + "" + NL + "}";
 
     private String target = null;
     private String fileName = null;

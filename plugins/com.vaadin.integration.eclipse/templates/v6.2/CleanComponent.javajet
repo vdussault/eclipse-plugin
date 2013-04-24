@@ -19,22 +19,22 @@ import com.vaadin.ui.AbstractComponent;
  @com.vaadin.ui.ClientWidget(<%= widgetsetPackage %>.client.ui.V<%= typeName %>.class)
 public class <%= typeName %> extends AbstractComponent {
  
-    @Override
-    public void paintContent(PaintTarget target) throws PaintException {
-        super.paintContent(target);
+	@Override
+	public void paintContent(PaintTarget target) throws PaintException {
+		super.paintContent(target);
 
-    }
+	}
 
-    /**
-     * Receive and handle events and other variable changes from the client.
-     * 
-     * {@inheritDoc}
-     */
-    @Override
-    public void changeVariables(Object source, Map<String, Object> variables) {
-        super.changeVariables(source, variables);
+	/**
+	 * Receive and handle events and other variable changes from the client.
+	 * 
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void changeVariables(Object source, Map<String, Object> variables) {
+		super.changeVariables(source, variables);
 
-    }
+	}
 
 }
 

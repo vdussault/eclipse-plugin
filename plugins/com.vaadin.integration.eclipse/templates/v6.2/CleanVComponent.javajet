@@ -42,9 +42,9 @@ public class <%= typeName %> extends Widget implements Paintable {
 		setStyleName(CLASSNAME);
 	}
 
-    /**
-     * Called whenever an update is received from the server 
-     */
+	/**
+	 * Called whenever an update is received from the server 
+	 */
 	public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
 		// This call should be made first. 
 		// It handles sizes, captions, tooltips, etc. automatically.

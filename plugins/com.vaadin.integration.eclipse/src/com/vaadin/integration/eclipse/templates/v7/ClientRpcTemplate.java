@@ -23,7 +23,7 @@ public class ClientRpcTemplate implements Template {
   public final String NL = nl == null ? (System.getProperties().getProperty("line.separator")) : nl;
   protected final String TEXT_1 = "package ";
   protected final String TEXT_2 = ";" + NL + "" + NL + "import com.vaadin.shared.communication.ClientRpc;" + NL + "" + NL + "public interface ";
-  protected final String TEXT_3 = " extends ClientRpc {" + NL + "" + NL + "    // TODO example API" + NL + "    public void alert(String message);" + NL + "" + NL + "}";
+  protected final String TEXT_3 = " extends ClientRpc {" + NL + "" + NL + "\t// TODO example API" + NL + "\tpublic void alert(String message);" + NL + "" + NL + "}";
 
     private String target = null;
     private String fileName = null;

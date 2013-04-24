@@ -23,7 +23,7 @@ public class ServerRpcTemplate implements Template {
   public final String NL = nl == null ? (System.getProperties().getProperty("line.separator")) : nl;
   protected final String TEXT_1 = "package ";
   protected final String TEXT_2 = ";" + NL + "" + NL + "import com.vaadin.shared.MouseEventDetails;" + NL + "import com.vaadin.shared.communication.ServerRpc;" + NL + "" + NL + "public interface ";
-  protected final String TEXT_3 = " extends ServerRpc {" + NL + "" + NL + "    // TODO example API" + NL + "    public void clicked(MouseEventDetails mouseDetails);" + NL + "" + NL + "}";
+  protected final String TEXT_3 = " extends ServerRpc {" + NL + "" + NL + "\t// TODO example API" + NL + "\tpublic void clicked(MouseEventDetails mouseDetails);" + NL + "" + NL + "}";
   protected final String TEXT_4 = NL;
 
     private String target = null;

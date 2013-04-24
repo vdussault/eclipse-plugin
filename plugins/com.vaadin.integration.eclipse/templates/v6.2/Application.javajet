@@ -12,13 +12,13 @@ import com.vaadin.ui.*;
  */
 public class <%= uiOrApplicationClass %> extends Application {
 
-    @Override
-    public void init() {
-        Window mainWindow = new Window("<%= applicationName %>");
-        Label label = new Label("Hello Vaadin user");
-        mainWindow.addComponent(label);
-        setMainWindow(mainWindow);
-    }
+	@Override
+	public void init() {
+		Window mainWindow = new Window("<%= applicationName %>");
+		Label label = new Label("Hello Vaadin user");
+		mainWindow.addComponent(label);
+		setMainWindow(mainWindow);
+	}
 
 }
 

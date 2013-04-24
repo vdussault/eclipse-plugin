@@ -24,7 +24,7 @@ public class StateTemplate implements Template {
   protected final String TEXT_1 = "package ";
   protected final String TEXT_2 = ";" + NL + "" + NL + "public class ";
   protected final String TEXT_3 = " extends ";
-  protected final String TEXT_4 = " {" + NL + "" + NL + "    // TODO example state" + NL + "    public String text = \"This is ";
+  protected final String TEXT_4 = " {" + NL + "" + NL + "\t// TODO example state" + NL + "\tpublic String text = \"This is ";
   protected final String TEXT_5 = "\";" + NL + "" + NL + "}";
 
     private String target = null;

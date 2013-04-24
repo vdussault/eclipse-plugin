@@ -9,7 +9,7 @@ package <%= target %>;
 
 public class <%= typeName %> extends <%= stateExtends %> {
 
-    // TODO example state
-    public String text = "This is <%= componentName %>";
+	// TODO example state
+	public String text = "This is <%= componentName %>";
 
 }
