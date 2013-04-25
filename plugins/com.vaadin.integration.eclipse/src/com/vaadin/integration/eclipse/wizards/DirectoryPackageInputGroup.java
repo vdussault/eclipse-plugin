@@ -122,8 +122,8 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
      * Get the elements to select by default for a Java project.
      * 
      * These include the source directories of the project, the class
-     * directories of the project, WebContent/META-INF and
-     * WebContent/VAADIN/themes .
+     * directories of the project, WebContent/META-INF, WebContent/VAADIN/themes
+     * and WebContent/VAADIN/addons.
      * 
      * @param javaProject
      * @return List of elements to select (IFolder, IPackageFragmentRoot etc.)
@@ -158,6 +158,11 @@ class DirectoryPackageInputGroup extends CheckboxTreeAndListGroup {
             IFolder themesFolder = ProjectUtil.getThemesFolder(project);
             if (themesFolder.exists()) {
                 result.add(themesFolder);
+            }
+
+            IFolder addonsFolder = ProjectUtil.getAddonsFolder(project);
+            if (addonsFolder.exists()) {
+                result.add(addonsFolder);
             }
 
             // Select META-INF to include also everything else than the manifest

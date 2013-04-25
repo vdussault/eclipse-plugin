@@ -150,6 +150,14 @@ public class ProjectUtil {
                 .getFolder(VAADIN).getFolder(themes);
     }
 
+    public static IFolder getAddonsFolder(IProject project)
+            throws CoreException {
+        String VAADIN = VaadinPlugin.VAADIN_RESOURCE_DIRECTORY;
+        String addons = VaadinPlugin.VAADIN_ADDON_THEME_DIRECTORY;
+        return ProjectUtil.getWebContentFolder(project.getProject())
+                .getFolder(VAADIN).getFolder(addons);
+    }
+
     public static IFolder getSrcFolder(IProject project) throws CoreException {
         try {
             IJavaProject javaProject = JavaCore.create(project);
