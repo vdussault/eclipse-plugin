@@ -1405,7 +1405,7 @@ public class VaadinPluginUtil {
                                 .toLowerCase();
                         if (extension.equals("scss") || extension.equals("css")) {
 
-                            if (!"addons.scss".equals(file.getName())) {
+                            if ("addons.scss".equals(file.getName())) {
                                 // Ignore any addons.scss
                                 continue;
                             }
