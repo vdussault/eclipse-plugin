@@ -142,7 +142,7 @@ public class NewThemeWizard extends Wizard implements INewWizard {
 
             final IFile[] files = ThemesUtil.createTheme(jproject, themeName,
                     scssTheme, new SubProgressMonitor(monitor, 1),
-                    AddonStylesImporter.supported(project));
+                    AddonStylesImporter.isSupported(project));
 
             monitor.setTaskName("Modifying Java file(s) to use theme...");
             // update selected application/UI classes

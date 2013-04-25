@@ -1386,10 +1386,8 @@ public class VaadinPluginUtil {
     public static String findStylesheetsString(IJavaProject jProject)
             throws CoreException {
 
-        IFolder defaultAddonStylesDir = ProjectUtil
-                .getWebContentFolder(jProject.getProject())
-                .getFolder(VaadinPlugin.VAADIN_RESOURCE_DIRECTORY)
-                .getFolder(VaadinPlugin.VAADIN_ADDON_THEME_DIRECTORY);
+        IFolder defaultAddonStylesDir = ProjectUtil.getAddonsFolder(jProject
+                .getProject());
 
         StringBuilder stylesheets = new StringBuilder();
       
@@ -1406,6 +1404,12 @@ public class VaadinPluginUtil {
                         String extension = file.getFileExtension()
                                 .toLowerCase();
                         if (extension.equals("scss") || extension.equals("css")) {
+
+                            if (!"addons.scss".equals(file.getName())) {
+                                // Ignore any addons.scss
+                                continue;
+                            }
+
                             if (stylesheets.length() > 0) {
                                 // Comma separated list
                                 stylesheets.append(",");

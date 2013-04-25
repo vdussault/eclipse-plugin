@@ -23,7 +23,7 @@ public class AddonStylesBuilder extends IncrementalProjectBuilder {
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
             throws CoreException {
         IProject project = getProject();
-        if (AddonStylesImporter.supported(project)) {
+        if (AddonStylesImporter.isSupported(project)) {
             IFolder themes = ProjectUtil.getThemesFolder(project);
             if (themes.exists()) {
                 for (IResource theme : themes.members()) {

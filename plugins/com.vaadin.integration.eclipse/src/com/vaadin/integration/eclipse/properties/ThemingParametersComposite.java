@@ -44,7 +44,7 @@ public class ThemingParametersComposite extends Composite {
 
     public void setProject(IProject project) {
         this.project = project;
-        boolean suspendend = AddonStylesImporter.suspended(project);
+        boolean suspendend = AddonStylesImporter.isSuspended(project);
         suspendAddonThemeScanning.setSelection(suspendend);
     }
 

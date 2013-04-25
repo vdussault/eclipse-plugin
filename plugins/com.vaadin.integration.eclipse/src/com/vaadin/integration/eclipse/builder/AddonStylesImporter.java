@@ -27,7 +27,7 @@ public class AddonStylesImporter {
      * @return
      *          Returns true if project supports the addon importer
      */
-    public static boolean supported(IProject project) {
+    public static boolean isSupported(IProject project) {
         return VaadinPluginUtil.isVaadinFeatureTypeSupported(
                 VaadinPlugin.ADDON_IMPORTER_CLASS, project);
     }
@@ -39,7 +39,7 @@ public class AddonStylesImporter {
      *            The project
      * @return True if the addon scanning should be suspended
      */
-    public static boolean suspended(IProject project) {
+    public static boolean isSuspended(IProject project) {
         return PreferenceUtil.get(project).isAddonThemeScanningSuspended();
     }
 
@@ -57,7 +57,7 @@ public class AddonStylesImporter {
             final IProgressMonitor monitor, IFolder targetDir)
             throws CoreException, IOException {
 
-        if (AddonStylesImporter.suspended(project)) {
+        if (AddonStylesImporter.isSuspended(project)) {
             return;
         }
 

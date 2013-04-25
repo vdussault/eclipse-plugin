@@ -242,8 +242,8 @@ public class VaadinProjectPropertyPage extends PropertyPage {
         boolean suspended = widgetsetComposite.areWidgetsetBuildsSuspended();
         WidgetsetBuildManager.setWidgetsetBuildsSuspended(project, suspended);
 
-        if (AddonStylesImporter.supported(project)) {
-            boolean wasSuspended = AddonStylesImporter.suspended(project);
+        if (AddonStylesImporter.isSupported(project)) {
+            boolean wasSuspended = AddonStylesImporter.isSuspended(project);
             suspended = themingComposite.isAddonScanningSuspended();
             AddonStylesImporter.setSuspended(project, suspended);
             if (wasSuspended && !suspended) {
@@ -252,16 +252,24 @@ public class VaadinProjectPropertyPage extends PropertyPage {
                     // suspended
                     // and now again is enabled
                     IFolder themes = ProjectUtil.getThemesFolder(project);
-                    for (IResource theme : themes.members()) {
-                        IFolder themeFolder = (IFolder) theme;
-                        try {
-                            IProgressMonitor monitor = new NullProgressMonitor();
-                            AddonStylesImporter.run(project, monitor,
-                                    themeFolder);
-                            themeFolder.refreshLocal(IResource.DEPTH_INFINITE,
-                                    new SubProgressMonitor(monitor, 1));
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                    if (themes.exists()) {
+                        for (IResource theme : themes.members()) {
+                            if (theme instanceof IFolder) {
+                                IFolder themeFolder = (IFolder) theme;
+                                try {
+                                    IProgressMonitor monitor = new NullProgressMonitor();
+                                    AddonStylesImporter.run(project, monitor,
+                                            themeFolder);
+                                    themeFolder.refreshLocal(
+                                            IResource.DEPTH_INFINITE,
+                                            new SubProgressMonitor(monitor, 1));
+                                } catch (IOException e) {
+                                    ErrorUtil.handleBackgroundException(
+                                            IStatus.WARNING,
+                                            "Failed to import addon theme folder "
+                                                    + themeFolder.getName(), e);
+                                }
+                            }
                         }
                     }
 
@@ -348,7 +356,7 @@ public class VaadinProjectPropertyPage extends PropertyPage {
         modifiedLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
         try {
-            if (AddonStylesImporter.supported(getVaadinProject())) {
+            if (AddonStylesImporter.isSupported(getVaadinProject())) {
 
                 group = new Group(composite, SWT.NONE);
                 group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -360,7 +368,8 @@ public class VaadinProjectPropertyPage extends PropertyPage {
                 themingComposite.createContents();
             }
         } catch (CoreException e) {
-
+            ErrorUtil.handleBackgroundException(IStatus.WARNING,
+                    "Failed to create theming option group", e);
         }
 
         group = new Group(composite, SWT.NONE);

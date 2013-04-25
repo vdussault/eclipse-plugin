@@ -237,7 +237,7 @@ public class DirectoryPackageWizardPage extends
         stylesheetsText.addListener(SWT.Modify, this);
 
         label = new Label(manifestGroup, SWT.NONE);
-        label.setText("    Comma separated list of stylesheet included in the add-on. (e.g VAADIN/addons/myaddon/myaddon.scss)");
+        label.setText("    Comma separated list of stylesheets included in the add-on. (e.g VAADIN/addons/myaddon/myaddon.scss)");
         gd = new GridData(SWT.LEFT, SWT.TOP, true, false);
         gd.horizontalSpan = 2;
         label.setLayoutData(gd);
