@@ -1,8 +1,13 @@
 package com.vaadin.integration.eclipse.util;
 
 import java.io.IOException;
+import java.net.JarURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -576,6 +581,33 @@ public class ProjectUtil {
     public static boolean isGWTDependency(IJavaProject jproject, IPath path)
             throws CoreException {
         return LocalFileManager.isGWTDependency(path);
+    }
+
+    public static boolean hasManifestAttribute(String attribute,
+            IPath resource) {
+        if (resource != null && resource.toPortableString().endsWith(".jar")) {
+            JarFile jarFile = null;
+            try {
+                URL url = new URL("file:" + resource.toPortableString());
+                url = new URL("jar:" + url.toExternalForm() + "!/");
+                JarURLConnection conn = (JarURLConnection) url.openConnection();
+                jarFile = conn.getJarFile();
+                Manifest manifest = jarFile.getManifest();
+                VaadinPluginUtil.closeJarFile(jarFile);
+                jarFile = null;
+                Attributes mainAttributes = manifest.getMainAttributes();
+                if (mainAttributes.getValue(attribute) != null) {
+                    return true;
+                }
+            } catch (Throwable t) {
+                ErrorUtil.handleBackgroundException(IStatus.INFO,
+                        "Could not access JAR when checking for attribute "
+                                + attribute, t);
+            } finally {
+                VaadinPluginUtil.closeJarFile(jarFile);
+            }
+        }
+        return false;
     }
 
 }

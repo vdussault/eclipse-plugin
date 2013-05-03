@@ -61,6 +61,7 @@ public class ThemesUtil {
                 IFile stylesFile = themeFolder.getFile(new Path("styles.scss"));
                 IFile themeFile = themeFolder.getFile(new Path(themeName
                         + ".scss"));
+                IFile addonsFile = themeFolder.getFile(new Path("addons.scss"));
 
                 try {
                     String stylesContent = ThemesUtil.getScssStylesContent(
@@ -77,6 +78,11 @@ public class ThemesUtil {
                     themeFile.create(stream, true, new SubProgressMonitor(
                             monitor, 1));
                     stream.close();
+
+                    String addonsContent = getAdddonsScssContent();
+                    stream = openStringStream(addonsContent);
+                    addonsFile.create(stream, true, new SubProgressMonitor(
+                            monitor, 1));
 
                 } catch (IOException e) {
                 }
@@ -154,6 +160,19 @@ public class ThemesUtil {
         sb.append("  @include " + baseTheme + ";\n\n");
         sb.append("  /* Insert your theme rules here */\n");
         sb.append("}\n");
+        return sb.toString();
+    }
+
+    private static String getAdddonsScssContent() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("/*This file is automatically managed and "
+                + "will be overwritten from time to time.*/\n");
+        sb.append("/* Do not manually edit this file. */\n");
+        sb.append("\n");
+        sb.append("/* Import and include this mixin into your project theme to include the addon themes */\n");
+        sb.append("@mixin addons {");
+        sb.append("}");
+
         return sb.toString();
     }
 

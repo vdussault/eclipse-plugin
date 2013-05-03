@@ -574,28 +574,7 @@ public class WidgetsetUtil {
     }
 
     public static boolean isWidgetsetPackage(IPath resource) {
-        if (resource != null && resource.toPortableString().endsWith(".jar")) {
-            JarFile jarFile = null;
-            try {
-                URL url = new URL("file:" + resource.toPortableString());
-                url = new URL("jar:" + url.toExternalForm() + "!/");
-                JarURLConnection conn = (JarURLConnection) url.openConnection();
-                jarFile = conn.getJarFile();
-                Manifest manifest = jarFile.getManifest();
-                VaadinPluginUtil.closeJarFile(jarFile);
-                jarFile = null;
-                Attributes mainAttributes = manifest.getMainAttributes();
-                if (mainAttributes.getValue("Vaadin-Widgetsets") != null) {
-                    return true;
-                }
-            } catch (Throwable t) {
-                ErrorUtil.handleBackgroundException(IStatus.INFO,
-                        "Could not access JAR when checking for widgetsets", t);
-            } finally {
-                VaadinPluginUtil.closeJarFile(jarFile);
-            }
-        }
-        return false;
+        return ProjectUtil.hasManifestAttribute("Vaadin-Widgetsets", resource);
     }
 
     private static boolean isNeededForWidgetsetCompilation(IPath path) {
