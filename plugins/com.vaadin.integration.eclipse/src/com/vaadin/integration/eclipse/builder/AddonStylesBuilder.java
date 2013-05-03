@@ -39,14 +39,8 @@ public class AddonStylesBuilder extends IncrementalProjectBuilder {
             IResource resource = delta.getResource();
             int kind = delta.getKind();
 
-            if (isAddonPackageWithStyles(resource.getRawLocation())) {
-                if (kind == IResourceDelta.ADDED
-                        || kind == IResourceDelta.CHANGED 
-                        || kind == IResourceDelta.REMOVED) {
-                    /*
-                     * If a JAR which has the directory package manifest is
-                     * added to the workspace run the addon imports.
-                     */
+            if (kind == IResourceDelta.ADDED || kind == IResourceDelta.CHANGED) {
+                if (isAddonPackageWithStyles(resource.getRawLocation())) {
                     run(monitor);
                 }
             } else if (kind == IResourceDelta.REMOVED && isJar(resource)) {
