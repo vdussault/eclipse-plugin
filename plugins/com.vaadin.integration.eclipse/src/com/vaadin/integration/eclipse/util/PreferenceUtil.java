@@ -126,7 +126,9 @@ public class PreferenceUtil {
      */
     public boolean setWidgetsetCompilationSuspended(boolean suspended) {
         boolean oldValue = isWidgetsetCompilationSuspended();
-        prefStore.setValue(PREFERENCES_WIDGETSET_SUSPENDED, suspended);
+        // need to store as String because default value is "true"
+        prefStore.setValue(PREFERENCES_WIDGETSET_SUSPENDED,
+                Boolean.toString(suspended));
         return oldValue != suspended;
     }
 
@@ -147,7 +149,9 @@ public class PreferenceUtil {
      */
     public boolean setWidgetsetCompilationVerboseMode(boolean verbose) {
         boolean oldValue = isWidgetsetCompilationVerboseMode();
-        prefStore.setValue(PREFERENCES_WIDGETSET_VERBOSE, verbose);
+        // need to store as String because default value is "true"
+        prefStore.setValue(PREFERENCES_WIDGETSET_VERBOSE,
+                Boolean.toString(verbose));
         return oldValue != verbose;
 
     }
