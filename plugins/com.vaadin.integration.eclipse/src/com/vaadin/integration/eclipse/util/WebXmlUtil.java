@@ -21,6 +21,8 @@ import org.eclipse.jst.j2ee.webapplication.ServletType;
 import org.eclipse.jst.j2ee.webapplication.WebApp;
 import org.eclipse.jst.j2ee.webapplication.WebapplicationFactory;
 
+import com.vaadin.integration.eclipse.util.data.AbstractVaadinVersion;
+
 @SuppressWarnings("restriction")
 public class WebXmlUtil {
 
@@ -37,6 +39,8 @@ public class WebXmlUtil {
 
     public static final String VAADIN_UI_CLASS_PARAMETER = "UI";
 
+    public static final String VAADIN_LEGACY_TOSTRING_PARAMETER = "legacyPropertyToString";
+
     public static final String VAADIN_WIDGETSET_PARAMETER = "widgetset";
 
     /**
@@ -49,14 +53,13 @@ public class WebXmlUtil {
      * @param urlPattern
      * @param servletClassName
      * @param addVaadinMapping
-     * @param uiMapping
-     *            true to create a UI mapping (Vaadin 7) instead of an
-     *            Application mapping
+     * @param vaadinVersion
      */
     @SuppressWarnings("unchecked")
     public static void addServlet(WebApp webApp, String applicationName,
             String applicationClass, String urlPattern,
-            String servletClassName, boolean addVaadinMapping, boolean uiMapping) {
+            String servletClassName, boolean addVaadinMapping,
+            AbstractVaadinVersion vaadinVersion) {
 
         /* Create servlet type compatible with Vaadin */
         ServletType servletType = WebapplicationFactory.eINSTANCE
@@ -68,10 +71,20 @@ public class WebXmlUtil {
         servlet.setServletName(applicationName);
         servlet.setWebType(servletType);
 
+        boolean uiMapping = VersionUtil.isVaadin7(vaadinVersion);
         if (uiMapping) {
             // Vaadin 7 UI instead of a Vaadin 6 Application
             addServletInitParameter(webApp, servlet, VAADIN_UI_CLASS_PARAMETER,
                     applicationClass, "Vaadin UI class to use");
+
+            if (VersionUtil.isVaadin71(vaadinVersion)) {
+                addServletInitParameter(
+                        webApp,
+                        servlet,
+                        VAADIN_LEGACY_TOSTRING_PARAMETER,
+                        "false",
+                        "Legacy mode to return the value of the property as a string from AbstractProperty.toString()");
+            }
         } else {
             // Vaadin 6 Application
             addServletInitParameter(webApp, servlet,

@@ -159,6 +159,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
 
             /* Copy Vaadin JAR to project's WEB-INF/lib folder */
             boolean vaadin7 = VersionUtil.isVaadin7(vaadinVersion);
+            boolean vaadin71 = VersionUtil.isVaadin71(vaadinVersion);
             if (!vaadin7 && vaadinVersion instanceof LocalVaadinVersion) {
                 // Vaadin 7 uses Ivy for dependencies
                 ProjectDependencyManager.ensureVaadinLibraries(project,
@@ -225,8 +226,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
                     }
 
                     // Addon styles only supported on Vaadin 7.1 and above
-                    boolean supportsAddonStyles = VersionUtil
-                            .isVaadin71(vaadinVersion);
+                    boolean supportsAddonStyles = vaadin71;
 
                     /* Create theme */
                     ThemesUtil.createTheme(jProject, applicationTheme, true,
@@ -287,7 +287,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
                     WebXmlUtil.addServlet(artifact.getWebApp(),
                             applicationName, applicationPackage + "."
                                     + applicationClass, servletPath,
-                            servletClassName, createPortlet, vaadin7);
+                            servletClassName, createPortlet, vaadinVersion);
                     WebXmlUtil.addContextParameter(artifact.getWebApp(),
                             VAADIN_PRODUCTION_MODE, "false",
                             VAADIN_PRODUCTION_MODE_DESCRIPTION);
