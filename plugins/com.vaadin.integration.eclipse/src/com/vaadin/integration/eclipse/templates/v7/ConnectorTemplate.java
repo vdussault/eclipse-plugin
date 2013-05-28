@@ -45,7 +45,7 @@ public class ConnectorTemplate implements Template {
   protected final String TEXT_22 = ".class, this);";
   protected final String TEXT_23 = NL + "\t" + NL + "\tpublic ";
   protected final String TEXT_24 = "() {";
-  protected final String TEXT_25 = "    " + NL + "\t\tregisterRpc(";
+  protected final String TEXT_25 = NL + "\t\tregisterRpc(";
   protected final String TEXT_26 = ".class, new ";
   protected final String TEXT_27 = "() {" + NL + "\t\t\tpublic void alert(String message) {" + NL + "\t\t\t\t// TODO Do something useful" + NL + "\t\t\t\tWindow.alert(message);" + NL + "\t\t\t}" + NL + "\t\t});";
   protected final String TEXT_28 = NL + NL + "\t\t// TODO ServerRpc usage example, do something useful instead" + NL + "\t\tgetWidget().addClickHandler(new ClickHandler() {" + NL + "\t\t\tpublic void onClick(ClickEvent event) {" + NL + "\t\t\t\tfinal MouseEventDetails mouseDetails = MouseEventDetailsBuilder" + NL + "\t\t\t\t\t.buildMouseEventDetails(event.getNativeEvent()," + NL + "\t\t\t\t\t\t\t\tgetWidget().getElement());" + NL + "\t\t\t\trpc.clicked(mouseDetails);" + NL + "\t\t\t}" + NL + "\t\t});";

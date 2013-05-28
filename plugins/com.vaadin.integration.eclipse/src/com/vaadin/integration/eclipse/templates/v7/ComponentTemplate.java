@@ -37,7 +37,7 @@ public class ComponentTemplate implements Template {
   protected final String TEXT_14 = " {" + NL;
   protected final String TEXT_15 = NL + "\tprivate ";
   protected final String TEXT_16 = "ServerRpc rpc = new ";
-  protected final String TEXT_17 = "ServerRpc() {" + NL + "\t\tprivate int clickCount = 0;" + NL + "        " + NL + "\t\tpublic void clicked(MouseEventDetails mouseDetails) {";
+  protected final String TEXT_17 = "ServerRpc() {" + NL + "\t\tprivate int clickCount = 0;" + NL + "" + NL + "\t\tpublic void clicked(MouseEventDetails mouseDetails) {";
   protected final String TEXT_18 = NL + "\t\t\t// nag every 5:th click using RPC" + NL + "\t\t\tif (++clickCount % 5 == 0) {" + NL + "\t\t\t\tgetRpcProxy(";
   protected final String TEXT_19 = "ClientRpc.class).alert(" + NL + "\t\t\t\t\t\t\"Ok, that's enough!\");" + NL + "\t\t\t}";
   protected final String TEXT_20 = NL + "\t\t\t// update shared state" + NL + "\t\t\tgetState().text = \"You have clicked \" + clickCount + \" times\";" + NL + "\t\t}" + NL + "\t};";

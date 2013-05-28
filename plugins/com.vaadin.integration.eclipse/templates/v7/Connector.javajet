@@ -49,7 +49,7 @@ public class <%= typeName %> extends AbstractComponentConnector {
 <% } %>
 	
 	public <%= typeName %>() {
-<% if (t.hasClientRpc()) { %>    
+<% if (t.hasClientRpc()) { %>
 		registerRpc(<%= clientRpcName %>.class, new <%= clientRpcName %>() {
 			public void alert(String message) {
 				// TODO Do something useful

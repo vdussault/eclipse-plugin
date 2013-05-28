@@ -49,8 +49,8 @@ public class <%= typeName %> extends Widget implements Paintable {
 		// This call should be made first. 
 		// It handles sizes, captions, tooltips, etc. automatically.
 		if (client.updateComponent(this, uidl, true)) {
-		    // If client.updateComponent returns true there has been no changes and we
-		    // do not need to update anything.
+			// If client.updateComponent returns true there has been no changes and we
+			// do not need to update anything.
 			return;
 		}
 

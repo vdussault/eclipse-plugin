@@ -24,7 +24,7 @@ public class <%= typeName %> extends <%= componentExtends %> {
 <% if (t.hasServerRpc()) { %>
 	private <%= typeName %>ServerRpc rpc = new <%= typeName %>ServerRpc() {
 		private int clickCount = 0;
-        
+
 		public void clicked(MouseEventDetails mouseDetails) {
  <% if (t.hasClientRpc()) { %>
 			// nag every 5:th click using RPC
