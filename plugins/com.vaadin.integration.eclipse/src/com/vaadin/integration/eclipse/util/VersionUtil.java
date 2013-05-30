@@ -250,7 +250,7 @@ public class VersionUtil {
      * @return
      */
     public static boolean isVaadin71(AbstractVaadinVersion vaadinVersion) {
-        return isVaadin7MinorVersionString(vaadinVersion.getVersionNumber(), 1);
+        return isVaadin71VersionString(vaadinVersion.getVersionNumber());
     }
 
     /**
@@ -262,32 +262,28 @@ public class VersionUtil {
      * @return
      */
     public static boolean isVaadin7VersionString(String vaadinVersion) {
-        if (null == vaadinVersion || vaadinVersion.indexOf(".") < 0) {
-            return false;
-        }
-        String majorVersionString = vaadinVersion.substring(0,
-                vaadinVersion.indexOf("."));
-        try {
-            int majorVersion = Integer.parseInt(majorVersionString);
-            return majorVersion >= 7;
-        } catch (NumberFormatException e) {
-            return false;
-        }
+        return isAtLeastVersionString(vaadinVersion, 7, 0);
     }
 
-    private static boolean isVaadin7MinorVersionString(String vaadinVersion,
-            int minorVersion) {
-        if (null == vaadinVersion || vaadinVersion.indexOf(".") < 0) {
+    public static boolean isVaadin71VersionString(String vaadinVersion) {
+        return isAtLeastVersionString(vaadinVersion, 7, 1);
+    }
+
+    private static boolean isAtLeastVersionString(String vaadinVersion,
+            int majorVersion, int minorVersion) {
+        if (null == vaadinVersion) {
             return false;
         }
-
+        String[] versionStrings = vaadinVersion.split("[.-]");
+        if (versionStrings.length < 2) {
+            return false;
+        }
         try {
-            String version = vaadinVersion.split("-")[0];
-            String versionNumbers[] = version.split("\\.");
-            int major = Integer.parseInt(versionNumbers[0]);
-            int minor = Integer.parseInt(versionNumbers[1]);
-            return major >= 7 && minor >= minorVersion;
-        } catch (Exception e) {
+            int major = Integer.parseInt(versionStrings[0]);
+            int minor = Integer.parseInt(versionStrings[1]);
+            return major > majorVersion
+                    || (major == majorVersion && minor >= minorVersion);
+        } catch (NumberFormatException e) {
             return false;
         }
     }

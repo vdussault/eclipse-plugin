@@ -82,6 +82,7 @@ public class VaadinFacetInstallDataModelProvider extends
         names.add(VAADIN_VERSION);
         names.add(USE_LATEST_NIGHTLY);
         names.add(VAADIN_PROJECT_TYPE);
+        names.add(CREATE_PUSH_APPLICATION);
         return names;
     }
 
@@ -188,6 +189,8 @@ public class VaadinFacetInstallDataModelProvider extends
             return VaadinFacetUtils.VAADIN_FACET_ID;
         } else if (propertyName.equals(VAADIN_PROJECT_TYPE)) {
             return PROJECT_TYPE_SERVLET;
+        } else if (propertyName.equals(CREATE_PUSH_APPLICATION)) {
+            return Boolean.FALSE;
         }
         return super.getDefaultProperty(propertyName);
     }
@@ -205,7 +208,7 @@ public class VaadinFacetInstallDataModelProvider extends
     /**
      * Check if the currently selected version is Vaadin 7.
      * 
-     * @return true if Vaadin 7, false for earlier versions
+     * @return true if Vaadin 7 or later, false for earlier versions
      */
     private boolean isVaadin7Version() {
         Object versionObject = getProperty(VAADIN_VERSION);
@@ -214,6 +217,20 @@ public class VaadinFacetInstallDataModelProvider extends
                     .valueOf(versionObject));
         }
         return isVaadin7Facet();
+    }
+
+    /**
+     * Check if the currently selected version is Vaadin 7.1.
+     * 
+     * @return true if Vaadin 7.1 or later, false for earlier versions
+     */
+    private boolean isVaadin71Version() {
+        Object versionObject = getProperty(VAADIN_VERSION);
+        if (null != versionObject && !"".equals(versionObject)) {
+            return VersionUtil.isVaadin71VersionString(String
+                    .valueOf(versionObject));
+        }
+        return false;
     }
 
     /**
@@ -266,6 +283,8 @@ public class VaadinFacetInstallDataModelProvider extends
             if (null != propertyValue && !"".equals(propertyValue)) {
                 boolean isVaadin7Version = VersionUtil
                         .isVaadin7VersionString(String.valueOf(propertyValue));
+                boolean isVaadin71Version = VersionUtil
+                        .isVaadin71VersionString(String.valueOf(propertyValue));
                 Object classNameObject = getProperty(APPLICATION_CLASS);
                 if (null != classNameObject) {
                     String className = classNameObject.toString();
@@ -300,6 +319,13 @@ public class VaadinFacetInstallDataModelProvider extends
                     model.notifyPropertyChange(PORTLET_TITLE,
                             IDataModel.ENABLE_CHG);
                 }
+
+                if (!isVaadin71Version) {
+                    setProperty(CREATE_PUSH_APPLICATION, Boolean.FALSE);
+                }
+                // enable/disable push checkbox
+                model.notifyPropertyChange(CREATE_PUSH_APPLICATION,
+                        IDataModel.ENABLE_CHG);
             }
         } else if (PORTLET_VERSION.equals(propertyName)) {
             // for Vaadin 7, portlet 1.0 is not supported
@@ -383,6 +409,9 @@ public class VaadinFacetInstallDataModelProvider extends
         }
         if (USE_LATEST_NIGHTLY.equals(propertyName)) {
             return !isVaadin7Facet();
+        }
+        if (CREATE_PUSH_APPLICATION.equals(propertyName)) {
+            return isVaadin71Version();
         }
         return super.isPropertyEnabled(propertyName);
     }

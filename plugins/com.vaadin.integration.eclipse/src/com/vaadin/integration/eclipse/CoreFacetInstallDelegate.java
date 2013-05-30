@@ -207,9 +207,13 @@ public class CoreFacetInstallDelegate implements IDelegate,
                 if (vaadin7) {
                     // Vaadin 7 or newer: create a UI instead of an
                     // application
+                    boolean push = model
+                            .getBooleanProperty(CREATE_PUSH_APPLICATION);
+
                     String uiCode = VaadinPluginUtil.createUiClassSource(
                             applicationPackage, applicationName,
-                            applicationClass, applicationTheme);
+                            applicationClass, applicationTheme, vaadin71
+                                    && push);
 
                     /* Create the application class if it does not exist */
                     appPackage.createCompilationUnit(applicationFileName,
@@ -245,7 +249,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
 
                     if (vaadinVersion instanceof MavenVaadinVersion) {
                         setupIvy(jProject, (MavenVaadinVersion) vaadinVersion,
-                                monitor);
+                                vaadin71 && push, monitor);
                     }
                 } else {
                     // Vaadin 6: create an Application class
@@ -344,12 +348,15 @@ public class CoreFacetInstallDelegate implements IDelegate,
     }
 
     public static void setupIvy(IJavaProject jProject,
-            MavenVaadinVersion version, IProgressMonitor monitor)
+            MavenVaadinVersion version, boolean push, IProgressMonitor monitor)
             throws CoreException {
         Map<String, String> substitutions = Collections.singletonMap(
                 "VAADIN_VERSION", version.getVersionNumber());
+        boolean vaadin71 = VersionUtil.isVaadin71(version);
+        String templateName = (vaadin71 && push) ? "ivy/ivy-push.xml"
+                : "ivy/ivy.xml";
         VaadinPluginUtil.ensureFileFromTemplate(jProject, "ivy.xml",
-                "ivy/ivy.xml", substitutions);
+                templateName, substitutions);
 
         VaadinPluginUtil.ensureFileFromTemplate(jProject, "ivysettings.xml",
                 "ivy/ivysettings.xml");

@@ -195,7 +195,7 @@ public class VaadinPluginUtil {
         try {
             ApplicationTemplate t = ApplicationTemplate.class.newInstance();
             String src = t.generate(packageName, applicationName,
-                    applicationClass, null);
+                    applicationClass, null, false);
             return src;
         } catch (Exception e) {
             ErrorUtil.handleBackgroundException(
@@ -206,12 +206,12 @@ public class VaadinPluginUtil {
     }
 
     public static String createUiClassSource(String packageName,
-            String applicationName, String uiClass, String uiTheme)
+            String applicationName, String uiClass, String uiTheme, boolean push)
             throws CoreException {
         try {
             UITemplate t = UITemplate.class.newInstance();
             String src = t.generate(packageName, applicationName, uiClass,
-                    uiTheme);
+                    uiTheme, push);
             return src;
         } catch (Exception e) {
             ErrorUtil.handleBackgroundException(
@@ -1390,7 +1390,7 @@ public class VaadinPluginUtil {
                 .getProject());
 
         StringBuilder stylesheets = new StringBuilder();
-      
+
         /*
          * Check if there exists addon themes which implements the convention
          * that themes should be under WebContent/VAADIN/addons. If it exists,

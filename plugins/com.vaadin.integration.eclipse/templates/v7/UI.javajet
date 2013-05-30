@@ -4,6 +4,9 @@
 		skeleton="../javaapplicationgenerator.skeleton" %>
 package <%= applicationPackage %>;
 
+<% if (push) {%>
+import com.vaadin.annotations.Push;
+<% } %>
 <% if(uiTheme != null) {%>
 import com.vaadin.annotations.Theme;
 <% } %>
@@ -20,6 +23,9 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 <% if(uiTheme != null) {%>
 @Theme("<%= uiTheme %>")
+<% } %>
+<% if (push) {%>
+@Push
 <% } %>
 public class <%= uiOrApplicationClass %> extends UI {
 

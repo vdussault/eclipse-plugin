@@ -10,6 +10,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -104,6 +105,9 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
         DataModelSynchHelper vaadinFacetSynchHelper = new DataModelSynchHelper(
                 vaadinFacetDataModel);
 
+        final boolean vaadin7 = VaadinFacetUtils.VAADIN_70
+                .equals(getPrimaryFacetVersion());
+
         Label label = new Label(group, SWT.NONE);
         label.setLayoutData(gdhfill());
         label.setText("Deployment configuration:");
@@ -119,8 +123,7 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
         final VaadinVersionComposite versionComposite = new VaadinVersionComposite(
                 group, SWT.NULL);
         versionComposite.createContents();
-        versionComposite.setUseDependencyManagement(VaadinFacetUtils.VAADIN_70
-                .equals(getPrimaryFacetVersion()));
+        versionComposite.setUseDependencyManagement(vaadin7);
 
         versionComposite.setNewProject();
 
@@ -135,12 +138,23 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
             public void propertyChanged(DataModelEvent event) {
                 if (IFacetDataModelProperties.FACET_VERSION.equals(event
                         .getPropertyName())) {
-                    versionComposite
-                            .setUseDependencyManagement(VaadinFacetUtils.VAADIN_70
-                                    .equals(getPrimaryFacetVersion()));
+                    versionComposite.setUseDependencyManagement(vaadin7);
                 }
             }
         });
+
+        // if Vaadin 7 project, add and link push checkbox (enabled only for
+        // Vaadin 7.1 and later)
+        if (vaadin7) {
+            Button pushCheckbox = new Button(group, SWT.CHECK);
+            pushCheckbox
+                    .setText("Create a server push enabled application (Vaadin 7.1)");
+            pushCheckbox.setLayoutData(new GridData(GridData.FILL,
+                    GridData.BEGINNING, true, false));
+
+            synchHelper.synchCheckbox(pushCheckbox, CREATE_PUSH_APPLICATION,
+                    new Control[] {});
+        }
 
         return group;
     }
