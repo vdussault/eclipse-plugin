@@ -14,11 +14,13 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
 import org.osgi.service.prefs.BackingStoreException;
 
+import com.vaadin.integration.eclipse.IVaadinFacetInstallDataModelProperties;
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.configuration.VaadinProjectCreationDataModelProvider;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.PreferenceUtil;
+import com.vaadin.integration.eclipse.util.VersionUtil;
 
 /**
  * Vaadin top level project creation wizard.
@@ -74,38 +76,47 @@ public abstract class VaadinProjectWizard extends WebProjectWizard {
 
     @Override
     protected void postPerformFinish() throws InvocationTargetException {
-        // Ivy resolving might take a while the first time, info about this.
-        // Popup can be (globally) disabled by the user.
+        IDataModel model = getDataModel();
+        String vaadinVersion = model
+                .getStringProperty(IVaadinFacetInstallDataModelProperties.VAADIN_VERSION);
+        boolean vaadin7 = VersionUtil.isVaadin7VersionString(vaadinVersion);
+        if (vaadin7) {
+            // Ivy resolving might take a while the first time, info about this.
+            // Popup can be (globally) disabled by the user.
 
-        // InstanceScope = separate for each workspace.
-        // (ConfigurationScope would be shared between workspaces)
-        IEclipsePreferences prefs = new InstanceScope()
-                .getNode(VaadinPlugin.PLUGIN_ID);
-        if (!prefs.getBoolean(PreferenceUtil.PREFERENCES_IVYINFO_DISABLED,
-                false)) {
-            // MDWT should be able to save prefs, but this did not seem to work,
-            // so we do it 'manually'.
-            MessageDialogWithToggle d = MessageDialogWithToggle
-                    .openInformation(
-                            getShell(),
-                            "Resolving dependencies",
-                            "Vaadin jars and dependencies are automatically resolved and downloaded."
-                                    + "\n\nIf the selected version is not already on your system, "
-                                    + "this process might take several minutes."
-                                    + " During this time your project will not compile."
-                                    + "\n\nYou can follow the progress in the status bar (IvyDE resolve).",
-                            "Don't show this message again", false, null, null);
+            // InstanceScope = separate for each workspace.
+            // (ConfigurationScope would be shared between workspaces)
+            IEclipsePreferences prefs = new InstanceScope()
+                    .getNode(VaadinPlugin.PLUGIN_ID);
+            if (!prefs.getBoolean(PreferenceUtil.PREFERENCES_IVYINFO_DISABLED,
+                    false)) {
+                // MDWT should be able to save prefs, but this did not seem to
+                // work,
+                // so we do it 'manually'.
+                MessageDialogWithToggle d = MessageDialogWithToggle
+                        .openInformation(
+                                getShell(),
+                                "Resolving dependencies",
+                                "Vaadin jars and dependencies are automatically resolved and downloaded."
+                                        + "\n\nIf the selected version is not already on your system, "
+                                        + "this process might take several minutes."
+                                        + " During this time your project will not compile."
+                                        + "\n\nYou can follow the progress in the status bar (IvyDE resolve).",
+                                "Don't show this message again", false, null,
+                                null);
 
-            if (d.getToggleState()) {
-                prefs.putBoolean(PreferenceUtil.PREFERENCES_IVYINFO_DISABLED,
-                        true);
-                try {
-                    prefs.flush();
-                } catch (BackingStoreException e) {
-                    ErrorUtil.handleBackgroundException(e);
+                if (d.getToggleState()) {
+                    prefs.putBoolean(
+                            PreferenceUtil.PREFERENCES_IVYINFO_DISABLED, true);
+                    try {
+                        prefs.flush();
+                    } catch (BackingStoreException e) {
+                        ErrorUtil.handleBackgroundException(e);
+                    }
                 }
             }
         }
+
         super.postPerformFinish();
     }
 }
