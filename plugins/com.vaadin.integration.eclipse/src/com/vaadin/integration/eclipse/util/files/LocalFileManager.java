@@ -122,7 +122,7 @@ public class LocalFileManager {
      * @return
      * @throws CoreException
      */
-    private static IPath getConfigurationPath() throws CoreException {
+    public static IPath getConfigurationPath() throws CoreException {
         URL userLocation = Platform.getUserLocation().getURL();
         URL configurationLocation = Platform.getConfigurationLocation()
                 .getURL();

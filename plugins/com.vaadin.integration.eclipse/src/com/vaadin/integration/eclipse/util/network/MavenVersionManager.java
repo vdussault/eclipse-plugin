@@ -1,13 +1,21 @@
 package com.vaadin.integration.eclipse.util.network;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 
 import com.vaadin.integration.eclipse.util.ErrorUtil;
 import com.vaadin.integration.eclipse.util.data.MavenVaadinVersion;
+import com.vaadin.integration.eclipse.util.files.LocalFileManager;
 import com.vaadin.integration.eclipse.util.files.LocalFileManager.FileType;
 
 public class MavenVersionManager {
@@ -35,7 +43,15 @@ public class MavenVersionManager {
     public static synchronized List<MavenVaadinVersion> getAvailableVersions(
             boolean onlyRelease) throws CoreException {
         if (availableVersions == null) {
-            availableVersions = downloadAvailableVersionsList();
+            try {
+                availableVersions = downloadAvailableVersionsList();
+            } catch (CoreException e) {
+                ErrorUtil
+                        .handleBackgroundException(
+                                "Failed to retrieve available Vaadin 7 version list from server, using cached list",
+                                e);
+                availableVersions = getCachedAvailableVersionsList();
+            }
         }
 
         List<MavenVaadinVersion> versions;
@@ -56,6 +72,9 @@ public class MavenVersionManager {
 
     /**
      * Download and return the list of available Vaadin versions from vaadin.com
+     * .
+     * 
+     * If the download succeeds, also save the list in the cache.
      * 
      * @return
      * @throws CoreException
@@ -66,11 +85,65 @@ public class MavenVersionManager {
             String versionData = DownloadManager
                     .downloadURL(AVAILABLE_VAADIN_VERSIONS_7_URL);
 
+            // store versionData in cache
+            try {
+                File cacheFile = getCacheFile();
+                BufferedWriter writer = new BufferedWriter(new FileWriter(
+                        cacheFile));
+                try {
+                    writer.write(versionData);
+                } finally {
+                    writer.close();
+                }
+            } catch (CoreException e) {
+                // log and ignore - the version list is still valid
+                ErrorUtil.handleBackgroundException(
+                        "Failed to save Vaadin 7 version list to cache", e);
+            } catch (IOException e) {
+                // log and ignore - the version list is still valid
+                ErrorUtil.handleBackgroundException(
+                        "Failed to save Vaadin 7 version list to cache", e);
+            }
+
             return parseAvailableVersions(versionData);
         } catch (IOException e) {
             throw ErrorUtil.newCoreException(
                     "Failed to download list of available Vaadin versions", e);
         }
+    }
+
+    /**
+     * Return the cached list of available Vaadin versions from last successful
+     * request to vaadin.com .
+     * 
+     * @return
+     * @throws CoreException
+     */
+    private static List<MavenVaadinVersion> getCachedAvailableVersionsList()
+            throws CoreException {
+        try {
+            File cacheFile = getCacheFile();
+            InputStream is = new FileInputStream(cacheFile);
+            String versionData;
+            try {
+                versionData = IOUtils.toString(is);
+            } finally {
+                is.close();
+            }
+
+            return parseAvailableVersions(versionData);
+        } catch (IOException e) {
+            throw ErrorUtil
+                    .newCoreException(
+                            "Failed to get cached list of available Vaadin versions",
+                            e);
+        }
+    }
+
+    private static File getCacheFile() throws CoreException {
+        IPath path = LocalFileManager.getConfigurationPath().append(
+                IPath.SEPARATOR + "VERSIONS_7");
+        return path.toFile();
     }
 
     /**
