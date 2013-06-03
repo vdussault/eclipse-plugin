@@ -4,9 +4,6 @@
 		skeleton="../javaapplicationgenerator.skeleton" %>
 package <%= applicationPackage %>;
 
-<% if (push) {%>
-import com.vaadin.annotations.Push;
-<% } %>
 <% if(uiTheme != null) {%>
 import com.vaadin.annotations.Theme;
 <% } %>
@@ -24,16 +21,11 @@ import com.vaadin.ui.VerticalLayout;
 <% if(uiTheme != null) {%>
 @Theme("<%= uiTheme %>")
 <% } %>
-<% if (push) {%>
-@Push
-<% } %>
 public class <%= uiOrApplicationClass %> extends UI {
-
-	private VerticalLayout layout;
 
 	@Override
 	protected void init(VaadinRequest request) {
-		layout = new VerticalLayout();
+		VerticalLayout layout = new VerticalLayout();
 		layout.setMargin(true);
 		setContent(layout);
 
@@ -44,39 +36,6 @@ public class <%= uiOrApplicationClass %> extends UI {
 			}
 		});
 		layout.addComponent(button);
-<% if (push) {%>
-
-		// Start a background thread which will periodically push hello messages
-		new Thread(new HelloService()).start();
-<% } %>
 	}
 
-<% if (push) {%>
-	public class HelloService implements Runnable {
-		@Override
-		public void run() {
-			for (int i = 0; i < 10; i++) {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					return;
-				}
-				access(new Runnable() {
-					@Override
-					public void run() {
-						layout.addComponent(new Label("Server says hello!"));
-					}
-				});
-			}
-			access(new Runnable() {
-				@Override
-				public void run() {
-					layout.addComponent(new Label(
-							"Server is tired and will no longer greet you"));
-				}
-			});
-		}
-	}
-
-<% } %>
 }

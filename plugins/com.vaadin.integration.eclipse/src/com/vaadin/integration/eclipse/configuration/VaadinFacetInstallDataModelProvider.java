@@ -82,7 +82,6 @@ public class VaadinFacetInstallDataModelProvider extends
         names.add(VAADIN_VERSION);
         names.add(USE_LATEST_NIGHTLY);
         names.add(VAADIN_PROJECT_TYPE);
-        names.add(CREATE_PUSH_APPLICATION);
         return names;
     }
 
@@ -189,8 +188,6 @@ public class VaadinFacetInstallDataModelProvider extends
             return VaadinFacetUtils.VAADIN_FACET_ID;
         } else if (propertyName.equals(VAADIN_PROJECT_TYPE)) {
             return PROJECT_TYPE_SERVLET;
-        } else if (propertyName.equals(CREATE_PUSH_APPLICATION)) {
-            return Boolean.FALSE;
         }
         return super.getDefaultProperty(propertyName);
     }
@@ -319,13 +316,6 @@ public class VaadinFacetInstallDataModelProvider extends
                     model.notifyPropertyChange(PORTLET_TITLE,
                             IDataModel.ENABLE_CHG);
                 }
-
-                if (!isVaadin71Version) {
-                    setProperty(CREATE_PUSH_APPLICATION, Boolean.FALSE);
-                }
-                // enable/disable push checkbox
-                model.notifyPropertyChange(CREATE_PUSH_APPLICATION,
-                        IDataModel.ENABLE_CHG);
             }
         } else if (PORTLET_VERSION.equals(propertyName)) {
             // for Vaadin 7, portlet 1.0 is not supported
@@ -409,9 +399,6 @@ public class VaadinFacetInstallDataModelProvider extends
         }
         if (USE_LATEST_NIGHTLY.equals(propertyName)) {
             return !isVaadin7Facet();
-        }
-        if (CREATE_PUSH_APPLICATION.equals(propertyName)) {
-            return isVaadin71Version();
         }
         return super.isPropertyEnabled(propertyName);
     }

@@ -143,19 +143,6 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
             }
         });
 
-        // if Vaadin 7 project, add and link push checkbox (enabled only for
-        // Vaadin 7.1 and later)
-        if (vaadin7) {
-            Button pushCheckbox = new Button(group, SWT.CHECK);
-            pushCheckbox
-                    .setText("Create a server push enabled application (Vaadin 7.1)");
-            pushCheckbox.setLayoutData(new GridData(GridData.FILL,
-                    GridData.BEGINNING, true, false));
-
-            synchHelper.synchCheckbox(pushCheckbox, CREATE_PUSH_APPLICATION,
-                    new Control[] {});
-        }
-
         return group;
     }
 

@@ -207,13 +207,9 @@ public class CoreFacetInstallDelegate implements IDelegate,
                 if (vaadin7) {
                     // Vaadin 7 or newer: create a UI instead of an
                     // application
-                    boolean push = model
-                            .getBooleanProperty(CREATE_PUSH_APPLICATION);
-
                     String uiCode = VaadinPluginUtil.createUiClassSource(
                             applicationPackage, applicationName,
-                            applicationClass, applicationTheme, vaadin71
-                                    && push);
+                            applicationClass, applicationTheme, vaadin71);
 
                     /* Create the application class if it does not exist */
                     appPackage.createCompilationUnit(applicationFileName,
@@ -249,7 +245,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
 
                     if (vaadinVersion instanceof MavenVaadinVersion) {
                         setupIvy(jProject, (MavenVaadinVersion) vaadinVersion,
-                                vaadin71 && push, monitor);
+                                vaadin71, monitor);
                     }
                 } else {
                     // Vaadin 6: create an Application class
