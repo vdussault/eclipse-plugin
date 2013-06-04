@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +28,12 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.ClasspathAttribute;
+import org.eclipse.jst.j2ee.project.facet.IJ2EEFacetConstants;
 import org.eclipse.jst.j2ee.web.componentcore.util.WebArtifactEdit;
+import org.eclipse.wst.common.componentcore.datamodel.FacetInstallDataModelProvider;
+import org.eclipse.wst.common.componentcore.datamodel.properties.IFacetDataModelProperties;
+import org.eclipse.wst.common.componentcore.datamodel.properties.IFacetProjectCreationDataModelProperties;
+import org.eclipse.wst.common.componentcore.datamodel.properties.IFacetProjectCreationDataModelProperties.FacetDataModelMap;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
@@ -75,6 +81,8 @@ public class CoreFacetInstallDelegate implements IDelegate,
         String portletVersion = model.getStringProperty(PORTLET_VERSION);
         boolean createPortlet = !PORTLET_VERSION_NONE.equals(portletVersion);
         boolean useLatestNightly = model.getBooleanProperty(USE_LATEST_NIGHTLY);
+
+        boolean servlet30 = isServlet30(model);
 
         // Reference to the local Vaadin JAR that we should use
         // TODO final Vaadin 7 support
@@ -207,17 +215,20 @@ public class CoreFacetInstallDelegate implements IDelegate,
                 if (vaadin7) {
                     // Vaadin 7 or newer: create a UI instead of an
                     // application
-                    String uiCode = VaadinPluginUtil.createUiClassSource(
-                            applicationPackage, applicationName,
-                            applicationClass, applicationTheme, vaadin71);
-
-                    /* Create the application class if it does not exist */
-                    appPackage.createCompilationUnit(applicationFileName,
-                            uiCode, false, monitor);
 
                     servletClassName = vaadinPackagePrefix
                             + (gaeProject ? WebXmlUtil.VAADIN7_GAE_SERVLET_CLASS
                                     : WebXmlUtil.VAADIN7_SERVLET_CLASS);
+
+                    // TODO for Vaadin 7.1, use @VaadinServletConfiguration
+                    // TODO use servletClassName
+                    String uiCode = VaadinPluginUtil.createUiClassSource(
+                            applicationPackage, applicationName,
+                            applicationClass, applicationTheme, servlet30);
+
+                    /* Create the application class if it does not exist */
+                    appPackage.createCompilationUnit(applicationFileName,
+                            uiCode, false, monitor);
 
                     if (createPortlet) {
                         // Vaadin 7 only supports portlet 2.0
@@ -245,7 +256,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
 
                     if (vaadinVersion instanceof MavenVaadinVersion) {
                         setupIvy(jProject, (MavenVaadinVersion) vaadinVersion,
-                                vaadin71, monitor);
+                                servlet30, monitor);
                     }
                 } else {
                     // Vaadin 6: create an Application class
@@ -273,28 +284,33 @@ public class CoreFacetInstallDelegate implements IDelegate,
                     }
                 }
 
-                /* Update web.xml */
-                WebArtifactEdit artifact = WebArtifactEdit
-                        .getWebArtifactEditForWrite(project);
-                try {
-                    String servletPath = "/*";
-                    // TODO check; could also skip web.xml creation for portlet
-                    // 2.0 - creating to help testing portlets as servlets
-                    if (createPortlet) {
-                        servletPath = "/" + servletName + servletPath;
-                    }
-                    // For Vaadin 7, use a UI instead of an Application
-                    WebXmlUtil.addServlet(artifact.getWebApp(),
-                            applicationName, applicationPackage + "."
-                                    + applicationClass, servletPath,
-                            servletClassName, createPortlet, vaadinVersion);
-                    WebXmlUtil.addContextParameter(artifact.getWebApp(),
-                            VAADIN_PRODUCTION_MODE, "false",
-                            VAADIN_PRODUCTION_MODE_DESCRIPTION);
+                if (vaadin7 && servlet30) {
+                    // no web.xml
+                } else {
+                    /* Update web.xml */
+                    WebArtifactEdit artifact = WebArtifactEdit
+                            .getWebArtifactEditForWrite(project);
+                    try {
+                        String servletPath = "/*";
+                        // TODO check; could also skip web.xml creation for
+                        // portlet
+                        // 2.0 - creating to help testing portlets as servlets
+                        if (createPortlet) {
+                            servletPath = "/" + servletName + servletPath;
+                        }
+                        // For Vaadin 7, use a UI instead of an Application
+                        WebXmlUtil.addServlet(artifact.getWebApp(),
+                                applicationName, applicationPackage + "."
+                                        + applicationClass, servletPath,
+                                servletClassName, createPortlet, vaadinVersion);
+                        WebXmlUtil.addContextParameter(artifact.getWebApp(),
+                                VAADIN_PRODUCTION_MODE, "false",
+                                VAADIN_PRODUCTION_MODE_DESCRIPTION);
 
-                    artifact.save(monitor);
-                } finally {
-                    artifact.dispose();
+                        artifact.save(monitor);
+                    } finally {
+                        artifact.dispose();
+                    }
                 }
 
                 if (createPortlet) {
@@ -343,16 +359,54 @@ public class CoreFacetInstallDelegate implements IDelegate,
 
     }
 
+    private boolean isServlet30(IDataModel model) {
+        IDataModel masterModel = (IDataModel) model
+                .getProperty(FacetInstallDataModelProvider.MASTER_PROJECT_DM);
+        if (null == masterModel) {
+            return false;
+        }
+        FacetDataModelMap facetDataModelMap = (FacetDataModelMap) masterModel
+                .getProperty(IFacetProjectCreationDataModelProperties.FACET_DM_MAP);
+        if (null == facetDataModelMap) {
+            return false;
+        }
+        IDataModel webFacet = facetDataModelMap
+                .getFacetDataModel(IJ2EEFacetConstants.DYNAMIC_WEB);
+        if (null == webFacet) {
+            return false;
+        }
+        IProjectFacetVersion facetVersion = (IProjectFacetVersion) webFacet
+                .getProperty(IFacetDataModelProperties.FACET_VERSION);
+        if (null == facetVersion) {
+            return false;
+        }
+
+        return IJ2EEFacetConstants.DYNAMIC_WEB_30.compareTo(facetVersion) <= 0;
+    }
+
     public static void setupIvy(IJavaProject jProject,
-            MavenVaadinVersion version, boolean push, IProgressMonitor monitor)
-            throws CoreException {
-        Map<String, String> substitutions = Collections.singletonMap(
-                "VAADIN_VERSION", version.getVersionNumber());
+            MavenVaadinVersion version, boolean servlet30,
+            IProgressMonitor monitor) throws CoreException {
+        Map<String, String> substitutions = new HashMap<String, String>();
+        substitutions.put("VAADIN_VERSION", version.getVersionNumber());
+
         boolean vaadin71 = VersionUtil.isVaadin71(version);
-        String templateName = (vaadin71 && push) ? "ivy/ivy-push.xml"
-                : "ivy/ivy.xml";
+        StringBuilder extraDependencies = new StringBuilder();
+        if (vaadin71) {
+            extraDependencies.append("\n\t\t<!-- Push support -->\n");
+            extraDependencies
+                    .append("\t\t<dependency org=\"com.vaadin\" name=\"vaadin-push\" rev=\"&vaadin.version;\" />\n");
+        }
+        if (servlet30) {
+            // TODO probably should not be deployed
+            extraDependencies.append("\n\t\t<!-- Servlet 3.0 API -->\n");
+            extraDependencies
+                    .append("\t\t<dependency org=\"javax.servlet\" name=\"javax.servlet-api\" rev=\"3.0.1\" />\n");
+        }
+        substitutions.put("EXTRA_DEPENDENCIES", extraDependencies.toString());
+
         VaadinPluginUtil.ensureFileFromTemplate(jProject, "ivy.xml",
-                templateName, substitutions);
+                "ivy/ivy.xml", substitutions);
 
         VaadinPluginUtil.ensureFileFromTemplate(jProject, "ivysettings.xml",
                 "ivy/ivysettings.xml");

@@ -4,28 +4,41 @@
 		skeleton="../javaapplicationgenerator.skeleton" %>
 package <%= applicationPackage %>;
 
+<% if(servlet30) {%>
+import javax.servlet.annotation.WebInitParam;
+import javax.servlet.annotation.WebServlet;
+
+<% } %>
 <% if(uiTheme != null) {%>
 import com.vaadin.annotations.Theme;
 <% } %>
 import com.vaadin.server.VaadinRequest;
+<% if(servlet30) {%>
+import com.vaadin.server.VaadinServlet;
+<% } %>
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
-/**
- * Main UI class
- */
 @SuppressWarnings("serial")
 <% if(uiTheme != null) {%>
 @Theme("<%= uiTheme %>")
 <% } %>
 public class <%= uiOrApplicationClass %> extends UI {
 
+<% if(servlet30) {%>
+	@WebServlet(value = "/*", asyncSupported = true, initParams = {
+			@WebInitParam(name = "ui", value = "<%= applicationPackage %>.<%= uiOrApplicationClass %>"),
+			@WebInitParam(name = "productionMode", value = "false") })
+	public static class Servlet extends VaadinServlet {
+	}
+
+<% } %>
 	@Override
 	protected void init(VaadinRequest request) {
-		VerticalLayout layout = new VerticalLayout();
+		final VerticalLayout layout = new VerticalLayout();
 		layout.setMargin(true);
 		setContent(layout);
 

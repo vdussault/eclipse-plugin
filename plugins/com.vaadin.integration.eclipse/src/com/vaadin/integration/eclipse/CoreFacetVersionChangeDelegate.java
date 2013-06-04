@@ -107,10 +107,11 @@ public class CoreFacetVersionChangeDelegate implements IDelegate {
                 monitor.worked(1);
 
                 // add Ivy dependency management
-                // do not add vaadin-push configuration when changing facet
-                // version
+                // do not add servlet 3 API dependency automatically on facet
+                // upgrade as not creating a UI class and its servlet
+                boolean servlet30 = false;
                 CoreFacetInstallDelegate.setupIvy(jproject, vaadinVersion,
-                        false, new SubProgressMonitor(monitor, 2));
+                        servlet30, new SubProgressMonitor(monitor, 2));
             } catch (CoreException e) {
                 throw ErrorUtil.newCoreException(
                         "Failed to update Vaadin facet version for project "
