@@ -412,6 +412,7 @@ Any metadata changes made will be stored in the project manifest.
    <!-- TODO make the commands/buttons/handlers so that compile widgetset is 
     "dropdown button" with all available compilable widgetsets.   -->
    
+<!--
    <extension
          point="org.eclipse.ui.commands">
       <category
@@ -424,6 +425,8 @@ Any metadata changes made will be stored in the project manifest.
             name="Compile Widgetset Command">
       </command>
    </extension>
+-->
+   <!-- These are still here mostly for the keyboard shortcut -->
    <extension
          point="org.eclipse.ui.handlers">
       <handler
@@ -440,17 +443,9 @@ Any metadata changes made will be stored in the project manifest.
             sequence="M1+6">
       </key>
    </extension>
+<!--
    <extension
          point="org.eclipse.ui.menus">
-         <!-- TODO add this to some better place -->
-      <menuContribution
-            locationURI="menu:org.eclipse.ui.workbench.project">
-            <command
-                  commandId="com.vaadin.integration.eclipse.commands.compileWidgetsetCommand"
-                  id="com.vaadin.integration.eclipse.menus.compileWidgetsetCommand"
-                  mnemonic="S">
-            </command>
-      </menuContribution>
       <menuContribution
             locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
          <toolbar
@@ -465,6 +460,24 @@ Any metadata changes made will be stored in the project manifest.
          </toolbar>
       </menuContribution>
    </extension>
+-->
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            label="Compile Vaadin Theme or Widgetset Toolbar"
+            visible="true"
+            id="com.vaadin.integration.eclipse.actionSet">
+         <action
+               class="com.vaadin.integration.eclipse.toolbars.VaadinPulldownMenuAction"
+               icon="icons/compile-dropdown-16.png"
+               id="com.vaadin.integration.eclipse.toolbars.VaadinPulldownAction"
+               label="Compile Theme or Widgetset"
+               style="pulldown"
+               toolbarPath="com.vaadin.integration.eclipse.toolbars/additions"
+               tooltip="Compile Vaadin Theme or Widgetset">
+         </action>
+      </actionSet>
+   </extension>
    <extension
          point="org.eclipse.wst.server.core.publishTasks">
       <publishTask
@@ -476,12 +489,17 @@ Any metadata changes made will be stored in the project manifest.
    <extension
          point="org.eclipse.ui.console.consolePageParticipants">
          <consolePageParticipant
-            class="com.vaadin.integration.eclipse.pageparticipants.CompileWidgetsetConsoleParticipant"
-            id="com.vaadin.integration.eclipse.widgetset.CompileWidgetsetConsoleParticipant">
+            class="com.vaadin.integration.eclipse.pageparticipants.CompileConsoleParticipant"
+            id="com.vaadin.integration.eclipse.CompileConsoleParticipant">
          <enablement>
-            <instanceof
-                  value="com.vaadin.integration.eclipse.consoles.CompileWidgetsetConsole">
-            </instanceof>
+            <or>
+               <instanceof
+                     value="com.vaadin.integration.eclipse.consoles.CompileWidgetsetConsole">
+               </instanceof>
+               <instanceof
+                     value="com.vaadin.integration.eclipse.consoles.CompileThemeConsole">
+               </instanceof>
+            </or>
          </enablement>
       </consolePageParticipant>
    </extension>

@@ -75,6 +75,14 @@ public class PreferenceUtil {
     private static final String PREFERENCES_ADDON_THEME_SCANNING_SUSPENDED = VaadinPlugin.PLUGIN_ID
             + "." + "addonThemesSuspended";
 
+    // true to suspend automatic compilation of themes
+    private static final String PREFERENCES_THEME_COMPILATION_SUSPENDED = VaadinPlugin.PLUGIN_ID
+            + "." + "themeCompilationSuspended";
+
+    // "widgetset"/"theme"/missing - if missing, defaults to "widgetset"
+    private static final String PREFERENCES_PREVIOUS_COMPILE_ACTION = VaadinPlugin.PLUGIN_ID
+            + "." + "previousCompileAction";
+
     /**
      * Checks whether scanning for addon themes has explicitly been suspended by
      * the user
@@ -99,6 +107,29 @@ public class PreferenceUtil {
     public void setAddonThemeScanningSuspended(boolean suspended) {
         prefStore.setValue(PREFERENCES_ADDON_THEME_SCANNING_SUSPENDED,
                 suspended);
+    }
+
+    /**
+     * Checks whether automatic compilation of themes has explicitly been
+     * suspended by the user
+     */
+    public boolean isThemeCompilationSuspended() {
+        if (!prefStore.contains(PREFERENCES_THEME_COMPILATION_SUSPENDED)) {
+            return false;
+        } else {
+            return prefStore
+                    .getBoolean(PREFERENCES_THEME_COMPILATION_SUSPENDED);
+        }
+    }
+
+    /**
+     * Suspends automatic theme compilation
+     * 
+     * @param suspended
+     *            true if themes should not be compiled automatically
+     */
+    public void setThemeCompilationSuspended(boolean suspended) {
+        prefStore.setValue(PREFERENCES_THEME_COMPILATION_SUSPENDED, suspended);
     }
 
     /**
@@ -330,5 +361,27 @@ public class PreferenceUtil {
         }
 
         return false;
+    }
+
+    public String getPreviousCompileAction() {
+        if (!prefStore.contains(PREFERENCES_PREVIOUS_COMPILE_ACTION)) {
+            return "widgetset";
+        } else {
+            return prefStore.getString(PREFERENCES_PREVIOUS_COMPILE_ACTION);
+        }
+    }
+
+    /**
+     * Sets the previously used compile action ("widgetset" or "theme"). Returns
+     * true if the value was changed, false if it remained the same.
+     * 
+     * @param action
+     *            either "widgetset" or "theme"
+     * @return true if the value was changed
+     */
+    public boolean setPreviousCompileAction(String action) {
+        String oldValue = getPreviousCompileAction();
+        prefStore.setValue(PREFERENCES_PREVIOUS_COMPILE_ACTION, action);
+        return !equals(oldValue, action);
     }
 }

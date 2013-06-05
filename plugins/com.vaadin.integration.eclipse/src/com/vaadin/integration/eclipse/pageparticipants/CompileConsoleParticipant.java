@@ -13,13 +13,12 @@ import org.eclipse.ui.console.IConsolePageParticipant;
 import org.eclipse.ui.part.IPageBookViewPage;
 
 import com.vaadin.integration.eclipse.VaadinPlugin;
-import com.vaadin.integration.eclipse.consoles.CompileWidgetsetConsole;
+import com.vaadin.integration.eclipse.consoles.AbstractVaadinConsole;
 
 @SuppressWarnings("restriction")
-public class CompileWidgetsetConsoleParticipant implements
-        IConsolePageParticipant {
+public class CompileConsoleParticipant implements IConsolePageParticipant {
 
-    private CompileWidgetsetConsole console;
+    private AbstractVaadinConsole console;
     private Process process;
     private TerminateButton terminateButton;
 
@@ -38,11 +37,11 @@ public class CompileWidgetsetConsoleParticipant implements
     }
 
     public void init(IPageBookViewPage page, IConsole iconsole) {
-        if (!(iconsole instanceof CompileWidgetsetConsole)) {
+        if (!(iconsole instanceof AbstractVaadinConsole)) {
             return;
         }
 
-        console = (CompileWidgetsetConsole) iconsole;
+        console = (AbstractVaadinConsole) iconsole;
         console.setParticipant(this);
         IActionBars actionBars = page.getSite().getActionBars();
         IToolBarManager manager = actionBars.getToolBarManager();

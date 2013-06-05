@@ -1,6 +1,15 @@
 package com.vaadin.integration.eclipse;
 
+import java.net.URL;
+
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 import com.vaadin.integration.eclipse.background.NightlyBuildUpdater;
@@ -47,6 +56,11 @@ public class VaadinPlugin extends AbstractUIPlugin {
     public static final String GWT_OLD_COMPILER_CLASS = "com.google.gwt.dev.GWTCompiler";
 
     public static final String ADDON_IMPORTER_CLASS = "com.vaadin.server.themeutils.SASSAddonImportFileCreator";
+    public static final String THEME_COMPILER_CLASS = "com.vaadin.sass.SassCompiler";
+
+    // image IDs for the plugin shared image registry
+    public static final String COMPILE_WIDGETSET_IMAGE_ID = "icons.compile-widgetset";
+    public static final String COMPILE_THEME_IMAGE_ID = "icons.compile-theme";
 
     private static VaadinPlugin instance = null;
 
@@ -72,6 +86,23 @@ public class VaadinPlugin extends AbstractUIPlugin {
         nightlyBuildUpdater.stopUpdateJob();
         nightlyBuildUpdater = null;
         super.stop(context);
+    }
+
+    @Override
+    protected void initializeImageRegistry(ImageRegistry registry) {
+        super.initializeImageRegistry(registry);
+
+        Bundle bundle = Platform.getBundle(PLUGIN_ID);
+
+        IPath path = new Path("icons/compile-widgetset-16.png");
+        URL url = FileLocator.find(bundle, path, null);
+        ImageDescriptor desc = ImageDescriptor.createFromURL(url);
+        registry.put(COMPILE_WIDGETSET_IMAGE_ID, desc);
+
+        path = new Path("icons/compile-theme-16.png");
+        url = FileLocator.find(bundle, path, null);
+        desc = ImageDescriptor.createFromURL(url);
+        registry.put(COMPILE_THEME_IMAGE_ID, desc);
     }
 
 }

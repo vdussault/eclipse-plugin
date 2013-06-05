@@ -2,9 +2,6 @@ package com.vaadin.integration.eclipse.handlers;
 
 import java.io.IOException;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -18,8 +15,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
 import com.vaadin.integration.eclipse.builder.WidgetsetBuildManager;
@@ -28,31 +23,20 @@ import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.WidgetsetUtil;
 
 /**
- * Our sample handler extends AbstractHandler, an IHandler base class.
+ * Handler for Compile Widgetset action.
  * 
  * @see org.eclipse.core.commands.IHandler
  * @see org.eclipse.core.commands.AbstractHandler
  */
-public class CompileWidgetsetHandler extends AbstractHandler {
-    /**
-     * The constructor.
-     */
+public class CompileWidgetsetHandler extends AbstractVaadinCompileHandler {
+
     public CompileWidgetsetHandler() {
     }
 
-    /**
-     * the command has been executed, so extract extract the needed information
-     * from the application context.
-     */
-    public Object execute(final ExecutionEvent event) throws ExecutionException {
-
-        final ISelection currentSelection = HandlerUtil
-                .getCurrentSelection(event);
-        final IEditorPart activeEditor = HandlerUtil.getActiveEditor(event);
-
+    @Override
+    public void startCompileJob(ISelection currentSelection,
+            IEditorPart activeEditor) {
         startCompileWidgetsetJob(currentSelection, activeEditor);
-
-        return null;
     }
 
     public static void startCompileWidgetsetJob(
@@ -61,7 +45,7 @@ public class CompileWidgetsetHandler extends AbstractHandler {
             @Override
             protected IStatus run(IProgressMonitor monitor) {
                 try {
-                    monitor.beginTask("Compiling wigetset", 1);
+                    monitor.beginTask("Compiling widgetset", 1);
 
                     boolean compiled = false;
                     if (currentSelection instanceof IStructuredSelection
@@ -149,16 +133,6 @@ public class CompileWidgetsetHandler extends AbstractHandler {
         job.schedule();
     }
 
-    protected static IFile getFileForEditor(IEditorPart editor) {
-        IFile file = null;
-        if (editor != null
-                && editor.getEditorInput() instanceof IFileEditorInput) {
-            IFileEditorInput input = (IFileEditorInput) editor.getEditorInput();
-            file = input.getFile();
-        }
-        return file;
-    }
-
     // try to compile a file as a GWT widgetset, or if not one, try to
     // compile widgetsets in the containing project
     protected static boolean compileFile(IProgressMonitor monitor, IFile file)
@@ -183,42 +157,6 @@ public class CompileWidgetsetHandler extends AbstractHandler {
         }
 
         return compiled;
-    }
-
-    /**
-     * Find a project based on current selection and active editor.
-     * 
-     * @param currentSelection
-     * @param activeEditor
-     * @return project or null if no suitable project found based on selection
-     *         and active editor
-     */
-    public static IProject getProject(ISelection currentSelection,
-            IEditorPart activeEditor) {
-        if (currentSelection instanceof IStructuredSelection
-                && ((IStructuredSelection) currentSelection).size() == 1) {
-            IStructuredSelection ssel = (IStructuredSelection) currentSelection;
-            Object obj = ssel.getFirstElement();
-            if (obj instanceof IFile) {
-                IFile file = (IFile) obj;
-                return file.getProject();
-            }
-            IProject project = ProjectUtil.getProject(currentSelection);
-            if (project == null) {
-                IFile file = getFileForEditor(activeEditor);
-                if (file != null && file.exists()) {
-                    return file.getProject();
-                }
-            } else {
-                return project;
-            }
-        } else {
-            IFile file = getFileForEditor(activeEditor);
-            if (file != null) {
-                return file.getProject();
-            }
-        }
-        return null;
     }
 
     protected static void showException(final Exception e) {
