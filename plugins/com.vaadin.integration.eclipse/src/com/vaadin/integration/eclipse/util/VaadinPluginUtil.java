@@ -1102,7 +1102,7 @@ public class VaadinPluginUtil {
             String arguments;
             if (isGwt20) {
                 arguments = "-noserver -war " + wsDirString + " "
-                        + WidgetsetUtil.getConfiguredWidgetSet(jproject);
+                        + WidgetsetUtil.getFirstWidgetSet(jproject);
 
                 // Could maybe make a more educated guess but this will at least
                 // allow the user to launch a browser session and show what the
@@ -1321,7 +1321,7 @@ public class VaadinPluginUtil {
                 IJavaLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY,
                 location.toOSString());
 
-        String widgetsetName = WidgetsetUtil.getConfiguredWidgetSet(jproject);
+        String widgetsetName = WidgetsetUtil.getFirstWidgetSet(jproject);
         workingCopy.setAttribute(
                 IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
                 arguments + " " + widgetsetName);

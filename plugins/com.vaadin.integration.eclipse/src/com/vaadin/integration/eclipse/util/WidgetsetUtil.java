@@ -16,7 +16,6 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
@@ -412,31 +411,25 @@ public class WidgetsetUtil {
     }
 
     /**
-     * Find the (first) widgetset used in the project based on web.xml . If none
-     * is mentioned there, return {@link #DEFAULT_WIDGET_SET_NAME}.
+     * Find the (first) widgetset in the project. If there is none, return
+     * {@link #DEFAULT_WIDGET_SET_NAME}.
      * 
      * @param project
-     * @return first widgetset GWT module name used in web.xml or default
+     * @return first widgetset GWT module name in the project or default
      *         widgetset
      */
-    public static String getConfiguredWidgetSet(IJavaProject project) {
-        WebArtifactEdit artifact = WebArtifactEdit
-                .getWebArtifactEditForRead(project.getProject());
-        if (artifact == null) {
-            ErrorUtil.handleBackgroundException(
-                    "Couldn't open web.xml for reading.", null);
-        } else {
-            try {
-                Map<String, String> widgetsets = WebXmlUtil
-                        .getWidgetSets(artifact);
-                for (String widgetset : widgetsets.values()) {
-                    if (widgetset != null) {
-                        return widgetset;
-                    }
+    public static String getFirstWidgetSet(IJavaProject project) {
+        try {
+            List<String> widgetsets = WidgetsetUtil.findWidgetSets(project,
+                    new NullProgressMonitor());
+            for (String widgetset : widgetsets) {
+                if (widgetset != null) {
+                    return widgetset;
                 }
-            } finally {
-                artifact.dispose();
             }
+        } catch (CoreException e) {
+            ErrorUtil.handleBackgroundException(
+                    "Failed to find widgetset in the project", e);
         }
 
         return DEFAULT_WIDGET_SET_NAME;
@@ -848,6 +841,7 @@ public class WidgetsetUtil {
                 ErrorUtil.handleBackgroundException(
                         "Couldn't open web.xml for edit.", null);
             } else {
+                // TODO do only if web.xml exists (#11988)
                 try {
                     WebXmlUtil.setWidgetSet(artifact, fullyQualifiedName,
                             Arrays.asList(prospectClasses));

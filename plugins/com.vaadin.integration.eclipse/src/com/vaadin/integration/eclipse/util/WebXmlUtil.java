@@ -275,7 +275,10 @@ public class WebXmlUtil {
      *         null if no widgetset configured
      */
     @SuppressWarnings("rawtypes")
-    public static Map<String, String> getWidgetSets(WebArtifactEdit artifact) {
+    @Deprecated
+    // TODO now unused but kept as a reference until setWidgetSet() is updated
+    private static Map<String, String> getWidgetSetsFromWebXml(
+            WebArtifactEdit artifact) {
         Map<String, String> widgetsets = new LinkedHashMap<String, String>();
 
         final WebApp root = artifact.getWebApp();

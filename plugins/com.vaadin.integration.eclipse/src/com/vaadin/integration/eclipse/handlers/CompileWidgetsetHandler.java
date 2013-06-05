@@ -50,6 +50,13 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                 .getCurrentSelection(event);
         final IEditorPart activeEditor = HandlerUtil.getActiveEditor(event);
 
+        startCompileWidgetsetJob(currentSelection, activeEditor);
+
+        return null;
+    }
+
+    public static void startCompileWidgetsetJob(
+            final ISelection currentSelection, final IEditorPart activeEditor) {
         Job job = new Job("Compiling widgetset...") {
             @Override
             protected IStatus run(IProgressMonitor monitor) {
@@ -136,54 +143,85 @@ public class CompileWidgetsetHandler extends AbstractHandler {
                 return Status.OK_STATUS;
             }
 
-            private IFile getFileForEditor(IEditorPart editor) {
-                IFile file = null;
-                if (editor != null
-                        && editor.getEditorInput() instanceof IFileEditorInput) {
-                    IFileEditorInput input = (IFileEditorInput) activeEditor
-                            .getEditorInput();
-                    file = input.getFile();
-                }
-                return file;
-            }
-
-            // try to compile a file as a GWT widgetset, or if not one, try to
-            // compile widgetsets in the containing project
-            private boolean compileFile(IProgressMonitor monitor, IFile file)
-                    throws CoreException, IOException, InterruptedException {
-                if (!WidgetsetUtil
-                        .isWidgetsetManagedByPlugin(file.getProject())) {
-                    return false;
-                }
-                // only one branch is executed so progress is tracked correctly
-                boolean compiled = false;
-                if (file != null && file.getName().endsWith(".gwt.xml")
-                        && file.getName().toLowerCase().contains("widgetset")) {
-                    WidgetsetBuildManager.compileWidgetset(file, monitor);
-                    compiled = true;
-                }
-                if (!compiled) {
-                    IProject project = ProjectUtil.getProject(file);
-                    if (VaadinFacetUtils.isVaadinProject(project)) {
-                        IJavaProject jproject = JavaCore.create(project);
-                        WidgetsetBuildManager.compileWidgetsets(jproject,
-                                monitor);
-                        compiled = true;
-                    }
-                }
-
-                return compiled;
-            }
-
         };
 
         job.setUser(false);
         job.schedule();
+    }
 
+    protected static IFile getFileForEditor(IEditorPart editor) {
+        IFile file = null;
+        if (editor != null
+                && editor.getEditorInput() instanceof IFileEditorInput) {
+            IFileEditorInput input = (IFileEditorInput) editor.getEditorInput();
+            file = input.getFile();
+        }
+        return file;
+    }
+
+    // try to compile a file as a GWT widgetset, or if not one, try to
+    // compile widgetsets in the containing project
+    protected static boolean compileFile(IProgressMonitor monitor, IFile file)
+            throws CoreException, IOException, InterruptedException {
+        if (!WidgetsetUtil.isWidgetsetManagedByPlugin(file.getProject())) {
+            return false;
+        }
+        // only one branch is executed so progress is tracked correctly
+        boolean compiled = false;
+        if (file != null && file.getName().endsWith(".gwt.xml")
+                && file.getName().toLowerCase().contains("widgetset")) {
+            WidgetsetBuildManager.compileWidgetset(file, monitor);
+            compiled = true;
+        }
+        if (!compiled) {
+            IProject project = ProjectUtil.getProject(file);
+            if (VaadinFacetUtils.isVaadinProject(project)) {
+                IJavaProject jproject = JavaCore.create(project);
+                WidgetsetBuildManager.compileWidgetsets(jproject, monitor);
+                compiled = true;
+            }
+        }
+
+        return compiled;
+    }
+
+    /**
+     * Find a project based on current selection and active editor.
+     * 
+     * @param currentSelection
+     * @param activeEditor
+     * @return project or null if no suitable project found based on selection
+     *         and active editor
+     */
+    public static IProject getProject(ISelection currentSelection,
+            IEditorPart activeEditor) {
+        if (currentSelection instanceof IStructuredSelection
+                && ((IStructuredSelection) currentSelection).size() == 1) {
+            IStructuredSelection ssel = (IStructuredSelection) currentSelection;
+            Object obj = ssel.getFirstElement();
+            if (obj instanceof IFile) {
+                IFile file = (IFile) obj;
+                return file.getProject();
+            }
+            IProject project = ProjectUtil.getProject(currentSelection);
+            if (project == null) {
+                IFile file = getFileForEditor(activeEditor);
+                if (file != null && file.exists()) {
+                    return file.getProject();
+                }
+            } else {
+                return project;
+            }
+        } else {
+            IFile file = getFileForEditor(activeEditor);
+            if (file != null) {
+                return file.getProject();
+            }
+        }
         return null;
     }
 
-    protected void showException(final Exception e) {
+    protected static void showException(final Exception e) {
         ErrorUtil.displayErrorFromBackgroundThread("Error compiling widgetset",
                 "Error compiling widgetset:\n" + e.getClass().getName() + " - "
                         + e.getMessage() + "\n\nSee error log for details.");
