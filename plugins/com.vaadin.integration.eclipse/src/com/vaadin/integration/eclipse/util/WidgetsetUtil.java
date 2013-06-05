@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jst.j2ee.web.componentcore.util.WebArtifactEdit;
+import org.eclipse.jst.j2ee.webapplication.WebAppResource;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
@@ -834,21 +835,30 @@ public class WidgetsetUtil {
                     + " will be created...");
 
             /* Update web.xml */
-
-            WebArtifactEdit artifact = WebArtifactEdit
-                    .getWebArtifactEditForWrite(project.getProject());
-            if (artifact == null) {
-                ErrorUtil.handleBackgroundException(
-                        "Couldn't open web.xml for edit.", null);
-            } else {
-                // TODO do only if web.xml exists (#11988)
-                try {
-                    WebXmlUtil.setWidgetSet(artifact, fullyQualifiedName,
-                            Arrays.asList(prospectClasses));
-                    artifact.saveIfNecessary(null);
-                } finally {
-                    artifact.dispose();
+            if (hasWebXml(project)) {
+                WebArtifactEdit artifact = WebArtifactEdit
+                        .getWebArtifactEditForWrite(project.getProject());
+                if (artifact == null) {
+                    ErrorUtil.handleBackgroundException(
+                            "Couldn't open web.xml for edit.", null);
+                } else {
+                    try {
+                        WebXmlUtil.setWidgetSet(artifact, fullyQualifiedName,
+                                Arrays.asList(prospectClasses));
+                        artifact.saveIfNecessary(null);
+                    } finally {
+                        artifact.dispose();
+                    }
                 }
+            } else {
+                // possibly a Servlet 3.0 project with @WebServlet
+                ErrorUtil
+                        .displayWarningFromBackgroundThread(
+                                "Update Widgetset",
+                                "The widgetset "
+                                        + fullyQualifiedName
+                                        + " has been created but there is no web.xml to update.\n\n"
+                                        + "Please update your @WebServlet annotation parameters.");
             }
 
             if (create) {
@@ -875,6 +885,22 @@ public class WidgetsetUtil {
         }
 
         return null;
+    }
+
+    private static boolean hasWebXml(IJavaProject project) {
+        boolean hasWebXml = false;
+        WebArtifactEdit webArtifactEditForRead = WebArtifactEdit
+                .getWebArtifactEditForRead(project.getProject());
+        try {
+            WebAppResource resource = (WebAppResource) (webArtifactEditForRead
+                    .getDeploymentDescriptorResource());
+            hasWebXml = !(null == resource || null == resource.getWebApp());
+        } finally {
+            if (null != webArtifactEditForRead) {
+                webArtifactEditForRead.dispose();
+            }
+        }
+        return hasWebXml;
     }
 
     /**
