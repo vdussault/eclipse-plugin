@@ -381,7 +381,9 @@ public class CoreFacetInstallDelegate implements IDelegate,
             return false;
         }
 
-        return IJ2EEFacetConstants.DYNAMIC_WEB_30.compareTo(facetVersion) <= 0;
+        // Older Eclipse versions do not have IJ2EEFacetConstants.DYNAMIC_WEB_30
+        return IJ2EEFacetConstants.DYNAMIC_WEB_FACET.getVersion("3.0")
+                .compareTo(facetVersion) <= 0;
     }
 
     public static void setupIvy(IJavaProject jProject,
