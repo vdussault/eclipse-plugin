@@ -220,11 +220,11 @@ public class CoreFacetInstallDelegate implements IDelegate,
                             + (gaeProject ? WebXmlUtil.VAADIN7_GAE_SERVLET_CLASS
                                     : WebXmlUtil.VAADIN7_SERVLET_CLASS);
 
-                    // TODO for Vaadin 7.1, use @VaadinServletConfiguration
                     // TODO use servletClassName
                     String uiCode = VaadinPluginUtil.createUiClassSource(
                             applicationPackage, applicationName,
-                            applicationClass, applicationTheme, servlet30);
+                            applicationClass, applicationTheme, servlet30,
+                            vaadin71);
 
                     /* Create the application class if it does not exist */
                     appPackage.createCompilationUnit(applicationFileName,

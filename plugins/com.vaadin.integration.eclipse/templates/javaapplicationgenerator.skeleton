@@ -8,7 +8,7 @@
  */
 public class CLASS {   
     public String generate(String applicationPackage, String applicationName,
-        String uiOrApplicationClass, String uiTheme, boolean servlet30) {
+        String uiOrApplicationClass, String uiTheme, boolean servlet30, boolean vaadin71) {
         return "";
     }
 }
