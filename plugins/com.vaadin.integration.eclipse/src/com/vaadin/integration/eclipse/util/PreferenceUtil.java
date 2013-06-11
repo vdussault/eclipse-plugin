@@ -79,7 +79,8 @@ public class PreferenceUtil {
     private static final String PREFERENCES_THEME_COMPILATION_SUSPENDED = VaadinPlugin.PLUGIN_ID
             + "." + "themeCompilationSuspended";
 
-    // "widgetset"/"theme"/missing - if missing, defaults to "widgetset"
+    // VaadinPlugin.COMPILE_ACTION_* or missing - if missing, defaults to
+    // widgetset
     private static final String PREFERENCES_PREVIOUS_COMPILE_ACTION = VaadinPlugin.PLUGIN_ID
             + "." + "previousCompileAction";
 
@@ -363,20 +364,28 @@ public class PreferenceUtil {
         return false;
     }
 
+    /**
+     * Returns the previously used compile action ("widgetset" or "theme" or
+     * "both") - use the constants {@link VaadinPlugin}.COMPILE_ACTION_*.
+     * 
+     * @return previously used compile action, by default "widgetset" if none
+     *         saved
+     */
     public String getPreviousCompileAction() {
         if (!prefStore.contains(PREFERENCES_PREVIOUS_COMPILE_ACTION)) {
-            return "widgetset";
+            return VaadinPlugin.COMPILE_ACTION_WIDGETSET;
         } else {
             return prefStore.getString(PREFERENCES_PREVIOUS_COMPILE_ACTION);
         }
     }
 
     /**
-     * Sets the previously used compile action ("widgetset" or "theme"). Returns
-     * true if the value was changed, false if it remained the same.
+     * Sets the previously used compile action ("widgetset", "theme" or "both").
+     * Returns true if the value was changed, false if it remained the same.
      * 
      * @param action
-     *            either "widgetset" or "theme"
+     *            either "widgetset", "theme" or "both" - use the constants
+     *            {@link VaadinPlugin}.COMPILE_ACTION_*
      * @return true if the value was changed
      */
     public boolean setPreviousCompileAction(String action) {

@@ -61,6 +61,11 @@ public class VaadinPlugin extends AbstractUIPlugin {
     // image IDs for the plugin shared image registry
     public static final String COMPILE_WIDGETSET_IMAGE_ID = "icons.compile-widgetset";
     public static final String COMPILE_THEME_IMAGE_ID = "icons.compile-theme";
+    public static final String COMPILE_WIDGETSET_AND_THEME_IMAGE_ID = "icons.compile-widgetset-and-theme";
+
+    public static final String COMPILE_ACTION_WIDGETSET = "widgetset";
+    public static final String COMPILE_ACTION_THEME = "theme";
+    public static final String COMPILE_ACTION_BOTH = "both";
 
     private static VaadinPlugin instance = null;
 
@@ -103,6 +108,11 @@ public class VaadinPlugin extends AbstractUIPlugin {
         url = FileLocator.find(bundle, path, null);
         desc = ImageDescriptor.createFromURL(url);
         registry.put(COMPILE_THEME_IMAGE_ID, desc);
+
+        path = new Path("icons/compile-widgetset-and-theme-16.png");
+        url = FileLocator.find(bundle, path, null);
+        desc = ImageDescriptor.createFromURL(url);
+        registry.put(COMPILE_WIDGETSET_AND_THEME_IMAGE_ID, desc);
     }
 
 }

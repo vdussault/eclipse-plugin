@@ -57,8 +57,10 @@ public class VaadinPulldownMenuAction implements
                     .get(VaadinPlugin.COMPILE_WIDGETSET_IMAGE_ID);
             Image compileThemeIcon = registry
                     .get(VaadinPlugin.COMPILE_THEME_IMAGE_ID);
+            Image compileBothIcon = registry
+                    .get(VaadinPlugin.COMPILE_WIDGETSET_AND_THEME_IMAGE_ID);
 
-            // Configure the menu items
+            // Compile widgetset
             final MenuItem widgetsetMenuItem = new MenuItem(menu, SWT.PUSH);
             widgetsetMenuItem.setText("Compile Widgetset");
             widgetsetMenuItem.setImage(compileWidgetsetIcon);
@@ -67,11 +69,24 @@ public class VaadinPulldownMenuAction implements
             widgetsetMenuItem.addSelectionListener(new SelectionAdapter() {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
-                    compileWidgetset();
+                    IWorkbenchPage activePage = PlatformUI.getWorkbench()
+                            .getActiveWorkbenchWindow().getActivePage();
+                    if (activePage != null) {
+                        ISelection currentSelection = activePage.getSelection();
+                        IEditorPart activeEditor = activePage.getActiveEditor();
+
+                        IProject project = AbstractVaadinCompileHandler
+                                .getProject(currentSelection, activeEditor);
+                        persistCompileAction(project,
+                                VaadinPlugin.COMPILE_ACTION_WIDGETSET);
+
+                        CompileWidgetsetHandler.startCompileWidgetsetJob(
+                                currentSelection, activeEditor);
+                    }
                 }
             });
 
-            // Configure the menu items
+            // Compile theme
             final MenuItem themeMenuItem = new MenuItem(menu, SWT.PUSH);
             themeMenuItem.setText("Compile Theme");
             themeMenuItem.setImage(compileThemeIcon);
@@ -80,7 +95,48 @@ public class VaadinPulldownMenuAction implements
             themeMenuItem.addSelectionListener(new SelectionAdapter() {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
-                    compileTheme();
+                    IWorkbenchPage activePage = PlatformUI.getWorkbench()
+                            .getActiveWorkbenchWindow().getActivePage();
+                    if (activePage != null) {
+                        ISelection currentSelection = activePage.getSelection();
+                        IEditorPart activeEditor = activePage.getActiveEditor();
+
+                        IProject project = AbstractVaadinCompileHandler
+                                .getProject(currentSelection, activeEditor);
+                        persistCompileAction(project,
+                                VaadinPlugin.COMPILE_ACTION_THEME);
+
+                        CompileThemeHandler.startCompileThemeJob(
+                                currentSelection, activeEditor);
+                    }
+                }
+            });
+
+            // Compile widgetset and theme
+            final MenuItem compileBothMenuItem = new MenuItem(menu, SWT.PUSH);
+            compileBothMenuItem.setText("Compile Widgetset and Theme");
+            compileBothMenuItem.setImage(compileBothIcon);
+
+            // Handle selection
+            compileBothMenuItem.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    IWorkbenchPage activePage = PlatformUI.getWorkbench()
+                            .getActiveWorkbenchWindow().getActivePage();
+                    if (activePage != null) {
+                        ISelection currentSelection = activePage.getSelection();
+                        IEditorPart activeEditor = activePage.getActiveEditor();
+
+                        IProject project = AbstractVaadinCompileHandler
+                                .getProject(currentSelection, activeEditor);
+                        persistCompileAction(project,
+                                VaadinPlugin.COMPILE_ACTION_BOTH);
+
+                        CompileThemeHandler.startCompileThemeJob(
+                                currentSelection, activeEditor);
+                        CompileWidgetsetHandler.startCompileWidgetsetJob(
+                                currentSelection, activeEditor);
+                    }
                 }
             });
         } else {
@@ -90,57 +146,18 @@ public class VaadinPulldownMenuAction implements
         return menu;
     }
 
-    protected static void compileTheme() {
-        IWorkbenchPage activePage = PlatformUI.getWorkbench()
-                .getActiveWorkbenchWindow().getActivePage();
-        if (activePage != null) {
-            ISelection currentSelection = activePage.getSelection();
-            IEditorPart activeEditor = activePage.getActiveEditor();
-
-            IProject project = AbstractVaadinCompileHandler.getProject(
-                    currentSelection, activeEditor);
-            if (project != null) {
-                try {
-                    PreferenceUtil preferences = PreferenceUtil.get(project);
-                    preferences.setPreviousCompileAction("theme");
-                    preferences.persist();
-                } catch (IOException e) {
-                    ErrorUtil
-                            .handleBackgroundException(
-                                    "Failed to persist previous compile action preference",
-                                    e);
-                }
+    protected static void persistCompileAction(IProject project,
+            String compileAction) {
+        if (project != null) {
+            try {
+                PreferenceUtil preferences = PreferenceUtil.get(project);
+                preferences.setPreviousCompileAction(compileAction);
+                preferences.persist();
+            } catch (IOException ex) {
+                ErrorUtil.handleBackgroundException(
+                        "Failed to persist previous compile action preference",
+                        ex);
             }
-
-            CompileThemeHandler.startCompileThemeJob(currentSelection,
-                    activeEditor);
-        }
-    }
-
-    protected static void compileWidgetset() {
-        IWorkbenchPage activePage = PlatformUI.getWorkbench()
-                .getActiveWorkbenchWindow().getActivePage();
-        if (activePage != null) {
-            ISelection currentSelection = activePage.getSelection();
-            IEditorPart activeEditor = activePage.getActiveEditor();
-
-            IProject project = AbstractVaadinCompileHandler.getProject(
-                    currentSelection, activeEditor);
-            if (project != null) {
-                try {
-                    PreferenceUtil preferences = PreferenceUtil.get(project);
-                    preferences.setPreviousCompileAction("widgetset");
-                    preferences.persist();
-                } catch (IOException e) {
-                    ErrorUtil
-                            .handleBackgroundException(
-                                    "Failed to persist previous compile action preference",
-                                    e);
-                }
-            }
-
-            CompileWidgetsetHandler.startCompileWidgetsetJob(currentSelection,
-                    activeEditor);
         }
     }
 
@@ -172,11 +189,13 @@ public class VaadinPulldownMenuAction implements
 
             String lastAction = PreferenceUtil.get(project)
                     .getPreviousCompileAction();
-            if ("theme".equals(lastAction)) {
+            if (VaadinPlugin.COMPILE_ACTION_THEME.equals(lastAction)
+                    || VaadinPlugin.COMPILE_ACTION_BOTH.equals(lastAction)) {
                 CompileThemeHandler.startCompileThemeJob(currentSelection,
                         activeEditor);
-            } else {
-                // "widgetset", not set or any other value
+            }
+            if (VaadinPlugin.COMPILE_ACTION_WIDGETSET.equals(lastAction)
+                    || VaadinPlugin.COMPILE_ACTION_BOTH.equals(lastAction)) {
                 CompileWidgetsetHandler.startCompileWidgetsetJob(
                         currentSelection, activeEditor);
             }
@@ -203,10 +222,12 @@ public class VaadinPulldownMenuAction implements
 
         String lastAction = PreferenceUtil.get(project)
                 .getPreviousCompileAction();
-        if ("theme".equals(lastAction)) {
+        if (VaadinPlugin.COMPILE_ACTION_THEME.equals(lastAction)) {
             action.setToolTipText("Compile Theme");
-        } else {
+        } else if (VaadinPlugin.COMPILE_ACTION_WIDGETSET.equals(lastAction)) {
             action.setToolTipText("Compile Widgetset");
+        } else if (VaadinPlugin.COMPILE_ACTION_BOTH.equals(lastAction)) {
+            action.setToolTipText("Compile Widgetset and Theme");
         }
     }
 
