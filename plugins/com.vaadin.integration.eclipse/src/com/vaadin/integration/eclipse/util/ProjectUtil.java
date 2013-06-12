@@ -520,6 +520,22 @@ public class ProjectUtil {
         }
     }
 
+    public static boolean isVaadin71(IProject project) {
+        try {
+            IJavaProject jproject = JavaCore.create(project);
+            if (null == jproject) {
+                return false;
+            }
+            IType type = jproject
+                    .findType(VaadinPlugin.VAADIN_SERVLET_CONFIGURATION_ANNOTATION_FULL_NAME);
+            return (null != type);
+        } catch (CoreException e) {
+            ErrorUtil.handleBackgroundException(
+                    "Failed to check Vaadin version in project", e);
+            return false;
+        }
+    }
+
     public static double getVaadinVersion(IProject project) {
         try {
             String vaadinVersion = getVaadinLibraryVersion(project, true);
@@ -583,8 +599,7 @@ public class ProjectUtil {
         return LocalFileManager.isGWTDependency(path);
     }
 
-    public static boolean hasManifestAttribute(String attribute,
-            IPath resource) {
+    public static boolean hasManifestAttribute(String attribute, IPath resource) {
         if (resource != null && resource.toPortableString().endsWith(".jar")) {
             JarFile jarFile = null;
             try {

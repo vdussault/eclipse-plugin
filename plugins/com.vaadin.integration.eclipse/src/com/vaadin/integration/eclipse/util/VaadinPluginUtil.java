@@ -673,6 +673,14 @@ public class VaadinPluginUtil {
                 monitor);
     }
 
+    public static IType[] getServletClasses(IProject project,
+            IProgressMonitor monitor) throws JavaModelException {
+        // find all non-binary subclasses of VaadinServlet in the project
+        // returns an empty array if none found
+        return getSubClasses(project,
+                VaadinPlugin.VAADIN_SERVLET_CLASS_FULL_NAME, true, monitor);
+    }
+
     public static boolean isVaadinJar(IPath path) {
         if ("jar".equals(path.getFileExtension())
                 && path.lastSegment().contains("vaadin")) {

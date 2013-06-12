@@ -19,21 +19,37 @@ public class VaadinPlugin extends AbstractUIPlugin {
     public static final String PLUGIN_ID = "com.vaadin.integration.eclipse";
 
     public static final String VAADIN_PACKAGE_PREFIX = "com.vaadin.";
-    public static final String VAADIN_UI_PACKAGE_PREFIX = VAADIN_PACKAGE_PREFIX
-            + "ui.";
+
+    // Vaadin 6 Application class
     public static final String APPLICATION_CLASS_NAME = "Application";
     public static final String APPLICATION_CLASS_FULL_NAME = VAADIN_PACKAGE_PREFIX
             + APPLICATION_CLASS_NAME;
+
+    // Vaadin 7 UI class
+    public static final String VAADIN_UI_PACKAGE_PREFIX = VAADIN_PACKAGE_PREFIX
+            + "ui.";
     public static final String UI_CLASS_NAME = "UI";
     public static final String UI_CLASS_FULL_NAME = VAADIN_UI_PACKAGE_PREFIX
             + UI_CLASS_NAME;
 
+    // Vaadin 7 server/servlet classes
+    public static final String VAADIN_SERVER_PACKAGE_PREFIX = VAADIN_PACKAGE_PREFIX
+            + "server.";
+    public static final String VAADIN_SERVLET_CLASS_NAME = "VaadinServlet";
+    public static final String VAADIN_SERVLET_CLASS_FULL_NAME = VAADIN_SERVER_PACKAGE_PREFIX
+            + VAADIN_SERVLET_CLASS_NAME;
+
+    // Vaadin 7 annotations
     public static final String VAADIN_ANNOTATIONS_PACKAGE_PREFIX = VAADIN_PACKAGE_PREFIX
             + "annotations.";
-
     public static final String THEME_ANNOTATION_NAME = "Theme";
     public static final String THEME_ANNOTATION_FULL_NAME = VAADIN_ANNOTATIONS_PACKAGE_PREFIX
             + THEME_ANNOTATION_NAME;
+    public static final String VAADIN_SERVLET_CONFIGURATION_ANNOTATION_NAME = "VaadinServletConfiguration";
+    public static final String VAADIN_SERVLET_CONFIGURATION_ANNOTATION_FULL_NAME = VAADIN_ANNOTATIONS_PACKAGE_PREFIX
+            + VAADIN_SERVLET_CONFIGURATION_ANNOTATION_NAME;
+
+    public static final String VAADIN_SERVLET_CONFIGURATION_ANNOTATION_PARAMETER_WIDGETSET = "widgetset";
 
     public static final String THEME_FOLDER_NAME = "themes";
 

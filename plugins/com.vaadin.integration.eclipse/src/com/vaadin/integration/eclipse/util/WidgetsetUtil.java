@@ -36,16 +36,32 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MemberValuePair;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jst.j2ee.web.componentcore.util.WebArtifactEdit;
 import org.eclipse.jst.j2ee.webapplication.WebAppResource;
+import org.eclipse.text.edits.TextEdit;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 import com.vaadin.integration.eclipse.VaadinFacetUtils;
@@ -852,13 +868,39 @@ public class WidgetsetUtil {
                 }
             } else {
                 // possibly a Servlet 3.0 project with @WebServlet
-                ErrorUtil
-                        .displayWarningFromBackgroundThread(
-                                "Update Widgetset",
-                                "The widgetset "
-                                        + fullyQualifiedName
-                                        + " has been created but there is no web.xml to update.\n\n"
-                                        + "Please update your @WebServlet annotation parameters.");
+
+                boolean updated = false;
+
+                boolean vaadin71 = ProjectUtil.isVaadin71(project.getProject());
+                // TODO progress monitor use
+                if (vaadin71) {
+                    IType[] servletClasses = VaadinPluginUtil
+                            .getServletClasses(project.getProject(),
+                                    new NullProgressMonitor());
+
+                    for (IType servletClass : servletClasses) {
+                        // if the servlet class has the
+                        // @VaadinServletConfiguration
+                        // annotation but no widgetset parameter, add the
+                        // parameter
+                        updated = updated
+                                || updateServletAnnotationForWidgetset(project,
+                                        servletClass, fullyQualifiedName,
+                                        new NullProgressMonitor());
+                    }
+                }
+
+                if (!updated) {
+                    ErrorUtil
+                            .displayWarningFromBackgroundThread(
+                                    "Update Widgetset",
+                                    "The widgetset "
+                                            + fullyQualifiedName
+                                            + " has been created but there is no web.xml to update.\n\n"
+                                            + "Please update your @WebServlet or @"
+                                            + VaadinPlugin.VAADIN_SERVLET_CONFIGURATION_ANNOTATION_NAME
+                                            + " annotation parameters.");
+                }
             }
 
             if (create) {
@@ -885,6 +927,142 @@ public class WidgetsetUtil {
         }
 
         return null;
+    }
+
+    private static boolean updateServletAnnotationForWidgetset(
+            IJavaProject project, IType servletClass, String widgetsetName,
+            IProgressMonitor monitor) {
+        boolean result = false;
+        // check for and update @VaadinServletConfiguration
+        try {
+
+            monitor.beginTask("Modifying Servlet class", 5);
+
+            ICompilationUnit compilationUnit = servletClass
+                    .getCompilationUnit();
+
+            String source = compilationUnit.getSource();
+            Document document = new Document(source);
+
+            compilationUnit
+                    .becomeWorkingCopy(new SubProgressMonitor(monitor, 1));
+
+            try {
+                ASTParser parser = ASTParser.newParser(AST.JLS3);
+                parser.setSource(compilationUnit);
+                parser.setResolveBindings(true);
+                CompilationUnit astRoot = (CompilationUnit) parser
+                        .createAST(new SubProgressMonitor(monitor, 1));
+
+                astRoot.recordModifications();
+                final AST ast = astRoot.getAST();
+
+                // trick to get the annotation from the visitor
+                final NormalAnnotation[] servletConfigurationAnnotation = new NormalAnnotation[1];
+                servletConfigurationAnnotation[0] = null;
+
+                astRoot.accept(new ASTVisitor() {
+
+                    @Override
+                    public boolean visit(NormalAnnotation annotation) {
+                        ITypeBinding binding = annotation.resolveTypeBinding();
+                        String fullyQualifiedName = binding.getQualifiedName();
+                        if (VaadinPlugin.VAADIN_SERVLET_CONFIGURATION_ANNOTATION_FULL_NAME
+                                .equals(fullyQualifiedName)) {
+                            servletConfigurationAnnotation[0] = annotation;
+                            return false;
+                        }
+                        return super.visit(annotation);
+                    }
+
+                    // Only look at top-level annotations
+                    // TODO might be suboptimal if does not stop traversal early
+
+                    @Override
+                    public boolean visit(Block node) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean visit(MethodDeclaration node) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean visit(FieldDeclaration node) {
+                        return false;
+                    }
+                });
+
+                final StringLiteral widgetsetString = ast.newStringLiteral();
+                widgetsetString.setLiteralValue(widgetsetName);
+
+                final ImportRewrite importRewrite = ImportRewrite.create(
+                        astRoot, true);
+
+                if (servletConfigurationAnnotation[0] != null) {
+                    // UPDATE existing annotation
+                    // this is only done if there is no widgetset parameter
+                    // explicitly defined
+                    List values = servletConfigurationAnnotation[0].values();
+                    MemberValuePair widgetsetPair = null;
+                    for (int i = 0; i < values.size(); ++i) {
+                        MemberValuePair pair = (MemberValuePair) values.get(i);
+                        if (VaadinPlugin.VAADIN_SERVLET_CONFIGURATION_ANNOTATION_PARAMETER_WIDGETSET
+                                .equals(pair.getName().getIdentifier())) {
+                            widgetsetPair = pair;
+                            break;
+                        }
+                    }
+                    if (null == widgetsetPair) {
+                        MemberValuePair pair = ast.newMemberValuePair();
+                        final SimpleName attributeName = ast
+                                .newSimpleName(VaadinPlugin.VAADIN_SERVLET_CONFIGURATION_ANNOTATION_PARAMETER_WIDGETSET);
+                        pair.setName(attributeName);
+                        pair.setValue(widgetsetString);
+                        values.add(pair);
+
+                        result = true;
+                    }
+                }
+
+                TextEdit rewrite = astRoot.rewrite(document, compilationUnit
+                        .getJavaProject().getOptions(true));
+                try {
+                    rewrite.apply(document);
+
+                    // rewrite imports (after the body rewrite, modifies earlier
+                    // part)
+                    TextEdit rewriteImports = importRewrite
+                            .rewriteImports(new SubProgressMonitor(monitor, 1));
+                    rewriteImports.apply(document);
+                } catch (Exception e) {
+                    ErrorUtil.handleBackgroundException(IStatus.WARNING,
+                            "Failed to update imports in the UI class "
+                                    + servletClass.getFullyQualifiedName(), e);
+                }
+                String newSource = document.get();
+                compilationUnit.getBuffer().setContents(newSource);
+
+                // reconcile changes with other modifications to the same
+                // compilation unit
+                compilationUnit.reconcile(ICompilationUnit.NO_AST, false, null,
+                        new SubProgressMonitor(monitor, 1));
+
+                compilationUnit.commitWorkingCopy(false,
+                        new SubProgressMonitor(monitor, 1));
+            } finally {
+                compilationUnit.discardWorkingCopy();
+            }
+        } catch (JavaModelException e) {
+            ErrorUtil.handleBackgroundException(
+                    "Failed to update @VaadinServletConfiguration annotation",
+                    e);
+            return false;
+        } finally {
+            monitor.done();
+        }
+        return result;
     }
 
     private static boolean hasWebXml(IJavaProject project) {
