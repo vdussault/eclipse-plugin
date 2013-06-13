@@ -412,7 +412,6 @@ Any metadata changes made will be stored in the project manifest.
    <!-- TODO make the commands/buttons/handlers so that compile widgetset is 
     "dropdown button" with all available compilable widgetsets.   -->
    
-<!--
    <extension
          point="org.eclipse.ui.commands">
       <category
@@ -425,7 +424,6 @@ Any metadata changes made will be stored in the project manifest.
             name="Compile Widgetset Command">
       </command>
    </extension>
--->
    <!-- These are still here mostly for the keyboard shortcut -->
    <extension
          point="org.eclipse.ui.handlers">
