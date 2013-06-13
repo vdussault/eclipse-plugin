@@ -10,7 +10,6 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -105,7 +104,7 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
         DataModelSynchHelper vaadinFacetSynchHelper = new DataModelSynchHelper(
                 vaadinFacetDataModel);
 
-        final boolean vaadin7 = VaadinFacetUtils.VAADIN_70
+        boolean vaadin7 = VaadinFacetUtils.VAADIN_70
                 .equals(getPrimaryFacetVersion());
 
         Label label = new Label(group, SWT.NONE);
@@ -138,6 +137,8 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
             public void propertyChanged(DataModelEvent event) {
                 if (IFacetDataModelProperties.FACET_VERSION.equals(event
                         .getPropertyName())) {
+                    boolean vaadin7 = VaadinFacetUtils.VAADIN_70
+                            .equals(getPrimaryFacetVersion());
                     versionComposite.setUseDependencyManagement(vaadin7);
                 }
             }

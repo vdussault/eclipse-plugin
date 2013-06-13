@@ -447,15 +447,18 @@ public class VaadinFacetInstallDataModelProvider extends
 
     private List<String> getVaadinVersions() throws CoreException {
         List<String> versions = new ArrayList<String>();
-        // Vaadin 7
-        for (MavenVaadinVersion version : MavenVersionManager
-                .getAvailableVersions(false)) {
-            versions.add(version.getVersionNumber());
-        }
-        // other (already downloaded) versions
-        for (LocalVaadinVersion version : LocalFileManager
-                .getLocalVaadinVersions(false)) {
-            versions.add(version.getVersionNumber());
+        if (isVaadin7Facet()) {
+            // Vaadin 7
+            for (MavenVaadinVersion version : MavenVersionManager
+                    .getAvailableVersions(false)) {
+                versions.add(version.getVersionNumber());
+            }
+        } else {
+            // other (already downloaded) versions
+            for (LocalVaadinVersion version : LocalFileManager
+                    .getLocalVaadinVersions(false)) {
+                versions.add(version.getVersionNumber());
+            }
         }
         return versions;
     }
