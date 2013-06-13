@@ -400,10 +400,9 @@ public class CoreFacetInstallDelegate implements IDelegate,
                     .append("\t\t<dependency org=\"com.vaadin\" name=\"vaadin-push\" rev=\"&vaadin.version;\" />\n");
         }
         if (servlet30) {
-            // TODO probably should not be deployed
             extraDependencies.append("\n\t\t<!-- Servlet 3.0 API -->\n");
             extraDependencies
-                    .append("\t\t<dependency org=\"javax.servlet\" name=\"javax.servlet-api\" rev=\"3.0.1\" />\n");
+                    .append("\t\t<dependency org=\"javax.servlet\" name=\"javax.servlet-api\" rev=\"3.0.1\" conf=\"nodeploy->default\" />\n");
         }
         substitutions.put("EXTRA_DEPENDENCIES", extraDependencies.toString());
 
@@ -423,6 +422,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
         setupIvyClasspath(jProject, "default", deployAttributes);
         setupIvyClasspath(jProject, "widgetset-compile",
                 new IClasspathAttribute[0]);
+        setupIvyClasspath(jProject, "nodeploy", new IClasspathAttribute[0]);
     }
 
     /**
