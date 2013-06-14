@@ -583,6 +583,11 @@ public class WidgetsetBuildManager {
                 // requires downloading GWT etc.
 
                 // VaadinPluginUtil.createHostedModeLaunch(project);
+            } catch (IOException e) {
+                ErrorUtil
+                        .handleBackgroundException(
+                                "Compiling widgetset resulted in an IOException. This may result from termination of widgetset compilation.",
+                                e);
             } finally {
                 widgetsetBuildRunning.remove(key);
             }
