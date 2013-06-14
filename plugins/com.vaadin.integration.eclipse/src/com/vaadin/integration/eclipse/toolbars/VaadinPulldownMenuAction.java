@@ -81,7 +81,7 @@ public class VaadinPulldownMenuAction implements
                                 VaadinPlugin.COMPILE_ACTION_WIDGETSET);
 
                         CompileWidgetsetHandler.startCompileWidgetsetJob(
-                                currentSelection, activeEditor);
+                                currentSelection, activeEditor, project);
                     }
                 }
             });
@@ -107,7 +107,7 @@ public class VaadinPulldownMenuAction implements
                                 VaadinPlugin.COMPILE_ACTION_THEME);
 
                         CompileThemeHandler.startCompileThemeJob(
-                                currentSelection, activeEditor);
+                                currentSelection, activeEditor, project);
                     }
                 }
             });
@@ -133,9 +133,9 @@ public class VaadinPulldownMenuAction implements
                                 VaadinPlugin.COMPILE_ACTION_BOTH);
 
                         CompileThemeHandler.startCompileThemeJob(
-                                currentSelection, activeEditor);
+                                currentSelection, activeEditor, project);
                         CompileWidgetsetHandler.startCompileWidgetsetJob(
-                                currentSelection, activeEditor);
+                                currentSelection, activeEditor, project);
                     }
                 }
             });
@@ -192,12 +192,12 @@ public class VaadinPulldownMenuAction implements
             if (VaadinPlugin.COMPILE_ACTION_THEME.equals(lastAction)
                     || VaadinPlugin.COMPILE_ACTION_BOTH.equals(lastAction)) {
                 CompileThemeHandler.startCompileThemeJob(currentSelection,
-                        activeEditor);
+                        activeEditor, project);
             }
             if (VaadinPlugin.COMPILE_ACTION_WIDGETSET.equals(lastAction)
                     || VaadinPlugin.COMPILE_ACTION_BOTH.equals(lastAction)) {
                 CompileWidgetsetHandler.startCompileWidgetsetJob(
-                        currentSelection, activeEditor);
+                        currentSelection, activeEditor, project);
             }
         }
     }

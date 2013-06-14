@@ -12,6 +12,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -36,11 +37,11 @@ public class CompileThemeHandler extends AbstractVaadinCompileHandler {
     @Override
     public void startCompileJob(ISelection currentSelection,
             IEditorPart activeEditor) {
-        startCompileThemeJob(currentSelection, activeEditor);
+        startCompileThemeJob(currentSelection, activeEditor, null);
     }
 
     public static void startCompileThemeJob(final ISelection currentSelection,
-            final IEditorPart activeEditor) {
+            final IEditorPart activeEditor, ISchedulingRule schedulingRule) {
         Job job = new Job("Compiling theme...") {
             @Override
             protected IStatus run(IProgressMonitor monitor) {
@@ -102,6 +103,9 @@ public class CompileThemeHandler extends AbstractVaadinCompileHandler {
 
         };
 
+        if (schedulingRule != null) {
+            job.setRule(schedulingRule);
+        }
         job.setUser(false);
         job.schedule();
     }

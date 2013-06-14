@@ -9,6 +9,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -36,11 +37,12 @@ public class CompileWidgetsetHandler extends AbstractVaadinCompileHandler {
     @Override
     public void startCompileJob(ISelection currentSelection,
             IEditorPart activeEditor) {
-        startCompileWidgetsetJob(currentSelection, activeEditor);
+        startCompileWidgetsetJob(currentSelection, activeEditor, null);
     }
 
     public static void startCompileWidgetsetJob(
-            final ISelection currentSelection, final IEditorPart activeEditor) {
+            final ISelection currentSelection, final IEditorPart activeEditor,
+            ISchedulingRule schedulingRule) {
         Job job = new Job("Compiling widgetset...") {
             @Override
             protected IStatus run(IProgressMonitor monitor) {
@@ -129,6 +131,9 @@ public class CompileWidgetsetHandler extends AbstractVaadinCompileHandler {
 
         };
 
+        if (schedulingRule != null) {
+            job.setRule(schedulingRule);
+        }
         job.setUser(false);
         job.schedule();
     }
