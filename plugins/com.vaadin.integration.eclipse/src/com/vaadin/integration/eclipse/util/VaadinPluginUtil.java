@@ -1409,6 +1409,11 @@ public class VaadinPluginUtil {
                 if (theme instanceof IFolder) {
                     IFolder themeFolder = (IFolder) theme;
                     for (IResource file : themeFolder.members()) {
+                        if (!(file instanceof IFile)
+                                || (null == file.getFileExtension())) {
+                            // ignore subdirectories and files without extension
+                            continue;
+                        }
                         String extension = file.getFileExtension()
                                 .toLowerCase();
                         if (extension.equals("scss") || extension.equals("css")) {
