@@ -23,8 +23,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.ivyde.eclipse.cpcontainer.IvyClasspathContainer;
-import org.apache.ivyde.eclipse.cpcontainer.IvyClasspathContainerConfiguration;
+import org.apache.ivyde.eclipse.cp.IvyClasspathContainer;
+import org.apache.ivyde.eclipse.cp.IvyClasspathContainerConfiguration;
+import org.apache.ivyde.eclipse.cp.IvyClasspathContainerHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -785,11 +786,17 @@ public class VaadinPluginUtil {
                 if (rawClassPathEntry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
                     // first add all dependencies from Ivy configuration
                     // widgetset-compile
-                    IClasspathContainer classpathContainer = JavaCore
-                            .getClasspathContainer(rawClassPathEntry.getPath(),
-                                    jproject);
-                    if (classpathContainer instanceof IvyClasspathContainer) {
-                        IvyClasspathContainerConfiguration conf = ((IvyClasspathContainer) classpathContainer)
+                    if (IvyClasspathContainerHelper
+                            .isIvyClasspathContainer(rawClassPathEntry
+                                    .getPath())) {
+                        IvyClasspathContainer ivyClasspathContainer = IvyClasspathContainerHelper
+                                .getContainer(rawClassPathEntry.getPath(),
+                                        jproject);
+                        // this is clumsy but allows getting the entries
+                        IClasspathContainer classpathContainer = JavaCore
+                                .getClasspathContainer(
+                                        rawClassPathEntry.getPath(), jproject);
+                        IvyClasspathContainerConfiguration conf = ivyClasspathContainer
                                 .getConf();
                         for (Object confName : conf.getConfs()) {
                             if ("widgetset-compile".equals(confName)) {

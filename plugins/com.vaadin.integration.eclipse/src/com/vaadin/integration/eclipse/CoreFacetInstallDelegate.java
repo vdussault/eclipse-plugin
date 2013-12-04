@@ -8,10 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.ivyde.eclipse.cpcontainer.IvyClasspathContainer;
-import org.apache.ivyde.eclipse.cpcontainer.IvyClasspathContainerConfAdapter;
-import org.apache.ivyde.eclipse.cpcontainer.IvyClasspathContainerConfiguration;
-import org.apache.ivyde.eclipse.cpcontainer.SettingsSetup;
+import org.apache.ivyde.eclipse.cp.IvyClasspathContainer;
+import org.apache.ivyde.eclipse.cp.IvyClasspathContainerConfiguration;
+import org.apache.ivyde.eclipse.cp.IvyClasspathContainerHelper;
+import org.apache.ivyde.eclipse.cp.SettingsSetup;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IClasspathAttribute;
-import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -423,6 +422,12 @@ public class CoreFacetInstallDelegate implements IDelegate,
         setupIvyClasspath(jProject, "widgetset-compile",
                 new IClasspathAttribute[0]);
         setupIvyClasspath(jProject, "nodeploy", new IClasspathAttribute[0]);
+
+        List<IvyClasspathContainer> ivyClasspathContainers = IvyClasspathContainerHelper
+                .getContainers(jProject);
+        for (IvyClasspathContainer container : ivyClasspathContainers) {
+            container.launchResolve(false, null);
+        }
     }
 
     /**
@@ -438,7 +443,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
         IvyClasspathContainerConfiguration conf = new IvyClasspathContainerConfiguration(
                 project, "ivy.xml", true);
 
-        // use all configurations in ivy.xml
+        // use given configuration in ivy.xml
         conf.setConfs(new ArrayList(Collections
                 .singletonList(configurationName)));
 
@@ -456,28 +461,22 @@ public class CoreFacetInstallDelegate implements IDelegate,
             }
         }
 
+        // see e.g. IvydeContainerPage.finish(); need to avoid using
+        // non-exported API of IvyDE
+
         // entry
-        IPath path = IvyClasspathContainerConfAdapter.getPath(conf);
-        // empty for the newly created classpath entry
-        // IClasspathAttribute[] atts = conf.getAttributes();
+        IPath path = conf.getPath();
         boolean exported = false;
         IClasspathEntry entry = JavaCore.newContainerEntry(path, null,
                 attributes, exported);
 
         try {
-            IvyClasspathContainer ivycp = new IvyClasspathContainer(project,
-                    path, new IClasspathEntry[0], new IClasspathAttribute[0]);
-            JavaCore.setClasspathContainer(path,
-                    new IJavaProject[] { project },
-                    new IClasspathContainer[] { ivycp }, null);
             IClasspathEntry[] entries = project.getRawClasspath();
             List newEntries = new ArrayList(Arrays.asList(entries));
             newEntries.add(entry);
             entries = (IClasspathEntry[]) newEntries
                     .toArray(new IClasspathEntry[newEntries.size()]);
             project.setRawClasspath(entries, project.getOutputLocation(), null);
-
-            ivycp.launchResolve(false, null);
         } catch (JavaModelException e) {
             ErrorUtil.handleBackgroundException(e);
         } catch (CoreException e) {
