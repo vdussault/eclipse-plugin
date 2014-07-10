@@ -12,8 +12,8 @@ import com.vaadin.integration.eclipse.util.ErrorUtil;
 
 public class VaadinFacetUtils {
     public static final String VAADIN_FACET_ID = "com.vaadin.integration.eclipse.core";
-    public static final String VAADIN6_PROJECT_DEFAULT_PRESET_ID = "com.vaadin.integration.eclipse.preset15";
-    public static final String VAADIN7_PROJECT_DEFAULT_PRESET_ID = "com.vaadin.integration.eclipse.presetv7j16s30";
+    public static final String VAADIN6_PROJECT_DEFAULT_PRESET_ID = "com.vaadin.integration.eclipse.presetv6d";
+    public static final String VAADIN7_PROJECT_DEFAULT_PRESET_ID = "com.vaadin.integration.eclipse.presetv7d";
 
     public static final IProjectFacet VAADIN_FACET = ProjectFacetsManager
             .getProjectFacet(VAADIN_FACET_ID);
