@@ -254,6 +254,18 @@ public class VersionUtil {
     }
 
     /**
+     * Checks if the Vaadin version is 7.3 or higher.
+     * 
+     * If major or minor version cannot be determined, false is returned.
+     * 
+     * @param vaadinVersion
+     * @return
+     */
+    public static boolean isVaadin73(AbstractVaadinVersion vaadinVersion) {
+        return isVaadin73VersionString(vaadinVersion.getVersionNumber());
+    }
+
+    /**
      * Checks if the Vaadin version is 7 or higher.
      * 
      * If major version cannot be determined, false is returned.
@@ -267,6 +279,10 @@ public class VersionUtil {
 
     public static boolean isVaadin71VersionString(String vaadinVersion) {
         return isAtLeastVersionString(vaadinVersion, 7, 1);
+    }
+
+    public static boolean isVaadin73VersionString(String vaadinVersion) {
+        return isAtLeastVersionString(vaadinVersion, 7, 3);
     }
 
     private static boolean isAtLeastVersionString(String vaadinVersion,

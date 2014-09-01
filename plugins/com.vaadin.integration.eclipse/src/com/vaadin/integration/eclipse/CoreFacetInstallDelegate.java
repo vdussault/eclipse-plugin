@@ -167,6 +167,8 @@ public class CoreFacetInstallDelegate implements IDelegate,
             /* Copy Vaadin JAR to project's WEB-INF/lib folder */
             boolean vaadin7 = VersionUtil.isVaadin7(vaadinVersion);
             boolean vaadin71 = VersionUtil.isVaadin71(vaadinVersion);
+            boolean vaadin73 = VersionUtil.isVaadin73(vaadinVersion);
+
             if (!vaadin7 && vaadinVersion instanceof LocalVaadinVersion) {
                 // Vaadin 7 uses Ivy for dependencies
                 ProjectDependencyManager.ensureVaadinLibraries(project,
@@ -238,10 +240,13 @@ public class CoreFacetInstallDelegate implements IDelegate,
                     // Addon styles only supported on Vaadin 7.1 and above
                     boolean supportsAddonStyles = vaadin71;
 
+                    // Valo theme only supported on Vaadin 7.3 and above
+                    boolean supportsValoTheme = vaadin73;
+
                     /* Create theme */
                     ThemesUtil.createTheme(jProject, applicationTheme, true,
                             new SubProgressMonitor(monitor, 1),
-                            supportsAddonStyles);
+                            supportsAddonStyles, supportsValoTheme);
 
                     /*
                      * NOTE! This must be done BEFORE Ivy is added so Ivy takes

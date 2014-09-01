@@ -30,8 +30,8 @@ public class ThemesUtil {
      */
     public static IFile[] createTheme(IJavaProject jproject,
             final String themeName, boolean scssTheme,
-            IProgressMonitor monitor, boolean addonStylesSupported)
-            throws CoreException {
+            IProgressMonitor monitor, boolean addonStylesSupported,
+            boolean valoThemeSupported) throws CoreException {
 
         IProject project = jproject.getProject();
 
@@ -42,6 +42,11 @@ public class ThemesUtil {
 
             String VAADIN = VaadinPlugin.VAADIN_RESOURCE_DIRECTORY;
             String themes = VaadinPlugin.THEME_FOLDER_NAME;
+            String baseThemeName = VaadinPlugin.VAADIN_DEFAULT_THEME;
+            if (valoThemeSupported) {
+                baseThemeName = VaadinPlugin.VAADIN_73_DEFAULT_THEME;
+            }
+
             IFolder webContent = ProjectUtil.getWebContentFolder(project);
 
             // Ensure theme does not already exist
@@ -54,8 +59,7 @@ public class ThemesUtil {
             // Create folders
             themeFolder.getLocation().toFile().mkdirs();
             webContent.refreshLocal(IResource.DEPTH_INFINITE,
-                            new SubProgressMonitor(monitor, 1));
-
+                    new SubProgressMonitor(monitor, 1));
 
             if (scssTheme) {
                 IFile stylesFile = themeFolder.getFile(new Path("styles.scss"));
@@ -64,16 +68,23 @@ public class ThemesUtil {
                 IFile addonsFile = themeFolder.getFile(new Path("addons.scss"));
 
                 try {
+
                     String stylesContent = ThemesUtil.getScssStylesContent(
-                            themeName, VaadinPlugin.VAADIN_DEFAULT_THEME,
-                            addonStylesSupported);
+                            themeName, baseThemeName, addonStylesSupported);
                     InputStream stream = openStringStream(stylesContent);
                     stylesFile.create(stream, true, new SubProgressMonitor(
                             monitor, 1));
                     stream.close();
 
-                    String themeContent = getScssThemeContent(themeName,
-                            VaadinPlugin.VAADIN_DEFAULT_THEME);
+                    String themeContent;
+                    if (valoThemeSupported) {
+                        themeContent = getValoScssThemeContent(themeName,
+                                baseThemeName);
+                    } else {
+                        themeContent = getScssThemeContent(themeName,
+                                baseThemeName);
+                    }
+
                     stream = openStringStream(themeContent);
                     themeFile.create(stream, true, new SubProgressMonitor(
                             monitor, 1));
@@ -89,8 +100,7 @@ public class ThemesUtil {
                 return new IFile[] { stylesFile, themeFile };
             } else {
                 IFile file = themeFolder.getFile(new Path("styles.css"));
-                String cssContent = getCssContent(themeName,
-                        VaadinPlugin.VAADIN_DEFAULT_THEME);
+                String cssContent = getCssContent(themeName, baseThemeName);
                 InputStream stream = openStringStream(cssContent);
                 try {
                     file.create(stream, true,
@@ -161,6 +171,49 @@ public class ThemesUtil {
         sb.append("  /* Insert your theme rules here */\n");
         sb.append("}\n");
         return sb.toString();
+    }
+
+    private static String getValoScssThemeContent(String themeName,
+            String baseTheme) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("// Global variable overrides. Must be declared before importing Valo.\n");
+        sb.append("\n");
+        sb.append("// Defines the plaintext font size, weight and family. Font size affects general component sizing.\n");
+        sb.append("//$v-font-size: 16px;\n");
+        sb.append("//$v-font-weight: 300;\n");
+        sb.append("//$v-font-family: \"Open Sans\", sans-serif;\n");
+        sb.append("\n");
+        sb.append("// Defines the border used by all components.\n");
+        sb.append("//$v-border: 1px solid (v-shade 0.7);\n");
+        sb.append("//$v-border-radius: 4px;\n");
+        sb.append("\n");
+        sb.append("// Affects the color of some component elements, e.g Button, Panel title, etc\n");
+        sb.append("//$v-background-color: hsl(210, 0%, 98%);\n");
+        sb.append("// Affects the color of content areas, e.g  Panel and Window content, TextField input etc\n");
+        sb.append("//$v-app-background-color: $v-background-color;\n");
+        sb.append("\n");
+        sb.append("// Affects the visual appearance of all components\n");
+        sb.append("//$v-gradient: v-linear 8%;\n");
+        sb.append("//$v-bevel-depth: 30%;\n");
+        sb.append("//$v-shadow-opacity: 5%;\n");
+        sb.append("\n");
+        sb.append("// Defines colors for indicating status (focus, success, failure)\n");
+        sb.append("//$v-focus-color: valo-focus-color(); // Calculates a suitable color automatically\n");
+        sb.append("//$v-friendly-color: #2c9720;\n");
+        sb.append("//$v-error-indicator-color: #ed473b;\n");
+        sb.append("\n");
+        sb.append("// For more information, see: https://vaadin.com/book/-/page/themes.valo.html\n");
+        sb.append("// Example variants can be copy/pasted from https://vaadin.com/wiki/-/wiki/Main/Valo+Examples\n");
+        sb.append("\n");
+        sb.append("@import \"../" + baseTheme + "/" + baseTheme
+                + ".scss\";\n\n");
+        sb.append("@mixin " + themeName + " {\n");
+        sb.append("  @include " + baseTheme + ";\n\n");
+        sb.append("  // Insert your own theme rules here\n");
+        sb.append("}\n");
+
+        return sb.toString();
+
     }
 
     private static String getAdddonsScssContent() {

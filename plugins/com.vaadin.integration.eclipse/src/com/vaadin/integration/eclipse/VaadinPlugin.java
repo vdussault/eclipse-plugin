@@ -64,6 +64,7 @@ public class VaadinPlugin extends AbstractUIPlugin {
     public static final String VAADIN_ADDON_THEME_DIRECTORY = "addons";
 
     public static final String VAADIN_DEFAULT_THEME = "reindeer";
+    public static final String VAADIN_73_DEFAULT_THEME = "valo";
 
     public static final String GWT_COMPILER_CLASS = "com.vaadin.tools.WidgetsetCompiler";
 
