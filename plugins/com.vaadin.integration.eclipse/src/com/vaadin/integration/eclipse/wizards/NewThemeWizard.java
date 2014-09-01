@@ -51,6 +51,7 @@ import org.eclipse.ui.ide.IDE;
 import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.builder.AddonStylesImporter;
 import com.vaadin.integration.eclipse.util.ErrorUtil;
+import com.vaadin.integration.eclipse.util.ProjectUtil;
 import com.vaadin.integration.eclipse.util.ThemesUtil;
 
 /**
@@ -140,9 +141,15 @@ public class NewThemeWizard extends Wizard implements INewWizard {
             IType uiType = jproject.findType(VaadinPlugin.UI_CLASS_FULL_NAME);
             boolean scssTheme = uiType != null;
 
+            double version = ProjectUtil.getVaadinVersion(project);
+            boolean isValoSupported = false;
+            if (version >= 7.3d) {
+                isValoSupported = true;
+            }
+
             final IFile[] files = ThemesUtil.createTheme(jproject, themeName,
                     scssTheme, new SubProgressMonitor(monitor, 1),
-                    AddonStylesImporter.isSupported(project));
+                    AddonStylesImporter.isSupported(project), isValoSupported);
 
             monitor.setTaskName("Modifying Java file(s) to use theme...");
             // update selected application/UI classes
@@ -429,7 +436,7 @@ public class NewThemeWizard extends Wizard implements INewWizard {
             monitor.done();
         }
     }
-    
+
     /**
      * We will accept the selection in the workbench to see if we can initialize
      * from it.
