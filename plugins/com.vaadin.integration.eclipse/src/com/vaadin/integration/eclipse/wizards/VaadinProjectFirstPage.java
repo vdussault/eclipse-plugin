@@ -10,6 +10,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -132,6 +133,12 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
         synchHelper.synchCheckbox(
                 versionComposite.getUseLatestNightlyCheckbox(),
                 USE_LATEST_NIGHTLY, new Control[] {});
+
+        // Add a check box for choosing whether to create a TB test.
+        final Button b = new Button(group, SWT.CHECK);
+        b.setText("Create TestBench test");
+        synchHelper.synchCheckbox(b, CREATE_TB_TEST, new Control[]{ });
+
         // update Vaadin 6/7
         vaadinFacetDataModel.addListener(new IDataModelListener() {
             public void propertyChanged(DataModelEvent event) {
@@ -140,6 +147,9 @@ public class VaadinProjectFirstPage extends WebProjectFirstPage implements
                     boolean vaadin7 = VaadinFacetUtils.VAADIN_70
                             .equals(getPrimaryFacetVersion());
                     versionComposite.setUseDependencyManagement(vaadin7);
+                    GridData data = (GridData) b.getLayoutData();
+                    data.exclude = !vaadin7;
+                    b.setVisible(vaadin7);
                 }
             }
         });

@@ -12,6 +12,7 @@ import org.apache.ivyde.eclipse.cp.IvyClasspathContainer;
 import org.apache.ivyde.eclipse.cp.IvyClasspathContainerConfiguration;
 import org.apache.ivyde.eclipse.cp.IvyClasspathContainerHelper;
 import org.apache.ivyde.eclipse.cp.SettingsSetup;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -58,7 +59,7 @@ import com.vaadin.integration.eclipse.util.files.LocalFileManager;
 import com.vaadin.integration.eclipse.util.network.DownloadManager;
 
 public class CoreFacetInstallDelegate implements IDelegate,
-        IVaadinFacetInstallDataModelProperties {
+IVaadinFacetInstallDataModelProperties {
 
     private static final String VAADIN_PRODUCTION_MODE = "productionMode";
     private static final String VAADIN_PRODUCTION_MODE_DESCRIPTION = "Vaadin production mode";
@@ -137,6 +138,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
         } else {
             monitor.worked(3);
         }
+        boolean createTBTest = model.getBooleanProperty(CREATE_TB_TEST) && VersionUtil.isVaadin73(vaadinVersion);
 
         try {
             monitor.subTask("Setting up project preferences");
@@ -231,6 +233,37 @@ public class CoreFacetInstallDelegate implements IDelegate,
                     appPackage.createCompilationUnit(applicationFileName,
                             uiCode, false, monitor);
 
+                    if(createTBTest) {
+                        // Create a folder for the test.
+                        IPath path = project.getFullPath().append("../" + VaadinPlugin.TEST_FOLDER_NAME);
+                        IFolder folder = project.getFolder(path);
+                        VaadinPluginUtil.createFolders(folder, monitor);
+                        IPackageFragmentRoot testRoot = jProject.getPackageFragmentRoot(folder);
+                        IPackageFragment testPackage = testRoot
+                                .createPackageFragment(applicationPackage, true,
+                                        monitor);
+                        // Add a class path entry for the test folder in the project.
+                        if(!jProject.isOnClasspath(folder)){
+                            IClasspathEntry[] oldClassPaths = jProject.getRawClasspath();
+                            int n = oldClassPaths.length;
+                            IClasspathEntry[] newClassPaths = new IClasspathEntry[n + 1];
+                            System.arraycopy(oldClassPaths, 0, newClassPaths, 0, n);
+                            newClassPaths[n] = JavaCore.newSourceEntry(testRoot.getPath());
+                            jProject.setRawClasspath(newClassPaths, null);
+                        }
+
+                        // Add the test to the test folder.
+                        String uiName = model.getStringProperty(IFacetDataModelProperties.FACET_PROJECT_NAME);
+                        String uiClassName = model.getStringProperty(APPLICATION_CLASS);
+                        if(uiClassName.toUpperCase().endsWith("UI")){
+                            uiClassName = uiClassName.substring(0, uiClassName.length() - 2);
+                        }
+                        String testClassName = uiClassName + "Test";
+                        String testFileName = testClassName + ".java";
+                        String testCode = VaadinPluginUtil.createTBTestSource(applicationPackage, uiName, testClassName);
+                        testPackage.createCompilationUnit(testFileName, testCode, false, monitor);
+                    }
+
                     if (createPortlet) {
                         // Vaadin 7 only supports portlet 2.0
                         portletClassName = vaadinPackagePrefix
@@ -260,7 +293,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
 
                     if (vaadinVersion instanceof MavenVaadinVersion) {
                         setupIvy(jProject, (MavenVaadinVersion) vaadinVersion,
-                                servlet30, monitor);
+                                servlet30, createTBTest, monitor);
                     }
                 } else {
                     // Vaadin 6: create an Application class
@@ -306,7 +339,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
                         WebXmlUtil.addServlet(artifact.getWebApp(),
                                 applicationName, applicationPackage + "."
                                         + applicationClass, servletPath,
-                                servletClassName, createPortlet, vaadinVersion);
+                                        servletClassName, createPortlet, vaadinVersion);
                         WebXmlUtil.addContextParameter(artifact.getWebApp(),
                                 VAADIN_PRODUCTION_MODE, "false",
                                 VAADIN_PRODUCTION_MODE_DESCRIPTION);
@@ -354,9 +387,9 @@ public class CoreFacetInstallDelegate implements IDelegate,
             monitor.worked(1);
         } catch (Exception e) {
             throw ErrorUtil
-                    .newCoreException(
-                            "Vaadin libraries installation or project template creation failed",
-                            e);
+            .newCoreException(
+                    "Vaadin libraries installation or project template creation failed",
+                    e);
         } finally {
             monitor.done();
         }
@@ -391,7 +424,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
     }
 
     public static void setupIvy(IJavaProject jProject,
-            MavenVaadinVersion version, boolean servlet30,
+            MavenVaadinVersion version, boolean servlet30, boolean createTBTest,
             IProgressMonitor monitor) throws CoreException {
         Map<String, String> substitutions = new HashMap<String, String>();
         substitutions.put("VAADIN_VERSION", version.getVersionNumber());
@@ -401,12 +434,17 @@ public class CoreFacetInstallDelegate implements IDelegate,
         if (vaadin71) {
             extraDependencies.append("\n\t\t<!-- Push support -->\n");
             extraDependencies
-                    .append("\t\t<dependency org=\"com.vaadin\" name=\"vaadin-push\" rev=\"&vaadin.version;\" />\n");
+            .append("\t\t<dependency org=\"com.vaadin\" name=\"vaadin-push\" rev=\"&vaadin.version;\" />\n");
         }
         if (servlet30) {
             extraDependencies.append("\n\t\t<!-- Servlet 3.0 API -->\n");
             extraDependencies
-                    .append("\t\t<dependency org=\"javax.servlet\" name=\"javax.servlet-api\" rev=\"3.0.1\" conf=\"nodeploy->default\" />\n");
+            .append("\t\t<dependency org=\"javax.servlet\" name=\"javax.servlet-api\" rev=\"3.0.1\" conf=\"nodeploy->default\" />\n");
+        }
+        if(createTBTest) {
+            extraDependencies.append("\n\t\t<!-- TestBench 4 -->\n");
+            extraDependencies
+            .append("\t\t<dependency org=\"com.vaadin\" name=\"vaadin-testbench-api\" rev=\"latest.release\" conf=\"nodeploy -> default\" />\n");
         }
         substitutions.put("EXTRA_DEPENDENCIES", extraDependencies.toString());
 
@@ -438,7 +476,7 @@ public class CoreFacetInstallDelegate implements IDelegate,
     /**
      * Use ivy.xml and ivysettings.xml at project root to create and add a new
      * classpath entry.
-     * 
+     *
      * @param project
      *            the project for which an Ivy classpath entry should be created
      */

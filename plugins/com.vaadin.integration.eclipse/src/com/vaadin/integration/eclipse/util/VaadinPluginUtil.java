@@ -64,6 +64,7 @@ import org.osgi.framework.Bundle;
 
 import com.vaadin.integration.eclipse.VaadinPlugin;
 import com.vaadin.integration.eclipse.templates.v62.ApplicationTemplate;
+import com.vaadin.integration.eclipse.templates.v7.TestTemplate;
 import com.vaadin.integration.eclipse.templates.v7.UITemplate;
 import com.vaadin.integration.eclipse.util.files.LocalFileManager;
 
@@ -91,7 +92,7 @@ public class VaadinPluginUtil {
 
     /**
      * Create a configuration file from a template if it does not exist.
-     * 
+     *
      * @param file
      *            the file to create from template
      * @param template
@@ -105,7 +106,7 @@ public class VaadinPluginUtil {
 
     /**
      * Create a configuration file from a template if it does not exist.
-     * 
+     *
      * @param file
      *            the file to create from template
      * @param template
@@ -206,6 +207,19 @@ public class VaadinPluginUtil {
         }
     }
 
+    public static String createTBTestSource(String packageName, String uiName, String testClassName) throws CoreException {
+        try {
+            TestTemplate t = TestTemplate.class.newInstance();
+            String src = t.generate(packageName, uiName, testClassName);
+            return src;
+        } catch (Exception e) {
+            ErrorUtil.handleBackgroundException(
+                    "Could not create TestBench test class from template", e);
+            throw ErrorUtil.newCoreException(
+                    "Could not create Testbench test class from template", e);
+        }
+    }
+
     public static String createUiClassSource(String packageName,
             String applicationName, String uiClass, String uiTheme,
             boolean servlet30, boolean vaadin71) throws CoreException {
@@ -225,7 +239,7 @@ public class VaadinPluginUtil {
     /**
      * Create a variable-based classpath entry if the given path is under the
      * target of the variable, an absolute one otherwise.
-     * 
+     *
      * @param variableName
      * @param jarPath
      * @return
@@ -246,11 +260,11 @@ public class VaadinPluginUtil {
     /**
      * Replace an existing class path entry (identified by last segment name)
      * with a new one or optionally append the new entry if not found.
-     * 
+     *
      * The position of the replaced element on the class path is kept unchanged.
      * If a new entry is added, it is inserted at the beginning of the class
      * path.
-     * 
+     *
      * @param entries
      *            list of class path entries to modify
      * @param newEntry
@@ -285,16 +299,16 @@ public class VaadinPluginUtil {
      * the class path of the launch itself!) or in the class path of a Java
      * launch. This is called when a JAR is replaced by a different version
      * which may have a different name or location.
-     * 
+     *
      * The old JAR is identified by its file name without path. For external
      * launches, the JAR path is extracted by back-tracking from the JAR file
      * name to the previous path separator and that full path is replaced with
      * the given new path to a JAR file.
-     * 
+     *
      * This is primarily meant for updating the generated widgetset compilation
      * and hosted mode launches, but will also modify certain other kinds of
      * launches.
-     * 
+     *
      * @throws CoreException
      */
     @SuppressWarnings("deprecation")
@@ -435,7 +449,7 @@ public class VaadinPluginUtil {
 
     /**
      * Returns the first gwt user jar defined in projects classpath.
-     * 
+     *
      * If not set, a gwt jar file provided by plugin is returned, or null if
      * none specified by Vaadin JAR.
      */
@@ -573,7 +587,7 @@ public class VaadinPluginUtil {
     /**
      * Create the folder if it does not exist. If the parent folder does not
      * exist, it is created first.
-     * 
+     *
      * @param folder
      * @param monitor
      * @throws CoreException
@@ -746,11 +760,11 @@ public class VaadinPluginUtil {
      * Returns the project classpath as a string, in a format that can be used
      * when launching external programs on the same platform where Eclipse is
      * running.
-     * 
+     *
      * For a Vaadin 6.2+ project, output locations should be on the classpath of
      * the widgetset compiler (but after all source directories) to enable
      * accessing the server side annotations.
-     * 
+     *
      * @param jproject
      * @param vmInstall
      *            JRE/JDK to select the system libraries to include on the class
@@ -927,7 +941,7 @@ public class VaadinPluginUtil {
 
     /**
      * Checks whether a VM installation is Java 1.6 or later.
-     * 
+     *
      * @param vmInstall
      * @return true if the VM version is 1.6 or later, false if older or unknown
      */
@@ -947,7 +961,7 @@ public class VaadinPluginUtil {
     /**
      * Returns the JVM install to use for a project. The project JVM is used if
      * available, the workspace default VM if none is specified for the project.
-     * 
+     *
      * @param jproject
      * @param gwtCompilation
      *            true if used for running the GWT compiler, in which case
@@ -999,7 +1013,7 @@ public class VaadinPluginUtil {
 
     /**
      * Returns the full path to the Java executable of a given JVM install.
-     * 
+     *
      * @param vmInstall
      * @return JVM executable path in platform specific format
      * @throws CoreException
@@ -1021,7 +1035,7 @@ public class VaadinPluginUtil {
     /**
      * Convert a path to a raw filesystem location - also works when the project
      * is outside the workspace
-     * 
+     *
      * @param project
      * @param path
      * @return
@@ -1042,7 +1056,7 @@ public class VaadinPluginUtil {
 
     /**
      * Find Java launch configuration for GWT hosted mode, create it if missing.
-     * 
+     *
      * @param project
      * @return the {@link ILaunchConfiguration} created/found launch
      *         configuration or null if none
@@ -1201,7 +1215,7 @@ public class VaadinPluginUtil {
 
     /**
      * Checks if a feature(class) is on the workspace classpath
-     * 
+     *
      * @param type
      *            The class the check for
      * @param project
@@ -1226,7 +1240,7 @@ public class VaadinPluginUtil {
     /**
      * Find Java launch configuration for GWT SuperDevMode, create it if
      * missing.
-     * 
+     *
      * @param project
      * @return the {@link ILaunchConfiguration} created/found launch
      *         configuration or null if none
@@ -1393,7 +1407,7 @@ public class VaadinPluginUtil {
     /**
      * Searches the project theme for stylesheets to add to the manifests.
      * Ignores stylesheets which are names addons.scss
-     * 
+     *
      * @param jProject
      * @return
      * @throws CoreException

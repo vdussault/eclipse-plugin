@@ -53,6 +53,8 @@ public class VaadinPlugin extends AbstractUIPlugin {
 
     public static final String THEME_FOLDER_NAME = "themes";
 
+    public static final String TEST_FOLDER_NAME = "test";
+
     public static final String THEME_ADDON_IMPORTS = "addons.scss";
 
     public static final String ID_COMPILE_WS_APP = "compilews";

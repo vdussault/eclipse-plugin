@@ -82,6 +82,7 @@ public class VaadinFacetInstallDataModelProvider extends
         names.add(VAADIN_VERSION);
         names.add(USE_LATEST_NIGHTLY);
         names.add(VAADIN_PROJECT_TYPE);
+        names.add(CREATE_TB_TEST);
         return names;
     }
 
@@ -188,13 +189,15 @@ public class VaadinFacetInstallDataModelProvider extends
             return VaadinFacetUtils.VAADIN_FACET_ID;
         } else if (propertyName.equals(VAADIN_PROJECT_TYPE)) {
             return PROJECT_TYPE_SERVLET;
+        } else if (propertyName.equals(CREATE_TB_TEST)) {
+            return Boolean.TRUE;
         }
         return super.getDefaultProperty(propertyName);
     }
 
     /**
      * Check if the currently selected project facet is Vaadin 7.
-     * 
+     *
      * @return true if Vaadin 7, false for earlier versions
      */
     private boolean isVaadin7Facet() {
@@ -204,7 +207,7 @@ public class VaadinFacetInstallDataModelProvider extends
 
     /**
      * Check if the currently selected version is Vaadin 7.
-     * 
+     *
      * @return true if Vaadin 7 or later, false for earlier versions
      */
     private boolean isVaadin7Version() {
@@ -218,7 +221,7 @@ public class VaadinFacetInstallDataModelProvider extends
 
     /**
      * Check if the currently selected version is Vaadin 7.1.
-     * 
+     *
      * @return true if Vaadin 7.1 or later, false for earlier versions
      */
     private boolean isVaadin71Version() {
@@ -231,9 +234,24 @@ public class VaadinFacetInstallDataModelProvider extends
     }
 
     /**
+     * Check if the currently selected version is Vaadin 7.3.
+     *
+     * @return true if Vaadin 7.3 or later, false for earlier versions
+     */
+    private boolean isVaadin73Version() {
+        Object versionObject = getProperty(VAADIN_VERSION);
+        if (null != versionObject && !"".equals(versionObject)) {
+            return VersionUtil.isVaadin73VersionString(String
+                    .valueOf(versionObject));
+        }
+        return false;
+    }
+
+
+    /**
      * Returns "Application" (for Vaadin 6 or unknown) or "UI" (for other Vaadin
      * versions - 7 or higher).
-     * 
+     *
      * @return
      */
     private String getApplicationClassSuffix() {
@@ -317,6 +335,8 @@ public class VaadinFacetInstallDataModelProvider extends
                             IDataModel.ENABLE_CHG);
                 }
             }
+            // By default, create a TestBench test if the Vaadin version is at least 7.3.
+            model.setBooleanProperty(CREATE_TB_TEST, isVaadin73Version());
         } else if (PORTLET_VERSION.equals(propertyName)) {
             // for Vaadin 7, portlet 1.0 is not supported
             if (isVaadin7Version() && PORTLET_VERSION10.equals(propertyValue)) {
@@ -357,7 +377,7 @@ public class VaadinFacetInstallDataModelProvider extends
     /**
      * Set up the directory layout (context root dir and output folder) for
      * default or Google App Engine configuration.
-     * 
+     *
      * @param useGae
      */
     private void useGaeDirectoryStructure(boolean useGae) {
@@ -399,6 +419,9 @@ public class VaadinFacetInstallDataModelProvider extends
         }
         if (USE_LATEST_NIGHTLY.equals(propertyName)) {
             return !isVaadin7Facet();
+        }
+        if (CREATE_TB_TEST.equals(propertyName)) {
+            return isVaadin73Version();
         }
         return super.isPropertyEnabled(propertyName);
     }

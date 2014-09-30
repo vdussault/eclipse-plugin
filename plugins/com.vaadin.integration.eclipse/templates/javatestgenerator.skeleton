@@ -1,0 +1,16 @@
+/*
+ * JET GENERATED do not edit!
+ * The source templates are in the templates folder (note: not package).
+ *
+ * The JET source templates can be edited. They are then transformed into java
+ * template classes by the JET plugin. To use the generated java templates, no
+ * dependencies are required.
+ */
+public class CLASS {
+    // UIName is a name that is used for generating a URL for the web browser in the test.
+    // It can be different from the UI class name: the class name usually ends with 'UI',
+    // while UIName does not.
+    public String generate(String applicationPackage, String uiName, String testClassName) {
+        return "";
+    }
+}
