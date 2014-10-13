@@ -6,6 +6,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.runtime.IPath;
@@ -40,12 +43,24 @@ public class VaadinJarBundlePlugin extends Plugin implements IStartup {
     @Override
     public void start(BundleContext bundleContext) throws Exception {
         super.start(bundleContext);
+        // Extension activators get called early.
+        // We need to clean up the null junk Equinox leaves behind (#14838)
+        // Go through system properties and remove any non String values
+        Properties sysProps = System.getProperties();
+        synchronized (sysProps) {
+            for (Iterator<Entry<Object, Object>> entries = sysProps.entrySet()
+                    .iterator(); entries.hasNext();) {
+                Entry<Object, Object> entry = entries.next();
+                if (!(entry.getValue() instanceof String)) {
+                    entries.remove();
+                }
+            }
+        }
         try {
             copyJarFiles();
         } catch (IOException e) {
             showErrorMessage("Copy failed",
                     "Failed to copy bundled Vaadin jar files");
-
         }
     }
 
@@ -108,6 +123,7 @@ public class VaadinJarBundlePlugin extends Plugin implements IStartup {
     private static void showErrorMessage(final String title,
             final String message) {
         PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+            @Override
             public void run() {
                 Shell shell = PlatformUI.getWorkbench()
                         .getActiveWorkbenchWindow().getShell();
@@ -116,6 +132,7 @@ public class VaadinJarBundlePlugin extends Plugin implements IStartup {
         });
     }
 
+    @Override
     public void earlyStartup() {
         // Needed for the class to be loaded. The actual initialization is done
         // when the bundle is initialized.
