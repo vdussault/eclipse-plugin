@@ -955,7 +955,7 @@ public class VaadinPluginUtil {
             return false;
         }
         return version.startsWith(JavaCore.VERSION_1_6)
-                || version.startsWith(JavaCore.VERSION_1_7);
+                || version.startsWith(JavaCore.VERSION_1_7) || version.startsWith("1.8");
     }
 
     /**
