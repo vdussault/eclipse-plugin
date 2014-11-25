@@ -73,7 +73,8 @@ import com.vaadin.integration.eclipse.wizards.DirectoryManifestProvider;
 
 public class WidgetsetUtil {
 
-    public static final String DEFAULT_WIDGET_SET_NAME = "com.vaadin.terminal.gwt.DefaultWidgetSet";
+    private static final String DEFAULT_WIDGET_SET_NAME_VAADIN6 = "com.vaadin.terminal.gwt.DefaultWidgetSet";
+    public static final String DEFAULT_WIDGET_SET_NAME = "com.vaadin.DefaultWidgetSet";
 
     /**
      * Helper method to compile a single widgetset.
@@ -428,12 +429,12 @@ public class WidgetsetUtil {
     }
 
     /**
-     * Find the (first) widgetset in the project. If there is none, return
-     * {@link #DEFAULT_WIDGET_SET_NAME}.
+     * Find the (first) widget set in the project. If there is none, return the
+     * default widget set
      * 
      * @param project
-     * @return first widgetset GWT module name in the project or default
-     *         widgetset
+     * @return the first widget set GWT module name in the project or the
+     *         default widget set
      */
     public static String getFirstWidgetSet(IJavaProject project) {
         try {
@@ -447,6 +448,10 @@ public class WidgetsetUtil {
         } catch (CoreException e) {
             ErrorUtil.handleBackgroundException(
                     "Failed to find widgetset in the project", e);
+        }
+
+        if (!ProjectUtil.isVaadin7(project.getProject())) {
+            return DEFAULT_WIDGET_SET_NAME_VAADIN6;
         }
 
         return DEFAULT_WIDGET_SET_NAME;
