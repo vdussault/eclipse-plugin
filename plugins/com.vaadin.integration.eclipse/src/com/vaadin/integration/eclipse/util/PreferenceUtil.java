@@ -32,6 +32,10 @@ public class PreferenceUtil {
     public static final String PREFERENCES_IVYINFO_DISABLED = VaadinPlugin.PLUGIN_ID
             + "." + "IvyInformationDisabled";
 
+    // true when Eclipse bug info popup is disabled
+    public static final String PREFERENCES_ECLIPSE_LUNA_SR1_BUG_INFO = VaadinPlugin.PLUGIN_ID
+            + "." + "Eclipse44BugInformationDisabled";
+
     /*
      * Project scoped keys
      */

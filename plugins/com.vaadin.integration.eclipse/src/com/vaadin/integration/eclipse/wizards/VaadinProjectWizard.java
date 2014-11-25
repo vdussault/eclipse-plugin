@@ -2,16 +2,26 @@ package com.vaadin.integration.eclipse.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jst.servlet.ui.project.facet.WebProjectWizard;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IFacetedProjectWorkingCopy;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Version;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.vaadin.integration.eclipse.IVaadinFacetInstallDataModelProperties;
@@ -88,35 +98,117 @@ public abstract class VaadinProjectWizard extends WebProjectWizard {
             // (ConfigurationScope would be shared between workspaces)
             IEclipsePreferences prefs = new InstanceScope()
                     .getNode(VaadinPlugin.PLUGIN_ID);
-            if (!prefs.getBoolean(PreferenceUtil.PREFERENCES_IVYINFO_DISABLED,
-                    false)) {
-                // MDWT should be able to save prefs, but this did not seem to
-                // work,
-                // so we do it 'manually'.
-                MessageDialogWithToggle d = MessageDialogWithToggle
-                        .openInformation(
-                                getShell(),
-                                "Resolving dependencies",
-                                "Vaadin jars and dependencies are automatically resolved and downloaded."
-                                        + "\n\nIf the selected version is not already on your system, "
-                                        + "this process might take several minutes."
-                                        + " During this time your project will not compile."
-                                        + "\n\nYou can follow the progress in the status bar (IvyDE resolve).",
-                                "Don't show this message again", false, null,
-                                null);
 
-                if (d.getToggleState()) {
-                    prefs.putBoolean(
-                            PreferenceUtil.PREFERENCES_IVYINFO_DISABLED, true);
-                    try {
-                        prefs.flush();
-                    } catch (BackingStoreException e) {
-                        ErrorUtil.handleBackgroundException(e);
-                    }
+            maybeShowIvyIsDownloadingMessage(prefs);
+            maybeShowLunaSR1BugWarning(prefs);
+        }
+
+        super.postPerformFinish();
+    }
+
+    private void maybeShowIvyIsDownloadingMessage(IEclipsePreferences prefs) {
+        if (!prefs.getBoolean(PreferenceUtil.PREFERENCES_IVYINFO_DISABLED,
+                false)) {
+            // MDWT should be able to save prefs, but this did not seem to
+            // work, so we do it 'manually'.
+            MessageDialogWithToggle d = MessageDialogWithToggle
+                    .openInformation(
+                            getShell(),
+                            "Resolving dependencies",
+                            "Vaadin jars and dependencies are automatically resolved and downloaded."
+                                    + "\n\nIf the selected version is not already on your system, "
+                                    + "this process might take several minutes."
+                                    + " During this time your project will not compile."
+                                    + "\n\nYou can follow the progress in the status bar (IvyDE resolve).",
+                            "Don't show this message again", false, null, null);
+
+            if (d.getToggleState()) {
+                prefs.putBoolean(PreferenceUtil.PREFERENCES_IVYINFO_DISABLED,
+                        true);
+                try {
+                    prefs.flush();
+                } catch (BackingStoreException e) {
+                    ErrorUtil.handleBackgroundException(e);
                 }
             }
         }
 
-        super.postPerformFinish();
+    }
+
+    private void maybeShowLunaSR1BugWarning(IEclipsePreferences prefs) {
+        if (!isEclipseLunaSR1())
+            return;
+
+        if (hotfixInstalled())
+            return;
+
+        if (!prefs.getBoolean(
+                PreferenceUtil.PREFERENCES_ECLIPSE_LUNA_SR1_BUG_INFO, false)) {
+            // MDWT should be able to save prefs, but this did not seem to
+            // work, so we do it 'manually'.
+            String title = "Eclipse hotfix needed";
+            final String UPDATE_URL = "http://download.eclipse.org/eclipse/updates/4.4/";
+            String message = "You need to install the hotfix named 'E4 RCP patch (bugzillas 445122) available from "
+                    + UPDATE_URL
+                    + " (in the group Eclipse 4.4.1 Patches for bug 445122)"
+                    + "\n\n"
+                    + "Eclipse Luna SR1 contains a serious bug which prevents Vaadin projects from working properly.";
+            String dontshowagain = "Don't show this message again";
+            final Shell shell = getShell();
+            MessageDialogWithToggle d = new MessageDialogWithToggle(shell,
+                    title, null, message, 0, new String[] { "Ok",
+                            "Copy URL to clipboard" }, 0, dontshowagain, false);
+
+            d.open();
+            int buttonId = d.getReturnCode() - IDialogConstants.INTERNAL_ID;
+            if (buttonId == 1) {
+                // Copy URL
+                TextTransfer textTransfer = TextTransfer.getInstance();
+                Display display = shell.getDisplay();
+                Clipboard clipboard = new Clipboard(display);
+
+                clipboard.setContents(new Object[] { UPDATE_URL },
+                        new Transfer[] { textTransfer });
+
+            }
+
+            if (d.getToggleState()) {
+                prefs.putBoolean(
+                        PreferenceUtil.PREFERENCES_ECLIPSE_LUNA_SR1_BUG_INFO,
+                        true);
+                try {
+                    prefs.flush();
+                } catch (BackingStoreException e) {
+                    ErrorUtil.handleBackgroundException(e);
+                }
+            }
+        }
+
+    }
+
+    private boolean isEclipseLunaSR1() {
+        try {
+            Bundle bundle = Platform.getBundle("org.eclipse.epp.package.jee");
+            Version version = bundle.getVersion();
+            if (version.getMajor() == 4 && version.getMinor() == 4
+                    && version.getMicro() == 1) {
+                // We are only interested in Luna SR1
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return false;
+    }
+
+    private boolean hotfixInstalled() {
+        try {
+            Bundle bundle = Platform
+                    .getBundle("org.eclipse.e4.rcp.R441patch.feature.group");
+            return (bundle != null);
+        } catch (Exception e) {
+            // Assume everything is ok and don't bother the user in vain
+            return true;
+        }
+
     }
 }
