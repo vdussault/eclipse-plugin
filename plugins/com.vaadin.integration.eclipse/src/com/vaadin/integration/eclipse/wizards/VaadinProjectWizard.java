@@ -136,10 +136,7 @@ public abstract class VaadinProjectWizard extends WebProjectWizard {
     }
 
     private void maybeShowLunaSR1BugWarning(IEclipsePreferences prefs) {
-        if (!isEclipseLunaSR1())
-            return;
-
-        if (hotfixInstalled())
+        if (!isBrokenLunaSR1())
             return;
 
         if (!prefs.getBoolean(
@@ -200,14 +197,30 @@ public abstract class VaadinProjectWizard extends WebProjectWizard {
         return false;
     }
 
-    private boolean hotfixInstalled() {
+    private boolean isBrokenLunaSR1() {
+        if (!isEclipseLunaSR1())
+            return false;
+
         try {
-            Bundle bundle = Platform
-                    .getBundle("org.eclipse.e4.rcp.R441patch.feature.group");
-            return (bundle != null);
+            // Luna SR1 ships with org.eclipse.osgi_3.10.1.v20140909-1633.jar
+            // The "E4 RCP patch (bugzillas 445122)" fix updates this to
+            // 3.10.2.v20141020-1740
+
+            // The original Luna release ships with 3.10.0.v20140606-1445.jar
+            Bundle bundle = Platform.getBundle("org.eclipse.osgi");
+            if (bundle == null)
+                return false; // This should not really happen, stay quiet if it
+                              // does
+            Version v = bundle.getVersion();
+            if (v.getMajor() == 3 && v.getMinor() == 10 && v.getMicro() == 1) {
+                // Version shipped with Luna SR1
+                return true;
+            }
+
+            return false;
         } catch (Exception e) {
             // Assume everything is ok and don't bother the user in vain
-            return true;
+            return false;
         }
 
     }
