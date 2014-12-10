@@ -2,6 +2,7 @@ package com.vaadin.integration.eclipse.util;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,10 +17,12 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
 import org.eclipse.core.resources.IFile;
@@ -171,6 +174,7 @@ public class WidgetsetUtil {
 
             ArrayList<String> compilerArgs = new ArrayList<String>(args);
             String compilerClass = "com.vaadin.tools.WidgetsetCompiler";
+//            String compilerClass = "com.google.gwt.dev.Compiler";
             compilerArgs.add(compilerClass);
 
             if (useNewGwtCompiler) {
@@ -250,7 +254,17 @@ public class WidgetsetUtil {
             monitor.subTask("Compiling widgetset " + moduleName
                     + " in project " + project.getName());
 
-            final Process exec = b.start();
+            final Process exec;
+            try {
+                exec = b.start();
+            } catch (Exception e) {
+            	StringBuffer argsSB = new StringBuffer();
+            	for (int i = 0; i < argsStr.length; i++) {
+            	   argsSB.append(argsStr[i] + " ");
+            	}
+            	String argsString = argsSB.toString();
+            	throw new IOException(argsString, e);
+            }
 
             // compilation now on
 
@@ -401,7 +415,7 @@ public class WidgetsetUtil {
 
         // construct the class path, including GWT JARs and project sources
         String classPath = VaadinPluginUtil.getProjectBaseClasspath(jproject,
-                vmInstall, true);
+                    vmInstall, true);
 
         String classpathSeparator = PlatformUtil.getClasspathSeparator();
 
@@ -413,6 +427,79 @@ public class WidgetsetUtil {
             if (!classPath.contains(jarName)) {
                 classPath = classPath + classpathSeparator + jarName;
             }
+        }
+        
+        // Windows doesn't allow command prompts to be over 8191. If the classpath is too long, we won't be able to execute the java command.
+        // To solve this problem, this fix generates a Jar file on-the-fly with a Class-Path value in its manifest that points to the 
+        // actual classpath. That way, we keep the classpath way below the maximum limit.
+        // 7500 is an arbitrary value.
+        if (classPath.length() > 7500 && PlatformUtil.getPlatform().equals("windows")) {
+        	// Some paths need to remain in the explicit classpath because the Vaadin plugin will look for them.
+        	// These paths are project directories and Vaadin/GWT related jars.
+        	// Also, before including the project directories in the classpath, the plugin adds the JRE jars.
+        	// These are kept in the explicit classpath as well.
+        	Set<String> notInJarPaths = new HashSet<String>();
+        	String[] classPathSplitted = classPath.split(classpathSeparator);
+        	boolean firstDirFound = false;
+        	for (String classPathEntry : classPathSplitted) {
+        		try {
+					File classPathFile = new File(classPathEntry);
+					if (classPathFile.isDirectory()) {
+						String dirPath = classPathFile.getAbsolutePath();
+						notInJarPaths.add(dirPath);
+						// If we have a directory, it means that we are done adding the JRE jars.
+						firstDirFound = true;
+					} else if (!firstDirFound) {
+						// JRE jar
+						notInJarPaths.add(classPathEntry);
+					} else if (classPathEntry.indexOf("vaadin") != -1 || classPathEntry.indexOf("google") != -1 || classPathEntry.indexOf("gwt") != -1) {
+						// Vaadin/GWT jar
+						notInJarPaths.add(classPathEntry);
+					}
+				} catch (Exception e) {
+					// Ignore and let the process deal with it
+				}
+			}
+        	
+        	// See http://todayguesswhat.blogspot.ca/2011/03/jar-manifestmf-class-path-referencing.html
+        	// For the Class-Path attribute to be recognized, all absolute paths must start with either "\" or "/" ("/" here)
+        	String classPathForManifest = classPath;
+        	// The first element of the classpath
+        	classPathForManifest = "/" + classPathForManifest;
+        	// Convert all "\" into "/"
+        	classPathForManifest = classPathForManifest.replace("\\", "/");
+        	// Spaces must be replace by "%20"
+        	classPathForManifest = classPathForManifest.replace(" ", "%20");
+        	// Replacing all the ";" by " /". All classpath entries are separated by a space and prefixed by "/"
+        	classPathForManifest = classPathForManifest.replace(classpathSeparator, " /");
+        	// Remove a potential useless "/" at the end of the classpath
+        	if (classPathForManifest.endsWith("/")) {
+        		classPathForManifest = classPathForManifest.substring(0, classPathForManifest.length() - 1);
+        	}
+        	// Create a manifest with the computed classpath.
+        	Manifest classPathJarManifest = new Manifest();
+        	classPathJarManifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+        	classPathJarManifest.getMainAttributes().put(Attributes.Name.CLASS_PATH, classPathForManifest);
+        	
+			try {
+				// Building a temporary file
+	        	File classPathJarFile = File.createTempFile("vaadin", ".jar");
+				FileOutputStream classPathJarFOS = new FileOutputStream(classPathJarFile);
+                // Jar that only contains our manifest
+				JarOutputStream classPathJarOS = new JarOutputStream(classPathJarFOS, classPathJarManifest);
+                classPathJarOS.close();
+                classPathJarFOS.close();
+                // Once we exit Eclipse, the temporary file will be deleted
+                classPathJarFile.deleteOnExit();
+                // The classpath now only includes a path to the temporary jar
+                classPath = classPathJarFile.getAbsolutePath();
+                // Adding the paths that need to remain in the explicit classpath
+                for (String dirPath : notInJarPaths) {
+					classPath = dirPath + classpathSeparator + classPath;
+				}
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
         }
 
         // construct rest of the arguments for the launch
@@ -427,7 +514,7 @@ public class WidgetsetUtil {
         args.add(classPath);
         return args;
     }
-
+    
     /**
      * Find the (first) widget set in the project. If there is none, return the
      * default widget set
